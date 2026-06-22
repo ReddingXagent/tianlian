@@ -1,0 +1,385 @@
+// =====================
+// 设备 (Device)
+// =====================
+export interface Device {
+  id: number;
+  stationId: number;
+  stationName?: string;
+  name: string;
+  code: string;
+  type: DeviceType;
+  status: DeviceStatus;
+  model: string;
+  manufacturer: string;
+  lastHeartbeat: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type DeviceType = 'charger' | 'battery' | 'inverter' | 'sensor' | 'other';
+
+export type DeviceStatus = 'online' | 'offline' | 'fault' | 'maintenance';
+
+// =====================
+// 告警 (Alarm)
+// =====================
+export interface Alarm {
+  id: number;
+  stationId: number;
+  stationName: string;
+  deviceId?: number;
+  deviceName?: string;
+  type: AlarmType;
+  level: AlarmLevel;
+  title: string;
+  description: string;
+  status: AlarmStatus;
+  handledBy?: number;
+  handledAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AlarmType =
+  | 'device_fault'
+  | 'power_anomaly'
+  | 'communication_loss'
+  | 'temperature_warning'
+  | 'other';
+
+export type AlarmLevel = 'info' | 'warning' | 'critical';
+
+export type AlarmStatus = 'unhandled' | 'processing' | 'resolved';
+
+// =====================
+// 工单 (WorkOrder)
+// =====================
+export interface WorkOrder {
+  id: number;
+  stationId: number;
+  stationName: string;
+  title: string;
+  description: string;
+  type: WorkOrderType;
+  priority: WorkOrderPriority;
+  status: WorkOrderStatus;
+  assigneeId?: number;
+  assigneeName?: string;
+  creatorId: number;
+  creatorName: string;
+  alarmId?: number;
+  scheduledAt?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type WorkOrderType =
+  | 'repair'
+  | 'inspection'
+  | 'installation'
+  | 'maintenance'
+  | 'other';
+
+export type WorkOrderPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export type WorkOrderStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled';
+
+// =====================
+// 知识库 (KnowledgeBase)
+// =====================
+export interface KnowledgeArticle {
+  id: number;
+  title: string;
+  summary: string;
+  content: string;
+  category: KnowledgeCategory;
+  tags: string[];
+  authorId: number;
+  authorName: string;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type KnowledgeCategory =
+  | 'operation'
+  | 'maintenance'
+  | 'troubleshooting'
+  | 'safety'
+  | 'regulation'
+  | 'other';
+
+// =====================
+// 扫码相关
+// =====================
+export interface ScanResult {
+  type: 'device' | 'station' | 'unknown';
+  id: number;
+  code: string;
+  name?: string;
+  status?: DeviceStatus;
+}
+
+// =====================
+// 设备监控
+// =====================
+export interface DeviceMetrics {
+  deviceId: number;
+  deviceName: string;
+  temperature?: number;
+  humidity?: number;
+  voltage?: number;
+  current?: number;
+  power?: number;
+  status: DeviceStatus;
+  lastUpdated: string;
+}
+
+export interface MonitorSummary {
+  totalDevices: number;
+  onlineDevices: number;
+  faultDevices: number;
+  criticalAlarms: number;
+}
+
+// =====================
+// 用户 (User)
+// =====================
+export interface User {
+  id: number;
+  username: string;
+  nickname: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  avatar?: string;
+  stationIds: number[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type UserRole =
+  | 'admin'
+  | 'station_master'
+  | 'operator'
+  | 'viewer';
+
+// =====================
+// 站点 (Station) — 运维侧只读引用
+// =====================
+export interface Station {
+  id: number;
+  name: string;
+  code: string;
+  address: string;
+  status: StationStatus;
+  latitude: number;
+  longitude: number;
+  deviceCount: number;
+  onlineDeviceCount: number;
+  alarmCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type StationStatus = 'online' | 'offline' | 'maintenance';
+
+// =====================
+// 通用API响应
+// =====================
+export interface ApiResponse<T = unknown> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+export interface PaginatedData<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+// =====================
+// 认证
+// =====================
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+// =====================
+// 工作台统计
+// =====================
+export interface WorkbenchStats {
+  pendingOrders: number;
+  inProgressOrders: number;
+  todayCompleted: number;
+  unhandledAlarms: number;
+  criticalAlarms: number;
+}
+
+// =====================
+// 故障诊断
+// =====================
+export interface DiagnosisResult {
+  faultCode: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  possibleCauses: string[];
+  solutions: string[];
+  relatedArticles?: KnowledgeArticle[];
+  deviceType?: DeviceType;
+}
+
+// =====================
+// 工单执行记录
+// =====================
+export interface WorkOrderRecord {
+  id: number;
+  orderId: number;
+  action: WorkOrderAction;
+  operatorId: number;
+  operatorName: string;
+  note: string;
+  createdAt: string;
+}
+
+export type WorkOrderAction =
+  | 'created'
+  | 'accepted'
+  | 'check_in'
+  | 'executing'
+  | 'completed'
+  | 'cancelled'
+  | 'reassigned';
+
+// =====================
+// 导航参数
+// =====================
+export type RootStackParamList = {
+  Auth: undefined;
+  Main: undefined;
+  WorkOrderDetail: { orderId: number };
+  WorkOrderCreate: undefined;
+  WorkOrderTransfer: { orderId: number };
+  ScanResult: { result: ScanResult };
+  KnowledgeArticle: { articleId: number };
+  Diagnosis: undefined;
+  Knowledge: undefined;
+  KnowledgeDetail: { articleId: number };
+  InspectionDetail: { taskId: number };
+};
+
+export type AuthStackParamList = {
+  Login: undefined;
+};
+
+export type MainTabParamList = {
+  Workbench: undefined;
+  WorkOrders: undefined;
+  Inspection: undefined;
+  Scan: undefined;
+  Monitor: undefined;
+  Dashboard: undefined;
+  Profile: undefined;
+};
+
+// =====================
+// 设备巡检 (Inspection)
+// =====================
+export interface InspectionTask {
+  id: number;
+  stationId: number;
+  stationName: string;
+  deviceId: number;
+  deviceName: string;
+  type: InspectionType;
+  status: InspectionStatus;
+  scheduledDate: string;
+  completedDate?: string;
+  assignedTo?: number;
+  assignedName?: string;
+  description: string;
+  items: InspectionItem[];
+  result?: InspectionResult;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type InspectionType = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'special';
+export type InspectionStatus = 'pending' | 'in_progress' | 'completed' | 'overdue';
+
+export interface InspectionItem {
+  id: number;
+  name: string;
+  expected: string;
+  result?: 'pass' | 'fail' | 'na';
+  note?: string;
+}
+
+export interface InspectionResult {
+  overall: 'pass' | 'partial' | 'fail';
+  summary: string;
+  operatorId: number;
+  operatorName: string;
+  completedAt: string;
+  images?: string[];
+}
+
+// =====================
+// 数据看板 (Dashboard)
+// =====================
+export interface DashboardStats {
+  totalOrders: number;
+  completedOrders: number;
+  pendingOrders: number;
+  avgCompletionHours: number;
+  onTimeRate: number;
+}
+
+export interface DeviceHealthStats {
+  total: number;
+  online: number;
+  offline: number;
+  fault: number;
+  maintenance: number;
+  onlineRate: number;
+}
+
+export interface AlarmTrend {
+  date: string;
+  total: number;
+  critical: number;
+  warning: number;
+  info: number;
+}
+
+export interface WorkOrderTrend {
+  date: string;
+  created: number;
+  completed: number;
+}
+
+export interface DashboardData {
+  stats: DashboardStats;
+  deviceHealth: DeviceHealthStats;
+  alarmTrends: AlarmTrend[];
+  workOrderTrends: WorkOrderTrend[];
+  topFaultDevices: Array<{
+    deviceId: number;
+    deviceName: string;
+    stationName: string;
+    faultCount: number;
+  }>;
+}
