@@ -1,0 +1,120 @@
+/* pages/points/points.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.points-card {
+  margin: 24rpx 32rpx;
+  padding: 40rpx;
+  background: linear-gradient(135deg, #FF9500, #FF6B00);
+  border-radius: 20rpx;
+  color: #fff;
+}
+
+.points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.points-label { font-size: 28rpx; opacity: 0.9; }
+.rules-link { font-size: 24rpx; opacity: 0.7; }
+
+.points-value {
+  font-size: 80rpx;
+  font-weight: bold;
+  text-align: center;
+  margin: 24rpx 0;
+  line-height: 1.2;
+}
+
+.points-sign {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sign-days { font-size: 24rpx; opacity: 0.8; }
+
+.sign-btn {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 24rpx;
+  border: 1rpx solid rgba(255,255,255,0.5);
+  border-radius: 32rpx;
+  padding: 8rpx 28rpx;
+  line-height: 1.4;
+}
+
+.sign-btn.signed {
+  background: rgba(255,255,255,0.1);
+  opacity: 0.6;
+}
+
+.section {
+  margin: 0 32rpx 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.reward-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.reward-item:last-child { border-bottom: none; }
+
+.reward-icon { font-size: 48rpx; margin-right: 20rpx; }
+
+.reward-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.reward-name { font-size: 28rpx; color: #333; }
+.reward-desc { font-size: 22rpx; color: #999; margin-top: 4rpx; }
+
+.reward-cost {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  background: #FFF3E0;
+  border-radius: 12rpx;
+}
+
+.reward-cost.insufficient { background: #f5f5f5; opacity: 0.6; }
+
+.cost-value { font-size: 32rpx; font-weight: bold; color: #FF6B00; }
+.cost-label { font-size: 20rpx; color: #999; }
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.history-item:last-child { border-bottom: none; }
+
+.history-left { display: flex; flex-direction: column; }
+.history-desc { font-size: 28rpx; color: #333; }
+.history-time { font-size: 22rpx; color: #ccc; margin-top: 4rpx; }
+
+.history-amount { font-size: 32rpx; font-weight: 500; }
+.history-amount.positive { color: #07C160; }
+.history-amount.negative { color: #999; }

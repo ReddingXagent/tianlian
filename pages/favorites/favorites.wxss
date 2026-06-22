@@ -1,0 +1,97 @@
+/* pages/favorites/favorites.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.fav-list { padding: 24rpx 32rpx; }
+
+.fav-item {
+  display: flex;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+}
+
+.fav-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.fav-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.fav-addr {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fav-tags {
+  display: flex;
+  gap: 16rpx;
+}
+
+.fav-dist, .fav-guns {
+  font-size: 22rpx;
+  color: #666;
+  background: #f5f5f5;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+}
+
+.fav-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-width: 140rpx;
+}
+
+.fav-price {
+  font-size: 28rpx;
+  color: #FF6B00;
+  font-weight: 500;
+}
+
+.fav-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  align-items: flex-end;
+}
+
+.action-btn {
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+}
+
+.nav-btn {
+  color: #07C160;
+  background: rgba(7, 193, 96, 0.1);
+}
+
+.del-btn {
+  color: #FA5151;
+  background: rgba(250, 81, 81, 0.1);
+}
+
+.go-btn {
+  margin-top: 24rpx;
+  background: #07C160;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 32rpx;
+  padding: 12rpx 48rpx;
+}

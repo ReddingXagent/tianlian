@@ -1,0 +1,98 @@
+<!-- pages/orders/orders.wxml - 订单列表 -->
+<view class="container">
+  <!-- 筛选标签 -->
+  <view class="filter-tabs">
+    <view
+      class="filter-tab {{currentTab === item.value ? 'active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="value"
+      bindtap="onTabChange"
+      data-value="{{item.value}}"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <loading visible="{{loading}}" text="加载订单..." />
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{!loading}}">
+    <block wx:if="{{orders.length}}">
+      <view
+        class="order-card"
+        wx:for="{{orders}}"
+        wx:key="id"
+        bindtap="onOrderTap"
+        data-id="{{item.id}}"
+      >
+        <!-- 订单头部 -->
+        <view class="order-header">
+          <view class="order-station">
+            <text class="station-name">{{item.stationName || '充电站'}}</text>
+            <text class="charger-id">{{item.chargerId}}</text>
+          </view>
+          <view class="order-status">
+            <text class="tag {{item.statusClass}}">{{item.statusText}}</text>
+          </view>
+        </view>
+
+        <!-- 订单信息 -->
+        <view class="order-info">
+          <view class="info-row">
+            <text class="info-label">充电电量</text>
+            <text class="info-value">{{item.energy}} kWh</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">充电时长</text>
+            <text class="info-value">{{item.durationText}}</text>
+          </view>
+          <view class="info-row">
+            <text class="info-label">订单金额</text>
+            <text class="info-value price">¥{{item.amount}}</text>
+          </view>
+        </view>
+
+        <!-- 订单时间 -->
+        <view class="order-time">
+          <text>{{item.createTime}}</text>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="order-actions" wx:if="{{item.showActions}}">
+          <button
+            wx:if="{{item.status === 'pending'}}"
+            class="btn btn-primary btn-sm"
+            catchtap="onPayOrder"
+            data-id="{{item.id}}"
+          >
+            去支付
+          </button>
+          <button
+            wx:if="{{item.status === 'charging'}}"
+            class="btn btn-outline btn-sm"
+            catchtap="onViewCharging"
+            data-id="{{item.id}}"
+          >
+            查看充电
+          </button>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <empty
+      visible="{{!orders.length}}"
+      text="暂无订单"
+      showAction="{{true}}"
+      actionText="去充电"
+      bind:action="onGoCharge"
+    />
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore && orders.length}}">
+      <text class="load-more-text" wx:if="{{!loadingMore}}">上拉加载更多</text>
+      <text class="load-more-text" wx:else>加载中...</text>
+    </view>
+  </view>
+</view>

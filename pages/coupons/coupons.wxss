@@ -1,0 +1,171 @@
+/* pages/coupons/coupons.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.tabs {
+  display: flex;
+  background: #fff;
+  padding: 0 32rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #07C160;
+  font-weight: bold;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48rpx;
+  height: 4rpx;
+  background: #07C160;
+  border-radius: 2rpx;
+}
+
+.claim-entry {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  background: #fff;
+  margin: 16rpx 0;
+}
+
+.claim-icon { font-size: 36rpx; margin-right: 12rpx; }
+.claim-text { flex: 1; font-size: 28rpx; color: #333; }
+.claim-arrow { font-size: 32rpx; color: #ccc; }
+
+.claim-input-area {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 32rpx;
+  background: #fff;
+  margin-bottom: 16rpx;
+}
+
+.code-input {
+  flex: 1;
+  height: 64rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  padding: 0 16rpx;
+  font-size: 28rpx;
+  margin-right: 16rpx;
+}
+
+.claim-btn {
+  background: #07C160;
+  color: #fff;
+  border: none;
+  font-size: 26rpx;
+}
+
+.claim-btn.disabled { opacity: 0.6; }
+
+.coupon-list { padding: 0 32rpx; }
+
+.coupon-card {
+  display: flex;
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+}
+
+.coupon-card.status-used,
+.coupon-card.status-expired {
+  opacity: 0.6;
+}
+
+.coupon-left {
+  width: 200rpx;
+  background: linear-gradient(135deg, #07C160, #06AD56);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx 0;
+  color: #fff;
+  position: relative;
+}
+
+.coupon-left::after {
+  content: '';
+  position: absolute;
+  right: -16rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32rpx;
+  height: 32rpx;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+.coupon-amount {
+  font-size: 56rpx;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.coupon-type {
+  font-size: 22rpx;
+  opacity: 0.8;
+  margin-top: 4rpx;
+}
+
+.coupon-right {
+  flex: 1;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.coupon-name {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.coupon-min {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.coupon-expire {
+  font-size: 22rpx;
+  color: #ccc;
+  margin-top: 4rpx;
+}
+
+.coupon-use-btn {
+  margin-top: 12rpx;
+  background: #07C160;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 24rpx;
+  align-self: flex-start;
+}
+
+.coupon-status-tag {
+  font-size: 24rpx;
+  margin-top: 12rpx;
+  align-self: flex-start;
+}

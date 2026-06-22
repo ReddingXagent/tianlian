@@ -1,0 +1,53 @@
+<!-- pages/favorites/favorites.wxml -->
+<view class="container">
+  <!-- 收藏列表 -->
+  <view class="fav-list" wx:if="{{!loading}}">
+    <block wx:if="{{favorites.length > 0}}">
+      <view
+        wx:for="{{favorites}}"
+        wx:key="id"
+        class="fav-item"
+        data-id="{{item.id}}"
+        bindtap="onStationTap"
+      >
+        <view class="fav-left">
+          <text class="fav-name">{{item.name}}</text>
+          <text class="fav-addr">{{item.address || ''}}</text>
+          <view class="fav-tags">
+            <text class="fav-dist">{{item.distanceText}}</text>
+            <text class="fav-guns">{{item.availableGuns}}</text>
+          </view>
+        </view>
+        <view class="fav-right">
+          <text class="fav-price">¥{{item.price || '--'}}/度</text>
+          <view class="fav-actions">
+            <view
+              class="action-btn nav-btn"
+              data-lat="{{item.lat}}"
+              data-lng="{{item.lng}}"
+              data-name="{{item.name}}"
+              catchtap="onNavigate"
+            >
+              🧭 导航
+            </view>
+            <view
+              class="action-btn del-btn"
+              data-id="{{item.id}}"
+              data-name="{{item.name}}"
+              catchtap="onRemoveFavorite"
+            >
+              ❤️ 取消
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+    <block wx:else>
+      <empty text="暂无收藏站点">
+        <button class="go-btn" bindtap="onGoHome">去发现站点</button>
+      </empty>
+    </block>
+  </view>
+
+  <loading wx:if="{{loading}}"></loading>
+</view>

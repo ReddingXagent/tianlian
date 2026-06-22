@@ -1,0 +1,26 @@
+{
+  "name": "tianlian-v3-user-mp",
+  "version": "1.0.0",
+  "description": "天链V3用户小程序",
+  "scripts": {
+    "test": "jest --passWithNoTests"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "services/**/*.js",
+      "utils/**/*.js",
+      "config/**/*.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

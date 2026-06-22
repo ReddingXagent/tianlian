@@ -1,0 +1,82 @@
+// pages/favorites/favorites.js - 收藏站点
+const api = require('../../services/api');
+const util = require('../../utils/util');
+
+Page({
+  data: {
+    favorites: [],
+    loading: false
+  },
+
+  onLoad() {
+    this.loadFavorites();
+  },
+
+  onShow() {
+    this.loadFavorites();
+  },
+
+  // 加载收藏
+  async loadFavorites() {
+    this.setData({ loading: true });
+    try {
+      const res = await api.getFavorites();
+      const favorites = (res.data?.list || res.data || []).map(item => ({
+        ...item,
+        distanceText: item.distance ? util.formatDistance(item.distance) : '未知',
+        statusText: item.status === 'online' ? '营业中' : '休息中',
+        availableGuns: `${item.availableGuns || 0}/${item.totalGuns || 0} 空闲`
+      }));
+      this.setData({ favorites, loading: false });
+    } catch (err) {
+      this.setData({ loading: false });
+      console.error('加载收藏失败:', err);
+    }
+  },
+
+  // 站点点击
+  onStationTap(e) {
+    const { id } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: `/pages/station-detail/station-detail?id=${id}`
+    });
+  },
+
+  // 取消收藏
+  onRemoveFavorite(e) {
+    const { id, name } = e.currentTarget.dataset;
+    wx.showModal({
+      title: '取消收藏',
+      content: `确定取消收藏"${name}"吗？`,
+      success: async (modalRes) => {
+        if (modalRes.confirm) {
+          try {
+            await api.removeFavorite(id);
+            wx.showToast({ title: '已取消收藏', icon: 'success' });
+            // 从列表中移除
+            const favorites = this.data.favorites.filter(f => f.id !== id);
+            this.setData({ favorites });
+          } catch (err) {
+            console.error('取消收藏失败:', err);
+          }
+        }
+      }
+    });
+  },
+
+  // 导航
+  onNavigate(e) {
+    const { lat, lng, name } = e.currentTarget.dataset;
+    wx.openLocation({
+      latitude: lat,
+      longitude: lng,
+      name: name,
+      scale: 16
+    });
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.loadFavorites().then(() => wx.stopPullDownRefresh());
+  }
+});

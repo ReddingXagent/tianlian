@@ -1,0 +1,114 @@
+/* pages/notifications/notifications.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 32rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #eee;
+}
+
+.unread-tip { font-size: 26rpx; color: #FA5151; }
+.mark-all-btn { font-size: 26rpx; color: #07C160; }
+
+.tabs {
+  display: flex;
+  background: #fff;
+  padding: 0 32rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 26rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #07C160;
+  font-weight: 500;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background: #07C160;
+  border-radius: 2rpx;
+}
+
+.notify-list {
+  padding: 0 32rpx;
+}
+
+.notify-item {
+  display: flex;
+  align-items: flex-start;
+  background: #fff;
+  padding: 24rpx;
+  margin-bottom: 2rpx;
+  position: relative;
+}
+
+.notify-item.unread {
+  background: #F0FFF4;
+}
+
+.notify-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.notify-icon { font-size: 36rpx; }
+
+.notify-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notify-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.notify-title { font-size: 28rpx; color: #333; font-weight: 500; }
+.notify-time { font-size: 22rpx; color: #ccc; }
+.notify-desc { font-size: 24rpx; color: #999; line-height: 1.5; }
+
+.unread-dot {
+  width: 14rpx;
+  height: 14rpx;
+  background: #FA5151;
+  border-radius: 50%;
+  position: absolute;
+  right: 24rpx;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.load-more {
+  text-align: center;
+  padding: 24rpx;
+  font-size: 24rpx;
+  color: #ccc;
+}
