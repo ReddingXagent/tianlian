@@ -8,12 +8,13 @@ from typing import List
 @dataclass
 class CloudConfig:
     """Cloud API configuration"""
-    base_url: str = "http://8.134.106.166/api/v1"
+    base_url: str = "http://8.134.106.166"  # 大圣统一入口; paths in cloud_client include /api/v1/
     ws_url: str = "ws://8.134.106.166/ws/v1"
     username: str = ""
     password: str = ""
     token: str = ""
     heartbeat_interval: int = 30  # seconds
+    upload_interval: int = 15  # seconds between telemetry batch uploads (T-1202)
     register_on_startup: bool = True  # auto-register gateway with cloud
     deregister_on_shutdown: bool = True  # deregister on graceful shutdown
 
@@ -25,9 +26,12 @@ class MQTTConfig:
     port: int = 1883
     username: str = ""
     password: str = ""
+    client_id: str = ""
     topic_prefix: str = "tianlian/gateway"
     qos: int = 1
     keepalive: int = 60
+    batch_size: int = 50  # max points per batch publish
+    batch_interval: int = 10  # seconds between batch publishes
 
 
 @dataclass
@@ -61,8 +65,10 @@ class StorageConfig:
     """Local storage configuration"""
     db_path: str = "data/gateway.db"
     max_cache_size: int = 10000
-    retry_interval: int = 30  # seconds
-    max_retries: int = 3
+    retry_interval: int = 30  # seconds between sync attempts
+    max_retries: int = 5  # increased from 3 for better resilience
+    batch_sync_size: int = 200  # max entries per sync cycle
+    cleanup_interval: int = 3600  # seconds between cleanup runs
 
 
 @dataclass
@@ -92,7 +98,7 @@ class GatewayConfig:
             gateway_id=os.getenv("GATEWAY_ID", "GW-001"),
             gateway_name=os.getenv("GATEWAY_NAME", "RaspberryPi-Gateway"),
             cloud=CloudConfig(
-                base_url=os.getenv("CLOUD_BASE_URL", "http://8.134.106.166/api/v1"),
+                base_url=os.getenv("CLOUD_BASE_URL", "http://8.134.106.166"),
                 username=os.getenv("CLOUD_USERNAME", ""),
                 password=os.getenv("CLOUD_PASSWORD", ""),
                 register_on_startup=os.getenv("CLOUD_REGISTER", "true").lower() == "true",
@@ -101,6 +107,9 @@ class GatewayConfig:
             mqtt=MQTTConfig(
                 host=os.getenv("MQTT_HOST", "localhost"),
                 port=int(os.getenv("MQTT_PORT", "1883")),
+                client_id=os.getenv("MQTT_CLIENT_ID", ""),
+                batch_size=int(os.getenv("MQTT_BATCH_SIZE", "50")),
+                batch_interval=int(os.getenv("MQTT_BATCH_INTERVAL", "10")),
             ),
             modbus=ModbusConfig(
                 host=os.getenv("MODBUS_HOST", "127.0.0.1"),

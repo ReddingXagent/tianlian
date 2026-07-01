@@ -59,6 +59,9 @@ def create_app(
     latest_telemetry_callback=None,
     modbus_adapter=None,
     ocpp_adapter=None,
+    telemetry_count_callback=None,
+    alarm_count_callback=None,
+    cloud_push_callback=None,
 ) -> FastAPI:
     """Create and configure the FastAPI application.
 
@@ -102,7 +105,7 @@ def create_app(
             "timestamp": time.time(),
         }
 
-    @app.get("/api/status")
+    @app.get("/api/v1/status")
     async def gateway_status():
         """Gateway runtime status"""
         uptime = time.monotonic() - _start_time
@@ -117,7 +120,7 @@ def create_app(
             "cache_max": _cache.config.max_cache_size if _cache else 0,
         }
 
-    @app.get("/api/telemetry/latest")
+    @app.get("/api/v1/telemetry/latest")
     async def latest_telemetry():
         """Latest telemetry data from all devices"""
         if latest_telemetry_callback:
@@ -130,7 +133,7 @@ def create_app(
             "telemetry": data,
         }
 
-    @app.get("/api/devices")
+    @app.get("/api/v1/devices")
     async def device_list():
         """List of connected devices"""
         if latest_telemetry_callback:
@@ -156,7 +159,7 @@ def create_app(
 
     # ── Debug / Simulation Endpoints ────────────────────────────────────
 
-    @app.post("/api/simulate/telemetry")
+    @app.post("/api/v1/simulate/telemetry")
     async def simulate_telemetry(req: SimulateTelemetryRequest):
         """Manually inject a simulated telemetry point.
 
@@ -195,7 +198,7 @@ def create_app(
             "telemetry": point.to_dict(),
         }
 
-    @app.post("/api/simulate/alarm")
+    @app.post("/api/v1/simulate/alarm")
     async def simulate_alarm(req: SimulateAlarmRequest):
         """Manually trigger a simulated alarm.
 
@@ -219,23 +222,117 @@ def create_app(
             "message": req.message,
         }
 
-    @app.get("/api/cache/stats", response_model=CacheStatsResponse)
+    @app.get("/api/v1/cache/stats", response_model=CacheStatsResponse)
     async def cache_stats():
         """Get cache statistics including unsynced count and configuration."""
         if not _cache:
             raise HTTPException(status_code=500, detail="Cache not initialized")
 
-        conn = _cache._get_conn()
-        cursor = conn.execute("SELECT COUNT(*) FROM telemetry_cache")
-        total_count = cursor.fetchone()[0]
+        # Use the public API to avoid thread-safety issues with direct conn access
+        stats = _cache.get_stats()
+        tel = stats.get("telemetry", {})
+        alarm = stats.get("alarms", {})
 
         return CacheStatsResponse(
-            unsynced_count=_cache.get_cache_size(),
-            total_count=total_count,
+            unsynced_count=(tel.get("unsynced", 0) + alarm.get("unsynced", 0)),
+            total_count=(tel.get("total", 0) + alarm.get("total", 0)),
             max_cache_size=_cache.config.max_cache_size,
             max_retries=_cache.config.max_retries,
             db_path=_cache.config.db_path,
         )
+
+    @app.get("/api/v1/dashboard")
+    async def dashboard():
+        """聚合端点 — 一次请求返回所有关键信息"""
+        uptime = time.monotonic() - _start_time
+        devices_cb = device_count_callback() if device_count_callback else 0
+        latest_cb = latest_telemetry_callback() if latest_telemetry_callback else {}
+        tel_count = telemetry_count_callback() if telemetry_count_callback else 0
+        alarm_count = alarm_count_callback() if alarm_count_callback else 0
+        cloud_info = cloud_push_callback() if cloud_push_callback else {}
+        cache_stats = _cache.get_stats() if _cache else {}
+
+        # device list from latest telemetry
+        device_list = []
+        for device_id, t in latest_cb.items():
+            device_list.append({
+                "device_id": device_id,
+                "status": t.get("status", "unknown"),
+                "power_kw": t.get("power", 0),
+                "voltage_v": t.get("voltage", 0),
+                "temperature_c": t.get("temperature", 0),
+                "last_seen": t.get("timestamp", ""),
+            })
+
+        # cloud success rate
+        cloud_pushed = cloud_info.get("push_total", 0)
+        cloud_failed = cloud_info.get("push_failures", 0)
+        cloud_total = cloud_pushed + cloud_failed
+        cloud_success_rate = round(cloud_pushed / cloud_total, 4) if cloud_total > 0 else 1.0
+
+        return {
+            "status": "healthy",
+            "gateway": "tianlian-v3-edge",
+            "uptime_seconds": round(uptime, 1),
+            "uptime_formatted": _format_uptime(uptime),
+            "device_count": devices_cb,
+            "devices": device_list,
+            "telemetry": {
+                "latest": latest_cb,
+                "total": tel_count,
+                "rate_per_sec": round(tel_count / uptime, 2) if uptime > 0 else 0.0,
+            },
+            "alarms": {
+                "total": alarm_count,
+                "rate_per_sec": round(alarm_count / uptime, 4) if uptime > 0 else 0.0,
+            },
+            "cloud": {
+                **cloud_info,
+                "success_rate": cloud_success_rate,
+            },
+            "cache": cache_stats,
+            "timestamp": time.time(),
+        }
+
+    @app.get("/api/v1/perf")
+    async def performance_metrics():
+        """Runtime performance metrics for monitoring (T-1202).
+
+        Returns buffer sizes, cache stats, throughput counters, and cloud health.
+        """
+        cache_stats = _cache.get_stats() if _cache else {}
+        uptime = time.monotonic() - _start_time
+        devices = device_count_callback() if device_count_callback else 0
+        tel_count = telemetry_count_callback() if telemetry_count_callback else 0
+        alarm_count = alarm_count_callback() if alarm_count_callback else 0
+        cloud_info = cloud_push_callback() if cloud_push_callback else {}
+
+        # Calculate rates
+        tel_rate = round(tel_count / uptime, 2) if uptime > 0 else 0.0
+        alarm_rate = round(alarm_count / uptime, 4) if uptime > 0 else 0.0
+
+        # Cloud push success rate (fields from main.py cloud_push_callback)
+        cloud_pushed = cloud_info.get("push_total", 0)
+        cloud_failed = cloud_info.get("push_failures", 0)
+        cloud_total = cloud_pushed + cloud_failed
+        cloud_success_rate = round(cloud_pushed / cloud_total, 4) if cloud_total > 0 else 1.0
+
+        return {
+            "uptime_seconds": round(uptime, 1),
+            "device_count": devices,
+            "throughput": {
+                "telemetry_total": tel_count,
+                "telemetry_rate_per_sec": tel_rate,
+                "alarm_total": alarm_count,
+                "alarm_rate_per_sec": alarm_rate,
+            },
+            "cloud": {
+                **cloud_info,
+                "success_rate": cloud_success_rate,
+            },
+            "cache": cache_stats,
+            "timestamp": time.time(),
+        }
 
     return app
 
