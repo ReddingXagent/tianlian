@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,16 @@ import {
   TouchableOpacity,
   RefreshControl,
   Dimensions,
+  Animated,
+  Share,
+  Alert,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { revenueApi } from '../services/api';
 import { RevenueRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import { buildRevenueCsv, revenueCsvFilename } from '../utils/csvExport';
 
 type PeriodType = 'day' | 'week' | 'month';
 
@@ -56,6 +60,33 @@ const RevenueScreen: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // 图表入场动画：每次数据加载完成淡入 + 上移
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (records.length > 0 && !loading) {
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [records, loading, fadeAnim]);
+
+  // 导出 CSV：生成内容后调用系统分享面板
+  const handleExport = useCallback(async () => {
+    if (records.length === 0) return;
+    const csv = buildRevenueCsv(records, summary, period);
+    try {
+      await Share.share({
+        message: csv,
+        title: '天链V3 营收数据',
+      });
+    } catch {
+      Alert.alert('导出失败', '无法导出数据，请稍后重试');
+    }
+  }, [records, summary, period]);
 
   const chartData = {
     labels: records.length > 0
@@ -135,36 +166,55 @@ const RevenueScreen: React.FC = () => {
 
           {/* 图表 */}
           <View style={styles.chartContainer}>
-            <Text style={styles.chartTitle}>
-              {PERIOD_LABELS[period]}营收趋势
-            </Text>
+            <View style={styles.chartHeader}>
+              <Text style={styles.chartTitle}>
+                {PERIOD_LABELS[period]}营收趋势
+              </Text>
+              <TouchableOpacity style={styles.exportBtn} onPress={handleExport} activeOpacity={0.7}>
+                <Text style={styles.exportBtnText}>📥 导出CSV</Text>
+              </TouchableOpacity>
+            </View>
             {records.length > 0 && (
-              <LineChart
-                data={chartData}
-                width={screenWidth - 64}
-                height={220}
-                yAxisLabel="¥"
-                yAxisSuffix=""
-                chartConfig={{
-                  backgroundColor: '#fff',
-                  backgroundGradientFrom: '#fff',
-                  backgroundGradientTo: '#fff',
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(26, 115, 232, ${opacity})`,
-                  labelColor: () => '#999',
-                  propsForDots: {
-                    r: '4',
-                    strokeWidth: '2',
-                    stroke: '#1a73e8',
-                  },
-                  propsForBackgroundLines: {
-                    strokeDasharray: '',
-                    stroke: '#f0f0f0',
-                  },
+              <Animated.View
+                style={{
+                  opacity: fadeAnim,
+                  transform: [
+                    {
+                      translateY: fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [12, 0],
+                      }),
+                    },
+                  ],
                 }}
-                bezier
-                style={styles.chart}
-              />
+              >
+                <LineChart
+                  data={chartData}
+                  width={screenWidth - 64}
+                  height={220}
+                  yAxisLabel="¥"
+                  yAxisSuffix=""
+                  chartConfig={{
+                    backgroundColor: '#fff',
+                    backgroundGradientFrom: '#fff',
+                    backgroundGradientTo: '#fff',
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(26, 115, 232, ${opacity})`,
+                    labelColor: () => '#999',
+                    propsForDots: {
+                      r: '4',
+                      strokeWidth: '2',
+                      stroke: '#1a73e8',
+                    },
+                    propsForBackgroundLines: {
+                      strokeDasharray: '',
+                      stroke: '#f0f0f0',
+                    },
+                  }}
+                  bezier
+                  style={styles.chart}
+                />
+              </Animated.View>
             )}
           </View>
 
@@ -259,11 +309,29 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   chartTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 12,
+  },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  exportBtnText: {
+    fontSize: 13,
+    color: '#1565c0',
+    fontWeight: '600',
   },
   chart: {
     borderRadius: 8,

@@ -309,7 +309,7 @@ describe('dashboardApi', () => {
   });
 
   it('getRecentAlarms should GET /dashboard/recent-alarms', async () => {
-    const alarms = [];
+    const alarms: never[] = [];
     const apiResponse = { code: 0, message: 'success', data: alarms };
     mockAxios.onGet('/dashboard/recent-alarms', { params: { limit: 5 } }).reply(200, apiResponse);
 
@@ -379,6 +379,21 @@ describe('chargerApi', () => {
     mockAxios.onPost('/chargers/faults/1/clear').reply(200, apiResponse);
 
     const result = await chargerApi.clearFault(1);
+    expect(result).toEqual(apiResponse);
+  });
+
+  it('getTrend should GET /devices/:id/charger-trend', async () => {
+    const trend = {
+      deviceId: 101,
+      points: [
+        { timestamp: '2024-01-15T10:00:00Z', power: 10, voltage: 380, current: 30, soc: 20 },
+        { timestamp: '2024-01-15T10:05:00Z', power: 30, voltage: 381, current: 80, soc: 45 },
+      ],
+    };
+    const apiResponse = { code: 0, message: 'success', data: trend };
+    mockAxios.onGet('/devices/101/charger-trend', { params: { points: 20 } }).reply(200, apiResponse);
+
+    const result = await chargerApi.getTrend(101, { points: 20 });
     expect(result).toEqual(apiResponse);
   });
 });

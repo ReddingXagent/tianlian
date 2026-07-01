@@ -120,7 +120,7 @@ describe('StatusBadge', () => {
   });
 
   it('should render unknown status with fallback', () => {
-    const { getByText } = render(<StatusBadge status="unknown" as any />);
+    const { getByText } = render(<StatusBadge status={"unknown" as any} />);
     expect(getByText('unknown')).toBeTruthy();
   });
 });

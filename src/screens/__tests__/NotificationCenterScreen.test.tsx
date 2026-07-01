@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, act } from '@testing-library/react-native';
+import { render, act, fireEvent } from '@testing-library/react-native';
 import NotificationCenterScreen from '../NotificationCenterScreen';
 import { notificationApi } from '../../services/api';
 
@@ -150,5 +150,51 @@ describe('NotificationCenterScreen', () => {
     await act(async () => {
       await new Promise((r) => setTimeout(r, 100));
     });
+  });
+
+  it('should render read filter segments (全部 / 未读)', async () => {
+    const { findByText, findAllByText } = render(<NotificationCenterScreen />);
+
+    // 等待列表加载
+    await findByText('充电桩A-01温度异常告警');
+    // 「全部」出现在已读分段与类型筛选 chip 两处
+    expect((await findAllByText('全部')).length).toBe(2);
+    expect(await findByText('未读 3')).toBeTruthy();
+  });
+
+  it('should filter to unread only when tapping 未读 segment', async () => {
+    const { findByText, queryByText } = render(<NotificationCenterScreen />);
+
+    await findByText('系统维护通知'); // 已读的那条默认可见
+
+    fireEvent.press(await findByText('未读 3'));
+
+    // 已读的「系统维护通知」被过滤掉
+    expect(queryByText('系统维护通知')).toBeNull();
+    // 未读的仍可见
+    expect(findByText('充电桩A-01温度异常告警')).toBeTruthy();
+  });
+
+  it('should filter by type when tapping a type chip', async () => {
+    const { findByText, queryByText } = render(<NotificationCenterScreen />);
+
+    await findByText('系统维护通知');
+
+    fireEvent.press(await findByText('告警'));
+
+    // 仅保留告警类型
+    expect(await findByText('充电桩A-01温度异常告警')).toBeTruthy();
+    expect(queryByText('新工单已分配')).toBeNull();
+    expect(queryByText('系统维护通知')).toBeNull();
+  });
+
+  it('should show 无匹配通知 when type filter matches nothing', async () => {
+    const { findByText } = render(<NotificationCenterScreen />);
+
+    await findByText('系统维护通知');
+
+    fireEvent.press(await findByText('设备'));
+
+    expect(await findByText('无匹配通知')).toBeTruthy();
   });
 });

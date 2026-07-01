@@ -191,6 +191,7 @@ export interface ChargerStatus {
   voltage: number;        // V 实时电压
   current: number;        // A 实时电流
   temperature: number;    // °C 充电枪温度
+  soc?: number | null;    // % 车辆电池SOC(0-100)，仅充电会话中有值
   energyTotal: number;    // kWh 累计电量
   sessionEnergy: number;  // kWh 当前会话电量
   sessionDuration: number; // 分钟 当前充电时长
@@ -199,6 +200,35 @@ export interface ChargerStatus {
   faultMessage: string | null;
   lastHeartbeat: string;
   updatedAt: string;
+}
+
+// 充电桩实时趋势曲线（功率/电压/电流/SOC 历史）
+export interface ChargerTrendPoint {
+  timestamp: string;
+  power: number;     // kW
+  voltage: number;   // V
+  current: number;   // A
+  soc: number;       // %
+}
+
+export interface ChargerTrend {
+  deviceId: number;
+  points: ChargerTrendPoint[];
+}
+
+export type ChargerTrendMetric = 'power' | 'voltage' | 'current' | 'soc';
+
+// 设备远程控制操作日志
+export interface DeviceControlLog {
+  id: number;
+  deviceId: number;
+  deviceName: string;
+  command: DeviceControlCommand['command'];
+  commandLabel: string;
+  status: 'success' | 'failed';
+  message: string;
+  operator: string;
+  createdAt: string;
 }
 
 export type ConnectorStatus = 'idle' | 'connected' | 'charging' | 'fault' | 'suspended';

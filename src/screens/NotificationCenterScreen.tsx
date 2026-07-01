@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,16 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  ScrollView,
   Alert,
 } from 'react-native';
 import { notificationApi } from '../services/api';
-import { AppNotification } from '../types';
+import { AppNotification, NotificationType } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+
+type ReadFilter = 'all' | 'unread';
+type TypeFilter = NotificationType | 'all';
 
 const NOTIFICATION_ICON: Record<string, string> = {
   alarm: '🔴',
@@ -29,6 +33,16 @@ const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   revenue: '营收通知',
 };
 
+// 类型筛选 chip 配置
+const TYPE_FILTER_OPTIONS: { value: TypeFilter; label: string }[] = [
+  { value: 'all', label: '全部' },
+  { value: 'alarm', label: '告警' },
+  { value: 'work_order', label: '工单' },
+  { value: 'device', label: '设备' },
+  { value: 'revenue', label: '营收' },
+  { value: 'system', label: '系统' },
+];
+
 const NotificationCenterScreen: React.FC = () => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +51,17 @@ const NotificationCenterScreen: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [readFilter, setReadFilter] = useState<ReadFilter>('all');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+
+  // 客户端双重筛选：已读状态 + 通知类型
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((n) => {
+      if (readFilter === 'unread' && n.isRead) return false;
+      if (typeFilter !== 'all' && n.type !== typeFilter) return false;
+      return true;
+    });
+  }, [notifications, readFilter, typeFilter]);
 
   const fetchData = useCallback(async (isRefresh = false, p = 1) => {
     if (isRefresh) {
@@ -180,38 +205,88 @@ const NotificationCenterScreen: React.FC = () => {
           onAction={() => fetchData(false, 1)}
         />
       ) : (
-        <FlatList
-          data={notifications}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={renderNotificationItem}
-          contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => fetchData(true, 1)}
-              colors={['#1a73e8']}
-              tintColor="#1a73e8"
-            />
-          }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.3}
-          ListEmptyComponent={
-            <EmptyState
-              icon="🔔"
-              title="暂无通知"
-              message="当前没有任何通知消息"
-            />
-          }
-          ListFooterComponent={
-            notifications.length > 0 && notifications.length < total ? (
-              <View style={styles.loadingMore}>
-                <LoadingSpinner text="加载更多..." size="small" />
-              </View>
-            ) : notifications.length >= total && total > 0 ? (
-              <Text style={styles.footerText}>已显示全部 {total} 条通知</Text>
-            ) : null
-          }
-        />
+        <View style={styles.listWrapper}>
+          {/* 筛选栏：已读状态 + 类型 */}
+          <View style={styles.filterBar}>
+            <View style={styles.readSegment}>
+              <TouchableOpacity
+                style={[styles.readSegBtn, readFilter === 'all' && styles.readSegBtnActive]}
+                onPress={() => setReadFilter('all')}
+              >
+                <Text style={[styles.readSegText, readFilter === 'all' && styles.readSegTextActive]}>
+                  全部
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.readSegBtn, readFilter === 'unread' && styles.readSegBtnActive]}
+                onPress={() => setReadFilter('unread')}
+              >
+                <Text style={[styles.readSegText, readFilter === 'unread' && styles.readSegTextActive]}>
+                  未读{unreadCount > 0 ? ` ${unreadCount}` : ''}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.typeFilterRow}
+            contentContainerStyle={styles.typeFilterContent}
+          >
+            {TYPE_FILTER_OPTIONS.map((opt) => {
+              const active = typeFilter === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.typeChip, active && styles.typeChipActive]}
+                  onPress={() => setTypeFilter(opt.value)}
+                >
+                  <Text style={[styles.typeChipText, active && styles.typeChipTextActive]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          <FlatList
+            data={filteredNotifications}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderNotificationItem}
+            contentContainerStyle={styles.listContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchData(true, 1)}
+                colors={['#1a73e8']}
+                tintColor="#1a73e8"
+              />
+            }
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.3}
+            ListEmptyComponent={
+              notifications.length === 0 ? (
+                <EmptyState icon="🔔" title="暂无通知" message="当前没有任何通知消息" />
+              ) : (
+                <EmptyState
+                  icon="🔍"
+                  title="无匹配通知"
+                  message="当前筛选条件下没有通知，试试切换筛选条件"
+                />
+              )
+            }
+            ListFooterComponent={
+              notifications.length > 0 && notifications.length < total ? (
+                <View style={styles.loadingMore}>
+                  <LoadingSpinner text="加载更多..." size="small" />
+                </View>
+              ) : notifications.length >= total && total > 0 ? (
+                <Text style={styles.footerText}>已显示全部 {total} 条通知</Text>
+              ) : null
+            }
+          />
+        </View>
       )}
     </View>
   );
@@ -240,6 +315,69 @@ const styles = StyleSheet.create({
   markAllText: {
     fontSize: 14,
     color: '#1a73e8',
+  },
+  listWrapper: {
+    flex: 1,
+  },
+  filterBar: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  readSegment: {
+    flexDirection: 'row',
+    backgroundColor: '#f0f2f5',
+    borderRadius: 8,
+    padding: 3,
+  },
+  readSegBtn: {
+    flex: 1,
+    paddingVertical: 7,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  readSegBtnActive: {
+    backgroundColor: '#1a73e8',
+  },
+  readSegText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  readSegTextActive: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  typeFilterRow: {
+    flexGrow: 0,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  typeFilterContent: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  typeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    backgroundColor: '#f0f2f5',
+    marginRight: 4,
+  },
+  typeChipActive: {
+    backgroundColor: '#1a73e8',
+  },
+  typeChipText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  typeChipTextActive: {
+    color: '#fff',
+    fontWeight: '600',
   },
   listContent: {
     padding: 16,

@@ -14,6 +14,9 @@ import ProfileScreen from '../screens/ProfileScreen';
 import ChargerMonitorScreen from '../screens/ChargerMonitorScreen';
 import AlarmListScreen from '../screens/AlarmListScreen';
 import NotificationCenterScreen from '../screens/NotificationCenterScreen';
+import DeviceListScreen from '../screens/DeviceListScreen';
+import DeviceDetailScreen from '../screens/DeviceDetailScreen';
+import WorkOrderScreen from '../screens/WorkOrderScreen';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -167,6 +170,36 @@ function MainTabNavigatorWithDetail() {
         component={NotificationCenterScreen}
         options={{
           title: '消息中心',
+          headerStyle: { backgroundColor: '#1a73e8' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
+      <RootStack.Screen
+        name="DeviceList"
+        component={DeviceListScreen}
+        options={({ route }) => ({
+          title: `${route.params?.stationName || ''} - 设备列表`,
+          headerStyle: { backgroundColor: '#1a73e8' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
+        })}
+      />
+      <RootStack.Screen
+        name="DeviceDetail"
+        component={DeviceDetailScreen}
+        options={{
+          title: '设备详情',
+          headerStyle: { backgroundColor: '#1a73e8' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
+      <RootStack.Screen
+        name="WorkOrder"
+        component={WorkOrderScreen}
+        options={{
+          title: '工单管理',
           headerStyle: { backgroundColor: '#1a73e8' },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },

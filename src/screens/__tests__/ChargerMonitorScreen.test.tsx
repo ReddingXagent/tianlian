@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, act } from '@testing-library/react-native';
+import { render, act, fireEvent } from '@testing-library/react-native';
 import ChargerMonitorScreen from '../ChargerMonitorScreen';
 import { chargerApi } from '../../services/api';
 
@@ -17,6 +17,7 @@ jest.mock('../../services/api', () => ({
   chargerApi: {
     getMonitorList: jest.fn(),
     getMonitorSummary: jest.fn(),
+    getTrend: jest.fn(),
   },
 }));
 
@@ -56,6 +57,14 @@ jest.mock('../../components/EmptyState', () => {
   };
   return MockEmptyState;
 });
+jest.mock('../../components/ChargerTrendChart', () => {
+  const MockTrend = (props: any) => {
+    const React = require('react');
+    const { Text } = require('react-native');
+    return React.createElement(Text, { testID: 'trend-mock' }, `趋势:${props.deviceId}`);
+  };
+  return MockTrend;
+});
 
 const MOCK_CHARGERS = [
   {
@@ -67,6 +76,7 @@ const MOCK_CHARGERS = [
     voltage: 380,
     current: 120,
     temperature: 42,
+    soc: 65,
     energyTotal: 12345.6,
     sessionEnergy: 12.3,
     sessionDuration: 45,
@@ -172,11 +182,58 @@ describe('ChargerMonitorScreen', () => {
     expect(await findByText(/本会话/)).toBeTruthy();
   });
 
+  it('should display SOC in session info when available', async () => {
+    const { findByText } = render(<ChargerMonitorScreen />);
+
+    expect(await findByText(/电量 65%/)).toBeTruthy();
+  });
+
+  it('should show a trend toggle hint on each charger card', async () => {
+    const { findAllByText } = render(<ChargerMonitorScreen />);
+
+    await findAllByText('充电桩A-01');
+    const toggles = await findAllByText(/趋势 ▾/);
+    expect(toggles.length).toBeGreaterThan(0);
+  });
+
+  it('should expand the trend chart when tapping a charger card', async () => {
+    const { findByText, getAllByText, getByText } = render(<ChargerMonitorScreen />);
+
+    await findByText('充电桩A-01');
+
+    // 初始每个充电桩都显示「趋势 ▾」
+    expect(getAllByText('趋势 ▾').length).toBe(3);
+
+    // 点击第一个充电桩卡片头部，展开趋势
+    fireEvent.press(getAllByText('趋势 ▾')[0]);
+
+    // 展开后渲染趋势组件，且该卡片切换为「收起 ▴」
+    expect(getByText('趋势:101')).toBeTruthy();
+    expect(getByText('收起 ▴')).toBeTruthy();
+    expect(getAllByText('趋势 ▾').length).toBe(2);
+  });
+
+  it('should collapse the trend chart when tapping an expanded card again', async () => {
+    const { findByText, getAllByText, queryByText } = render(<ChargerMonitorScreen />);
+
+    await findByText('充电桩A-01');
+
+    fireEvent.press(getAllByText('趋势 ▾')[0]);
+    expect(getAllByText('收起 ▴').length).toBe(1);
+
+    // 再次点击「收起 ▴」收起
+    fireEvent.press(getAllByText('收起 ▴')[0]);
+    expect(queryByText('趋势:101')).toBeNull();
+  });
+
   it('should handle error state', async () => {
     (chargerApi.getMonitorList as jest.Mock).mockRejectedValue(new Error('API Error'));
 
     const { findByText } = render(<ChargerMonitorScreen />);
-    expect(await findByText('加载监控数据失败，请下拉刷新重试')).toBeTruthy();
+    // The component renders EmptyState with title="加载失败" and message=error.message
+    expect(await findByText('加载失败')).toBeTruthy();
+    expect(await findByText('API Error')).toBeTruthy();
+    expect(await findByText('重新加载')).toBeTruthy();
   });
 
   it('should render empty state when no chargers', async () => {

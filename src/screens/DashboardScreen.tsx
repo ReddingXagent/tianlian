@@ -1,365 +1,214 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  TouchableOpacity,
+  View, Text, TouchableOpacity, StyleSheet, RefreshControl,
+  ScrollView, ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useAuthStore } from '../store/authStore';
+import { useStationStore } from '../store/stationStore';
+import { useWorkOrderStore } from '../store/workOrderStore';
 import { dashboardApi } from '../services/api';
-import { DashboardStats, Alarm, RootStackParamList } from '../types';
-import LoadingSpinner from '../components/LoadingSpinner';
-import StatusBadge from '../components/StatusBadge';
-import EmptyState from '../components/EmptyState';
+import { RootStackParamList, DashboardStats } from '../types';
 
-const DashboardScreen: React.FC = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentAlarms, setRecentAlarms] = useState<Alarm[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+type NavProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
+export default function DashboardScreen() {
+  const navigation = useNavigation<NavProp>();
+  const { user } = useAuthStore();
+  const { stations, fetchStations } = useStationStore();
+  const { fetchOrders } = useWorkOrderStore();
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [stats, setStats] = React.useState<DashboardStats | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
+  const loadDashboard = useCallback(async () => {
+    setRefreshing(true);
     try {
-      const [statsRes, alarmsRes] = await Promise.all([
-        dashboardApi.getStats(),
-        dashboardApi.getRecentAlarms(5),
+      await Promise.all([
+        fetchStations({ page: 1, pageSize: 100 }),
+        fetchOrders({ page: 1, pageSize: 5 }),
       ]);
-      setStats(statsRes.data);
-      setRecentAlarms(alarmsRes.data);
-    } catch {
-      setError('加载数据失败，请下拉刷新重试');
+      try {
+        const resp = await dashboardApi.getStats();
+        setStats(resp.data);
+      } catch {
+        // Stats API may not be ready
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [fetchStations, fetchOrders]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    loadDashboard();
+  }, [loadDashboard]);
 
   if (loading && !refreshing) {
-    return <LoadingSpinner text="加载仪表盘..." />;
-  }
-
-  if (error && !stats) {
     return (
-      <EmptyState
-        icon="⚠️"
-        title="加载失败"
-        message={error}
-        actionLabel="重新加载"
-        onAction={() => fetchData()}
-      />
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#4ECDC4" />
+      </View>
     );
   }
 
-  const alarmLevelIcon = (level: string) => {
-    switch (level) {
-      case 'critical': return '🔴';
-      case 'warning': return '🟡';
-      case 'info': return '🔵';
-      default: return '⚪';
-    }
-  };
+  const onlineStations = stations.filter((s) => s.status === 'online').length;
 
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={() => fetchData(true)}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
-        />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadDashboard} tintColor="#4ECDC4" />}
     >
-      {/* 站点概览 */}
-      <Text style={styles.sectionTitle}>站点概览</Text>
-      <View style={styles.statsGrid}>
-        <View style={[styles.statCard, { backgroundColor: '#e3f2fd' }]}>
-          <Text style={[styles.statNumber, { color: '#1565c0' }]}>
-            {stats?.totalStations ?? '-'}
-          </Text>
+      {/* 欢迎区 */}
+      <View style={styles.welcome}>
+        <Text style={styles.greeting}>你好，{user?.nickname || user?.username || '站长'}</Text>
+        <Text style={styles.dateText}>{new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })}</Text>
+      </View>
+
+      {/* 统计卡片 */}
+      <View style={styles.statsRow}>
+        <View style={[styles.statCard, { borderLeftColor: '#4ECDC4' }]}>
+          <Text style={styles.statValue}>{stats?.totalStations ?? stations.length}</Text>
           <Text style={styles.statLabel}>总站点</Text>
         </View>
-        <View style={[styles.statCard, { backgroundColor: '#e8f5e9' }]}>
-          <Text style={[styles.statNumber, { color: '#2e7d32' }]}>
-            {stats?.onlineStations ?? '-'}
-          </Text>
+        <View style={[styles.statCard, { borderLeftColor: '#27ae60' }]}>
+          <Text style={styles.statValue}>{stats?.onlineStations ?? onlineStations}</Text>
           <Text style={styles.statLabel}>在线</Text>
         </View>
-        <View style={[styles.statCard, { backgroundColor: '#fce4ec' }]}>
-          <Text style={[styles.statNumber, { color: '#c62828' }]}>
-            {stats?.unhandledAlarms ?? '-'}
-          </Text>
-          <Text style={styles.statLabel}>未处理告警</Text>
+        <View style={[styles.statCard, { borderLeftColor: '#e74c3c' }]}>
+          <Text style={styles.statValue}>{stats?.unhandledAlarms ?? '-'}</Text>
+          <Text style={styles.statLabel}>待处理告警</Text>
         </View>
       </View>
 
       {/* 营收摘要 */}
-      <Text style={styles.sectionTitle}>营收摘要</Text>
-      <View style={styles.revenueCard}>
-        <View style={styles.revenueRow}>
-          <View style={styles.revenueItem}>
-            <Text style={styles.revenueLabel}>今日</Text>
-            <Text style={styles.revenueAmount}>
-              ¥{(stats?.revenueSummary?.today ?? 0).toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.revenueDivider} />
-          <View style={styles.revenueItem}>
-            <Text style={styles.revenueLabel}>本周</Text>
-            <Text style={styles.revenueAmount}>
-              ¥{(stats?.revenueSummary?.week ?? 0).toFixed(2)}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.revenueDividerHorizontal} />
-        <View style={styles.revenueRow}>
-          <View style={styles.revenueItem}>
-            <Text style={styles.revenueLabel}>本月</Text>
-            <Text style={styles.revenueAmount}>
-              ¥{(stats?.revenueSummary?.month ?? 0).toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.revenueDivider} />
-          <View style={styles.revenueItem}>
-            <Text style={styles.revenueLabel}>累计</Text>
-            <Text style={[styles.revenueAmount, { color: '#1a73e8' }]}>
-              ¥{(stats?.revenueSummary?.total ?? 0).toFixed(2)}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* 快速入口 */}
-      <Text style={styles.sectionTitle}>快捷操作</Text>
-      <View style={styles.quickActions}>
-        <TouchableOpacity
-          style={styles.quickActionCard}
-          onPress={() => navigation.navigate('AlarmList', {})}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.quickActionIcon}>🔔</Text>
-          <Text style={styles.quickActionLabel}>告警列表</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.quickActionCard}
-          onPress={() => navigation.navigate('NotificationCenter')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.quickActionIcon}>📬</Text>
-          <Text style={styles.quickActionLabel}>消息中心</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.quickActionCard}
-          onPress={() => navigation.navigate('Revenue')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.quickActionIcon}>💰</Text>
-          <Text style={styles.quickActionLabel}>营收统计</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 最近告警 */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>最近告警</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('AlarmList', {})}>
-          <Text style={styles.viewAll}>查看全部</Text>
-        </TouchableOpacity>
-      </View>
-      {recentAlarms.length === 0 ? (
-        <View style={styles.emptyAlarm}>
-          <Text style={styles.emptyAlarmText}>暂无告警</Text>
-        </View>
-      ) : (
-        recentAlarms.map((alarm) => (
-          <View key={alarm.id} style={styles.alarmItem}>
-            <Text style={styles.alarmIcon}>{alarmLevelIcon(alarm.level)}</Text>
-            <View style={styles.alarmContent}>
-              <Text style={styles.alarmTitle} numberOfLines={1}>
-                {alarm.title}
-              </Text>
-              <Text style={styles.alarmStation} numberOfLines={1}>
-                {alarm.stationName}
-              </Text>
+      {stats?.revenueSummary && (
+        <View style={styles.revenueCard}>
+          <Text style={styles.sectionTitle}>营收概览</Text>
+          <View style={styles.revenueRow}>
+            <View style={styles.revenueItem}>
+              <Text style={styles.revenueAmount}>¥{(stats.revenueSummary.today / 100).toFixed(2)}</Text>
+              <Text style={styles.revenueLabel}>今日</Text>
             </View>
-            <StatusBadge status={alarm.level as 'critical' | 'warning' | 'info'} />
+            <View style={styles.revenueItem}>
+              <Text style={styles.revenueAmount}>¥{(stats.revenueSummary.week / 100).toFixed(2)}</Text>
+              <Text style={styles.revenueLabel}>本周</Text>
+            </View>
+            <View style={styles.revenueItem}>
+              <Text style={styles.revenueAmount}>¥{(stats.revenueSummary.month / 100).toFixed(2)}</Text>
+              <Text style={styles.revenueLabel}>本月</Text>
+            </View>
           </View>
-        ))
+        </View>
       )}
+
+      {/* 快捷入口 */}
+      <View style={styles.quickActions}>
+        <Text style={styles.sectionTitle}>快捷操作</Text>
+        <View style={styles.actionGrid}>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => navigation.navigate('Stations')}
+          >
+            <Text style={styles.actionIcon}>📍</Text>
+            <Text style={styles.actionText}>站点管理</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => navigation.navigate('AlarmList' as never)}
+          >
+            <Text style={styles.actionIcon}>🔔</Text>
+            <Text style={styles.actionText}>告警查看</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => navigation.navigate('WorkOrder' as never)}
+          >
+            <Text style={styles.actionIcon}>📋</Text>
+            <Text style={styles.actionText}>工单管理</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => navigation.navigate('Revenue')}
+          >
+            <Text style={styles.actionIcon}>💰</Text>
+            <Text style={styles.actionText}>营收统计</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* 站点列表预览 */}
+      <View style={styles.stationPreview}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>我的站点</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Stations')}>
+            <Text style={styles.seeAll}>查看全部 →</Text>
+          </TouchableOpacity>
+        </View>
+        {stations.slice(0, 3).map((station) => (
+          <TouchableOpacity
+            key={station.id}
+            style={styles.stationItem}
+            onPress={() => navigation.navigate('StationDetail', { stationId: station.id })}
+          >
+            <View style={styles.stationInfo}>
+              <Text style={styles.stationName}>{station.name}</Text>
+              <Text style={styles.stationAddr}>{station.address}</Text>
+            </View>
+            <View style={[styles.statusBadge, station.status === 'online' ? styles.statusOnline : styles.statusOffline]}>
+              <Text style={styles.statusText}>{station.status === 'online' ? '在线' : '离线'}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+        {stations.length === 0 && (
+          <Text style={styles.emptyText}>暂无站点数据</Text>
+        )}
+      </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f6fa',
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  viewAll: {
-    fontSize: 14,
-    color: '#1a73e8',
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 8,
-  },
+  container: { flex: 1, backgroundColor: '#0f0f23' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f0f23' },
+  welcome: { padding: 20, paddingTop: 10 },
+  greeting: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
+  dateText: { fontSize: 14, color: '#888', marginTop: 4 },
+  statsRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 12 },
   statCard: {
-    flex: 1,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
+    flex: 1, backgroundColor: '#1a1a2e', borderRadius: 12, padding: 16,
+    borderLeftWidth: 3,
   },
-  statNumber: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  statValue: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
+  statLabel: { fontSize: 12, color: '#888', marginTop: 4 },
+  revenueCard: { margin: 16, backgroundColor: '#1a1a2e', borderRadius: 12, padding: 20 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 12 },
+  revenueRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  revenueItem: { alignItems: 'center' },
+  revenueAmount: { fontSize: 20, fontWeight: 'bold', color: '#4ECDC4' },
+  revenueLabel: { fontSize: 12, color: '#888', marginTop: 4 },
+  quickActions: { padding: 16 },
+  actionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
+  actionItem: {
+    width: '47%', backgroundColor: '#1a1a2e', borderRadius: 12,
+    padding: 20, alignItems: 'center', gap: 8,
   },
-  statLabel: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
+  actionIcon: { fontSize: 32 },
+  actionText: { fontSize: 14, color: '#ccc' },
+  stationPreview: { padding: 16, paddingBottom: 40 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  seeAll: { fontSize: 14, color: '#4ECDC4' },
+  stationItem: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    backgroundColor: '#1a1a2e', borderRadius: 10, padding: 16, marginBottom: 8,
   },
-  revenueCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-    marginBottom: 8,
-  },
-  revenueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  revenueItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  revenueLabel: {
-    fontSize: 13,
-    color: '#999',
-    marginBottom: 4,
-  },
-  revenueAmount: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  revenueDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#eee',
-  },
-  revenueDividerHorizontal: {
-    height: 1,
-    backgroundColor: '#eee',
-  },
-  emptyAlarm: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 32,
-    alignItems: 'center',
-  },
-  emptyAlarmText: {
-    color: '#999',
-    fontSize: 14,
-  },
-  alarmItem: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  alarmIcon: {
-    fontSize: 20,
-    marginRight: 12,
-  },
-  alarmContent: {
-    flex: 1,
-    marginRight: 8,
-  },
-  alarmTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 2,
-  },
-  alarmStation: {
-    fontSize: 12,
-    color: '#999',
-  },
-  quickActions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 8,
-  },
-  quickActionCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  quickActionIcon: {
-    fontSize: 24,
-    marginBottom: 6,
-  },
-  quickActionLabel: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
+  stationInfo: { flex: 1 },
+  stationName: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  stationAddr: { fontSize: 12, color: '#666', marginTop: 4 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  statusOnline: { backgroundColor: 'rgba(39,174,96,0.2)' },
+  statusOffline: { backgroundColor: 'rgba(231,76,60,0.2)' },
+  statusText: { fontSize: 12, color: '#fff' },
+  emptyText: { color: '#666', textAlign: 'center', paddingVertical: 20 },
 });
-
-export default DashboardScreen;

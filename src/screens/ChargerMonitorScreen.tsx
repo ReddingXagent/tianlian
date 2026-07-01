@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import { ChargerStatus, ChargerMonitorSummary, RootStackParamList } from '../typ
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
+import ChargerTrendChart from '../components/ChargerTrendChart';
+import { usePolling } from '../hooks/usePolling';
 
 type ChargerMonitorRouteProp = RouteProp<RootStackParamList, 'ChargerMonitor'>;
 
@@ -28,40 +30,27 @@ const ChargerMonitorScreen: React.FC = () => {
   const route = useRoute<ChargerMonitorRouteProp>();
   const { stationId, stationName } = route.params;
 
-  const [chargers, setChargers] = useState<ChargerStatus[]>([]);
-  const [summary, setSummary] = useState<ChargerMonitorSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [expandedChargerId, setExpandedChargerId] = useState<number | null>(null);
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const [chargersRes, summaryRes] = await Promise.all([
-        chargerApi.getMonitorList(stationId),
-        chargerApi.getMonitorSummary(stationId),
-      ]);
-      setChargers(chargersRes.data);
-      setSummary(summaryRes.data);
-    } catch {
-      setError('加载监控数据失败，请下拉刷新重试');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+  // 并行获取充电桩列表+汇总，10秒自动轮询
+  const fetcher = useCallback(async () => {
+    const [chargersRes, summaryRes] = await Promise.all([
+      chargerApi.getMonitorList(stationId),
+      chargerApi.getMonitorSummary(stationId),
+    ]);
+    return { chargers: chargersRes.data, summary: summaryRes.data };
   }, [stationId]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const { data, loading, error, refresh } = usePolling(fetcher, {
+    interval: 10_000,
+    enabled: !!stationId,
+  });
 
-  if (loading && !refreshing) {
+  const chargers = data?.chargers ?? [];
+  const summary = data?.summary ?? null;
+  const refreshing = loading && chargers.length > 0;
+
+  if (loading && chargers.length === 0) {
     return <LoadingSpinner text="加载监控面板..." />;
   }
 
@@ -70,9 +59,9 @@ const ChargerMonitorScreen: React.FC = () => {
       <EmptyState
         icon="⚠️"
         title="加载失败"
-        message={error}
+        message={error.message}
         actionLabel="重新加载"
-        onAction={() => fetchData()}
+        onAction={refresh}
       />
     );
   }
@@ -95,7 +84,7 @@ const ChargerMonitorScreen: React.FC = () => {
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => fetchData(true)}
+          onRefresh={refresh}
           colors={['#1a73e8']}
           tintColor="#1a73e8"
         />
@@ -157,16 +146,27 @@ const ChargerMonitorScreen: React.FC = () => {
           const connectorConfig = getConnectorConfig(charger.connectorStatus);
           return (
             <View key={charger.id} style={styles.chargerCard}>
-              {/* 头部 */}
-              <View style={styles.chargerHeader}>
+              {/* 头部（点击展开/收起实时趋势） */}
+              <TouchableOpacity
+                style={styles.chargerHeader}
+                activeOpacity={0.7}
+                onPress={() =>
+                  setExpandedChargerId((prev) => (prev === charger.id ? null : charger.id))
+                }
+              >
                 <View style={styles.chargerNameRow}>
                   <Text style={styles.chargerIcon}>🔌</Text>
                   <Text style={styles.chargerName} numberOfLines={1}>
                     {charger.deviceName}
                   </Text>
                 </View>
-                <StatusBadge status={charger.connectorStatus as any} label={connectorConfig.label} />
-              </View>
+                <View style={styles.headerRight}>
+                  <StatusBadge status={charger.connectorStatus as any} label={connectorConfig.label} />
+                  <Text style={styles.trendToggle}>
+                    {expandedChargerId === charger.id ? '收起 ▴' : '趋势 ▾'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
               {/* 实时数据 */}
               <View style={styles.metricsGrid}>
@@ -206,8 +206,9 @@ const ChargerMonitorScreen: React.FC = () => {
               {(charger.state === 'charging' || charger.state === 'suspended') && (
                 <View style={styles.sessionInfo}>
                   <Text style={styles.sessionText}>
-                    ⏱ {formatDuration(charger.sessionDuration)} · 
+                    ⏱ {formatDuration(charger.sessionDuration)} ·
                     本会话 {charger.sessionEnergy.toFixed(1)} kWh
+                    {charger.soc != null ? ` · 电量 ${Math.round(charger.soc)}%` : ''}
                   </Text>
                 </View>
               )}
@@ -223,6 +224,11 @@ const ChargerMonitorScreen: React.FC = () => {
                     </Text>
                   </View>
                 </View>
+              )}
+
+              {/* 展开时显示实时趋势曲线 */}
+              {expandedChargerId === charger.id && (
+                <ChargerTrendChart deviceId={charger.deviceId} deviceName={charger.deviceName} />
               )}
             </View>
           );
@@ -321,6 +327,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 14,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  trendToggle: {
+    fontSize: 12,
+    color: '#1a73e8',
+    fontWeight: '500',
   },
   chargerNameRow: {
     flexDirection: 'row',

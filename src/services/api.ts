@@ -17,6 +17,7 @@ import {
   CreateWorkOrderData,
   ChargerStatus,
   ChargerMonitorSummary,
+  ChargerTrend,
   AppNotification,
 } from '../types';
 
@@ -220,6 +221,10 @@ export const chargerApi = {
   },
   clearFault(faultId: number): Promise<ApiResponse<{ success: boolean; message: string }>> {
     return api.post(`/chargers/faults/${faultId}/clear`).then((res) => res.data);
+  },
+  // 充电桩实时趋势（功率/电压/电流/SOC 历史曲线）
+  getTrend(deviceId: number, params?: { points?: number }): Promise<ApiResponse<ChargerTrend>> {
+    return api.get(`/devices/${deviceId}/charger-trend`, { params }).then((res) => res.data);
   },
 };
 
