@@ -1,0 +1,160 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Station } from '../types';
+import StatusBadge from './StatusBadge';
+
+interface StationCardProps {
+  station: Station;
+  onPress: (station: Station) => void;
+}
+
+const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
+  const distanceText = station.distance
+    ? station.distance < 1000
+      ? `${station.distance}米`
+      : `${(station.distance / 1000).toFixed(1)}公里`
+    : null;
+
+  const availableText = `${station.availableConnectors}/${station.totalConnectors}`;
+  const hasAvailable = station.availableConnectors > 0;
+
+  return (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onPress(station)}
+      activeOpacity={0.7}
+    >
+      {/* 顶部：名称 + 状态 */}
+      <View style={styles.topRow}>
+        <Text style={styles.name} numberOfLines={1}>{station.name}</Text>
+        <StatusBadge status={station.status} />
+      </View>
+
+      {/* 地址 */}
+      <Text style={styles.address} numberOfLines={1}>{station.address}</Text>
+
+      {/* 价格信息 */}
+      <View style={styles.priceRow}>
+        <View style={styles.priceItem}>
+          <Text style={styles.priceLabel}>电费</Text>
+          <Text style={styles.priceValue}>
+            <Text style={styles.priceNum}>{station.pricePerKwh.toFixed(2)}</Text>
+            <Text style={styles.priceUnit}> 元/度</Text>
+          </Text>
+        </View>
+        <View style={styles.priceDivider} />
+        <View style={styles.priceItem}>
+          <Text style={styles.priceLabel}>服务费</Text>
+          <Text style={styles.priceValue}>
+            <Text style={styles.priceNum}>{station.serviceFee.toFixed(2)}</Text>
+            <Text style={styles.priceUnit}> 元/度</Text>
+          </Text>
+        </View>
+      </View>
+
+      {/* 底部：距离 + 可用枪数 */}
+      <View style={styles.bottomRow}>
+        <View style={styles.availabilityRow}>
+          <Text style={[styles.availabilityDot, { color: hasAvailable ? '#2e7d32' : '#c62828' }]}>
+            ●
+          </Text>
+          <Text style={[styles.availabilityText, { color: hasAvailable ? '#2e7d32' : '#c62828' }]}>
+            {hasAvailable ? `可用 ${availableText}` : `已满 ${availableText}`}
+          </Text>
+        </View>
+        {distanceText && (
+          <Text style={styles.distance}>{distanceText}</Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    flex: 1,
+    marginRight: 8,
+  },
+  address: {
+    fontSize: 13,
+    color: '#999',
+    marginBottom: 10,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    backgroundColor: '#f5f6fa',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  priceItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  priceLabel: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 2,
+  },
+  priceValue: {
+    fontSize: 13,
+    color: '#333',
+  },
+  priceNum: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a73e8',
+  },
+  priceUnit: {
+    fontSize: 12,
+    color: '#666',
+  },
+  priceDivider: {
+    width: 1,
+    backgroundColor: '#ddd',
+    marginHorizontal: 8,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  availabilityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  availabilityDot: {
+    fontSize: 10,
+    marginRight: 4,
+  },
+  availabilityText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  distance: {
+    fontSize: 13,
+    color: '#999',
+  },
+});
+
+export default StationCard;
