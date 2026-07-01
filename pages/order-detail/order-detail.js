@@ -1,6 +1,9 @@
 // pages/order-detail/order-detail.js - 订单详情
+// 性能优化：API缓存
 const api = require('../../services/api');
 const util = require('../../utils/util');
+const config = require('../../config/index');
+const { cachedRequest } = require('../../utils/cache');
 
 const STATUS_CONFIG = {
   charging: {
@@ -42,12 +45,16 @@ Page({
     this.loadOrderDetail();
   },
 
-  // 加载订单详情
-  async loadOrderDetail() {
-    this.setData({ loading: true });
+  // 加载订单详情（带缓存）
+  async loadOrderDetail(force = false) {
+    if (force) this.setData({ loading: true });
 
     try {
-      const res = await api.getOrderDetail(this.data.orderId);
+      const res = await cachedRequest(
+        (id) => api.getOrderDetail(id),
+        [this.data.orderId],
+        { cacheKey: `order_detail_${this.data.orderId}`, ttl: config.CACHE_TTL.ORDERS, force }
+      );
       const data = res.data || {};
 
       const statusCfg = STATUS_CONFIG[data.status] || STATUS_CONFIG.finished;
@@ -84,7 +91,7 @@ Page({
 
   // 下拉刷新
   onPullDownRefresh() {
-    this.loadOrderDetail().then(() => {
+    this.loadOrderDetail(true).then(() => {
       wx.stopPullDownRefresh();
     });
   }

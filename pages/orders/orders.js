@@ -1,6 +1,10 @@
 // pages/orders/orders.js - 订单列表
+// 性能优化：API缓存 + createPagination 分页控制器
 const api = require('../../services/api');
 const util = require('../../utils/util');
+const config = require('../../config/index');
+const { cache } = require('../../utils/cache');
+const { createPagination, guardTap } = require('../../utils/perf');
 
 const STATUS_MAP = {
   charging: { text: '充电中', class: 'tag-success' },
@@ -27,46 +31,54 @@ Page({
   },
 
   onLoad() {
+    this._initPagination('');
     this.loadOrders();
+  },
+
+  // 初始化分页控制器
+  _initPagination(tab) {
+    this._pagination = createPagination(
+      async (page, pageSize) => {
+        const res = await api.getOrders({ page, pageSize, status: tab || undefined });
+        return res;
+      },
+      {
+        pageSize: 10,
+        cacheKey: `orders_${tab}`,
+        cacheTtl: config.CACHE_TTL.ORDERS
+      }
+    );
   },
 
   onShow() {
-    // 每次显示时刷新第一页
-    this.setData({ page: 1, orders: [], hasMore: true });
-    this.loadOrders();
+    // 页面返回时刷新首页（使用缓存避免闪烁）
+    if (this.data.currentTab !== undefined) {
+      this.setData({ page: 1 });
+      this.loadOrders(true);
+    }
   },
 
-  // 切换筛选
-  onTabChange(e) {
+  // 切换筛选（防连点）
+  onTabChange: guardTap(function(e) {
     const { value } = e.currentTarget.dataset;
     if (value === this.data.currentTab) return;
 
-    this.setData({
-      currentTab: value,
-      page: 1,
-      orders: [],
-      hasMore: true
-    });
-    this.loadOrders();
-  },
+    this.setData({ currentTab: value, orders: [], page: 1, hasMore: true });
+    this._initPagination(value);
+    this.loadOrders(true);
+  }, 500),
 
-  // 加载订单
-  async loadOrders() {
-    const { currentTab, page, pageSize, loading, loadingMore } = this.data;
+  // 加载订单（使用分页控制器）
+  async loadOrders(reload = false) {
+    if (this._pagination && this._pagination.isLoading()) return;
 
-    if (loading || loadingMore) return;
-
-    const isFirstPage = page === 1;
+    const isFirstPage = reload || this.data.page === 1;
     this.setData(isFirstPage ? { loading: true } : { loadingMore: true });
 
     try {
-      const res = await api.getOrders({
-        page,
-        pageSize,
-        status: currentTab || undefined
-      });
+      const { list, total, hasMore, page } = await this._pagination.loadMore(reload);
 
-      const orders = (res.data?.list || res.data || []).map(order => ({
+      const orders = list.map(order => ({
         ...order,
         statusText: STATUS_MAP[order.status]?.text || order.status,
         statusClass: STATUS_MAP[order.status]?.class || 'tag-default',
@@ -76,11 +88,10 @@ Page({
         showActions: order.status === 'pending' || order.status === 'charging'
       }));
 
-      const total = res.data?.total || orders.length;
-
       this.setData({
-        orders: isFirstPage ? orders : [...this.data.orders, ...orders],
-        hasMore: this.data.orders.length + orders.length < total,
+        orders,
+        page,
+        hasMore,
         loading: false,
         loadingMore: false
       });
@@ -121,13 +132,13 @@ Page({
     });
   },
 
-  // 下拉刷新
-  onPullDownRefresh() {
-    this.setData({ page: 1, orders: [], hasMore: true });
-    this.loadOrders().then(() => {
+  // 下拉刷新（防连点）
+  onPullDownRefresh: guardTap(function() {
+    this.setData({ page: 1 });
+    this.loadOrders(true).then(() => {
       wx.stopPullDownRefresh();
-    });
-  },
+    }).catch(() => wx.stopPullDownRefresh());
+  }, 1000),
 
   // 上拉加载更多
   onReachBottom() {

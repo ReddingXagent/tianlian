@@ -1,7 +1,10 @@
 // pages/charging/charging.js - 充电中
+// 性能优化：智能轮询（自适应间隔 + 失败退避）+ 批量 setData
 const api = require('../../services/api');
 const util = require('../../utils/util');
 const config = require('../../config/index');
+const { createPolling } = require('../../utils/polling');
+const { createBatchSetData, diffSetData } = require('../../utils/perf');
 
 Page({
   data: {
@@ -25,8 +28,8 @@ Page({
     statusClass: 'charging',
     startTime: '',
 
-    // 轮询
-    pollTimer: null
+    // 轮询状态
+    pollingActive: false
   },
 
   onLoad(options) {
@@ -37,12 +40,15 @@ Page({
       startTime: util.formatTime(new Date(), 'HH:mm:ss')
     });
 
-    // 开始轮询
-    this.startPolling();
+    this._polling = null;
+    this._lastStatusData = null; // 用于 diff 比较的上次数据
   },
 
-  onUnload() {
-    this.stopPolling();
+  onShow() {
+    // 切回前台时恢复轮询
+    if (this.data.sessionId && !this.data.pollingActive) {
+      this.startPolling();
+    }
   },
 
   onHide() {
@@ -50,37 +56,52 @@ Page({
     this.stopPolling();
   },
 
-  onShow() {
-    // 切回前台时恢复轮询
-    if (this.data.sessionId) {
-      this.startPolling();
-    }
+  onUnload() {
+    this.stopPolling();
   },
 
-  // 开始轮询
+  // 开始智能轮询
   startPolling() {
-    this.fetchStatus(); // 立即获取一次
-    const timer = setInterval(() => {
-      this.fetchStatus();
-    }, config.CHARGING_POLL_INTERVAL);
-    this.setData({ pollTimer: timer });
+    if (this._polling) {
+      this._polling.stop();
+    }
+
+    this._polling = createPolling(
+      () => this.fetchStatus(),
+      {
+        interval: config.CHARGING_POLL_INTERVAL,
+        maxRetries: 3,
+        backoffFactor: 1.5,
+        maxInterval: 15000,
+        shouldStop: () => this.data.statusText === '充电完成',
+        onMaxRetries: () => {
+          wx.showToast({ title: '连接异常，请刷新', icon: 'none' });
+          this.setData({ pollingActive: false });
+        }
+      }
+    );
+
+    this.setData({ pollingActive: true });
+    this._polling.start();
   },
 
   // 停止轮询
   stopPolling() {
-    if (this.data.pollTimer) {
-      clearInterval(this.data.pollTimer);
-      this.setData({ pollTimer: null });
+    if (this._polling) {
+      this._polling.stop();
+      this._polling = null;
     }
+    this.setData({ pollingActive: false });
   },
 
-  // 获取充电状态
+  // 获取充电状态（批量 setData + diff，减少渲染次数）
   async fetchStatus() {
     try {
       const res = await api.getChargingStatus(this.data.sessionId);
       const data = res.data || {};
 
-      this.setData({
+      // 构建新数据对象
+      const newData = {
         power: (data.power || 0).toFixed(2),
         energy: (data.energy || 0).toFixed(2),
         cost: (data.cost || 0).toFixed(2),
@@ -92,7 +113,11 @@ Page({
         price: (data.price || 0).toFixed(2),
         orderId: data.orderId || '',
         statusText: data.status === 'charging' ? '充电中' : data.status || '充电中'
-      });
+      };
+
+      // diff 更新：只发送变化的字段
+      diffSetData(this, newData, this._lastStatusData);
+      this._lastStatusData = newData;
 
       // 充电完成自动跳转
       if (data.status === 'finished') {
@@ -106,13 +131,7 @@ Page({
       }
     } catch (err) {
       console.error('获取充电状态失败:', err);
-      // 连续失败3次停止轮询
-      if (!this._failCount) this._failCount = 0;
-      this._failCount++;
-      if (this._failCount >= 3) {
-        this.stopPolling();
-        wx.showToast({ title: '连接异常，请刷新', icon: 'none' });
-      }
+      throw err; // 交给 polling 处理退避
     }
   },
 

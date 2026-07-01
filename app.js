@@ -7,7 +7,9 @@ App({
     userInfo: null,
     systemInfo: null,
     // 当前充电会话
-    chargingSession: null
+    chargingSession: null,
+    // 静默重试标记
+    _reloginPending: null
   },
 
   onLaunch() {
@@ -71,6 +73,18 @@ App({
     wx.removeStorageSync('token');
     this.globalData.token = null;
     this.globalData.userInfo = null;
+  },
+
+  // 静默重登（token过期时自动重试）
+  silentRelogin() {
+    if (this.globalData._reloginPending) {
+      return this.globalData._reloginPending;
+    }
+    this.globalData._reloginPending = this.login()
+      .finally(() => {
+        this.globalData._reloginPending = null;
+      });
+    return this.globalData._reloginPending;
   },
 
   // 处理扫码场景

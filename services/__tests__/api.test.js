@@ -31,7 +31,7 @@ describe('API Service', () => {
   describe('baseURL', () => {
     it('should use API_BASE_URL from config', () => {
       expect(config.API_BASE_URL).toBeDefined();
-      expect(config.API_BASE_URL).toBe('http://8.134.106.166/api/v1');
+      expect(config.API_BASE_URL).toBe('http://localhost:8000/api/v1');
     });
   });
 

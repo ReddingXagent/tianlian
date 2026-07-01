@@ -1,7 +1,13 @@
 // pages/index/index.js - 首页（附近站点）
+// 性能优化：API缓存 + 搜索防抖 + 筛选状态本地缓存
 const api = require('../../services/api');
 const util = require('../../utils/util');
 const config = require('../../config/index');
+const { cachedRequest } = require('../../utils/cache');
+const { guardTap, buildMarkers } = require('../../utils/perf');
+
+// 搜索防抖
+const debouncedSearch = util.debounce(function(fn) { fn(); }, 400);
 
 Page({
   data: {
@@ -29,10 +35,19 @@ Page({
   },
 
   onLoad() {
+    // 恢复上次筛选状态
+    const lastFilter = wx.getStorageSync('station_filter');
+    if (lastFilter) {
+      this.setData({
+        filterGunType: lastFilter.gunType || '',
+        filterSortBy: lastFilter.sortBy || 'distance'
+      });
+    }
     this.getLocation();
   },
 
   onShow() {
+    // 使用缓存：只有缓存过期或强制刷新才请求
     if (this.data.latitude && this.data.longitude) {
       this.loadStations();
     }
@@ -55,78 +70,78 @@ Page({
     });
   },
 
-  // 加载附近站点
-  async loadStations() {
+  // 加载附近站点（带缓存）
+  async loadStations(force = false) {
     const { latitude, longitude, filterGunType, filterSortBy } = this.data;
     this.setData({ loading: true });
 
+    const cacheKey = `stations_${latitude}_${longitude}_${filterGunType}_${filterSortBy}`;
+
     try {
-      const res = await api.filterStations({
-        lat: latitude,
-        lng: longitude,
-        gunType: filterGunType || undefined,
-        sortBy: filterSortBy
-      });
+      const res = await cachedRequest(
+        (params) => api.filterStations(params),
+        [{
+          lat: latitude,
+          lng: longitude,
+          gunType: filterGunType || undefined,
+          sortBy: filterSortBy
+        }],
+        { cacheKey, ttl: config.CACHE_TTL.STATIONS, force }
+      );
+
       const stations = (res.data?.list || res.data || []).map(s => ({
         ...s,
-        distance: s.distance || util.calcDistance(latitude, longitude, s.lat, s.lng)
+        distance: s.distance || util.calcDistance(latitude, longitude, s.lat, s.lng),
+        distanceText: util.formatDistance(
+          s.distance || util.calcDistance(latitude, longitude, s.lat, s.lng)
+        )
       }));
 
-      const markers = stations.map((s, i) => ({
-        id: i,
-        latitude: s.lat,
-        longitude: s.lng,
-        title: s.name,
-        iconPath: '/assets/icons/marker.png',
-        width: 32,
-        height: 32,
-        callout: {
-          content: s.name,
-          color: '#333',
-          fontSize: 12,
-          borderRadius: 8,
-          padding: 8,
-          display: 'BYCLICK'
-        }
-      }));
+      // 增量更新 markers（复用未变化的标记，减少 setData 数据量）
+      const markers = buildMarkers(stations, this.data._prevMarkers || []);
 
       this.setData({ stations, markers, loading: false });
+      this.data._prevMarkers = markers;
     } catch (err) {
       this.setData({ loading: false });
       console.error('加载站点失败:', err);
     }
   },
 
-  // 搜索输入
+  // 搜索输入（防抖）
   onSearchInput(e) {
     this.setData({ keyword: e.detail.value });
+    // 防抖搜索
+    if (e.detail.value.trim()) {
+      debouncedSearch(() => this.onSearch());
+    }
   },
 
   // 搜索
-  onSearch() {
+  async onSearch() {
     const { keyword } = this.data;
     if (!keyword.trim()) {
-      this.loadStations();
+      this.loadStations(true);
       return;
     }
+
+    const cacheKey = `search_${keyword.trim()}`;
     this.setData({ loading: true });
-    api.searchStations(keyword.trim())
-      .then(res => {
-        const stations = res.data || [];
-        const markers = stations.map((s, i) => ({
-          id: i,
-          latitude: s.lat,
-          longitude: s.lng,
-          title: s.name,
-          iconPath: '/assets/icons/marker.png',
-          width: 32,
-          height: 32
-        }));
-        this.setData({ stations, markers, loading: false });
-      })
-      .catch(() => {
-        this.setData({ loading: false });
-      });
+
+    try {
+      const res = await cachedRequest(
+        (kw) => api.searchStations(kw),
+        [keyword.trim()],
+        { cacheKey, ttl: config.CACHE_TTL.STATIONS }
+      );
+
+      const stations = res.data || [];
+      const markers = buildMarkers(stations, this.data._prevMarkers || []);
+      this.setData({ stations, markers, loading: false });
+      this.data._prevMarkers = markers;
+    } catch (err) {
+      this.setData({ loading: false });
+    }
   },
 
   // 显示/隐藏筛选面板
@@ -148,8 +163,13 @@ Page({
 
   // 应用筛选
   onApplyFilter() {
+    // 持久化筛选状态
+    wx.setStorageSync('station_filter', {
+      gunType: this.data.filterGunType,
+      sortBy: this.data.filterSortBy
+    });
     this.setData({ showFilter: false });
-    this.loadStations();
+    this.loadStations(true); // 强制刷新
   },
 
   // 重置筛选
@@ -158,6 +178,7 @@ Page({
       filterGunType: '',
       filterSortBy: 'distance'
     });
+    wx.removeStorageSync('station_filter');
   },
 
   // 收藏站点
@@ -166,11 +187,14 @@ Page({
     try {
       await api.addFavorite(station.id);
       wx.showToast({ title: '已收藏', icon: 'success' });
-      // 更新本地状态
+      // 局部更新，不清缓存
       const stations = this.data.stations.map(s =>
         s.id === station.id ? { ...s, isFavorited: true } : s
       );
       this.setData({ stations });
+      // 刷新收藏缓存
+      const { cache } = require('../../utils/cache');
+      cache.delete('favorites');
     } catch (err) {
       console.error('收藏失败:', err);
     }
@@ -186,15 +210,17 @@ Page({
         s.id === station.id ? { ...s, isFavorited: false } : s
       );
       this.setData({ stations });
+      const { cache } = require('../../utils/cache');
+      cache.delete('favorites');
     } catch (err) {
       console.error('取消收藏失败:', err);
     }
   },
 
-  // 定位
-  onLocate() {
+  // 定位（防连点）
+  onLocate: guardTap(function() {
     this.getLocation();
-  },
+  }, 2000),
 
   // 地图标记点击
   onMarkerTap(e) {
@@ -206,11 +232,6 @@ Page({
     }
   },
 
-  // 地图更新
-  onMapUpdated(e) {
-    // 可在此处理地图拖动后的中心点变化
-  },
-
   // 站点卡片点击
   onStationTap(e) {
     const { station } = e.detail;
@@ -219,14 +240,16 @@ Page({
     });
   },
 
-  // 刷新
-  onRefresh() {
-    this.loadStations();
-  },
+  // 刷新（防连点）
+  onRefresh: guardTap(function() {
+    this.loadStations(true);
+  }, 1000),
 
   // 下拉刷新
   onPullDownRefresh() {
-    this.loadStations().then(() => {
+    this.loadStations(true).then(() => {
+      wx.stopPullDownRefresh();
+    }).catch(() => {
       wx.stopPullDownRefresh();
     });
   }

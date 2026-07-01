@@ -1,6 +1,10 @@
 // pages/favorites/favorites.js - 收藏站点
+// 性能优化：API缓存
 const api = require('../../services/api');
 const util = require('../../utils/util');
+const config = require('../../config/index');
+const { cachedRequest } = require('../../utils/cache');
+const { guardTap } = require('../../utils/perf');
 
 Page({
   data: {
@@ -16,11 +20,17 @@ Page({
     this.loadFavorites();
   },
 
-  // 加载收藏
-  async loadFavorites() {
-    this.setData({ loading: true });
+  // 加载收藏（带缓存）
+  async loadFavorites(force = false) {
+    if (force) this.setData({ loading: true });
+
     try {
-      const res = await api.getFavorites();
+      const res = await cachedRequest(
+        () => api.getFavorites(),
+        [],
+        { cacheKey: 'favorites', ttl: config.CACHE_TTL.FAVORITES, force }
+      );
+
       const favorites = (res.data?.list || res.data || []).map(item => ({
         ...item,
         distanceText: item.distance ? util.formatDistance(item.distance) : '未知',
@@ -42,8 +52,8 @@ Page({
     });
   },
 
-  // 取消收藏
-  onRemoveFavorite(e) {
+  // 取消收藏（防连点）
+  onRemoveFavorite: guardTap(function(e) {
     const { id, name } = e.currentTarget.dataset;
     wx.showModal({
       title: '取消收藏',
@@ -53,16 +63,18 @@ Page({
           try {
             await api.removeFavorite(id);
             wx.showToast({ title: '已取消收藏', icon: 'success' });
-            // 从列表中移除
             const favorites = this.data.favorites.filter(f => f.id !== id);
             this.setData({ favorites });
+            // 清除收藏缓存
+            const { cache } = require('../../utils/cache');
+            cache.delete('favorites');
           } catch (err) {
             console.error('取消收藏失败:', err);
           }
         }
       }
     });
-  },
+  }, 2000),
 
   // 导航
   onNavigate(e) {
@@ -77,6 +89,6 @@ Page({
 
   // 下拉刷新
   onPullDownRefresh() {
-    this.loadFavorites().then(() => wx.stopPullDownRefresh());
+    this.loadFavorites(true).then(() => wx.stopPullDownRefresh()).catch(() => wx.stopPullDownRefresh());
   }
 });

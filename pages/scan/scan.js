@@ -1,6 +1,7 @@
 // pages/scan/scan.js - 扫码充电
 const api = require('../../services/api');
 const util = require('../../utils/util');
+const { guardTap } = require('../../utils/perf');
 
 Page({
   data: {
@@ -78,18 +79,18 @@ Page({
     this.setData({ chargerId: e.detail.value });
   },
 
-  // 手动输入启动
-  onManualStart() {
+  // 手动输入启动（防连点）
+  onManualStart: guardTap(function() {
     const { chargerId } = this.data;
     if (!chargerId.trim()) {
       wx.showToast({ title: '请输入充电桩编号', icon: 'none' });
       return;
     }
     this.startCharging(chargerId.trim());
-  },
+  }, 3000),
 
-  // 启动充电
-  async startCharging(chargerId) {
+  // 启动充电（防连点，避免重复发起）
+  startCharging: guardTap(async function(chargerId) {
     try {
       const res = await api.startCharging(chargerId);
       // 保存到历史
@@ -102,13 +103,13 @@ Page({
     } catch (err) {
       console.error('启动充电失败:', err);
     }
-  },
+  }, 3000),
 
-  // 历史记录点击
-  onHistoryTap(e) {
+  // 历史记录点击（防连点）
+  onHistoryTap: guardTap(function(e) {
     const { id } = e.currentTarget.dataset;
     this.startCharging(id);
-  },
+  }, 3000),
 
   // 加载历史记录
   loadHistory() {

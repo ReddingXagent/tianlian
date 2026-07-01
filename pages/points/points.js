@@ -1,7 +1,10 @@
 // pages/points/points.js - 积分中心
+// 性能优化：API缓存
 const api = require('../../services/api');
 const util = require('../../utils/util');
 const config = require('../../config/index');
+const { cachedRequest } = require('../../utils/cache');
+const { guardTap } = require('../../utils/perf');
 
 Page({
   data: {
@@ -29,13 +32,18 @@ Page({
     this.loadPoints();
   },
 
-  // 加载积分
-  async loadPoints() {
-    this.setData({ loading: true });
+  // 加载积分（带缓存）
+  async loadPoints(force = false) {
+    if (force) this.setData({ loading: true });
+
     try {
-      const res = await api.getPoints();
+      const res = await cachedRequest(
+        () => api.getPoints(),
+        [],
+        { cacheKey: 'points_info', ttl: config.CACHE_TTL.POINTS, force }
+      );
+
       const data = res.data || {};
-      // 检查今日是否已签到
       const today = util.formatTime(new Date(), 'YYYY-MM-DD');
       const signedIn = data.lastSignInDate === today;
       this.setData({
@@ -50,11 +58,16 @@ Page({
     }
   },
 
-  // 加载积分记录
-  async loadHistory() {
+  // 加载积分记录（带缓存）
+  async loadHistory(force = false) {
     this.setData({ historyLoading: true });
     try {
-      const res = await api.getPointsHistory();
+      const res = await cachedRequest(
+        () => api.getPointsHistory(),
+        [],
+        { cacheKey: 'points_history', ttl: config.CACHE_TTL.POINTS, force }
+      );
+
       const history = (res.data?.list || res.data || []).map(item => ({
         ...item,
         timeText: util.formatTime(item.createTime, 'YYYY-MM-DD HH:mm'),
@@ -67,8 +80,8 @@ Page({
     }
   },
 
-  // 每日签到
-  async onSignIn() {
+  // 每日签到（防连点）
+  onSignIn: guardTap(async function() {
     if (this.data.signedIn) {
       wx.showToast({ title: '今日已签到', icon: 'none' });
       return;
@@ -82,11 +95,15 @@ Page({
         points: this.data.points + earnedPoints,
         signInDays: this.data.signInDays + 1
       });
-      this.loadHistory();
+      // 签到后强制刷新缓存
+      const { cache } = require('../../utils/cache');
+      cache.delete('points_info');
+      cache.delete('points_history');
+      this.loadHistory(true);
     } catch (err) {
       console.error('签到失败:', err);
     }
-  },
+  }, 2000),
 
   // 兑换
   onRedeem(e) {
@@ -105,7 +122,10 @@ Page({
             await api.redeemPoints(id);
             wx.showToast({ title: '兑换成功', icon: 'success' });
             this.setData({ points: this.data.points - points });
-            this.loadHistory();
+            const { cache } = require('../../utils/cache');
+            cache.delete('points_info');
+            cache.delete('points_history');
+            this.loadHistory(true);
           } catch (err) {
             console.error('兑换失败:', err);
           }
@@ -133,8 +153,9 @@ Page({
 
   // 下拉刷新
   onPullDownRefresh() {
-    Promise.all([this.loadPoints(), this.loadHistory()]).then(() => {
-      wx.stopPullDownRefresh();
-    });
+    Promise.all([
+      this.loadPoints(true),
+      this.loadHistory(true)
+    ]).then(() => wx.stopPullDownRefresh()).catch(() => wx.stopPullDownRefresh());
   }
 });

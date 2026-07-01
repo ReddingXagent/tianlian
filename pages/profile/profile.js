@@ -1,5 +1,8 @@
 // pages/profile/profile.js - 我的
+// 性能优化：API缓存 + 钱包数据缓存
 const api = require('../../services/api');
+const { cachedRequest } = require('../../utils/cache');
+const config = require('../../config/index');
 const app = getApp();
 
 Page({
@@ -13,6 +16,7 @@ Page({
 
   onLoad() {
     this.loadUserInfo();
+    this.loadWallet();
   },
 
   onShow() {
@@ -28,10 +32,14 @@ Page({
     }
   },
 
-  // 加载钱包
-  async loadWallet() {
+  // 加载钱包（带缓存）
+  async loadWallet(force = false) {
     try {
-      const res = await api.getWallet();
+      const res = await cachedRequest(
+        () => api.getWallet(),
+        [],
+        { cacheKey: 'wallet_info', ttl: config.CACHE_TTL.ORDERS, force }
+      );
       this.setData({
         wallet: {
           balance: (res.data?.balance || 0).toFixed(2),
@@ -154,8 +162,8 @@ Page({
 
   // 下拉刷新
   onPullDownRefresh() {
-    Promise.all([this.loadWallet()]).then(() => {
+    this.loadWallet(true).then(() => {
       wx.stopPullDownRefresh();
-    });
+    }).catch(() => wx.stopPullDownRefresh());
   }
 });

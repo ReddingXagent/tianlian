@@ -1,6 +1,9 @@
 // pages/payment/payment.js - 支付页
+// 性能优化：API缓存
 const api = require('../../services/api');
 const util = require('../../utils/util');
+const config = require('../../config/index');
+const { cachedRequest } = require('../../utils/cache');
 
 Page({
   data: {
@@ -21,10 +24,14 @@ Page({
     this.loadWallet();
   },
 
-  // 加载订单信息
+  // 加载订单信息（带缓存）
   async loadOrderInfo() {
     try {
-      const res = await api.getOrderDetail(this.data.orderId);
+      const res = await cachedRequest(
+        (id) => api.getOrderDetail(id),
+        [this.data.orderId],
+        { cacheKey: `order_detail_${this.data.orderId}`, ttl: config.CACHE_TTL.ORDERS }
+      );
       const data = res.data || {};
 
       this.setData({
@@ -39,10 +46,14 @@ Page({
     }
   },
 
-  // 加载钱包余额
+  // 加载钱包余额（带缓存）
   async loadWallet() {
     try {
-      const res = await api.getWallet();
+      const res = await cachedRequest(
+        () => api.getWallet(),
+        [],
+        { cacheKey: 'wallet_info', ttl: config.CACHE_TTL.ORDERS }
+      );
       this.setData({
         balance: (res.data?.balance || 0).toFixed(2)
       });
