@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
 import WorkOrderCard from '../components/WorkOrderCard';
+import { usePolling } from '../hooks/usePolling';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -33,41 +34,29 @@ const QUICK_ACTIONS = [
 
 const WorkbenchScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [stats, setStats] = useState<WorkbenchStats | null>(null);
-  const [pendingOrders, setPendingOrders] = useState<WorkOrder[]>([]);
-  const [recentAlarms, setRecentAlarms] = useState<Alarm[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const [statsRes, ordersRes, alarmsRes] = await Promise.all([
-        workbenchApi.getStats(),
-        workbenchApi.getPendingOrders(5),
-        workbenchApi.getRecentAlarms(5),
-      ]);
-      setStats(statsRes.data);
-      setPendingOrders(ordersRes.data);
-      setRecentAlarms(alarmsRes.data);
-    } catch {
-      setError('加载数据失败，请下拉刷新重试');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+  // 并行获取工作台数据，15秒自动轮询
+  const fetcher = useCallback(async () => {
+    const [statsRes, ordersRes, alarmsRes] = await Promise.all([
+      workbenchApi.getStats(),
+      workbenchApi.getPendingOrders(5),
+      workbenchApi.getRecentAlarms(5),
+    ]);
+    return {
+      stats: statsRes.data,
+      pendingOrders: ordersRes.data,
+      recentAlarms: alarmsRes.data,
+    };
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const { data, loading, error, refresh } = usePolling(fetcher, {
+    interval: 15_000,
+    enabled: true,
+  });
+
+  const stats = data?.stats ?? null;
+  const pendingOrders = data?.pendingOrders ?? [];
+  const recentAlarms = data?.recentAlarms ?? [];
+  const refreshing = loading && stats !== null;
 
   const handleOrderPress = (order: WorkOrder) => {
     navigation.navigate('WorkOrderDetail', { orderId: order.id });
@@ -81,7 +70,7 @@ const WorkbenchScreen: React.FC = () => {
     navigation.navigate(route as never);
   };
 
-  if (loading && !refreshing) {
+  if (loading && !stats) {
     return <LoadingSpinner text="加载工作台..." />;
   }
 
@@ -90,9 +79,9 @@ const WorkbenchScreen: React.FC = () => {
       <EmptyState
         icon="⚠️"
         title="加载失败"
-        message={error}
+        message={error.message}
         actionLabel="重新加载"
-        onAction={() => fetchData()}
+        onAction={refresh}
       />
     );
   }
@@ -121,7 +110,7 @@ const WorkbenchScreen: React.FC = () => {
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => fetchData(true)}
+          onRefresh={refresh}
           colors={['#1a73e8']}
           tintColor="#1a73e8"
         />
