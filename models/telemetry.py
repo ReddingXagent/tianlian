@@ -4,6 +4,13 @@ from dataclasses import dataclass, field, asdict
 from typing import Dict, Optional
 from datetime import datetime, timezone
 
+# 设备名→云端ID映射（云端要求整数device_id）
+DEVICE_ID_MAP = {
+    "modbus-1": 1,
+    "CHARGER-001": 2,
+    "GW-001": 0,
+}
+
 
 @dataclass
 class TelemetryPoint:
@@ -22,9 +29,14 @@ class TelemetryPoint:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
     def to_api_payload(self) -> Dict:
-        """Format for cloud API"""
+        """Format for cloud API (device_id mapped to integer)"""
+        cloud_id = DEVICE_ID_MAP.get(self.device_id, self.device_id)
+        try:
+            cloud_id = int(cloud_id)
+        except (ValueError, TypeError):
+            pass  # keep as string if unmappable
         return {
-            "device_id": self.device_id,
+            "device_id": cloud_id,
             "timestamp": self.timestamp,
             "metrics": {
                 "power": self.power,

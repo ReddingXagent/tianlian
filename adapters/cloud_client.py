@@ -71,6 +71,10 @@ class CloudClient:
         # 获取 CSRF token（云端 Django 要求）
         await self._fetch_csrf_token()
 
+        # 设置认证 token
+        if self.config.token:
+            self._token = self.config.token
+
         if self.config.register_on_startup:
             await self.register()
 
@@ -126,6 +130,8 @@ class CloudClient:
         """Pod注册 → POST /api/v1/pod/register"""
         try:
             headers = {}
+            if self._token:
+                headers["Authorization"] = f"Bearer {self._token}"
             if self._csrf_token:
                 headers["X-CSRF-Token"] = self._csrf_token
                 headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
@@ -150,6 +156,8 @@ class CloudClient:
             return
         try:
             headers = {}
+            if self._token:
+                headers["Authorization"] = f"Bearer {self._token}"
             if self._csrf_token:
                 headers["X-CSRF-Token"] = self._csrf_token
                 headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
@@ -271,6 +279,8 @@ class CloudClient:
         """带指数退避重试的POST请求"""
         last_error = None
         headers = {}
+        if self._token:
+            headers["Authorization"] = f"Bearer {self._token}"
         if hasattr(self, "_csrf_token") and self._csrf_token:
             headers["X-CSRF-Token"] = self._csrf_token
             headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
@@ -313,6 +323,8 @@ class CloudClient:
             await asyncio.sleep(self.config.heartbeat_interval)
             try:
                 headers = {}
+                if self._token:
+                    headers["Authorization"] = f"Bearer {self._token}"
                 if self._csrf_token:
                     headers["X-CSRF-Token"] = self._csrf_token
                     headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"

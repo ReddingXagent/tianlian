@@ -101,6 +101,7 @@ class GatewayConfig:
                 base_url=os.getenv("CLOUD_BASE_URL", "http://8.134.106.166"),
                 username=os.getenv("CLOUD_USERNAME", ""),
                 password=os.getenv("CLOUD_PASSWORD", ""),
+                token=os.getenv("CLOUD_TOKEN", ""),
                 register_on_startup=os.getenv("CLOUD_REGISTER", "true").lower() == "true",
                 deregister_on_shutdown=os.getenv("CLOUD_DEREGISTER", "true").lower() == "true",
             ),
