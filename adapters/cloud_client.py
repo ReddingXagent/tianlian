@@ -45,6 +45,7 @@ class CloudClient:
         self.region_id = getattr(config, 'region_id', 'default')
         self.cache = cache
         self._token: Optional[str] = None
+        self._csrf_token: str = ""
         self._registered = False
         self._heartbeat_task: Optional[asyncio.Task] = None
         self._sync_task: Optional[asyncio.Task] = None
@@ -67,6 +68,9 @@ class CloudClient:
             ),
         )
 
+        # 获取 CSRF token（云端 Django 要求）
+        await self._fetch_csrf_token()
+
         if self.config.register_on_startup:
             await self.register()
 
@@ -79,6 +83,16 @@ class CloudClient:
 
         logger.info("CloudClient started, base_url=%s, pod_id=%s",
                      self.config.base_url, self.pod_id)
+
+    async def _fetch_csrf_token(self) -> None:
+        """从云端获取 CSRF token（Django CSRF 中间件要求）"""
+        try:
+            r = await self._client.get("/api/v1/health")
+            self._csrf_token = r.cookies.get("tianlian_csrf_token", "")
+            if self._csrf_token:
+                logger.debug("CSRF token acquired")
+        except Exception:
+            self._csrf_token = ""
 
     async def stop(self) -> None:
         """停止云端连接"""
@@ -247,9 +261,13 @@ class CloudClient:
                                  op_name: str) -> bool:
         """带指数退避重试的POST请求"""
         last_error = None
+        headers = {}
+        if hasattr(self, "_csrf_token") and self._csrf_token:
+            headers["X-CSRFToken"] = self._csrf_token
+            headers["Referer"] = self.config.base_url + "/"
         for attempt in range(self.MAX_RETRIES):
             try:
-                r = await self._client.post(path, json=payload)
+                r = await self._client.post(path, json=payload, headers=headers)
                 if r.status_code == 200:
                     return True
                 # 4xx 不重试（客户端错误）
