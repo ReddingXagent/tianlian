@@ -125,12 +125,16 @@ class CloudClient:
     async def register(self) -> bool:
         """Pod注册 → POST /api/v1/pod/register"""
         try:
+            headers = {}
+            if self._csrf_token:
+                headers["X-CSRF-Token"] = self._csrf_token
+                headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
             r = await self._client.post("/api/v1/pod/register", json={
                 "pod_id": self.pod_id,
                 "region_id": self.region_id,
-                "endpoint": f"http://{self.gateway_id}:5000",
+                "endpoint": f"http://{self.gateway_id}:8080",
                 "version": "3.0.0",
-            })
+            }, headers=headers)
             if r.status_code == 200:
                 self._registered = True
                 logger.info("Cloud registered: pod_id=%s", self.pod_id)
@@ -145,9 +149,14 @@ class CloudClient:
         if not self._registered:
             return
         try:
+            headers = {}
+            if self._csrf_token:
+                headers["X-CSRF-Token"] = self._csrf_token
+                headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
             r = await self._client.post(
                 "/api/v1/pod/heartbeat",
                 json={"pod_id": self.pod_id, "load": 0},
+                headers=headers,
             )
             self._registered = False
             logger.info("Cloud deregistered: pod_id=%s", self.pod_id)
@@ -263,7 +272,8 @@ class CloudClient:
         last_error = None
         headers = {}
         if hasattr(self, "_csrf_token") and self._csrf_token:
-            headers["X-CSRFToken"] = self._csrf_token
+            headers["X-CSRF-Token"] = self._csrf_token
+            headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
             headers["Referer"] = self.config.base_url + "/"
         for attempt in range(self.MAX_RETRIES):
             try:
@@ -302,9 +312,14 @@ class CloudClient:
         while True:
             await asyncio.sleep(self.config.heartbeat_interval)
             try:
+                headers = {}
+                if self._csrf_token:
+                    headers["X-CSRF-Token"] = self._csrf_token
+                    headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
                 r = await self._client.post(
                     "/api/v1/pod/heartbeat",
                     json={"pod_id": self.pod_id, "load": 0},
+                    headers=headers,
                 )
                 if r.status_code != 200:
                     logger.warning("Cloud heartbeat failed: %d", r.status_code)

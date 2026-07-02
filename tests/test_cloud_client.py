@@ -101,12 +101,12 @@ class TestCloudTelemetry:
         ok = await cloud_client.push_telemetry_batch(telemetry_points)
         assert ok is True
 
-        # 验证payload格式
+        # 验证payload格式 (V3对齐: pod_id + records)
         call_args = cloud_client._client.post.call_args
         payload = call_args.kwargs["json"]
-        assert payload["gateway_id"] == "GW-TEST"
-        assert len(payload["telemetry"]) == 2
-        assert payload["telemetry"][0]["device_id"] == "CHG-001"
+        assert payload["pod_id"] == "GW-TEST"
+        assert len(payload["records"]) == 2
+        assert payload["records"][0]["device_id"] == "CHG-001"
 
     @pytest.mark.asyncio
     async def test_push_telemetry_empty(self, cloud_client):
