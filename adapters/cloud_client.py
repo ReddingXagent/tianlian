@@ -1,11 +1,13 @@
-"""Cloud API Client — 边缘网关→云端对接
+"""Cloud API Client — 边缘网关→云端对接 (V3 API对齐版)
 
-负责网关到云端Mock Server的HTTP通信：
-- 网关注册/注销/心跳
-- 遥测数据批量上报
-- 告警上报
+对接云端 8.134.106.166 天链V3系统：
+- Pod注册/心跳 (pod/register, pod/heartbeat)
+- 遥测数据批量上报 (telemetry/batch-report)
+- 告警上报 (alarms)
 - 失败重试（指数退避）
 - 断网时自动降级写入本地缓存
+
+API对齐日期: 2026-07-02
 """
 
 import asyncio
@@ -25,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 
 class CloudClient:
-    """云端API客户端
+    """云端API客户端 (V3对齐)
 
-    负责将网关数据推送到云端服务器。
+    负责将网关(Pod)数据推送到云端服务器。
     - 失败时自动重试（指数退避，最多3次）
     - 重试耗尽后降级写入本地缓存（如有）
     - 不影响网关主流程
@@ -39,13 +41,19 @@ class CloudClient:
     def __init__(self, config: CloudConfig, gateway_id: str,
                  cache: Optional["TelemetryCache"] = None):
         self.config = config
-        self.gateway_id = gateway_id
-        self.cache = cache  # 可选：断网降级缓存
+        self.gateway_id = gateway_id  # 对应云端的 pod_id
+        self.region_id = getattr(config, 'region_id', 'default')
+        self.cache = cache
         self._token: Optional[str] = None
         self._registered = False
         self._heartbeat_task: Optional[asyncio.Task] = None
         self._sync_task: Optional[asyncio.Task] = None
         self._client: Optional[httpx.AsyncClient] = None
+
+    @property
+    def pod_id(self) -> str:
+        """pod_id = gateway_id (V3命名对齐)"""
+        return self.gateway_id
 
     async def start(self) -> None:
         """启动云端连接"""
@@ -69,7 +77,8 @@ class CloudClient:
         if self.cache:
             self._sync_task = asyncio.create_task(self._cache_sync_loop())
 
-        logger.info("CloudClient started, base_url=%s", self.config.base_url)
+        logger.info("CloudClient started, base_url=%s, pod_id=%s",
+                     self.config.base_url, self.pod_id)
 
     async def stop(self) -> None:
         """停止云端连接"""
@@ -95,57 +104,67 @@ class CloudClient:
 
         logger.info("CloudClient stopped")
 
+    # ============================================================
+    # Pod 注册/注销/心跳 (对齐 V3 pod/ 系列端点)
+    # ============================================================
+
     async def register(self) -> bool:
-        """网关注册"""
+        """Pod注册 → POST /api/v1/pod/register"""
         try:
-            r = await self._client.post("/api/v1/gateway/register", json={
-                "gateway_id": self.gateway_id,
-                "gateway_name": f"Gateway-{self.gateway_id}",
-                "firmware_version": "0.1.0",
-                "capabilities": ["ocpp", "modbus"],
+            r = await self._client.post("/api/v1/pod/register", json={
+                "pod_id": self.pod_id,
+                "region_id": self.region_id,
+                "endpoint": f"http://{self.gateway_id}:5000",
+                "version": "3.0.0",
             })
             if r.status_code == 200:
                 self._registered = True
-                logger.info("Cloud registered: %s", self.gateway_id)
+                logger.info("Cloud registered: pod_id=%s", self.pod_id)
                 return True
-            logger.warning("Cloud register failed: %d", r.status_code)
+            logger.warning("Cloud register failed: %d %s", r.status_code, r.text[:200])
         except Exception as e:
             logger.warning("Cloud register error: %s", e)
         return False
 
     async def deregister(self) -> None:
-        """网关注销"""
+        """Pod注销 (保留兼容路径，云端暂无deregister端点)"""
         if not self._registered:
             return
         try:
-            await self._client.post(
-                "/api/v1/gateway/deregister",
-                params={"gateway_id": self.gateway_id},
+            r = await self._client.post(
+                "/api/v1/pod/heartbeat",
+                json={"pod_id": self.pod_id, "load": 0},
             )
             self._registered = False
-            logger.info("Cloud deregistered: %s", self.gateway_id)
+            logger.info("Cloud deregistered: pod_id=%s", self.pod_id)
         except Exception as e:
             logger.warning("Cloud deregister error: %s", e)
 
+    # ============================================================
+    # 遥测推送 (对齐 V3 telemetry/batch-report 端点)
+    # ============================================================
+
     async def push_telemetry_batch(self, points: List[TelemetryPoint]) -> bool:
-        """批量推送遥测数据到云端（带重试 + 降级缓存）"""
+        """批量推送遥测数据到云端 → POST /api/v1/telemetry/batch-report"""
         if not self._client or not points:
             return False
 
+        records = [p.to_api_payload() for p in points]
+
         payload = {
-            "gateway_id": self.gateway_id,
-            "timestamp": str(time.time()),
-            "telemetry": [p.to_api_payload() for p in points],
+            "pod_id": self.pod_id,
+            "region_id": self.region_id,
+            "records": records,
         }
 
         ok = await self._post_with_retry(
-            "/api/v1/telemetry/batch", payload, "telemetry_push"
+            "/api/v1/telemetry/batch-report", payload, "telemetry_push"
         )
         if ok:
             logger.debug("Cloud telemetry pushed: %d points", len(points))
             return True
 
-        # 云推送失败，主动写入本地缓存，_cache_sync_loop 会定期重试
+        # 云推送失败，主动写入本地缓存
         if self.cache:
             self.cache.cache_telemetry_batch(points)
             logger.info("Cloud telemetry push failed, %d points cached locally", len(points))
@@ -153,56 +172,76 @@ class CloudClient:
             logger.warning("Cloud telemetry push failed, no cache available")
         return False
 
+    # ============================================================
+    # 告警推送 (对齐 V3 alarms 端点，逐条POST)
+    # ============================================================
+
     async def push_alarm(self, device_id: str, alarm_type: str,
                           severity: str, message: str) -> bool:
-        """推送单个告警到云端（带重试 + 降级缓存）"""
-        return await self.push_alarm_batch([{
+        """推送单个告警 → POST /api/v1/alarms"""
+        if not self._client:
+            return False
+
+        payload = {
             "device_id": device_id,
             "alarm_type": alarm_type,
-            "severity": severity,
-            "message": message,
-        }])
+            "level": severity,
+            "content": message,
+        }
+
+        ok = await self._post_with_retry(
+            "/api/v1/alarms", payload, "alarm_push"
+        )
+        if ok:
+            logger.info("Cloud alarm pushed: %s/%s", device_id, alarm_type)
+            return True
+
+        # 降级缓存
+        if self.cache:
+            self.cache.cache_alarm(device_id, {
+                "device_id": device_id,
+                "alarm_type": alarm_type,
+                "severity": severity,
+                "message": message,
+            })
+        return False
 
     async def push_alarm_batch(self, alarms: List[dict]) -> bool:
-        """批量推送告警到云端（带重试 + 降级缓存）
-
-        Args:
-            alarms: List of dicts with keys: device_id, alarm_type, severity, message
+        """批量推送告警 → 逐条 POST /api/v1/alarms (云端无batch端点)
 
         Returns:
-            True if all pushed, False if any failed
+            True if ALL pushed, False if any failed
         """
         if not self._client or not alarms:
             return False
 
-        now = str(time.time())
-        payload = {
-            "gateway_id": self.gateway_id,
-            "timestamp": now,
-            "alarms": [
-                {
-                    **a,
-                    "timestamp": now,
-                }
-                for a in alarms
-            ],
-        }
+        all_ok = True
+        for a in alarms:
+            payload = {
+                "device_id": a.get("device_id", "unknown"),
+                "alarm_type": a.get("alarm_type", "unknown"),
+                "level": a.get("severity", "info"),
+                "content": a.get("message", ""),
+            }
+            ok = await self._post_with_retry(
+                "/api/v1/alarms", payload, "alarm_batch_push"
+            )
+            if ok:
+                logger.debug("Cloud alarm pushed: %s/%s",
+                             a.get("device_id"), a.get("alarm_type"))
+            else:
+                all_ok = False
+                if self.cache:
+                    self.cache.cache_alarm(a.get("device_id", "unknown"), a)
+                logger.warning("Cloud alarm push failed, cached locally")
 
-        ok = await self._post_with_retry(
-            "/api/v1/alarms/batch", payload, "alarm_batch_push"
-        )
-        if ok:
-            logger.info("Cloud alarm batch pushed: %d alarms", len(alarms))
-            return True
+        if not all_ok and not self.cache:
+            logger.warning("Cloud alarm batch push partially failed, no cache available")
+        return all_ok
 
-        # 云推送失败，主动写入本地缓存，_cache_sync_loop 会定期重试
-        if self.cache:
-            for a in alarms:
-                self.cache.cache_alarm(a.get("device_id", "unknown"), a)
-            logger.warning("Cloud alarm push failed, %d alarms cached locally", len(alarms))
-        else:
-            logger.warning("Cloud alarm push failed, no cache available")
-        return False
+    # ============================================================
+    # 内部重试机制
+    # ============================================================
 
     async def _post_with_retry(self, path: str, payload: dict,
                                  op_name: str) -> bool:
@@ -236,42 +275,43 @@ class CloudClient:
                        op_name, self.MAX_RETRIES, last_error)
         return False
 
+    # ============================================================
+    # 心跳循环
+    # ============================================================
+
     async def _heartbeat_loop(self) -> None:
-        """心跳循环"""
+        """心跳循环 → POST /api/v1/pod/heartbeat"""
         while True:
             await asyncio.sleep(self.config.heartbeat_interval)
             try:
                 r = await self._client.post(
-                    "/api/v1/gateway/heartbeat",
-                    params={"gateway_id": self.gateway_id},
+                    "/api/v1/pod/heartbeat",
+                    json={"pod_id": self.pod_id, "load": 0},
                 )
                 if r.status_code != 200:
                     logger.warning("Cloud heartbeat failed: %d", r.status_code)
+                else:
+                    logger.debug("Cloud heartbeat OK: pod_id=%s", self.pod_id)
             except Exception as e:
                 logger.debug("Cloud heartbeat error: %s", e)
 
-    async def _cache_sync_loop(self) -> None:
-        """缓存恢复同步循环 — 网络恢复后自动上传积压数据
+    # ============================================================
+    # 缓存恢复同步循环
+    # ============================================================
 
-        T-1202 优化：
-        - 动态间隔：有积压时加快轮询（5s），空闲时放慢（60s）
-        - 告警优先同步（比遥测先）
-        - 并行推送告警+遥测减少等待
-        """
-        idle_interval = 60   # 空闲时60秒检查一次
-        active_interval = 5  # 有积压时5秒检查一次
-        batch_size = 100     # 每次最多同步100条（提升吞吐）
+    async def _cache_sync_loop(self) -> None:
+        """缓存恢复同步循环 — 网络恢复后自动上传积压数据"""
+        idle_interval = 60
+        active_interval = 5
+        batch_size = 100
         consecutive_idle = 0
 
         while True:
             try:
-                # 告警优先（更重要）
                 alarm_synced = await self._sync_cached_alarms(batch_size)
-                # 遥测和告警并行（如果告警没积压）
                 if alarm_synced == 0:
                     tel_synced = await self._sync_cached_telemetry(batch_size)
                 else:
-                    # 有告警积压时，先清告警再处理遥测
                     tel_synced = 0
 
                 total_synced = alarm_synced + tel_synced
@@ -280,7 +320,6 @@ class CloudClient:
                     await asyncio.sleep(active_interval)
                 else:
                     consecutive_idle += 1
-                    # 连续3次空闲后逐渐增加间隔
                     interval = min(idle_interval, active_interval * (2 ** consecutive_idle))
                     await asyncio.sleep(interval)
             except Exception as e:
@@ -288,7 +327,7 @@ class CloudClient:
                 await asyncio.sleep(active_interval)
 
     async def _sync_cached_telemetry(self, batch_size: int = 50) -> int:
-        """同步积压的遥测缓存数据到云端"""
+        """同步积压的遥测缓存数据到云端 → POST /api/v1/telemetry/batch-report"""
         if not self.cache or not self._client:
             return 0
         unsynced = self.cache.get_cloud_unsynced(limit=batch_size)
@@ -296,14 +335,16 @@ class CloudClient:
             return 0
 
         ids = [item["id"] for item in unsynced]
+        records = [item["payload"] for item in unsynced]
+
         payload = {
-            "gateway_id": self.gateway_id,
-            "timestamp": str(time.time()),
-            "telemetry": [item["payload"] for item in unsynced],
+            "pod_id": self.pod_id,
+            "region_id": self.region_id,
+            "records": records,
         }
 
         ok = await self._post_with_retry(
-            "/api/v1/telemetry/batch", payload, "cache_sync_telemetry"
+            "/api/v1/telemetry/batch-report", payload, "cache_sync_telemetry"
         )
         if ok:
             self.cache.mark_cloud_synced(ids)
@@ -314,30 +355,35 @@ class CloudClient:
             return 0
 
     async def _sync_cached_alarms(self, batch_size: int = 50) -> int:
-        """同步积压的告警缓存数据到云端"""
+        """同步积压的告警缓存 → 逐条 POST /api/v1/alarms"""
         if not self.cache or not self._client:
             return 0
         unsynced = self.cache.get_cloud_unsynced_alarms(limit=batch_size)
         if not unsynced:
             return 0
 
-        ids = [item["id"] for item in unsynced]
-        alarms = [item["payload"] for item in unsynced]
+        synced_count = 0
+        for item in unsynced:
+            a = item["payload"]
+            payload = {
+                "device_id": a.get("device_id", "unknown"),
+                "alarm_type": a.get("alarm_type", "unknown"),
+                "level": a.get("severity", "info"),
+                "content": a.get("message", ""),
+            }
+            ok = await self._post_with_retry(
+                "/api/v1/alarms", payload, "cache_sync_alarms"
+            )
+            if ok:
+                synced_count += 1
 
-        now = str(time.time())
-        payload = {
-            "gateway_id": self.gateway_id,
-            "timestamp": now,
-            "alarms": [{**a, "timestamp": now} for a in alarms],
-        }
+        if synced_count > 0:
+            synced_ids = [item["id"] for item in unsynced[:synced_count]]
+            self.cache.mark_alarms_cloud_synced(synced_ids)
+            logger.info("Cache sync: %d alarms synced", synced_count)
 
-        ok = await self._post_with_retry(
-            "/api/v1/alarms/batch", payload, "cache_sync_alarms"
-        )
-        if ok:
-            self.cache.mark_alarms_cloud_synced(ids)
-            logger.info("Cache sync: %d alarms synced", len(ids))
-            return len(ids)
-        else:
-            self.cache.increment_alarm_retry(ids)
-            return 0
+        if synced_count < len(unsynced):
+            failed_ids = [item["id"] for item in unsynced[synced_count:]]
+            self.cache.increment_alarm_retry(failed_ids)
+
+        return synced_count
