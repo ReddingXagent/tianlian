@@ -119,6 +119,7 @@ class TelemetryCache:
                  point.timestamp, time.time(), priority),
             )
             conn.commit()
+            self._enforce_cache_limit(conn)
 
     def cache_telemetry_batch(self, points: List[TelemetryPoint], priority: int = 0) -> int:
         """Cache multiple telemetry points in a single transaction (T-1102)
@@ -146,6 +147,7 @@ class TelemetryCache:
                 rows,
             )
             conn.commit()
+            self._enforce_cache_limit(conn)
         logger.debug("Cached %d telemetry points (priority=%d)", len(rows), priority)
         return len(rows)
 
@@ -426,6 +428,36 @@ class TelemetryCache:
                 "db_size_bytes": db_size,
                 "db_path": str(db_path),
             }
+
+    def _enforce_cache_limit(self, conn: sqlite3.Connection) -> None:
+        """Keep total telemetry_cache rows within max_cache_size.
+
+        Eviction strategy: delete oldest entries with lowest priority first.
+        Uses a 5% buffer to avoid evicting on every insert.
+        Runs inside _lock.
+        """
+        max_size = self.config.max_cache_size
+        # Only trigger when exceeding by > 5% to batch evictions
+        threshold = int(max_size * 1.05)
+        cursor = conn.execute("SELECT COUNT(*) FROM telemetry_cache")
+        total = cursor.fetchone()[0]
+        if total <= threshold:
+            return
+
+        overflow = total - max_size
+        # Delete oldest, lowest-priority entries
+        conn.execute(
+            "DELETE FROM telemetry_cache WHERE id IN ("
+            "SELECT id FROM telemetry_cache "
+            "ORDER BY priority ASC, cached_at ASC LIMIT ?"
+            ")",
+            (overflow,),
+        )
+        conn.commit()
+        logger.warning(
+            "Cache limit exceeded (%d > %d): evicted %d oldest entries",
+            total, max_size, overflow,
+        )
 
     def cleanup(self, max_age_days: int = 7) -> int:
         """Remove old synced entries and reclaim disk space. Returns count deleted."""
