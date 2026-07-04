@@ -151,8 +151,8 @@ class TestTelemetryBatch:
         assert payload["gateway_id"] == "GW-001"
         assert payload["timestamp"] == "2026-06-22T12:00:00Z"
         assert len(payload["telemetry"]) == 2
-        assert payload["telemetry"][0]["device_id"] == "CHARGER-001"
-        assert payload["telemetry"][1]["device_id"] == "INVERTER-001"
+        assert payload["telemetry"][0]["device_id"] == 2  # CHARGER-001 maps to 2
+        assert payload["telemetry"][1]["device_id"] == "INVERTER-001"  # unmapped
         assert payload["telemetry"][0]["metrics"]["power"] == 50.0
         assert payload["telemetry"][1]["metrics"]["power"] == -5.0
 
