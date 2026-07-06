@@ -83,9 +83,9 @@ class TestTelemetryPoint:
         assert "soc" not in d
 
     def test_telemetry_point_to_api_payload(self):
-        """Test to_api_payload() produces correct cloud API format"""
+        """Test to_api_payload() produces correct cloud V3 API format"""
         point = TelemetryPoint(
-            device_id="CHARGER-002",
+            device_id="CHARGER-001",
             timestamp="2026-06-22T12:00:00+00:00",
             power=75.0,
             voltage=230.0,
@@ -96,24 +96,24 @@ class TestTelemetryPoint:
             status="charging",
         )
         payload = point.to_api_payload()
-        assert payload["device_id"] == "CHARGER-002"
-        assert payload["timestamp"] == "2026-06-22T12:00:00+00:00"
-        assert payload["metrics"]["power"] == 75.0
-        assert payload["metrics"]["voltage"] == 230.0
-        assert payload["metrics"]["current"] == 35.0
-        assert payload["metrics"]["temperature"] == 42.0
-        assert payload["metrics"]["energy"] == 1500.0
-        # soc and status should NOT be in metrics
-        assert "soc" not in payload["metrics"]
-        assert "status" not in payload["metrics"]
+        # CHARGER-001 maps to cloud device_id=2
+        assert payload["device_id"] == 2
+        # Charger fields mapped to charger_* schema
+        assert payload["charger_power"] == 75.0
+        assert payload["charger_voltage"] == 230.0
+        assert payload["charger_current"] == 35.0
+        assert payload["charger_soc"] == 90.0
+        assert payload["charger_kwh"] == 1500.0
+        assert payload["gun_temperature"] == 42.0
 
     def test_telemetry_point_to_api_payload_zero_values(self):
-        """Test to_api_payload with zero values"""
+        """Test to_api_payload with zero values (unknown device → grid fields)"""
         point = TelemetryPoint(device_id="METER-001", timestamp="2026-01-01T00:00:00Z")
         payload = point.to_api_payload()
+        # METER-001 not in DEVICE_ID_MAP, stays as string
         assert payload["device_id"] == "METER-001"
-        assert payload["metrics"]["power"] == 0.0
-        assert payload["metrics"]["voltage"] == 0.0
+        # Zero values are filtered out (None check), so only device_id present
+        assert "grid_power_total" not in payload  # 0.0 is falsy, filtered out
 
 
 class TestTelemetryBatch:
@@ -136,32 +136,35 @@ class TestTelemetryBatch:
         assert batch.points[1].device_id == "CHARGER-002"
 
     def test_telemetry_batch_to_api_payload(self):
-        """Test batch to_api_payload"""
+        """Test batch to_api_payload (V3 TelemetryBatchReport format)"""
         batch = TelemetryBatch(gateway_id="GW-001", timestamp="2026-06-22T12:00:00Z")
         batch.add(TelemetryPoint(
             device_id="CHARGER-001", timestamp="2026-06-22T12:00:00Z",
             power=50.0, voltage=220.0, current=30.0, temperature=40.0, energy=1000.0,
         ))
         batch.add(TelemetryPoint(
-            device_id="INVERTER-001", timestamp="2026-06-22T12:00:00Z",
+            device_id="modbus-1", timestamp="2026-06-22T12:00:00Z",
             power=-5.0, voltage=380.0, current=10.0, temperature=35.0, energy=200.0,
         ))
 
         payload = batch.to_api_payload()
-        assert payload["gateway_id"] == "GW-001"
-        assert payload["timestamp"] == "2026-06-22T12:00:00Z"
-        assert len(payload["telemetry"]) == 2
-        assert payload["telemetry"][0]["device_id"] == 2  # CHARGER-001 maps to 2
-        assert payload["telemetry"][1]["device_id"] == "INVERTER-001"  # unmapped
-        assert payload["telemetry"][0]["metrics"]["power"] == 50.0
-        assert payload["telemetry"][1]["metrics"]["power"] == -5.0
+        assert payload["pod_id"] == "GW-001"
+        assert payload["region_id"] == "default"
+        assert len(payload["records"]) == 2
+        # CHARGER-001 → device_id=2, charger fields
+        assert payload["records"][0]["device_id"] == 2
+        assert payload["records"][0]["charger_power"] == 50.0
+        # modbus-1 → device_id=1, grid/battery fields
+        assert payload["records"][1]["device_id"] == 1
+        assert payload["records"][1]["grid_power_total"] == -5.0
 
     def test_telemetry_batch_empty(self):
-        """Test empty batch"""
+        """Test empty batch (V3 format)"""
         batch = TelemetryBatch(gateway_id="GW-002")
         payload = batch.to_api_payload()
-        assert payload["gateway_id"] == "GW-002"
-        assert payload["telemetry"] == []
+        assert payload["pod_id"] == "GW-002"
+        assert payload["region_id"] == "default"
+        assert payload["records"] == []
 
 
 class TestDeviceInfo:

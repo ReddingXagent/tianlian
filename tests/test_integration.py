@@ -150,17 +150,15 @@ class TestTelemetryPipeline:
 
     @pytest.mark.asyncio
     async def test_telemetry_to_api_payload_format(self, sample_telemetry_points):
-        """TelemetryPoint should produce correct API payload"""
+        """TelemetryPoint should produce correct V3 API payload"""
         point = sample_telemetry_points[0]
         payload = point.to_api_payload()
 
         assert payload["device_id"] == "EVSE-001"
-        assert "timestamp" in payload
-        assert payload["metrics"]["power"] == 22.5
-        assert payload["metrics"]["voltage"] == 400.0
-        assert payload["metrics"]["current"] == 56.0
-        assert payload["metrics"]["temperature"] == 35.0
-        assert payload["metrics"]["energy"] == 100.5
+        # EVSE-001 is unknown device → grid_* fields
+        assert payload["grid_power_total"] == 22.5
+        assert payload["grid_voltage_a"] == 400.0
+        assert payload["ambient_temperature"] == 35.0
 
 
 # ── Test: Alarm Pipeline ────────────────────────────────────────────────
@@ -446,7 +444,7 @@ class TestBatchMQTTPublish:
         assert payload["device_id"] == "EVSE-001"
         assert payload["count"] == 2
         assert len(payload["telemetry"]) == 2
-        assert "power" in payload["telemetry"][0]["metrics"]
+        assert "power" in payload["telemetry"][0] or "charger_power" in payload["telemetry"][0] or "grid_power_total" in payload["telemetry"][0]
 
 
 # ── Test: Cleanup & Maintenance ─────────────────────────────────────────
@@ -533,10 +531,10 @@ class TestTelemetryDataIntegrity:
 
         cached_payload = unsynced[0]["payload"]
         assert cached_payload["device_id"] == point.device_id
-        assert cached_payload["metrics"]["power"] == point.power
-        assert cached_payload["metrics"]["voltage"] == point.voltage
-        assert cached_payload["metrics"]["current"] == point.current
-        assert cached_payload["metrics"]["temperature"] == point.temperature
+        # EVSE-001 is unknown → grid_* fields
+        assert cached_payload["grid_power_total"] == point.power
+        assert cached_payload["grid_voltage_a"] == point.voltage
+        assert cached_payload["ambient_temperature"] == point.temperature
 
     def test_batch_round_trip(self, cache, sample_telemetry_points):
         """All batched telemetry should survive cache → retrieve cycle"""

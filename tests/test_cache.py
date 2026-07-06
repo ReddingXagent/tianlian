@@ -77,7 +77,7 @@ class TestTelemetryCache:
         assert len(unsynced) == 1
         assert unsynced[0]["device_id"] == "CHARGER-001"
         assert unsynced[0]["retry_count"] == 0
-        assert unsynced[0]["payload"]["metrics"]["power"] == 50.0
+        assert unsynced[0]["payload"]["charger_power"] == 50.0
 
     def test_get_unsynced_multiple(self, cache):
         """Test retrieving multiple unsynced points in order"""
@@ -92,9 +92,9 @@ class TestTelemetryCache:
         unsynced = cache.get_unsynced(limit=10)
         assert len(unsynced) == 3
         # Should be in insertion order
-        assert unsynced[0]["payload"]["metrics"]["power"] == 10.0
-        assert unsynced[1]["payload"]["metrics"]["power"] == 20.0
-        assert unsynced[2]["payload"]["metrics"]["power"] == 30.0
+        assert unsynced[0]["payload"]["charger_power"] == 10.0
+        assert unsynced[1]["payload"]["charger_power"] == 20.0
+        assert unsynced[2]["payload"]["charger_power"] == 30.0
 
     def test_get_unsynced_limit(self, cache):
         """Test limit parameter of get_unsynced"""

@@ -1,13 +1,13 @@
 """Cloud API Client — 边缘网关→云端对接 (V3 API对齐版)
 
 对接云端 8.134.106.166 天链V3系统：
-- Pod注册/心跳 (pod/register, pod/heartbeat)
-- 遥测数据批量上报 (telemetry/batch-report)
-- 告警上报 (alarms)
+- Pod注册/心跳 (pod/register, pod/heartbeat) — 无需认证
+- 遥测数据批量上报 (telemetry/batch-report) — Bearer token认证
+- 告警上报 (alarms) — Bearer token认证
 - 失败重试（指数退避）
 - 断网时自动降级写入本地缓存
 
-API对齐日期: 2026-07-02
+API对齐日期: 2026-07-06 (对齐云端334端点真实OpenAPI schema)
 """
 
 import asyncio
@@ -53,7 +53,7 @@ class CloudClient:
 
     @property
     def pod_id(self) -> str:
-        """pod_id = gateway_id (V3命名对齐)"""
+        """兼容属性: pod_id = gateway_id"""
         return self.gateway_id
 
     async def start(self) -> None:
@@ -127,65 +127,74 @@ class CloudClient:
     # ============================================================
 
     async def register(self) -> bool:
-        """Pod注册 → POST /api/v1/pod/register"""
+        """Pod注册 → POST /api/v1/pod/register (无需认证)"""
         try:
-            headers = {}
-            if self._token:
-                headers["Authorization"] = f"Bearer {self._token}"
-            if self._csrf_token:
-                headers["X-CSRF-Token"] = self._csrf_token
-                headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
+            # 云端单Pod模式：如果pod-01已存在，尝试心跳确认
+            r = await self._client.get("/api/v1/pod/list")
+            if r.status_code == 200:
+                data = r.json()
+                pods = data.get("pods", data.get("data", {}).get("pods", []))
+                for pod in pods:
+                    if pod.get("pod_id") == self.pod_id:
+                        self._registered = True
+                        logger.info("Cloud pod already registered: %s", self.pod_id)
+                        return True
+
+            # 尝试注册新Pod
             r = await self._client.post("/api/v1/pod/register", json={
                 "pod_id": self.pod_id,
                 "region_id": self.region_id,
-                "endpoint": f"http://{self.gateway_id}:8080",
+                "endpoint": f"http://{self._get_local_ip()}:8080",
                 "version": "3.0.0",
-            }, headers=headers)
+            })
             if r.status_code == 200:
                 self._registered = True
-                logger.info("Cloud registered: pod_id=%s", self.pod_id)
+                logger.info("Cloud pod registered: %s", self.pod_id)
+                return True
+            # 单Pod模式可能不支持注册，确认已有pod即可
+            if "单Pod模式" in r.text or "not supported" in r.text.lower():
+                logger.info("Cloud in single-pod mode, pod registration handled by cloud")
+                self._registered = True
                 return True
             logger.warning("Cloud register failed: %d %s", r.status_code, r.text[:200])
         except Exception as e:
             logger.warning("Cloud register error: %s", e)
         return False
 
+    def _get_local_ip(self) -> str:
+        """获取本机局域网IP"""
+        import socket
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return "192.168.31.10"
+
     async def deregister(self) -> None:
-        """Pod注销 (保留兼容路径，云端暂无deregister端点)"""
+        """Pod注销 — 云端单Pod模式无需注销"""
         if not self._registered:
             return
-        try:
-            headers = {}
-            if self._token:
-                headers["Authorization"] = f"Bearer {self._token}"
-            if self._csrf_token:
-                headers["X-CSRF-Token"] = self._csrf_token
-                headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
-            r = await self._client.post(
-                "/api/v1/pod/heartbeat",
-                json={"pod_id": self.pod_id, "load": 0},
-                headers=headers,
-            )
-            self._registered = False
-            logger.info("Cloud deregistered: pod_id=%s", self.pod_id)
-        except Exception as e:
-            logger.warning("Cloud deregister error: %s", e)
+        self._registered = False
+        logger.info("Cloud pod unregistered: %s", self.pod_id)
 
     # ============================================================
     # 遥测推送 (对齐 V3 telemetry/batch-report 端点)
     # ============================================================
 
     async def push_telemetry_batch(self, points: List[TelemetryPoint]) -> bool:
-        """批量推送遥测数据到云端 → POST /api/v1/telemetry/batch-report"""
+        """批量推送遥测数据到云端 → POST /api/v1/telemetry/batch"""
         if not self._client or not points:
             return False
 
         records = [p.to_api_payload() for p in points]
 
         payload = {
+            "records": records,
             "pod_id": self.pod_id,
             "region_id": self.region_id,
-            "records": records,
         }
 
         ok = await self._post_with_retry(
@@ -216,8 +225,8 @@ class CloudClient:
         payload = {
             "device_id": device_id,
             "alarm_type": alarm_type,
-            "level": severity,
-            "content": message,
+            "severity": severity,
+            "message": message,
         }
 
         ok = await self._post_with_retry(
@@ -251,8 +260,8 @@ class CloudClient:
             payload = {
                 "device_id": a.get("device_id", "unknown"),
                 "alarm_type": a.get("alarm_type", "unknown"),
-                "level": a.get("severity", "info"),
-                "content": a.get("message", ""),
+                "severity": a.get("severity", "info"),
+                "message": a.get("message", ""),
             }
             ok = await self._post_with_retry(
                 "/api/v1/alarms", payload, "alarm_batch_push"
@@ -318,20 +327,19 @@ class CloudClient:
     # ============================================================
 
     async def _heartbeat_loop(self) -> None:
-        """心跳循环 → POST /api/v1/pod/heartbeat"""
+        """心跳循环 → POST /api/v1/pod/heartbeat (无需认证)"""
         while True:
             await asyncio.sleep(self.config.heartbeat_interval)
             try:
-                headers = {}
-                if self._token:
-                    headers["Authorization"] = f"Bearer {self._token}"
-                if self._csrf_token:
-                    headers["X-CSRF-Token"] = self._csrf_token
-                    headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
                 r = await self._client.post(
                     "/api/v1/pod/heartbeat",
-                    json={"pod_id": self.pod_id, "load": 0},
-                    headers=headers,
+                    json={
+                        "pod_id": self.pod_id,
+                        "load": {
+                            "gateway_id": self.gateway_id,
+                            "region_id": self.region_id,
+                        },
+                    },
                 )
                 if r.status_code != 200:
                     logger.warning("Cloud heartbeat failed: %d", r.status_code)
@@ -372,7 +380,7 @@ class CloudClient:
                 await asyncio.sleep(active_interval)
 
     async def _sync_cached_telemetry(self, batch_size: int = 50) -> int:
-        """同步积压的遥测缓存数据到云端 → POST /api/v1/telemetry/batch-report"""
+        """同步积压的遥测缓存数据到云端 → POST /api/v1/telemetry/batch"""
         if not self.cache or not self._client:
             return 0
         unsynced = self.cache.get_cloud_unsynced(limit=batch_size)
@@ -383,9 +391,9 @@ class CloudClient:
         records = [item["payload"] for item in unsynced]
 
         payload = {
+            "records": records,
             "pod_id": self.pod_id,
             "region_id": self.region_id,
-            "records": records,
         }
 
         ok = await self._post_with_retry(
@@ -413,8 +421,8 @@ class CloudClient:
             payload = {
                 "device_id": a.get("device_id", "unknown"),
                 "alarm_type": a.get("alarm_type", "unknown"),
-                "level": a.get("severity", "info"),
-                "content": a.get("message", ""),
+                "severity": a.get("severity", "info"),
+                "message": a.get("message", ""),
             }
             ok = await self._post_with_retry(
                 "/api/v1/alarms", payload, "cache_sync_alarms"

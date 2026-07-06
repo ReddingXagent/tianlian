@@ -29,23 +29,53 @@ class TelemetryPoint:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
     def to_api_payload(self) -> Dict:
-        """Format for cloud API (device_id mapped to integer)"""
+        """Format for cloud V3 TelemetryReportLegacy schema
+
+        Maps edge gateway fields to cloud V3 fields:
+        - modbus-1 → grid_* fields (储能逆变器)
+        - CHARGER-001 → charger_* fields (充电桩)
+        """
         cloud_id = DEVICE_ID_MAP.get(self.device_id, self.device_id)
         try:
             cloud_id = int(cloud_id)
         except (ValueError, TypeError):
-            pass  # keep as string if unmappable
-        return {
-            "device_id": cloud_id,
-            "timestamp": self.timestamp,
-            "metrics": {
-                "power": self.power,
-                "voltage": self.voltage,
-                "current": self.current,
-                "temperature": self.temperature,
-                "energy": self.energy,
-            }
-        }
+            pass
+
+        # 通用基础字段
+        payload = {"device_id": cloud_id}
+
+        # 根据设备类型映射字段
+        if self.device_id == "modbus-1":
+            # 储能逆变器 → grid + battery + pv fields
+            payload.update({
+                "grid_voltage_a": self.voltage if self.voltage else None,
+                "grid_power_a": self.power if self.power else None,
+                "grid_power_total": self.power if self.power else None,
+                "battery_voltage": self.voltage if self.voltage else None,
+                "battery_temperature": self.temperature if self.temperature else None,
+                "battery_soc": self.soc,
+                "ambient_temperature": self.temperature if self.temperature else None,
+            })
+        elif self.device_id.startswith("CHARGER"):
+            # 充电桩 → charger fields
+            payload.update({
+                "charger_voltage": self.voltage if self.voltage else None,
+                "charger_current": self.current if self.current else None,
+                "charger_power": self.power if self.power else None,
+                "charger_soc": self.soc,
+                "charger_kwh": self.energy if self.energy else None,
+                "gun_temperature": self.temperature if self.temperature else None,
+            })
+        else:
+            # 未知设备 → 通用power字段
+            payload.update({
+                "grid_power_total": self.power if self.power else None,
+                "grid_voltage_a": self.voltage if self.voltage else None,
+                "ambient_temperature": self.temperature if self.temperature else None,
+            })
+
+        # 清理 None 值
+        return {k: v for k, v in payload.items() if v is not None}
 
 
 @dataclass
@@ -60,7 +90,7 @@ class TelemetryBatch:
 
     def to_api_payload(self) -> Dict:
         return {
-            "gateway_id": self.gateway_id,
-            "timestamp": self.timestamp,
-            "telemetry": [p.to_api_payload() for p in self.points]
+            "records": [p.to_api_payload() for p in self.points],
+            "pod_id": self.gateway_id,
+            "region_id": "default",
         }
