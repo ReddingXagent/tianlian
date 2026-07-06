@@ -4,6 +4,7 @@ import { MainTabParamList } from '../types';
 import DashboardScreen from './DashboardScreen';
 import StationListScreen from './StationListScreen';
 import RevenueScreen from './RevenueScreen';
+import AIChatPanel from '../components/AIChatPanel';
 import ProfileScreen from './ProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -33,6 +34,11 @@ export default function MainTabNavigator() {
         name="Revenue"
         component={RevenueScreen}
         options={{ title: '营收', tabBarLabel: '营收' }}
+      />
+      <Tab.Screen
+        name="AIChat"
+        component={AIChatPanel}
+        options={{ title: 'AI 助手', tabBarLabel: 'AI 助手', headerShown: false }}
       />
       <Tab.Screen
         name="Profile"
