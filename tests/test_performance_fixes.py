@@ -307,6 +307,7 @@ class TestCacheSyncLoop:
     @pytest.mark.asyncio
     async def test_sync_cached_telemetry_failure_increments_retry(self, tmp_cache, make_telemetry_point):
         """Failed sync should increment retry count, not mark synced"""
+        from unittest.mock import AsyncMock, patch
         from adapters.cloud_client import CloudClient
         from config import CloudConfig
 
@@ -321,8 +322,10 @@ class TestCacheSyncLoop:
         client = CloudClient(config, "GW-SYNC3", cache=tmp_cache)
         await client.start()
 
-        synced = await client._sync_cached_telemetry(batch_size=10)
-        assert synced == 0  # failed
+        # Mock _post_with_retry to simulate failure without real connection timeout
+        with patch.object(client, '_post_with_retry', AsyncMock(return_value=False)):
+            synced = await client._sync_cached_telemetry(batch_size=10)
+            assert synced == 0  # failed
 
         # Retry count should be incremented
         unsynced = tmp_cache.get_unsynced()
