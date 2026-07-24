@@ -26,6 +26,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _to_int_id(device_id) -> int:
+    """将设备ID转为云端要求的整数ID"""
+    try:
+        return int(device_id)
+    except (ValueError, TypeError):
+        return 1  # 默认ID
+
+
 class CloudClient:
     """云端API客户端 (V3对齐)
 
@@ -218,15 +226,18 @@ class CloudClient:
 
     async def push_alarm(self, device_id: str, alarm_type: str,
                           severity: str, message: str) -> bool:
-        """推送单个告警 → POST /api/v1/alarms"""
+        """推送单个告警 → POST /api/v1/alarms
+
+        云端V3字段: device_id(int), alarm_type, content, level
+        """
         if not self._client:
             return False
 
         payload = {
-            "device_id": device_id,
+            "device_id": _to_int_id(device_id),
             "alarm_type": alarm_type,
-            "severity": severity,
-            "message": message,
+            "content": message,
+            "level": severity,
         }
 
         ok = await self._post_with_retry(
@@ -258,10 +269,10 @@ class CloudClient:
         all_ok = True
         for a in alarms:
             payload = {
-                "device_id": a.get("device_id", "unknown"),
+                "device_id": _to_int_id(a.get("device_id", "unknown")),
                 "alarm_type": a.get("alarm_type", "unknown"),
-                "severity": a.get("severity", "info"),
-                "message": a.get("message", ""),
+                "content": a.get("message", ""),
+                "level": a.get("severity", "info"),
             }
             ok = await self._post_with_retry(
                 "/api/v1/alarms", payload, "alarm_batch_push"
@@ -419,10 +430,10 @@ class CloudClient:
         for item in unsynced:
             a = item["payload"]
             payload = {
-                "device_id": a.get("device_id", "unknown"),
+                "device_id": _to_int_id(a.get("device_id", "unknown")),
                 "alarm_type": a.get("alarm_type", "unknown"),
-                "severity": a.get("severity", "info"),
-                "message": a.get("message", ""),
+                "content": a.get("message", ""),
+                "level": a.get("severity", "info"),
             }
             ok = await self._post_with_retry(
                 "/api/v1/alarms", payload, "cache_sync_alarms"
