@@ -177,6 +177,7 @@ class TestModbusAdapterSimulation:
 
 # ── OCPPAdapter Tests ─────────────────────────────────────────────────
 
+@pytest.mark.timeout(20)
 class TestOCPPAdapterSimulation:
 
     @pytest.mark.asyncio
