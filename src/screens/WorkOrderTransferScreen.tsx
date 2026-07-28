@@ -18,7 +18,7 @@ type TransferRouteProp = RouteProp<RootStackParamList, 'WorkOrderDetail'>;
 const WorkOrderTransferScreen: React.FC = () => {
   const route = useRoute<TransferRouteProp>();
   const { orderId } = route.params;
-  const { transferring, transferError, transferOrder, escalateOrder } =
+  const { transferring, transferError, transferOrder, urgeOrder } =
     useWorkOrderEnhancedStore();
 
   const [assigneeId, setAssigneeId] = useState('');
@@ -45,17 +45,15 @@ const WorkOrderTransferScreen: React.FC = () => {
     }
   };
 
-  const handleEscalate = () => {
-    Alert.alert('升级工单', '确定要将此工单升级吗？升级后工单将提交给上级处理。', [
+  const handleUrge = () => {
+    Alert.alert('催单', '确定要催促工程师处理此工单吗？', [
       { text: '取消', style: 'cancel' },
       {
-        text: '确定升级',
-        style: 'destructive',
+        text: '确定催单',
         onPress: async () => {
-          const reason = '需要上级协助处理';
-          const result = await escalateOrder(orderId, reason);
+          const result = await urgeOrder(orderId, '请尽快处理');
           if (result) {
-            Alert.alert('升级成功', '工单已升级，等待上级处理');
+            Alert.alert('催单成功', '已通知工程师尽快处理');
           }
         },
       },
@@ -120,23 +118,23 @@ const WorkOrderTransferScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 升级区域 */}
+      {/* 催单区域 */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>升级工单</Text>
+        <Text style={styles.sectionLabel}>催单</Text>
         <View style={styles.card}>
           <Text style={styles.hintText}>
-            升级后工单将提交给上级主管处理，适用于遇到无法解决的问题或需要更高级别资源支持的情况。
+            催单后将通知工程师尽快处理，适用于工单长时间未接单或未完成的场景。
           </Text>
           <TouchableOpacity
             style={[styles.escalateBtn, transferring && styles.btnDisabled]}
-            onPress={handleEscalate}
+            onPress={handleUrge}
             disabled={transferring}
             activeOpacity={0.7}
           >
             {transferring ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.btnText}>升级工单</Text>
+              <Text style={styles.btnText}>催促处理</Text>
             )}
           </TouchableOpacity>
         </View>

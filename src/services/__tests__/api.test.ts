@@ -14,6 +14,8 @@ import api, {
   inspectionApi,
   dashboardApi,
   workOrderTransferApi,
+  workOrderActionApi,
+  workOrderRecordApi,
 } from '../api';
 
 // Mock expo-secure-store
@@ -213,79 +215,177 @@ describe('workbenchApi', () => {
   });
 });
 
-describe('workOrderApi', () => {
+describe('workOrderApi (真后端契约: snake_case + WO-字符串id)', () => {
   beforeEach(() => {
     mockAxios.reset();
   });
 
-  it('getList should GET /work-orders', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
+  const RAW_WO = {
+    id: 'WO-20260728-100000',
+    fault_desc: 'PCS通讯中断',
+    type: 'repair',
+    level: 'critical',
+    status: 'processing',
+    station_id: 3,
+    device_id: 7,
+    assignee_id: 2,
+    creator_id: 999,
+    create_time: '2026-07-28T10:00:00',
+    accept_time: '2026-07-28T10:05:00',
+    finish_time: null,
+    solution: null,
+  };
+
+  it('getList should GET /work-orders and map snake_case items', async () => {
+    const apiResponse = {
+      code: 200,
+      message: 'success',
+      data: { items: [RAW_WO], total: 1, page: 1, page_size: 20 },
+    };
     mockAxios.onGet('/work-orders').reply(200, apiResponse);
 
     const result = await workOrderApi.getList();
-    expect(result).toEqual(apiResponse);
+    expect(result.data.total).toBe(1);
+    expect(result.data.pageSize).toBe(20);
+    expect(result.data.items[0]).toMatchObject({
+      id: 'WO-20260728-100000',
+      title: 'PCS通讯中断',
+      priority: 'high',
+      status: 'in_progress',
+      stationId: 3,
+      assigneeId: 2,
+    });
   });
 
-  it('getList should pass filter params', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/work-orders', { params: { stationId: 1, status: 'pending', page: 1, pageSize: 20 } }).reply(200, apiResponse);
-
-    const result = await workOrderApi.getList({ stationId: 1, status: 'pending', page: 1, pageSize: 20 });
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getDetail should GET /work-orders/:id', async () => {
-    const workOrder = {
-      id: 1, stationId: 1, stationName: '站A', title: '维修', description: '需要维修',
-      type: 'repair' as const, priority: 'high' as const, status: 'pending' as const,
-      creatorId: 1, creatorName: 'admin',
-      createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
+  it('getList should convert client status filter to backend status + page_size', async () => {
+    const apiResponse = {
+      code: 200,
+      message: 'success',
+      data: { items: [], total: 0, page: 1, page_size: 10 },
     };
-    const apiResponse = { code: 0, message: 'success', data: workOrder };
-    mockAxios.onGet('/work-orders/1').reply(200, apiResponse);
+    mockAxios.onGet('/work-orders').reply(200, apiResponse);
 
-    const result = await workOrderApi.getDetail(1);
-    expect(result).toEqual(apiResponse);
+    await workOrderApi.getList({ status: 'in_progress', page: 1, pageSize: 10 });
+    const sent = mockAxios.history.get[0].params;
+    expect(sent.status).toBe('processing');
+    expect(sent.page_size).toBe(10);
   });
 
-  it('create should POST /work-orders', async () => {
-    const newOrder = { title: '新工单', description: '测试', stationId: 1, priority: 'normal' as const };
-    const created = { id: 99, ...newOrder, stationName: '站A', type: 'repair' as const, status: 'pending' as const, creatorId: 1, creatorName: 'admin', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: created };
-    mockAxios.onPost('/work-orders', newOrder).reply(200, apiResponse);
+  it('getDetail should GET /work-orders/:id (string id) and map payload', async () => {
+    const apiResponse = { code: 200, message: 'success', data: RAW_WO };
+    mockAxios.onGet('/work-orders/WO-20260728-100000').reply(200, apiResponse);
 
-    const result = await workOrderApi.create(newOrder);
-    expect(result).toEqual(apiResponse);
+    const result = await workOrderApi.getDetail('WO-20260728-100000');
+    expect(result.data.id).toBe('WO-20260728-100000');
+    expect(result.data.status).toBe('in_progress');
   });
 
-  it('update should PUT /work-orders/:id', async () => {
-    const updateData = { title: '更新标题' };
-    const updated = { id: 1, stationId: 1, stationName: '站A', title: '更新标题', description: '需要维修', type: 'repair' as const, priority: 'high' as const, status: 'pending' as const, creatorId: 1, creatorName: 'admin', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: updated };
-    mockAxios.onPut('/work-orders/1', updateData).reply(200, apiResponse);
+  it('create should POST snake_case body and map response', async () => {
+    const apiResponse = { code: 200, message: 'success', data: RAW_WO };
+    mockAxios.onPost('/work-orders').reply(200, apiResponse);
 
-    const result = await workOrderApi.update(1, updateData);
-    expect(result).toEqual(apiResponse);
+    await workOrderApi.create({ faultDesc: 'PCS通讯中断', type: 'repair', level: 'critical', stationId: 3, deviceId: 7 });
+    const body = JSON.parse(mockAxios.history.post[0].data);
+    expect(body).toMatchObject({
+      fault_desc: 'PCS通讯中断',
+      type: 'repair',
+      level: 'critical',
+      station_id: 3,
+      device_id: 7,
+    });
   });
 
-  it('updateStatus should PATCH /work-orders/:id/status', async () => {
-    const updated = { id: 1, stationId: 1, stationName: '站A', title: '维修', description: '需要维修', type: 'repair' as const, priority: 'high' as const, status: 'in_progress' as const, creatorId: 1, creatorName: 'admin', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: updated };
-    mockAxios.onPatch('/work-orders/1/status', { status: 'in_progress' }).reply(200, apiResponse);
+  it('update should PUT snake_case body', async () => {
+    const apiResponse = { code: 200, message: 'success', data: RAW_WO };
+    mockAxios.onPut('/work-orders/WO-1').reply(200, apiResponse);
 
-    const result = await workOrderApi.updateStatus(1, 'in_progress');
-    expect(result).toEqual(apiResponse);
+    await workOrderApi.update('WO-1', { solution: '已更换通讯模块', assigneeId: 5 });
+    const body = JSON.parse(mockAxios.history.put[0].data);
+    expect(body).toMatchObject({ solution: '已更换通讯模块', assignee_id: 5 });
   });
 
-  it('assign should POST /work-orders/:id/assign', async () => {
-    const updated = { id: 1, stationId: 1, stationName: '站A', title: '维修', description: '需要维修', type: 'repair' as const, priority: 'high' as const, status: 'in_progress' as const, assigneeId: 2, assigneeName: '张三', creatorId: 1, creatorName: 'admin', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: updated };
-    mockAxios.onPost('/work-orders/1/assign', { assigneeId: 2 }).reply(200, apiResponse);
+  it('updateStatus should PUT mapped backend status', async () => {
+    const apiResponse = { code: 200, message: 'success', data: RAW_WO };
+    mockAxios.onPut('/work-orders/WO-1').reply(200, apiResponse);
 
-    const result = await workOrderApi.assign(1, 2);
-    expect(result).toEqual(apiResponse);
+    await workOrderApi.updateStatus('WO-1', 'in_progress');
+    const body = JSON.parse(mockAxios.history.put[0].data);
+    expect(body.status).toBe('processing');
+  });
+
+  it('updateStatus should reject unsupported client status (cancelled)', async () => {
+    await expect(workOrderApi.updateStatus('WO-1', 'cancelled')).rejects.toThrow('不支持');
+    expect(mockAxios.history.put.length).toBe(0);
+  });
+
+  it('assign should PUT assignee_id (manual assign via update)', async () => {
+    const apiResponse = { code: 200, message: 'success', data: RAW_WO };
+    mockAxios.onPut('/work-orders/WO-1').reply(200, apiResponse);
+
+    await workOrderApi.assign('WO-1', 2);
+    const body = JSON.parse(mockAxios.history.put[0].data);
+    expect(body.assignee_id).toBe(2);
+  });
+});
+
+describe('workOrderActionApi (真端点 accept/start/complete)', () => {
+  beforeEach(() => {
+    mockAxios.reset();
+  });
+
+  it('accept should POST /work-orders/:id/accept', async () => {
+    mockAxios.onPost('/work-orders/WO-1/accept').reply(200, { code: 200, message: '接单成功', data: { status: 'accepted' } });
+    const result = await workOrderActionApi.accept('WO-1');
+    expect(result.message).toBe('接单成功');
+  });
+
+  it('start should POST /work-orders/:id/start', async () => {
+    mockAxios.onPost('/work-orders/WO-1/start').reply(200, { code: 200, message: '开始处理', data: { status: 'processing' } });
+    const result = await workOrderActionApi.start('WO-1');
+    expect(result.message).toBe('开始处理');
+  });
+
+  it('complete should POST /work-orders/:id/complete with solution query param', async () => {
+    mockAxios.onPost('/work-orders/WO-1/complete').reply(200, { code: 200, message: '完成申请已提交', data: { status: 'pending_verify' } });
+    await workOrderActionApi.complete('WO-1', '更换模块');
+    expect(mockAxios.history.post[0].params).toEqual({ solution: '更换模块' });
+  });
+});
+
+describe('workOrderRecordApi (真端点 logs/notes)', () => {
+  beforeEach(() => {
+    mockAxios.reset();
+  });
+
+  it('getRecords should GET /work-orders/:id/logs and map items', async () => {
+    mockAxios.onGet('/work-orders/WO-1/logs').reply(200, {
+      code: 200,
+      message: 'success',
+      data: {
+        items: [{ id: 11, action: 'accepted', description: '工程师已接单', created_at: '2026-07-28T10:05:00' }],
+        total: 1,
+      },
+    });
+    const result = await workOrderRecordApi.getRecords('WO-1');
+    expect(result.data[0]).toMatchObject({
+      id: 11,
+      orderId: 'WO-1',
+      action: 'accepted',
+      note: '工程师已接单',
+      createdAt: '2026-07-28T10:05:00',
+    });
+  });
+
+  it('addRecord should POST /work-orders/:id/notes', async () => {
+    mockAxios.onPost('/work-orders/WO-1/notes').reply(200, {
+      code: 200,
+      message: '备注已添加',
+      data: { id: 12, action: 'note', description: '现场拍照留档', created_at: '2026-07-28T11:00:00' },
+    });
+    const result = await workOrderRecordApi.addRecord('WO-1', { action: 'note', note: '现场拍照留档' });
+    expect(result.data.note).toBe('现场拍照留档');
+    const body = JSON.parse(mockAxios.history.post[0].data);
+    expect(body).toEqual({ action: 'note', note: '现场拍照留档' });
   });
 });
 
@@ -604,36 +704,35 @@ describe('dashboardApi', () => {
   });
 });
 
-describe('workOrderTransferApi', () => {
+describe('workOrderTransferApi (真端点 transfer/urge)', () => {
   beforeEach(() => {
     mockAxios.reset();
   });
 
-  it('transfer should POST /work-orders/:id/transfer', async () => {
-    const workOrder = {
-      id: 1, stationId: 1, stationName: '站A', title: '维修', description: '需要维修',
-      type: 'repair' as const, priority: 'high' as const, status: 'in_progress' as const,
-      assigneeId: 3, assigneeName: '李四', creatorId: 1, creatorName: 'admin',
-      createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
-    };
-    const apiResponse = { code: 0, message: 'success', data: workOrder };
-    mockAxios.onPost('/work-orders/1/transfer', { assigneeId: 3, reason: '需要其他人处理' }).reply(200, apiResponse);
+  it('transfer should POST snake_case target_engineer_id body', async () => {
+    const apiResponse = { code: 200, message: '转单成功', data: { status: 'pending', new_engineer: '李四' } };
+    mockAxios.onPost('/work-orders/WO-1/transfer').reply(200, apiResponse);
 
-    const result = await workOrderTransferApi.transfer(1, { assigneeId: 3, reason: '需要其他人处理' });
-    expect(result).toEqual(apiResponse);
+    const result = await workOrderTransferApi.transfer('WO-1', { targetEngineerId: 3, reason: '需要其他人处理' });
+    expect(result.message).toBe('转单成功');
+    const body = JSON.parse(mockAxios.history.post[0].data);
+    expect(body).toEqual({ target_engineer_id: 3, reason: '需要其他人处理' });
   });
 
-  it('escalate should POST /work-orders/:id/escalate', async () => {
-    const workOrder = {
-      id: 1, stationId: 1, stationName: '站A', title: '维修', description: '需要维修',
-      type: 'repair' as const, priority: 'urgent' as const, status: 'in_progress' as const,
-      assigneeId: 2, assigneeName: '张三', creatorId: 1, creatorName: 'admin',
-      createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
-    };
-    const apiResponse = { code: 0, message: 'success', data: workOrder };
-    mockAxios.onPost('/work-orders/1/escalate', { reason: '需要升级' }).reply(200, apiResponse);
+  it('urge should POST /work-orders/:id/urge with message', async () => {
+    const apiResponse = { code: 200, message: '催单成功', data: { message: '已催单给工程师 2' } };
+    mockAxios.onPost('/work-orders/WO-1/urge').reply(200, apiResponse);
 
-    const result = await workOrderTransferApi.escalate(1, '需要升级');
-    expect(result).toEqual(apiResponse);
+    const result = await workOrderTransferApi.urge('WO-1', '客户催了');
+    expect(result.message).toBe('催单成功');
+    const body = JSON.parse(mockAxios.history.post[0].data);
+    expect(body).toEqual({ message: '客户催了' });
+  });
+
+  it('urge should default message', async () => {
+    mockAxios.onPost('/work-orders/WO-1/urge').reply(200, { code: 200, message: '催单成功', data: {} });
+    await workOrderTransferApi.urge('WO-1');
+    const body = JSON.parse(mockAxios.history.post[0].data);
+    expect(body.message).toBe('请尽快处理');
   });
 });

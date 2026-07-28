@@ -13,7 +13,7 @@ jest.mock('../../services/api', () => ({
 }));
 
 const MOCK_ORDER: WorkOrder = {
-  id: 1,
+  id: 'WO-1',
   stationId: 1,
   stationName: '充电站A',
   title: '充电桩故障维修',
@@ -33,7 +33,7 @@ const MOCK_ORDER: WorkOrder = {
 };
 
 const MOCK_ORDER_2: WorkOrder = {
-  id: 2,
+  id: 'WO-2',
   stationId: 2,
   stationName: '充电站B',
   title: '定期巡检',
@@ -138,16 +138,16 @@ describe('useWorkOrderStore', () => {
 
       await act(async () => {
         await useWorkOrderStore.getState().fetchOrders({
-          stationId: 1,
           status: 'pending',
-          priority: 'high',
+          level: 'critical',
+          type: 'repair',
         });
       });
 
       expect(workOrderApi.getList).toHaveBeenCalledWith({
-        stationId: 1,
         status: 'pending',
-        priority: 'high',
+        level: 'critical',
+        type: 'repair',
       });
     });
   });
@@ -158,7 +158,7 @@ describe('useWorkOrderStore', () => {
       (workOrderApi.getDetail as jest.Mock).mockResolvedValue(response);
 
       await act(async () => {
-        await useWorkOrderStore.getState().fetchOrderDetail(1);
+        await useWorkOrderStore.getState().fetchOrderDetail('WO-1');
       });
 
       const state = useWorkOrderStore.getState();
@@ -172,7 +172,7 @@ describe('useWorkOrderStore', () => {
       (workOrderApi.getDetail as jest.Mock).mockRejectedValue(error);
 
       await act(async () => {
-        await useWorkOrderStore.getState().fetchOrderDetail(999);
+        await useWorkOrderStore.getState().fetchOrderDetail('WO-999');
       });
 
       const state = useWorkOrderStore.getState();
@@ -185,7 +185,7 @@ describe('useWorkOrderStore', () => {
       (workOrderApi.getDetail as jest.Mock).mockRejectedValue('Unknown error');
 
       await act(async () => {
-        await useWorkOrderStore.getState().fetchOrderDetail(1);
+        await useWorkOrderStore.getState().fetchOrderDetail('WO-1');
       });
 
       const state = useWorkOrderStore.getState();
@@ -210,7 +210,7 @@ describe('useWorkOrderStore', () => {
       (workOrderApi.updateStatus as jest.Mock).mockResolvedValue({ data: updatedOrder });
 
       await act(async () => {
-        await useWorkOrderStore.getState().updateOrderStatus(1, 'in_progress');
+        await useWorkOrderStore.getState().updateOrderStatus('WO-1', 'in_progress');
       });
 
       const state = useWorkOrderStore.getState();
@@ -227,7 +227,7 @@ describe('useWorkOrderStore', () => {
 
       await expect(
         act(async () => {
-          await useWorkOrderStore.getState().updateOrderStatus(1, 'completed');
+          await useWorkOrderStore.getState().updateOrderStatus('WO-1', 'completed');
         })
       ).rejects.toThrow('Update failed');
 
@@ -240,7 +240,7 @@ describe('useWorkOrderStore', () => {
 
       await expect(
         act(async () => {
-          await useWorkOrderStore.getState().updateOrderStatus(1, 'completed');
+          await useWorkOrderStore.getState().updateOrderStatus('WO-1', 'completed');
         })
       ).rejects.toThrow('更新工单状态失败');
 

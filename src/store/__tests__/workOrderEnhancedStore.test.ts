@@ -7,6 +7,7 @@ jest.mock('../../services/api', () => ({
   workOrderApi: {
     create: jest.fn(),
     assign: jest.fn(),
+    getDetail: jest.fn(),
   },
   workOrderRecordApi: {
     getRecords: jest.fn(),
@@ -14,12 +15,18 @@ jest.mock('../../services/api', () => ({
   },
   workOrderTransferApi: {
     transfer: jest.fn(),
-    escalate: jest.fn(),
+    urge: jest.fn(),
+  },
+  WO_PRIORITY_TO_LEVEL: {
+    low: 'info',
+    normal: 'warning',
+    high: 'critical',
+    urgent: 'critical',
   },
 }));
 
 const MOCK_ORDER: WorkOrder = {
-  id: 1,
+  id: 'WO-1',
   stationId: 1,
   stationName: '充电站A',
   title: '充电桩故障维修',
@@ -40,7 +47,7 @@ const MOCK_ORDER: WorkOrder = {
 
 const MOCK_RECORD: WorkOrderRecord = {
   id: 1,
-  orderId: 1,
+  orderId: 'WO-1',
   action: 'created',
   operatorId: 1,
   operatorName: '管理员',
@@ -85,11 +92,10 @@ describe('useWorkOrderEnhancedStore', () => {
 
       expect(result).toEqual(MOCK_ORDER);
       expect(workOrderApi.create).toHaveBeenCalledWith({
-        title: '充电桩故障维修',
-        description: '充电桩CH001无法正常启动',
-        stationId: 1,
+        faultDesc: '充电桩故障维修: 充电桩CH001无法正常启动',
         type: 'repair',
-        priority: 'high',
+        level: 'critical',
+        stationId: 1,
       });
       const state = useWorkOrderEnhancedStore.getState();
       expect(state.creating).toBe(false);
@@ -124,11 +130,11 @@ describe('useWorkOrderEnhancedStore', () => {
 
       let result: WorkOrder | null = null;
       await act(async () => {
-        result = await useWorkOrderEnhancedStore.getState().assignOrder(1, 2);
+        result = await useWorkOrderEnhancedStore.getState().assignOrder('WO-1', 2);
       });
 
       expect(result).toEqual(assignedOrder);
-      expect(workOrderApi.assign).toHaveBeenCalledWith(1, 2);
+      expect(workOrderApi.assign).toHaveBeenCalledWith('WO-1', 2);
     });
 
     it('should handle assign failure', async () => {
@@ -136,7 +142,7 @@ describe('useWorkOrderEnhancedStore', () => {
 
       let result: WorkOrder | null = null;
       await act(async () => {
-        result = await useWorkOrderEnhancedStore.getState().assignOrder(1, 2);
+        result = await useWorkOrderEnhancedStore.getState().assignOrder('WO-1', 2);
       });
 
       expect(result).toBeNull();
@@ -148,15 +154,19 @@ describe('useWorkOrderEnhancedStore', () => {
   describe('transferOrder', () => {
     it('should transfer order successfully', async () => {
       const transferredOrder = { ...MOCK_ORDER, assigneeId: 3, assigneeName: '李四' };
-      (workOrderTransferApi.transfer as jest.Mock).mockResolvedValue({ data: transferredOrder });
+      (workOrderTransferApi.transfer as jest.Mock).mockResolvedValue({ message: '转单成功' });
+      (workOrderApi.getDetail as jest.Mock).mockResolvedValue({ data: transferredOrder });
 
       let result: WorkOrder | null = null;
       await act(async () => {
-        result = await useWorkOrderEnhancedStore.getState().transferOrder(1, 3, '需要其他人处理');
+        result = await useWorkOrderEnhancedStore.getState().transferOrder('WO-1', 3, '需要其他人处理');
       });
 
       expect(result).toEqual(transferredOrder);
-      expect(workOrderTransferApi.transfer).toHaveBeenCalledWith(1, { assigneeId: 3, reason: '需要其他人处理' });
+      expect(workOrderTransferApi.transfer).toHaveBeenCalledWith('WO-1', {
+        targetEngineerId: 3,
+        reason: '需要其他人处理',
+      });
     });
 
     it('should handle transfer failure', async () => {
@@ -164,7 +174,7 @@ describe('useWorkOrderEnhancedStore', () => {
 
       let result: WorkOrder | null = null;
       await act(async () => {
-        result = await useWorkOrderEnhancedStore.getState().transferOrder(1, 3, 'test');
+        result = await useWorkOrderEnhancedStore.getState().transferOrder('WO-1', 3, 'test');
       });
 
       expect(result).toBeNull();
@@ -173,31 +183,31 @@ describe('useWorkOrderEnhancedStore', () => {
     });
   });
 
-  describe('escalateOrder', () => {
-    it('should escalate order successfully', async () => {
-      const escalatedOrder = { ...MOCK_ORDER, priority: 'urgent' as const };
-      (workOrderTransferApi.escalate as jest.Mock).mockResolvedValue({ data: escalatedOrder });
+  describe('urgeOrder', () => {
+    it('should urge order successfully', async () => {
+      (workOrderTransferApi.urge as jest.Mock).mockResolvedValue({ message: '催单成功' });
+      (workOrderApi.getDetail as jest.Mock).mockResolvedValue({ data: MOCK_ORDER });
 
       let result: WorkOrder | null = null;
       await act(async () => {
-        result = await useWorkOrderEnhancedStore.getState().escalateOrder(1, '需要升级处理');
+        result = await useWorkOrderEnhancedStore.getState().urgeOrder('WO-1', '请尽快处理');
       });
 
-      expect(result).toEqual(escalatedOrder);
-      expect(workOrderTransferApi.escalate).toHaveBeenCalledWith(1, '需要升级处理');
+      expect(result).toEqual(MOCK_ORDER);
+      expect(workOrderTransferApi.urge).toHaveBeenCalledWith('WO-1', '请尽快处理');
     });
 
-    it('should handle escalate failure', async () => {
-      (workOrderTransferApi.escalate as jest.Mock).mockRejectedValue(new Error('Escalate failed'));
+    it('should handle urge failure', async () => {
+      (workOrderTransferApi.urge as jest.Mock).mockRejectedValue(new Error('Urge failed'));
 
       let result: WorkOrder | null = null;
       await act(async () => {
-        result = await useWorkOrderEnhancedStore.getState().escalateOrder(1, 'test');
+        result = await useWorkOrderEnhancedStore.getState().urgeOrder('WO-1', 'test');
       });
 
       expect(result).toBeNull();
       const state = useWorkOrderEnhancedStore.getState();
-      expect(state.transferError).toBe('Escalate failed');
+      expect(state.transferError).toBe('Urge failed');
     });
   });
 
@@ -206,7 +216,7 @@ describe('useWorkOrderEnhancedStore', () => {
       (workOrderRecordApi.getRecords as jest.Mock).mockResolvedValue({ data: [MOCK_RECORD] });
 
       await act(async () => {
-        await useWorkOrderEnhancedStore.getState().fetchRecords(1);
+        await useWorkOrderEnhancedStore.getState().fetchRecords('WO-1');
       });
 
       const state = useWorkOrderEnhancedStore.getState();
@@ -218,7 +228,7 @@ describe('useWorkOrderEnhancedStore', () => {
       (workOrderRecordApi.getRecords as jest.Mock).mockRejectedValue(new Error('Not found'));
 
       await act(async () => {
-        await useWorkOrderEnhancedStore.getState().fetchRecords(999);
+        await useWorkOrderEnhancedStore.getState().fetchRecords('WO-999');
       });
 
       const state = useWorkOrderEnhancedStore.getState();
@@ -232,10 +242,10 @@ describe('useWorkOrderEnhancedStore', () => {
       (workOrderRecordApi.getRecords as jest.Mock).mockResolvedValue({ data: [MOCK_RECORD, { ...MOCK_RECORD, id: 2 }] });
 
       await act(async () => {
-        await useWorkOrderEnhancedStore.getState().addRecord(1, 'executing', '正在处理');
+        await useWorkOrderEnhancedStore.getState().addRecord('WO-1', 'executing', '正在处理');
       });
 
-      expect(workOrderRecordApi.addRecord).toHaveBeenCalledWith(1, { action: 'executing', note: '正在处理' });
+      expect(workOrderRecordApi.addRecord).toHaveBeenCalledWith('WO-1', { action: 'executing', note: '正在处理' });
       const state = useWorkOrderEnhancedStore.getState();
       expect(state.records.length).toBe(2);
     });

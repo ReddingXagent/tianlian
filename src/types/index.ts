@@ -55,7 +55,7 @@ export type AlarmStatus = 'unhandled' | 'processing' | 'resolved';
 // 工单 (WorkOrder)
 // =====================
 export interface WorkOrder {
-  id: number;
+  id: string;
   stationId: number;
   stationName: string;
   title: string;
@@ -72,6 +72,7 @@ export interface WorkOrder {
   completedAt?: string;
   createdAt: string;
   updatedAt: string;
+  solution?: string;
 }
 
 export type WorkOrderType =
@@ -247,7 +248,7 @@ export interface DiagnosisResult {
 // =====================
 export interface WorkOrderRecord {
   id: number;
-  orderId: number;
+  orderId: string;
   action: WorkOrderAction;
   operatorId: number;
   operatorName: string;
@@ -270,9 +271,9 @@ export type WorkOrderAction =
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
-  WorkOrderDetail: { orderId: number };
+  WorkOrderDetail: { orderId: string };
   WorkOrderCreate: undefined;
-  WorkOrderTransfer: { orderId: number };
+  WorkOrderTransfer: { orderId: string };
   ScanResult: { result: ScanResult };
   KnowledgeArticle: { articleId: number };
   Diagnosis: undefined;

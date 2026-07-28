@@ -11,14 +11,14 @@ interface WorkOrderState {
   loading: boolean;
   error: string | null;
   fetchOrders: (params?: {
-    stationId?: number;
     status?: string;
-    priority?: string;
+    level?: string;
+    type?: string;
     page?: number;
     pageSize?: number;
   }) => Promise<void>;
-  fetchOrderDetail: (id: number) => Promise<void>;
-  updateOrderStatus: (id: number, status: string) => Promise<void>;
+  fetchOrderDetail: (id: string) => Promise<void>;
+  updateOrderStatus: (id: string, status: string) => Promise<void>;
   setSelectedOrder: (order: WorkOrder | null) => void;
 }
 
@@ -49,7 +49,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
     }
   },
 
-  fetchOrderDetail: async (id: number) => {
+  fetchOrderDetail: async (id: string) => {
     set({ loading: true, error: null });
     try {
       const response = await workOrderApi.getDetail(id);
@@ -60,7 +60,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
     }
   },
 
-  updateOrderStatus: async (id: number, status: string) => {
+  updateOrderStatus: async (id: string, status: string) => {
     try {
       const response = await workOrderApi.updateStatus(id, status);
       const { orders } = get();

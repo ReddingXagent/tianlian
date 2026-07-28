@@ -115,32 +115,140 @@ export const workbenchApi = {
 };
 
 // =====================
-// 工单 API
+// 工单契约映射（后端 snake_case ↔ 前端 camelCase）
+// =====================
+export const WO_LEVEL_TO_PRIORITY: Record<string, 'low' | 'normal' | 'high' | 'urgent'> = {
+  info: 'low',
+  warning: 'normal',
+  critical: 'high',
+  fatal: 'urgent',
+};
+export const WO_PRIORITY_TO_LEVEL: Record<string, string> = {
+  low: 'info',
+  normal: 'warning',
+  high: 'critical',
+  urgent: 'critical',
+};
+export const WO_BACKEND_STATUS_TO_CLIENT: Record<string, 'pending' | 'in_progress' | 'completed' | 'cancelled'> = {
+  pending: 'pending',
+  accepted: 'in_progress',
+  processing: 'in_progress',
+  pending_verify: 'completed',
+  completed: 'completed',
+};
+export const WO_CLIENT_STATUS_TO_BACKEND: Record<string, string> = {
+  pending: 'pending',
+  in_progress: 'processing',
+  completed: 'completed',
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapWorkOrder(raw: any): WorkOrder {
+  return {
+    id: String(raw.id),
+    stationId: raw.station_id ?? 0,
+    stationName: raw.station_name ?? '',
+    title: raw.fault_desc ?? '',
+    description: raw.fault_desc ?? '',
+    type: (raw.type ?? 'repair') as WorkOrder['type'],
+    priority: WO_LEVEL_TO_PRIORITY[raw.level] ?? 'normal',
+    status: WO_BACKEND_STATUS_TO_CLIENT[raw.status] ?? 'pending',
+    assigneeId: raw.assignee_id ?? undefined,
+    assigneeName: raw.assignee_name ?? undefined,
+    creatorId: raw.creator_id ?? 999,
+    creatorName: raw.creator_name ?? '',
+    completedAt: raw.finish_time ?? undefined,
+    createdAt: raw.create_time ?? '',
+    updatedAt: raw.update_time ?? raw.create_time ?? '',
+    solution: raw.solution ?? undefined,
+  };
+}
+
+// =====================
+// 工单 API（对齐后端真契约: /work-orders, id=WO-字符串）
 // =====================
 export const workOrderApi = {
   getList(params?: {
-    stationId?: number;
     status?: string;
-    priority?: string;
+    level?: string;
+    type?: string;
     page?: number;
     pageSize?: number;
   }): Promise<ApiResponse<PaginatedData<WorkOrder>>> {
-    return api.get('/work-orders', { params }).then((res) => res.data);
+    const query: Record<string, unknown> = {
+      page: params?.page,
+      page_size: params?.pageSize,
+      level: params?.level,
+      type: params?.type,
+    };
+    if (params?.status) {
+      query.status = WO_CLIENT_STATUS_TO_BACKEND[params.status] ?? params.status;
+    }
+    return api.get('/work-orders', { params: query }).then((res) => {
+      const env = res.data as ApiResponse<Record<string, unknown>>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawPage: any = env.data ?? {};
+      return {
+        ...env,
+        data: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          items: (rawPage.items ?? []).map((it: any) => mapWorkOrder(it)),
+          total: rawPage.total ?? 0,
+          page: rawPage.page ?? params?.page ?? 1,
+          pageSize: rawPage.page_size ?? params?.pageSize ?? 20,
+        },
+      };
+    });
   },
-  getDetail(id: number): Promise<ApiResponse<WorkOrder>> {
-    return api.get(`/work-orders/${id}`).then((res) => res.data);
+  getDetail(id: string): Promise<ApiResponse<WorkOrder>> {
+    return api.get(`/work-orders/${id}`).then((res) => ({
+      ...res.data,
+      data: mapWorkOrder(res.data.data),
+    }));
   },
-  create(data: Partial<WorkOrder>): Promise<ApiResponse<WorkOrder>> {
-    return api.post('/work-orders', data).then((res) => res.data);
+  create(data: {
+    faultDesc: string;
+    type?: string;
+    level?: string;
+    stationId?: number;
+    deviceId?: number;
+  }): Promise<ApiResponse<WorkOrder>> {
+    return api
+      .post('/work-orders', {
+        fault_desc: data.faultDesc,
+        type: data.type ?? 'repair',
+        level: data.level ?? 'warning',
+        station_id: data.stationId,
+        device_id: data.deviceId,
+      })
+      .then((res) => ({ ...res.data, data: mapWorkOrder(res.data.data) }));
   },
-  update(id: number, data: Partial<WorkOrder>): Promise<ApiResponse<WorkOrder>> {
-    return api.put(`/work-orders/${id}`, data).then((res) => res.data);
+  update(
+    id: string,
+    data: { faultDesc?: string; level?: string; status?: string; assigneeId?: number; solution?: string }
+  ): Promise<ApiResponse<WorkOrder>> {
+    return api
+      .put(`/work-orders/${id}`, {
+        fault_desc: data.faultDesc,
+        level: data.level,
+        status: data.status ? WO_CLIENT_STATUS_TO_BACKEND[data.status] ?? data.status : undefined,
+        assignee_id: data.assigneeId,
+        solution: data.solution,
+      })
+      .then((res) => ({ ...res.data, data: mapWorkOrder(res.data.data) }));
   },
-  updateStatus(id: number, status: string): Promise<ApiResponse<WorkOrder>> {
-    return api.patch(`/work-orders/${id}/status`, { status }).then((res) => res.data);
+  updateStatus(id: string, status: string): Promise<ApiResponse<WorkOrder>> {
+    const backendStatus = WO_CLIENT_STATUS_TO_BACKEND[status];
+    if (!backendStatus) {
+      return Promise.reject(new Error(`后端不支持的工单状态: ${status}`));
+    }
+    return workOrderApi.update(id, { status: backendStatus });
   },
-  assign(id: number, assigneeId: number): Promise<ApiResponse<WorkOrder>> {
-    return api.post(`/work-orders/${id}/assign`, { assigneeId }).then((res) => res.data);
+  assign(id: string, assigneeId: number): Promise<ApiResponse<WorkOrder>> {
+    return workOrderApi.update(id, { assigneeId });
+  },
+  dispatch(id: string, auto = true): Promise<ApiResponse<unknown>> {
+    return api.post(`/work-orders/${id}/dispatch`, { auto }).then((res) => res.data);
   },
 };
 
@@ -251,32 +359,66 @@ export const diagnosisApi = {
 };
 
 // =====================
-// 工单执行记录 API
+// 工单执行记录 API（后端: GET /logs + POST /notes）
 // =====================
 export const workOrderRecordApi = {
-  getRecords(orderId: number): Promise<ApiResponse<WorkOrderRecord[]>> {
-    return api.get(`/work-orders/${orderId}/records`).then((res) => res.data);
+  getRecords(orderId: string): Promise<ApiResponse<WorkOrderRecord[]>> {
+    return api.get(`/work-orders/${orderId}/logs`).then((res) => {
+      const env = res.data as ApiResponse<Record<string, unknown>>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const items: any[] = (env.data as any)?.items ?? [];
+      return {
+        ...env,
+        data: items.map((it) => ({
+          id: it.id,
+          orderId,
+          action: it.action as WorkOrderRecord['action'],
+          operatorId: 0,
+          operatorName: '系统',
+          note: it.description ?? '',
+          createdAt: it.created_at ?? '',
+        })),
+      };
+    });
   },
-  addRecord(orderId: number, data: { action: string; note: string }): Promise<ApiResponse<WorkOrderRecord>> {
-    return api.post(`/work-orders/${orderId}/records`, data).then((res) => res.data);
+  addRecord(orderId: string, data: { action: string; note: string }): Promise<ApiResponse<WorkOrderRecord>> {
+    return api.post(`/work-orders/${orderId}/notes`, data).then((res) => {
+      const env = res.data as ApiResponse<Record<string, unknown>>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const it: any = env.data ?? {};
+      return {
+        ...env,
+        data: {
+          id: it.id,
+          orderId,
+          action: (it.action ?? data.action) as WorkOrderRecord['action'],
+          operatorId: 0,
+          operatorName: '手工记录',
+          note: it.description ?? data.note,
+          createdAt: it.created_at ?? '',
+        },
+      };
+    });
   },
 };
 
 // =====================
-// 工单操作 API（语义化方法）
+// 工单操作 API（后端真端点: accept/start/complete/verify）
 // =====================
 export const workOrderActionApi = {
-  accept(id: number): Promise<ApiResponse<WorkOrder>> {
+  accept(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/accept`).then((res) => res.data);
   },
-  checkIn(id: number, location?: { lat: number; lng: number }): Promise<ApiResponse<WorkOrder>> {
-    return api.post(`/work-orders/${id}/check-in`, location || {}).then((res) => res.data);
+  start(id: string): Promise<ApiResponse<unknown>> {
+    return api.post(`/work-orders/${id}/start`).then((res) => res.data);
   },
-  startExecuting(id: number): Promise<ApiResponse<WorkOrder>> {
-    return api.post(`/work-orders/${id}/start-executing`).then((res) => res.data);
+  complete(id: string, solution?: string): Promise<ApiResponse<unknown>> {
+    return api
+      .post(`/work-orders/${id}/complete`, null, { params: solution ? { solution } : {} })
+      .then((res) => res.data);
   },
-  complete(id: number, data?: { note: string; attachments?: string[] }): Promise<ApiResponse<WorkOrder>> {
-    return api.post(`/work-orders/${id}/complete`, data || {}).then((res) => res.data);
+  verify(id: string): Promise<ApiResponse<unknown>> {
+    return api.post(`/work-orders/${id}/verify`).then((res) => res.data);
   },
 };
 
@@ -353,14 +495,19 @@ export const dashboardApi = {
 };
 
 // =====================
-// 工单流转 API
+// 工单流转 API（后端真端点: transfer / urge催单）
 // =====================
 export const workOrderTransferApi = {
-  transfer(id: number, data: { assigneeId: number; reason: string }): Promise<ApiResponse<WorkOrder>> {
-    return api.post(`/work-orders/${id}/transfer`, data).then((res) => res.data);
+  transfer(id: string, data: { targetEngineerId: number; reason: string }): Promise<ApiResponse<unknown>> {
+    return api
+      .post(`/work-orders/${id}/transfer`, {
+        target_engineer_id: data.targetEngineerId,
+        reason: data.reason,
+      })
+      .then((res) => res.data);
   },
-  escalate(id: number, reason: string): Promise<ApiResponse<WorkOrder>> {
-    return api.post(`/work-orders/${id}/escalate`, { reason }).then((res) => res.data);
+  urge(id: string, message = '请尽快处理'): Promise<ApiResponse<unknown>> {
+    return api.post(`/work-orders/${id}/urge`, { message }).then((res) => res.data);
   },
 };
 

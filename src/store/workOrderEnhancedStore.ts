@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { WorkOrder, WorkOrderRecord } from '../types';
-import { workOrderApi, workOrderRecordApi, workOrderTransferApi } from '../services/api';
+import { workOrderApi, workOrderRecordApi, workOrderTransferApi, WO_PRIORITY_TO_LEVEL } from '../services/api';
 
 interface WorkOrderEnhancedState {
   // Create
@@ -17,19 +17,19 @@ interface WorkOrderEnhancedState {
   // Assign
   assigning: boolean;
   assignError: string | null;
-  assignOrder: (orderId: number, assigneeId: number) => Promise<WorkOrder | null>;
+  assignOrder: (orderId: string, assigneeId: number) => Promise<WorkOrder | null>;
 
   // Transfer
   transferring: boolean;
   transferError: string | null;
-  transferOrder: (orderId: number, assigneeId: number, reason: string) => Promise<WorkOrder | null>;
-  escalateOrder: (orderId: number, reason: string) => Promise<WorkOrder | null>;
+  transferOrder: (orderId: string, assigneeId: number, reason: string) => Promise<WorkOrder | null>;
+  urgeOrder: (orderId: string, message: string) => Promise<WorkOrder | null>;
 
   // Records
   records: WorkOrderRecord[];
   recordsLoading: boolean;
-  fetchRecords: (orderId: number) => Promise<void>;
-  addRecord: (orderId: number, action: string, note: string) => Promise<void>;
+  fetchRecords: (orderId: string) => Promise<void>;
+  addRecord: (orderId: string, action: string, note: string) => Promise<void>;
 
   // Reset
   reset: () => void;
@@ -48,7 +48,16 @@ export const useWorkOrderEnhancedStore = create<WorkOrderEnhancedState>((set, ge
   createOrder: async (data) => {
     set({ creating: true, createError: null });
     try {
-      const response = await workOrderApi.create(data as Partial<WorkOrder>);
+      const faultDesc =
+        data.description && data.description !== data.title
+          ? `${data.title}: ${data.description}`
+          : data.title;
+      const response = await workOrderApi.create({
+        faultDesc,
+        type: data.type,
+        level: WO_PRIORITY_TO_LEVEL[data.priority] ?? 'warning',
+        stationId: data.stationId,
+      });
       set({ creating: false });
       return response.data;
     } catch (err: unknown) {
@@ -74,9 +83,10 @@ export const useWorkOrderEnhancedStore = create<WorkOrderEnhancedState>((set, ge
   transferOrder: async (orderId, assigneeId, reason) => {
     set({ transferring: true, transferError: null });
     try {
-      const response = await workOrderTransferApi.transfer(orderId, { assigneeId, reason });
+      await workOrderTransferApi.transfer(orderId, { targetEngineerId: assigneeId, reason });
+      const detail = await workOrderApi.getDetail(orderId);
       set({ transferring: false });
-      return response.data;
+      return detail.data;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '转派工单失败';
       set({ transferring: false, transferError: message });
@@ -84,15 +94,16 @@ export const useWorkOrderEnhancedStore = create<WorkOrderEnhancedState>((set, ge
     }
   },
 
-  escalateOrder: async (orderId, reason) => {
+  urgeOrder: async (orderId, message) => {
     set({ transferring: true, transferError: null });
     try {
-      const response = await workOrderTransferApi.escalate(orderId, reason);
+      await workOrderTransferApi.urge(orderId, message);
+      const detail = await workOrderApi.getDetail(orderId);
       set({ transferring: false });
-      return response.data;
+      return detail.data;
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : '升级工单失败';
-      set({ transferring: false, transferError: message });
+      const msg = err instanceof Error ? err.message : '催单失败';
+      set({ transferring: false, transferError: msg });
       return null;
     }
   },

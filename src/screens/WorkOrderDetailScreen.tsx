@@ -30,9 +30,13 @@ const WORK_ORDER_TYPE_LABEL: Record<string, string> = {
 const WORK_ORDER_ACTION_LABEL: Record<string, { label: string; color: string }> = {
   created: { label: '创建工单', color: '#1a73e8' },
   accepted: { label: '接单', color: '#1565c0' },
+  started: { label: '开始处理', color: '#f57f17' },
   check_in: { label: '签到', color: '#e65100' },
   executing: { label: '开始执行', color: '#f57f17' },
   completed: { label: '完成', color: '#2e7d32' },
+  transferred: { label: '转单', color: '#6a1b9a' },
+  urged: { label: '催单', color: '#d84315' },
+  note: { label: '备注', color: '#455a64' },
   cancelled: { label: '取消', color: '#616161' },
   reassigned: { label: '重新分配', color: '#6a1b9a' },
 };
@@ -41,7 +45,7 @@ const WorkOrderDetailScreen: React.FC = () => {
   const route = useRoute<DetailRouteProp>();
   const navigation = useNavigation();
   const { orderId } = route.params;
-  const { selectedOrder, loading, error, fetchOrderDetail, updateOrderStatus } =
+  const { selectedOrder, loading, error, fetchOrderDetail } =
     useWorkOrderStore();
   const [refreshing, setRefreshing] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
@@ -73,45 +77,15 @@ const WorkOrderDetailScreen: React.FC = () => {
     loadData();
   }, [orderId]);
 
-  const handleStatusChange = (newStatus: string) => {
-    const labelMap: Record<string, string> = {
-      pending: '待处理',
-      in_progress: '进行中',
-      completed: '已完成',
-      cancelled: '已取消',
-    };
-    const statusLabel = labelMap[newStatus] || newStatus;
-
-    Alert.alert('确认操作', `确定要将工单状态变更为"${statusLabel}"吗？`, [
-      { text: '取消', style: 'cancel' },
-      {
-        text: '确定',
-        onPress: async () => {
-          setStatusUpdating(true);
-          try {
-            await updateOrderStatus(orderId, newStatus);
-            await loadRecords();
-          } catch {
-            Alert.alert('操作失败', '更新工单状态失败，请重试');
-          } finally {
-            setStatusUpdating(false);
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleAction = (action: 'accept' | 'checkIn' | 'execute' | 'complete') => {
+  const handleAction = (action: 'accept' | 'execute' | 'complete') => {
     const confirmMessages: Record<string, string> = {
       accept: '确定要接单处理此工单吗？',
-      checkIn: '确定已到达现场并签到吗？',
-      execute: '确定要开始执行此工单吗？',
+      execute: '确定已到达现场并开始执行此工单吗？',
       complete: '确定工单已完成并提交吗？',
     };
 
     const actionLabels: Record<string, string> = {
       accept: '接单',
-      checkIn: '签到',
       execute: '开始执行',
       complete: '完成',
     };
@@ -125,15 +99,12 @@ const WorkOrderDetailScreen: React.FC = () => {
           try {
             if (action === 'accept') {
               await workOrderActionApi.accept(orderId);
-              await updateOrderStatus(orderId, 'in_progress');
-            } else if (action === 'checkIn') {
-              await workOrderActionApi.checkIn(orderId);
             } else if (action === 'execute') {
-              await workOrderActionApi.startExecuting(orderId);
+              await workOrderActionApi.start(orderId);
             } else if (action === 'complete') {
               await workOrderActionApi.complete(orderId);
-              await updateOrderStatus(orderId, 'completed');
             }
+            await fetchOrderDetail(orderId);
             await loadRecords();
             Alert.alert('操作成功', `工单已${actionLabels[action]}`);
           } catch {
@@ -270,30 +241,10 @@ const WorkOrderDetailScreen: React.FC = () => {
                   <Text style={styles.actionBtnText}>📋 接单</Text>
                 )}
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionDanger]}
-                onPress={() => handleStatusChange('cancelled')}
-                disabled={statusUpdating}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.actionBtnText}>取消工单</Text>
-              </TouchableOpacity>
             </>
           )}
           {order?.status === 'in_progress' && (
             <>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionWarning]}
-                onPress={() => handleAction('checkIn')}
-                disabled={statusUpdating}
-                activeOpacity={0.7}
-              >
-                {statusUpdating ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <Text style={styles.actionBtnText}>📌 签到</Text>
-                )}
-              </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: '#f57f17' }]}
                 onPress={() => handleAction('execute')}
@@ -303,7 +254,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 {statusUpdating ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text style={styles.actionBtnText}>🔧 开始执行</Text>
+                  <Text style={styles.actionBtnText}>🔧 到场并开始执行</Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
@@ -317,14 +268,6 @@ const WorkOrderDetailScreen: React.FC = () => {
                 ) : (
                   <Text style={styles.actionBtnText}>✅ 标记完成</Text>
                 )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.actionDanger]}
-                onPress={() => handleStatusChange('cancelled')}
-                disabled={statusUpdating}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.actionBtnText}>取消工单</Text>
               </TouchableOpacity>
             </>
           )}
