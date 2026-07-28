@@ -374,6 +374,7 @@ class TestCacheSyncLoop:
     @pytest.mark.asyncio
     async def test_sync_cached_alarms_failure_increments_retry(self, tmp_cache):
         """Failed alarm sync should increment retry count"""
+        from unittest.mock import AsyncMock, patch
         from adapters.cloud_client import CloudClient
         from config import CloudConfig
 
@@ -386,15 +387,17 @@ class TestCacheSyncLoop:
         })
 
         config = CloudConfig(
-            base_url="http://localhost:99999",
+            base_url="http://localhost:99999",  # nothing listening
             register_on_startup=False,
             heartbeat_interval=0,
         )
         client = CloudClient(config, "GW-SYNC5", cache=tmp_cache)
         await client.start()
 
-        synced = await client._sync_cached_alarms(batch_size=10)
-        assert synced == 0
+        # Mock _post_with_retry to simulate failure without real connection timeout
+        with patch.object(client, '_post_with_retry', AsyncMock(return_value=False)):
+            synced = await client._sync_cached_alarms(batch_size=10)
+            assert synced == 0
 
         # Retry count should be incremented
         remaining = tmp_cache.get_unsynced_alarms()
