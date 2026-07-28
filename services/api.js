@@ -1,4 +1,6 @@
 // services/api.js - API服务层
+// 闭环战役B3: 充电/订单/优惠券/积分 全量对齐真后端 /business 经营域契约
+// 真云端冒烟实测(8.134.106.166): 登录走OAuth2 form-urlencoded, 全站snake_case+{code,message,data}信封
 const config = require('../config/index');
 
 const BASE_URL = config.API_BASE_URL;
@@ -7,7 +9,7 @@ const TIMEOUT = config.REQUEST_TIMEOUT;
 /**
  * 通用请求封装
  * @param {string} url - 接口路径（不含base）
- * @param {object} options - 请求选项
+ * @param {object} options - 请求选项 (form=true 时走 x-www-form-urlencoded)
  * @returns {Promise}
  */
 function request(url, options = {}) {
@@ -16,11 +18,23 @@ function request(url, options = {}) {
     data = {},
     header = {},
     showLoading = false,
-    loadingText = '加载中...'
+    loadingText = '加载中...',
+    form = false
   } = options;
 
   // 获取token
   const token = wx.getStorageSync('token');
+
+  // form模式: 对象 → urlencoded 字符串 (对齐OAuth2PasswordRequestForm)
+  let payload = data;
+  let contentType = 'application/json';
+  if (form) {
+    contentType = 'application/x-www-form-urlencoded';
+    payload = Object.keys(data)
+      .filter((k) => data[k] !== undefined && data[k] !== null)
+      .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(data[k])}`)
+      .join('&');
+  }
 
   return new Promise((resolve, reject) => {
     if (showLoading) {
@@ -30,10 +44,10 @@ function request(url, options = {}) {
     wx.request({
       url: `${BASE_URL}${url}`,
       method,
-      data,
+      data: payload,
       timeout: TIMEOUT,
       header: {
-        'Content-Type': 'application/json',
+        'Content-Type': contentType,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         ...header
       },
@@ -75,392 +89,446 @@ function request(url, options = {}) {
   });
 }
 
-// ========== 认证接口 ==========
+// ========== 归一化层 (后端snake_case → 前端camelCase) ==========
+
+// 订单状态: 后端 charging/settled/paid ↔ UI charging/pending/finished
+const ORDER_STATUS_TO_UI = { charging: 'charging', settled: 'pending', paid: 'finished' };
+const ORDER_STATUS_TO_BACKEND = { charging: 'charging', pending: 'settled', finished: 'paid' };
+// 优惠券状态: 后端 active/used/expired ↔ UI unused/used/expired
+const COUPON_STATUS_TO_BACKEND = { unused: 'active', used: 'used', expired: 'expired' };
+
+function mapOrder(o) {
+  if (!o) return o;
+  return {
+    id: String(o.id),
+    sessionId: String(o.id), // 兼容充电页 sessionId 语义
+    orderNo: o.order_no,
+    stationId: o.station_id,
+    deviceId: o.device_id,
+    userId: o.user_id,
+    status: ORDER_STATUS_TO_UI[o.status] || o.status,
+    rawStatus: o.status,
+    energyKwh: o.energy_kwh,
+    durationMin: o.duration_min,
+    amount: o.amount,
+    discountAmount: o.discount_amount,
+    finalAmount: o.final_amount,
+    pointsEarned: o.points_earned,
+    paidAt: o.paid_at
+  };
+}
+
+function mapCoupon(c) {
+  if (!c) return c;
+  return {
+    id: String(c.id),
+    code: c.code,
+    name: c.name,
+    type: c.coupon_type,
+    value: c.value,
+    minAmount: c.min_amount,
+    status: c.status === 'active' ? 'unused' : c.status,
+    rawStatus: c.status,
+    expireAt: c.expire_at
+  };
+}
+
+function mapPoints(p) {
+  if (!p) return p;
+  return {
+    userId: p.user_id,
+    balance: p.balance,
+    history: (p.recent || []).map((r) => ({
+      delta: r.delta,
+      reason: r.reason,
+      createdAt: r.created_at
+    }))
+  };
+}
+
+function mapPagination(d, mapper) {
+  return {
+    items: (d.items || []).map(mapper),
+    total: d.total || 0,
+    page: d.page || 1,
+    pageSize: d.page_size || 20
+  };
+}
+
+// ========== 认证接口 (对齐真后端 OAuth2 form-urlencoded) ==========
 
 /**
- * 微信登录
- * @param {string} code - wx.login返回的code
+ * 用户名密码登录 (后端 /auth/login 走 OAuth2PasswordRequestForm)
+ * 登录成功自动落盘 token + userInfo
  */
-function login(code) {
+function login(username, password) {
   return request('/auth/login', {
     method: 'POST',
-    data: { code },
+    form: true,
+    data: { username, password },
     showLoading: true,
     loadingText: '登录中...'
+  }).then((res) => {
+    const d = res.data || {};
+    if (d.token) {
+      wx.setStorageSync('token', d.token);
+    }
+    if (d.user) {
+      wx.setStorageSync('userInfo', d.user);
+    }
+    return res;
   });
 }
 
+/** 微信登录 (后端暂无wx登录端点, 保留占位, 走用户名密码登录) */
+function wxLogin() {
+  return Promise.reject(new Error('请使用用户名密码登录'));
+}
+
+function logout() {
+  wx.removeStorageSync('token');
+  wx.removeStorageSync('userInfo');
+}
+
+function getCurrentUser() {
+  return wx.getStorageSync('userInfo') || null;
+}
+
+function getCurrentUserId() {
+  const u = getCurrentUser();
+  return u && u.id !== undefined && u.id !== null ? u.id : null;
+}
+
 /**
- * 获取用户信息
+ * 获取用户信息 (后端无专用端点, 返回登录时落盘的用户信息)
  */
 function getUserInfo() {
-  return request('/user/info');
+  const user = getCurrentUser();
+  return user
+    ? Promise.resolve({ code: 200, data: user })
+    : Promise.reject(new Error('未登录'));
 }
 
 /**
- * 更新用户信息
- * @param {object} data - 用户信息
+ * 更新用户信息 (后端暂无端点)
  */
-function updateUserInfo(data) {
-  return request('/user/info', {
-    method: 'PUT',
-    data
+function updateUserInfo() {
+  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
+}
+
+// ========== 站点接口 (真云端可用) ==========
+
+/**
+ * 站点列表 (真云端 GET /stations, 分页 snake_case 参数)
+ */
+function getStations(params = {}) {
+  const { page = 1, pageSize = 20 } = params;
+  return request('/stations', {
+    data: { page, page_size: pageSize }
   });
 }
 
-// ========== 站点接口 ==========
-
 /**
- * 获取附近站点
- * @param {number} lat - 纬度
- * @param {number} lng - 经度
- * @param {number} radius - 搜索半径（米）
+ * 获取附近站点 (后端无nearby端点, 降级为列表)
  */
-function getNearbyStations(lat, lng, radius = 5000) {
-  return request('/stations/nearby', {
-    method: 'GET',
-    data: { lat, lng, radius }
-  });
+function getNearbyStations() {
+  return getStations();
 }
 
 /**
  * 获取站点详情
- * @param {string} stationId - 站点ID
  */
 function getStationDetail(stationId) {
   return request(`/stations/${stationId}`);
 }
 
 /**
- * 搜索站点
- * @param {string} keyword - 搜索关键词
+ * 搜索站点 (后端无search端点, 降级为列表)
  */
-function searchStations(keyword) {
-  return request('/stations/search', {
-    method: 'GET',
-    data: { keyword }
-  });
+function searchStations() {
+  return getStations();
 }
 
 /**
- * 筛选站点
- * @param {object} params - 筛选参数 { lat, lng, gunType, sortBy, radius, page, pageSize }
+ * 筛选站点 (后端无filter端点, 降级为列表)
  */
 function filterStations(params = {}) {
-  const { lat, lng, gunType, sortBy, radius = 5000, page = 1, pageSize = 20 } = params;
-  return request('/stations/filter', {
-    method: 'GET',
-    data: { lat, lng, gunType, sortBy, radius, page, pageSize }
-  });
+  const { page = 1, pageSize = 20 } = params;
+  return getStations({ page, pageSize });
 }
 
-// ========== 收藏接口 ==========
+// ========== 收藏接口 (后端暂无, 本地存储降级) ==========
 
-/**
- * 获取收藏站点列表
- */
 function getFavorites() {
-  return request('/user/favorites');
+  return Promise.resolve({ code: 200, data: wx.getStorageSync('favorites') || [] });
 }
 
-/**
- * 添加收藏站点
- * @param {string} stationId - 站点ID
- */
 function addFavorite(stationId) {
-  return request('/user/favorites', {
-    method: 'POST',
-    data: { stationId }
-  });
+  const favs = wx.getStorageSync('favorites') || [];
+  if (!favs.includes(stationId)) {
+    favs.push(stationId);
+    wx.setStorageSync('favorites', favs);
+  }
+  return Promise.resolve({ code: 200, data: { stationId } });
 }
 
-/**
- * 取消收藏站点
- * @param {string} stationId - 站点ID
- */
 function removeFavorite(stationId) {
-  return request(`/user/favorites/${stationId}`, {
-    method: 'DELETE'
-  });
+  const favs = (wx.getStorageSync('favorites') || []).filter((id) => id !== stationId);
+  wx.setStorageSync('favorites', favs);
+  return Promise.resolve({ code: 200, data: { stationId } });
 }
 
-// ========== 扫码/充电接口 ==========
+// ========== 扫码/充电接口 (对齐 /business 经营域) ==========
 
 /**
- * 扫码启动充电
- * @param {string} chargerId - 充电桩ID
+ * 扫码启动充电 → POST /business/charging-orders/start-by-sn
+ * @param {string} chargerId - 充电桩SN或code (扫码内容)
  */
 function startCharging(chargerId) {
-  return request('/charging/start', {
+  return request('/business/charging-orders/start-by-sn', {
     method: 'POST',
-    data: { chargerId },
+    data: { charger_sn: chargerId, user_id: getCurrentUserId() },
     showLoading: true,
     loadingText: '启动中...'
-  });
+  }).then((res) => ({ ...res, data: mapOrder(res.data) }));
 }
 
 /**
- * 获取充电实时数据
- * @param {string} sessionId - 充电会话ID
+ * 获取充电订单状态 → GET /business/charging-orders/{id}
+ * @param {string|number} sessionId - 订单ID
  */
 function getChargingStatus(sessionId) {
-  return request(`/charging/status/${sessionId}`);
+  return request(`/business/charging-orders/${sessionId}`).then((res) => ({
+    ...res,
+    data: mapOrder(res.data)
+  }));
 }
 
 /**
- * 停止充电
- * @param {string} sessionId - 充电会话ID
+ * 停止充电 → POST /business/charging-orders/{id}/complete (charging → settled)
+ * @param {string|number} sessionId - 订单ID
+ * @param {number} energyKwh - 充电电量(度), 缺省0(桩端计量未接入)
+ * @param {number} durationMin - 充电时长(分钟)
  */
-function stopCharging(sessionId) {
-  return request('/charging/stop', {
+function stopCharging(sessionId, energyKwh = 0, durationMin = 0) {
+  return request(`/business/charging-orders/${sessionId}/complete`, {
     method: 'POST',
-    data: { sessionId },
+    data: { energy_kwh: energyKwh, duration_min: durationMin },
     showLoading: true,
     loadingText: '停止中...'
-  });
+  }).then((res) => ({ ...res, data: mapOrder(res.data) }));
 }
 
-// ========== 订单接口 ==========
+// ========== 订单接口 (对齐 /business/charging-orders) ==========
 
 /**
  * 获取订单列表
- * @param {object} params - 查询参数 { page, pageSize, status }
+ * @param {object} params - { page, pageSize, status(UI态), userId }
  */
 function getOrders(params = {}) {
-  const { page = 1, pageSize = 10, status } = params;
-  return request('/orders', {
-    method: 'GET',
-    data: { page, pageSize, ...(status ? { status } : {}) }
-  });
+  const { page = 1, pageSize = 10, status, userId } = params;
+  const uid = userId !== undefined ? userId : getCurrentUserId();
+  const backendStatus = status ? ORDER_STATUS_TO_BACKEND[status] || status : null;
+  const query = { page, page_size: pageSize };
+  if (uid !== null && uid !== undefined) query.user_id = uid;
+  if (backendStatus) query.status = backendStatus;
+  return request('/business/charging-orders', { data: query }).then((res) => ({
+    ...res,
+    data: mapPagination(res.data, mapOrder)
+  }));
 }
 
 /**
  * 获取订单详情
- * @param {string} orderId - 订单ID
  */
 function getOrderDetail(orderId) {
-  return request(`/orders/${orderId}`);
+  return request(`/business/charging-orders/${orderId}`).then((res) => ({
+    ...res,
+    data: mapOrder(res.data)
+  }));
 }
 
 /**
- * 评价订单
- * @param {string} orderId - 订单ID
- * @param {number} rating - 评分 1-5
- * @param {string} comment - 评价内容
+ * 评价订单 (后端暂无端点)
  */
-function reviewOrder(orderId, rating, comment) {
-  return request(`/orders/${orderId}/review`, {
-    method: 'POST',
-    data: { rating, comment }
-  });
+function reviewOrder() {
+  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
 }
 
-// ========== 支付接口 ==========
+// ========== 支付接口 (对齐 /business 支付结算) ==========
 
 /**
- * 创建支付
- * @param {string} orderId - 订单ID
+ * 支付订单 → POST /business/charging-orders/{id}/pay (settled → paid + 积分发放)
+ * @param {string|number} orderId - 订单ID
+ * @param {string} couponCode - 可选优惠券码
  */
-function createPayment(orderId) {
-  return request('/payment/create', {
+function createPayment(orderId, couponCode) {
+  return request(`/business/charging-orders/${orderId}/pay`, {
     method: 'POST',
-    data: { orderId },
+    data: { coupon_code: couponCode || null },
     showLoading: true,
-    loadingText: '获取支付信息...'
-  });
+    loadingText: '支付中...'
+  }).then((res) => ({ ...res, data: mapOrder(res.data) }));
 }
 
 /**
- * 查询支付状态
- * @param {string} orderId - 订单ID
+ * 查询支付状态 (订单详情即支付状态: status=finished 为已支付)
  */
 function queryPaymentStatus(orderId) {
-  return request(`/payment/status/${orderId}`);
+  return getOrderDetail(orderId);
 }
 
-// ========== 钱包接口 ==========
+// ========== 钱包接口 (后端暂无, 占位) ==========
 
-/**
- * 获取钱包信息
- */
 function getWallet() {
-  return request('/wallet/info');
+  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
 }
 
-/**
- * 充值
- * @param {number} amount - 充值金额（元）
- */
-function recharge(amount) {
-  return request('/wallet/recharge', {
-    method: 'POST',
-    data: { amount }
-  });
+function recharge() {
+  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
 }
 
-/**
- * 获取交易记录
- * @param {number} page - 页码
- */
-function getTransactions(page = 1) {
-  return request('/wallet/transactions', {
-    method: 'GET',
-    data: { page, pageSize: 20 }
-  });
+function getTransactions() {
+  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
 }
 
-// ========== 优惠券接口 ==========
+// ========== 优惠券接口 (对齐 /business/coupons) ==========
 
 /**
  * 获取优惠券列表
- * @param {string} status - 状态筛选: unused/used/expired
+ * @param {string} status - UI状态: unused/used/expired
  */
 function getCoupons(status) {
-  return request('/coupons', {
-    method: 'GET',
-    data: status ? { status } : {}
-  });
+  const query = {};
+  const uid = getCurrentUserId();
+  if (uid !== null && uid !== undefined) query.user_id = uid;
+  if (status) query.status = COUPON_STATUS_TO_BACKEND[status] || status;
+  return request('/business/coupons', { data: query }).then((res) => ({
+    ...res,
+    data: mapPagination(res.data, mapCoupon)
+  }));
 }
 
 /**
- * 领取优惠券
+ * 领取优惠券 → POST /business/coupons/claim (无主券绑定到当前用户)
  * @param {string} couponCode - 优惠券码
  */
 function claimCoupon(couponCode) {
-  return request('/coupons/claim', {
+  return request('/business/coupons/claim', {
     method: 'POST',
-    data: { couponCode },
+    data: { code: couponCode, user_id: getCurrentUserId() },
     showLoading: true,
     loadingText: '领取中...'
   });
 }
 
-/**
- * 使用优惠券
- * @param {string} couponId - 优惠券ID
- * @param {string} orderId - 订单ID
- */
-function useCoupon(couponId, orderId) {
-  return request('/coupons/use', {
-    method: 'POST',
-    data: { couponId, orderId }
-  });
-}
-
-// ========== 积分接口 ==========
+// ========== 积分接口 (对齐 /business/points) ==========
 
 /**
- * 获取积分信息
+ * 获取积分余额+最近流水
  */
-function getPoints() {
-  return request('/points/info');
+function getPoints(userId) {
+  const uid = userId !== undefined ? userId : getCurrentUserId();
+  if (uid === null || uid === undefined) {
+    return Promise.reject(new Error('NO_USER'));
+  }
+  return request('/business/points', { data: { user_id: uid } }).then((res) => ({
+    ...res,
+    data: mapPoints(res.data)
+  }));
 }
 
 /**
- * 获取积分记录
- * @param {number} page - 页码
+ * 获取积分记录 (后端积分流水随 /business/points 返回)
  */
-function getPointsHistory(page = 1) {
-  return request('/points/history', {
-    method: 'GET',
-    data: { page, pageSize: 20 }
-  });
+function getPointsHistory(userId) {
+  return getPoints(userId).then((res) => ({ ...res, data: res.data.history }));
 }
 
 /**
- * 每日签到
+ * 每日签到 (后端暂无端点)
  */
 function dailySignIn() {
-  return request('/points/sign-in', {
-    method: 'POST',
-    showLoading: true,
-    loadingText: '签到中...'
-  });
+  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
 }
 
 /**
- * 积分兑换
- * @param {string} rewardId - 兑换项ID
+ * 积分兑换 (后端暂无端点)
  */
-function redeemPoints(rewardId) {
-  return request('/points/redeem', {
-    method: 'POST',
-    data: { rewardId },
-    showLoading: true,
-    loadingText: '兑换中...'
-  });
+function redeemPoints() {
+  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
 }
 
-// ========== 通知接口 ==========
+// ========== 通知接口 (后端暂无, 占位) ==========
 
-/**
- * 获取通知列表
- * @param {number} page - 页码
- * @param {string} type - 通知类型筛选
- */
-function getNotifications(page = 1, type) {
-  return request('/notifications', {
-    method: 'GET',
-    data: { page, pageSize: 20, ...(type ? { type } : {}) }
-  });
+function getNotifications() {
+  return Promise.resolve({ code: 200, data: { items: [], total: 0 } });
 }
 
-/**
- * 标记通知已读
- * @param {string} notificationId - 通知ID
- */
-function markNotificationRead(notificationId) {
-  return request(`/notifications/${notificationId}/read`, {
-    method: 'POST'
-  });
+function markNotificationRead() {
+  return Promise.resolve({ code: 200, data: null });
 }
 
-/**
- * 标记全部已读
- */
 function markAllNotificationsRead() {
-  return request('/notifications/read-all', {
-    method: 'POST'
-  });
+  return Promise.resolve({ code: 200, data: null });
 }
 
-/**
- * 获取未读通知数量
- */
 function getUnreadNotificationCount() {
-  return request('/notifications/unread-count');
+  return Promise.resolve({ code: 200, data: { count: 0 } });
 }
 
 module.exports = {
   request,
+  // 归一化
+  mapOrder,
+  mapCoupon,
+  mapPoints,
+  mapPagination,
+  ORDER_STATUS_TO_UI,
+  ORDER_STATUS_TO_BACKEND,
+  COUPON_STATUS_TO_BACKEND,
+  // 认证
   login,
+  wxLogin,
+  logout,
+  getCurrentUser,
+  getCurrentUserId,
   getUserInfo,
   updateUserInfo,
+  // 站点
+  getStations,
   getNearbyStations,
   getStationDetail,
   searchStations,
   filterStations,
+  // 收藏
   getFavorites,
   addFavorite,
   removeFavorite,
+  // 充电
   startCharging,
   getChargingStatus,
   stopCharging,
+  // 订单
   getOrders,
   getOrderDetail,
   reviewOrder,
+  // 支付
   createPayment,
   queryPaymentStatus,
+  // 钱包
   getWallet,
   recharge,
   getTransactions,
+  // 优惠券
   getCoupons,
   claimCoupon,
-  useCoupon,
+  // 积分
   getPoints,
   getPointsHistory,
   dailySignIn,
   redeemPoints,
+  // 通知
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
