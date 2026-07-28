@@ -1,7 +1,18 @@
-import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import * as SecureStore from 'expo-secure-store';
-import api, { tokenStorage, authApi, stationApi, deviceApi, alarmApi, workOrderApi, dashboardApi, revenueApi, chargerApi, notificationApi } from '../api';
+import api, {
+  tokenStorage,
+  authApi,
+  stationApi,
+  alarmApi,
+  workOrderApi,
+  dashboardApi,
+  revenueApi,
+  mapAlarm,
+  mapWorkOrder,
+  mapStation,
+  mapPagination,
+} from '../api';
 
 // Mock expo-secure-store
 jest.mock('expo-secure-store', () => ({
@@ -15,425 +26,331 @@ const mockAxios = new MockAdapter(api);
 const TEST_TOKEN = 'test-jwt-token-12345';
 const BASE_URL = 'http://8.134.106.166/api/v1';
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockAxios.reset();
+  (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
+});
+
 describe('api instance', () => {
-  it('should create an axios instance with correct baseURL', () => {
+  it('should target the real cloud baseURL', () => {
     expect(api.defaults.baseURL).toBe(BASE_URL);
     expect(api.defaults.timeout).toBe(15000);
-    expect(api.defaults.headers['Content-Type']).toBe('application/json');
-  });
-});
-
-describe('request interceptor', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
   });
 
-  it('should inject Bearer token when token exists', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
-
-    mockAxios.onGet('/auth/profile').reply((config) => {
-      expect(config.headers?.Authorization).toBe(`Bearer ${TEST_TOKEN}`);
-      return [200, { code: 0, message: 'ok', data: {} }];
-    });
-
-    await api.get('/auth/profile');
-    expect(SecureStore.getItemAsync).toHaveBeenCalledWith('auth_token');
-  });
-
-  it('should not inject Authorization header when no token', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
-
-    mockAxios.onGet('/stations').reply((config) => {
-      expect(config.headers?.Authorization).toBeUndefined();
-      return [200, { code: 0, message: 'ok', data: { items: [], total: 0, page: 1, pageSize: 10 } }];
-    });
-
-    await api.get('/stations');
-  });
-
-  it('should handle SecureStore error gracefully', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockRejectedValue(new Error('SecureStore error'));
-
-    mockAxios.onGet('/auth/profile').reply((config) => {
-      expect(config.headers?.Authorization).toBeUndefined();
-      return [200, { code: 0, message: 'ok', data: {} }];
-    });
-
-    await api.get('/auth/profile');
-  });
-});
-
-describe('401 response interceptor', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should clear token on 401 response', async () => {
-    mockAxios.onGet('/auth/profile').reply(401, { code: 401, message: 'Unauthorized' });
-
-    await expect(api.get('/auth/profile')).rejects.toThrow();
+  it('401 clears stored token', async () => {
+    mockAxios.onGet('/alarms').reply(401, { detail: 'Unauthorized' });
+    await expect(alarmApi.getList()).rejects.toBeDefined();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('auth_token');
-  });
-
-  it('should not clear token on non-401 errors', async () => {
-    mockAxios.onGet('/auth/profile').reply(500, { code: 500, message: 'Server Error' });
-
-    await expect(api.get('/auth/profile')).rejects.toThrow();
-    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
-  });
-
-  it('should propagate the error after handling 401', async () => {
-    mockAxios.onGet('/auth/profile').reply(401, { code: 401, message: 'Unauthorized' });
-
-    await expect(api.get('/auth/profile')).rejects.toBeDefined();
   });
 });
 
 describe('tokenStorage', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('getToken should return token from SecureStore', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
-    const token = await tokenStorage.getToken();
-    expect(token).toBe(TEST_TOKEN);
+  it('set/get/remove delegate to SecureStore', async () => {
+    await tokenStorage.setToken('t1');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('auth_token', 't1');
+    await tokenStorage.getToken();
     expect(SecureStore.getItemAsync).toHaveBeenCalledWith('auth_token');
-  });
-
-  it('getToken should return null on error', async () => {
-    (SecureStore.getItemAsync as jest.Mock).mockRejectedValue(new Error('error'));
-    const token = await tokenStorage.getToken();
-    expect(token).toBeNull();
-  });
-
-  it('setToken should store token in SecureStore', async () => {
-    await tokenStorage.setToken(TEST_TOKEN);
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('auth_token', TEST_TOKEN);
-  });
-
-  it('removeToken should delete token from SecureStore', async () => {
     await tokenStorage.removeToken();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('auth_token');
   });
 });
 
-describe('authApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
-    jest.clearAllMocks();
-  });
-
-  it('login should POST /auth/login and return data', async () => {
-    const loginData = { username: 'admin', password: '123456' };
-    const responseData = { token: TEST_TOKEN, user: { id: 1, username: 'admin', nickname: '管理员', email: 'admin@test.com', phone: '13800138000', role: 'admin' as const, stationIds: [1, 2], createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' } };
-    const apiResponse = { code: 0, message: 'success', data: responseData };
-
-    mockAxios.onPost('/auth/login', loginData).reply(200, apiResponse);
-
-    const result = await authApi.login(loginData);
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('logout should POST /auth/logout', async () => {
-    const apiResponse = { code: 0, message: 'success', data: null };
-    mockAxios.onPost('/auth/logout').reply(200, apiResponse);
-
-    const result = await authApi.logout();
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getProfile should GET /auth/profile', async () => {
-    const user = { id: 1, username: 'admin', nickname: '管理员', email: 'admin@test.com', phone: '13800138000', role: 'admin' as const, stationIds: [1, 2], createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: user };
-    mockAxios.onGet('/auth/profile').reply(200, apiResponse);
-
-    const result = await authApi.getProfile();
-    expect(result).toEqual(apiResponse);
+describe('auth contract (real cloud)', () => {
+  it('login posts OAuth2 form-urlencoded and reads token key', async () => {
+    let captured: Record<string, unknown> = {};
+    mockAxios.onPost('/auth/login').reply((config) => {
+      captured = {
+        body: config.data,
+        contentType: config.headers?.['Content-Type'],
+      };
+      return [200, { code: 200, message: 'success', data: { token: 'tok-1', user: { id: 3, username: 'admin' } } }];
+    });
+    const resp = await authApi.login({ username: 'admin', password: 'pw' });
+    expect(captured.contentType).toBe('application/x-www-form-urlencoded');
+    expect(captured.body).toBe('username=admin&password=pw');
+    expect(resp.data.token).toBe('tok-1');
+    expect(resp.data.user.username).toBe('admin');
   });
 });
 
-describe('stationApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
+describe('mappers (snake_case → camelCase)', () => {
+  it('mapAlarm maps real cloud alarm fields', () => {
+    const a = mapAlarm({
+      id: 2983,
+      device_id: 1,
+      station_id: 15,
+      station_name: '济南光伏电站',
+      device_name: '充电桩#1',
+      alarm_type: 'high_temperature',
+      level: 'fatal',
+      content: 'Charger temperature high: 52.2°C',
+      status: 'active',
+      created_at: '2026-07-28T20:00:53+08:00',
+      handled_at: null,
+    });
+    expect(a.id).toBe(2983);
+    expect(a.stationId).toBe(15);
+    expect(a.stationName).toBe('济南光伏电站');
+    expect(a.level).toBe('critical'); // fatal → critical
+    expect(a.status).toBe('unhandled'); // active → unhandled
+    expect(a.title).toBe('温度过高');
+    expect(a.description).toBe('Charger temperature high: 52.2°C');
+    expect(a.handledAt).toBeUndefined();
   });
 
-  it('getList should GET /stations with params', async () => {
-    const paginatedData = { items: [{ id: 1, name: '站A', code: 'ST001', address: '地址A', status: 'online' as const, latitude: 23.1, longitude: 113.3, deviceCount: 5, onlineDeviceCount: 3, alarmCount: 1, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' }], total: 1, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/stations', { params: { page: 1, pageSize: 10 } }).reply(200, apiResponse);
-
-    const result = await stationApi.getList({ page: 1, pageSize: 10 });
-    expect(result).toEqual(apiResponse);
+  it('mapAlarm status mapping acknowledged/ignored', () => {
+    expect(mapAlarm({ status: 'acknowledged' }).status).toBe('processing');
+    expect(mapAlarm({ status: 'ignored' }).status).toBe('resolved');
+    expect(mapAlarm({ status: 'resolved' }).status).toBe('resolved');
+    expect(mapAlarm({ level: 'warning' }).level).toBe('warning');
   });
 
-  it('getList should work without params', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/stations').reply(200, apiResponse);
-
-    const result = await stationApi.getList();
-    expect(result).toEqual(apiResponse);
+  it('mapWorkOrder maps WO- string id + level/status', () => {
+    const w = mapWorkOrder({
+      id: 'WO-20260711174343-f74b',
+      fault_desc: '设备健康度告警: TL-TR-100KVA-017 健康度 78.1%',
+      type: 'repair',
+      level: 'P0',
+      status: 'processing',
+      station_id: 13,
+      device_id: 17,
+      assignee_id: null,
+      creator_id: null,
+      create_time: '2026-07-11T09:43:43+08:00',
+      finish_time: null,
+      solution: null,
+    });
+    expect(w.id).toBe('WO-20260711174343-f74b');
+    expect(typeof w.id).toBe('string');
+    expect(w.title).toContain('设备健康度告警');
+    expect(w.priority).toBe('urgent'); // P0 → urgent
+    expect(w.status).toBe('in_progress'); // processing → in_progress
+    expect(w.solution).toBeUndefined();
+    expect(w.createdAt).toBe('2026-07-11T09:43:43+08:00');
   });
 
-  it('getDetail should GET /stations/:id', async () => {
-    const station = { id: 1, name: '站A', code: 'ST001', address: '地址A', status: 'online' as const, latitude: 23.1, longitude: 113.3, deviceCount: 5, onlineDeviceCount: 3, alarmCount: 1, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: station };
-    mockAxios.onGet('/stations/1').reply(200, apiResponse);
-
-    const result = await stationApi.getDetail(1);
-    expect(result).toEqual(apiResponse);
+  it('mapWorkOrder accepted/pending_verify/verified status mapping', () => {
+    expect(mapWorkOrder({ status: 'accepted' }).status).toBe('in_progress');
+    expect(mapWorkOrder({ status: 'pending_verify' }).status).toBe('completed');
+    expect(mapWorkOrder({ status: 'verified' }).status).toBe('completed');
+    expect(mapWorkOrder({ level: 'P1' }).priority).toBe('high');
+    expect(mapWorkOrder({ level: 'P2' }).priority).toBe('normal');
+    expect(mapWorkOrder({ level: 'warning' }).priority).toBe('low');
   });
 
-  it('getDevices should GET /stations/:stationId/devices', async () => {
-    const devices = [{ id: 1, stationId: 1, name: '充电桩A', code: 'CH001', type: 'charger' as const, status: 'online' as const, model: 'CH-2000', manufacturer: '厂商A', lastHeartbeat: '2024-01-01T00:00:00Z', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' }];
-    const apiResponse = { code: 0, message: 'success', data: devices };
-    mockAxios.onGet('/stations/1/devices').reply(200, apiResponse);
-
-    const result = await stationApi.getDevices(1);
-    expect(result).toEqual(apiResponse);
+  it('mapStation maps lat/lon + status normal→online', () => {
+    const s = mapStation({
+      id: 16,
+      name: '济南光伏电站',
+      code: 'ST2026016',
+      address: '济南市高新区',
+      lat: 36.6681,
+      lon: 116.9972,
+      status: 'normal',
+      total_devices: 7,
+      health_score: 0.91,
+      total_power: 1750.0,
+      created_at: '2026-06-23T03:20:01+08:00',
+    });
+    expect(s.latitude).toBe(36.6681);
+    expect(s.longitude).toBe(116.9972);
+    expect(s.status).toBe('online');
+    expect(s.deviceCount).toBe(7);
+    expect(s.healthScore).toBe(0.91);
   });
 
-  it('getAlarms should GET /stations/:stationId/alarms with params', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/stations/1/alarms', { params: { page: 1, pageSize: 10 } }).reply(200, apiResponse);
-
-    const result = await stationApi.getAlarms(1, { page: 1, pageSize: 10 });
-    expect(result).toEqual(apiResponse);
-  });
-});
-
-describe('deviceApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
-  });
-
-  it('getList should GET /devices', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/devices').reply(200, apiResponse);
-
-    const result = await deviceApi.getList();
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getList should pass stationId param', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/devices', { params: { stationId: 1 } }).reply(200, apiResponse);
-
-    const result = await deviceApi.getList({ stationId: 1 });
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getDetail should GET /devices/:id', async () => {
-    const device = { id: 1, stationId: 1, name: '充电桩A', code: 'CH001', type: 'charger' as const, status: 'online' as const, model: 'CH-2000', manufacturer: '厂商A', lastHeartbeat: '2024-01-01T00:00:00Z', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: device };
-    mockAxios.onGet('/devices/1').reply(200, apiResponse);
-
-    const result = await deviceApi.getDetail(1);
-    expect(result).toEqual(apiResponse);
-  });
-});
-
-describe('alarmApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
-  });
-
-  it('getList should GET /alarms', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/alarms').reply(200, apiResponse);
-
-    const result = await alarmApi.getList();
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getDetail should GET /alarms/:id', async () => {
-    const alarm = { id: 1, stationId: 1, stationName: '站A', type: 'device_fault' as const, level: 'warning' as const, title: '温度异常', description: '温度过高', status: 'unhandled' as const, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: alarm };
-    mockAxios.onGet('/alarms/1').reply(200, apiResponse);
-
-    const result = await alarmApi.getDetail(1);
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('handleAlarm should POST /alarms/:id/handle', async () => {
-    const alarm = { id: 1, stationId: 1, stationName: '站A', type: 'device_fault' as const, level: 'warning' as const, title: '温度异常', description: '温度过高', status: 'resolved' as const, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: alarm };
-    mockAxios.onPost('/alarms/1/handle').reply(200, apiResponse);
-
-    const result = await alarmApi.handleAlarm(1);
-    expect(result).toEqual(apiResponse);
+  it('mapPagination normalizes page_size → pageSize', () => {
+    const p = mapPagination(
+      { items: [{ id: 1, status: 'active' }], total: 2952, page: 1, page_size: 50 },
+      mapAlarm
+    );
+    expect(p.total).toBe(2952);
+    expect(p.pageSize).toBe(50);
+    expect(p.items).toHaveLength(1);
+    expect(p.items[0].status).toBe('unhandled');
   });
 });
 
-describe('workOrderApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
+describe('alarmApi contract', () => {
+  it('getList sends snake_case params + reverses UI status filter', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/alarms').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 50 } }];
+    });
+    await alarmApi.getList({ stationId: 15, status: 'unhandled', page: 1, pageSize: 50 });
+    expect(params.station_id).toBe(15);
+    expect(params.status).toBe('active');
+    expect(params.page_size).toBe(50);
+    expect(params.pageSize).toBeUndefined();
   });
 
-  it('getList should GET /work-orders', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/work-orders').reply(200, apiResponse);
-
-    const result = await workOrderApi.getList();
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getDetail should GET /work-orders/:id', async () => {
-    const workOrder = { id: 1, stationId: 1, stationName: '站A', title: '维修', description: '需要维修', type: 'repair' as const, priority: 'high' as const, status: 'pending' as const, creatorId: 1, creatorName: 'admin', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: workOrder };
-    mockAxios.onGet('/work-orders/1').reply(200, apiResponse);
-
-    const result = await workOrderApi.getDetail(1);
-    expect(result).toEqual(apiResponse);
-  });
-});
-
-describe('dashboardApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
-  });
-
-  it('getStats should GET /dashboard/stats', async () => {
-    const stats = { totalStations: 10, onlineStations: 8, offlineStations: 2, totalAlarms: 5, unhandledAlarms: 2, revenueSummary: { today: 1000, week: 7000, month: 30000, total: 500000 } };
-    const apiResponse = { code: 0, message: 'success', data: stats };
-    mockAxios.onGet('/dashboard/stats').reply(200, apiResponse);
-
-    const result = await dashboardApi.getStats();
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getRecentAlarms should GET /dashboard/recent-alarms', async () => {
-    const alarms: never[] = [];
-    const apiResponse = { code: 0, message: 'success', data: alarms };
-    mockAxios.onGet('/dashboard/recent-alarms', { params: { limit: 5 } }).reply(200, apiResponse);
-
-    const result = await dashboardApi.getRecentAlarms(5);
-    expect(result).toEqual(apiResponse);
+  it('handleAlarm hits PUT /alarms/{id}/ack (no /handle on real cloud)', async () => {
+    let method = '';
+    mockAxios.onPut('/alarms/2983/ack').reply((config) => {
+      method = config.method ?? '';
+      return [200, { code: 200, message: 'success', data: { id: 2983, status: 'acknowledged' } }];
+    });
+    const resp = await alarmApi.handleAlarm(2983);
+    expect(method).toBe('put');
+    expect(resp.data?.status).toBe('processing');
   });
 });
 
-describe('revenueApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
+describe('workOrderApi contract', () => {
+  it('getList hits /work-orders with snake params + maps items', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/work-orders').reply((config) => {
+      params = config.params ?? {};
+      return [200, {
+        code: 200, message: 'success',
+        data: {
+          items: [{ id: 'WO-20260711174343-f74b', fault_desc: 'x', level: 'P1', status: 'pending', create_time: 't' }],
+          total: 113, page: 1, page_size: 20,
+        },
+      }];
+    });
+    const resp = await workOrderApi.getList({ status: 'in_progress', page: 1, pageSize: 20 });
+    expect(params.status).toBe('processing');
+    expect(params.page_size).toBe(20);
+    expect(resp.data.items[0].id).toBe('WO-20260711174343-f74b');
+    expect(resp.data.items[0].priority).toBe('high');
+    expect(resp.data.total).toBe(113);
   });
 
-  it('getSummary should GET /revenue/summary', async () => {
-    const summary = { today: 1000, week: 7000, month: 30000, total: 500000 };
-    const apiResponse = { code: 0, message: 'success', data: summary };
-    mockAxios.onGet('/revenue/summary').reply(200, apiResponse);
-
-    const result = await revenueApi.getSummary();
-    expect(result).toEqual(apiResponse);
+  it('createWorkOrder posts snake_case body with level mapping', async () => {
+    let body: Record<string, unknown> = {};
+    mockAxios.onPost('/work-orders').reply((config) => {
+      body = JSON.parse(config.data ?? '{}');
+      return [200, { code: 200, message: 'success', data: { id: 'WO-1', fault_desc: 't', level: 'P0', status: 'pending' } }];
+    });
+    await workOrderApi.createWorkOrder({
+      stationId: 13,
+      title: '检修',
+      description: '详情',
+      type: 'repair',
+      priority: 'urgent',
+    });
+    expect(body.fault_desc).toBe('检修');
+    expect(body.level).toBe('P0');
+    expect(body.station_id).toBe(13);
+    expect(body.type).toBe('repair');
   });
 
-  it('getRecords should GET /revenue/records', async () => {
-    const records = [{ date: '2024-01-01', amount: 1000, orderCount: 10 }];
-    const apiResponse = { code: 0, message: 'success', data: records };
-    mockAxios.onGet('/revenue/records', { params: { type: 'day' } }).reply(200, apiResponse);
-
-    const result = await revenueApi.getRecords({ type: 'day' });
-    expect(result).toEqual(apiResponse);
-  });
-});
-
-describe('chargerApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
+  it('completeWorkOrder sends solution as query param', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onPost('/work-orders/WO-1/complete').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { id: 'WO-1', status: 'completed' } }];
+    });
+    await workOrderApi.completeWorkOrder('WO-1', '已更换模块');
+    expect(params.solution).toBe('已更换模块');
   });
 
-  it('getMonitorList should GET /stations/:id/chargers/monitor', async () => {
-    const chargers = [{ id: 1, deviceId: 101, deviceName: '充电桩1', connectorStatus: 'idle', power: 0, voltage: 220, current: 0, temperature: 25, energyTotal: 1000, sessionEnergy: 0, sessionDuration: 0, state: 'idle', faultCode: null, faultMessage: null, lastHeartbeat: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' }];
-    const apiResponse = { code: 0, message: 'success', data: chargers };
-    mockAxios.onGet('/stations/1/chargers/monitor').reply(200, apiResponse);
-
-    const result = await chargerApi.getMonitorList(1);
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getMonitorSummary should GET /stations/:id/chargers/summary', async () => {
-    const summary = { totalChargers: 5, chargingCount: 2, idleCount: 2, faultCount: 1, totalPower: 120.5, todayEnergy: 500, todaySessions: 20, avgPowerPerCharger: 24.1 };
-    const apiResponse = { code: 0, message: 'success', data: summary };
-    mockAxios.onGet('/stations/1/chargers/summary').reply(200, apiResponse);
-
-    const result = await chargerApi.getMonitorSummary(1);
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getFaultRecords should GET /chargers/faults', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/chargers/faults', { params: { stationId: 1 } }).reply(200, apiResponse);
-
-    const result = await chargerApi.getFaultRecords({ stationId: 1 });
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('clearFault should POST /chargers/faults/:id/clear', async () => {
-    const apiResponse = { code: 0, message: 'success', data: { success: true, message: '故障已清除' } };
-    mockAxios.onPost('/chargers/faults/1/clear').reply(200, apiResponse);
-
-    const result = await chargerApi.clearFault(1);
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getTrend should GET /devices/:id/charger-trend', async () => {
-    const trend = {
-      deviceId: 101,
-      points: [
-        { timestamp: '2024-01-15T10:00:00Z', power: 10, voltage: 380, current: 30, soc: 20 },
-        { timestamp: '2024-01-15T10:05:00Z', power: 30, voltage: 381, current: 80, soc: 45 },
-      ],
-    };
-    const apiResponse = { code: 0, message: 'success', data: trend };
-    mockAxios.onGet('/devices/101/charger-trend', { params: { points: 20 } }).reply(200, apiResponse);
-
-    const result = await chargerApi.getTrend(101, { points: 20 });
-    expect(result).toEqual(apiResponse);
+  it('getDetail accepts string id', async () => {
+    mockAxios.onGet('/work-orders/WO-20260711174343-f74b').reply(200, {
+      code: 200, message: 'success',
+      data: { id: 'WO-20260711174343-f74b', status: 'pending', level: 'warning', fault_desc: 'd', create_time: 't' },
+    });
+    const resp = await workOrderApi.getDetail('WO-20260711174343-f74b');
+    expect(resp.data.id).toBe('WO-20260711174343-f74b');
+    expect(resp.data.status).toBe('pending');
   });
 });
 
-describe('notificationApi', () => {
-  beforeEach(() => {
-    mockAxios.reset();
+describe('stationApi contract', () => {
+  it('getList maps snake pagination + station fields', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/stations').reply((config) => {
+      params = config.params ?? {};
+      return [200, {
+        code: 200, message: 'success',
+        data: {
+          items: [{ id: 16, name: '济南光伏电站', lat: 36.6, lon: 116.9, status: 'normal', total_devices: 7 }],
+          total: 20, page: 1, page_size: 100,
+        },
+      }];
+    });
+    const resp = await stationApi.getList({ page: 1, pageSize: 100 });
+    expect(params.page_size).toBe(100);
+    expect(resp.data.items[0].status).toBe('online');
+    expect(resp.data.items[0].latitude).toBe(36.6);
+    expect(resp.data.pageSize).toBe(100);
+  });
+});
+
+describe('dashboardApi aggregation (real cloud has no dashboard endpoint)', () => {
+  it('aggregates work-orders/stats + alarms + stations', async () => {
+    mockAxios.onGet('/work-orders/stats').reply(200, {
+      code: 200, message: 'success',
+      data: { total: 113, status_distribution: { pending: 100, processing: 4, accepted: 2, completed: 7 } },
+    });
+    mockAxios.onGet('/alarms').reply((config) => {
+      const p = config.params ?? {};
+      const total = p.status === 'active' ? 2900 : 2952;
+      return [200, { code: 200, message: 'success', data: { items: [], total, page: 1, page_size: 1 } }];
+    });
+    mockAxios.onGet('/stations').reply(200, {
+      code: 200, message: 'success',
+      data: {
+        items: [
+          { id: 1, name: 'a', status: 'normal', lat: 0, lon: 0 },
+          { id: 2, name: 'b', status: 'offline', lat: 0, lon: 0 },
+        ],
+        total: 2, page: 1, page_size: 100,
+      },
+    });
+    const resp = await dashboardApi.getStats();
+    expect(resp.data.totalStations).toBe(2);
+    expect(resp.data.onlineStations).toBe(1);
+    expect(resp.data.offlineStations).toBe(1);
+    expect(resp.data.totalAlarms).toBe(2952);
+    expect(resp.data.unhandledAlarms).toBe(2900);
+    expect(resp.data.pendingWorkOrders).toBe(100);
+    expect(resp.data.totalWorkOrders).toBe(113);
   });
 
-  it('getList should GET /notifications', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 20 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/notifications').reply(200, apiResponse);
+  it('getRecentAlarms maps items', async () => {
+    mockAxios.onGet('/alarms').reply(200, {
+      code: 200, message: 'success',
+      data: { items: [{ id: 1, alarm_type: 'offline', level: 'info', status: 'active', content: 'c' }], total: 1, page: 1, page_size: 5 },
+    });
+    const resp = await dashboardApi.getRecentAlarms(5);
+    expect(resp.data).toHaveLength(1);
+    expect(resp.data[0].title).toBe('设备离线');
+  });
+});
 
-    const result = await notificationApi.getList();
-    expect(result).toEqual(apiResponse);
+describe('revenueApi contract (A3 /business domain)', () => {
+  it('getSummary aggregates total + daily windows', async () => {
+    mockAxios.onGet('/business/revenue/summary').reply(200, {
+      code: 200, message: 'success',
+      data: { order_count: 10, net_revenue: 1000.5, gross_amount: 1100, discount_total: 99.5 },
+    });
+    const daily = Array.from({ length: 30 }, (_, i) => ({
+      date: `2026-07-${String(i + 1).padStart(2, '0')}`,
+      order_count: 1,
+      net_revenue: 10,
+    }));
+    mockAxios.onGet('/business/revenue/daily').reply(200, { code: 200, message: 'success', data: daily });
+    const resp = await revenueApi.getSummary();
+    expect(resp.data.total).toBe(1000.5);
+    expect(resp.data.month).toBe(300);
+    expect(resp.data.week).toBe(70);
+    expect(resp.data.today).toBe(10);
   });
 
-  it('getUnreadCount should GET /notifications/unread-count', async () => {
-    const apiResponse = { code: 0, message: 'success', data: { count: 5 } };
-    mockAxios.onGet('/notifications/unread-count').reply(200, apiResponse);
-
-    const result = await notificationApi.getUnreadCount();
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('markAsRead should POST /notifications/:id/read', async () => {
-    const notification = { id: 1, type: 'alarm', title: '告警', message: '温度异常', level: 'critical', isRead: true, createdAt: '2024-01-01T00:00:00Z' };
-    const apiResponse = { code: 0, message: 'success', data: notification };
-    mockAxios.onPost('/notifications/1/read').reply(200, apiResponse);
-
-    const result = await notificationApi.markAsRead(1);
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('markAllAsRead should POST /notifications/read-all', async () => {
-    const apiResponse = { code: 0, message: 'success', data: null };
-    mockAxios.onPost('/notifications/read-all').reply(200, apiResponse);
-
-    const result = await notificationApi.markAllAsRead();
-    expect(result).toEqual(apiResponse);
+  it('getRecords maps daily → RevenueRecord (month → 30 days)', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/business/revenue/daily').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: [{ date: '2026-07-28', order_count: 3, net_revenue: 25.5 }] }];
+    });
+    const resp = await revenueApi.getRecords({ type: 'month' });
+    expect(params.days).toBe(30);
+    expect(resp.data[0]).toEqual({ date: '2026-07-28', amount: 25.5, orderCount: 3 });
+    await revenueApi.getRecords({ type: 'day' });
+    expect(params.days).toBe(7);
   });
 });

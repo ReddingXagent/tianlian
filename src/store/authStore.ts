@@ -53,10 +53,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ token: null, user: null, isAuthenticated: false, isLoading: false });
         return;
       }
-      const response = await authApi.getProfile();
+      // 真云端无 /auth/profile 端点: 有 token 即视为已认证, profile 尽力获取
+      let user: User | null = get().user;
+      try {
+        const response = await authApi.getProfile();
+        if (response.data) user = response.data;
+      } catch {
+        // profile 不可用时保留缓存用户, 不清 token
+      }
       set({
         token,
-        user: response.data,
+        user,
         isAuthenticated: true,
         isLoading: false,
       });

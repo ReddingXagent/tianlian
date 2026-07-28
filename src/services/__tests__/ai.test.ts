@@ -130,29 +130,25 @@ describe('executeToolCall', () => {
   });
 
   it('list_alarms should return formatted alarm list', async () => {
-    const alarms = {
-      items: [
-        {
-          id: 1,
-          stationId: 1,
-          stationName: '站A',
-          title: '温度过高',
-          level: 'critical',
-          status: 'unhandled',
-          description: '温度异常',
-          type: 'temperature_warning',
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        },
-      ],
-      total: 1,
-      page: 1,
-      pageSize: 20,
-    };
-
+    // 真云端契约: snake_case + 状态 active + 分页 page_size
     mockAxios
-      .onGet('/alarms', { params: { status: 'unhandled', pageSize: 20 } })
-      .reply(200, { code: 0, message: 'ok', data: alarms });
+      .onGet('/alarms')
+      .reply(200, {
+        code: 200, message: 'success',
+        data: {
+          items: [{
+            id: 1,
+            station_id: 1,
+            station_name: '站A',
+            alarm_type: 'high_temperature',
+            level: 'critical',
+            status: 'active',
+            content: '温度异常',
+            created_at: '2024-01-01T00:00:00Z',
+          }],
+          total: 1, page: 1, page_size: 20,
+        },
+      });
 
     const result = await executeToolCall('list_alarms', { status: 'unhandled' });
     const parsed = JSON.parse(result);
@@ -160,36 +156,29 @@ describe('executeToolCall', () => {
     expect(parsed.alarms).toHaveLength(1);
     expect(parsed.alarms[0].title).toBe('温度过高');
     expect(parsed.alarms[0].level).toBe('critical');
+    expect(parsed.alarms[0].status).toBe('unhandled');
     expect(parsed.total).toBe(1);
   });
 
   it('list_workorders should return formatted work order list', async () => {
-    const orders = {
-      items: [
-        {
-          id: 1,
-          stationId: 1,
-          stationName: '站A',
-          title: '维修充电桩',
-          description: '需要维修',
-          type: 'repair',
-          priority: 'high',
-          status: 'pending',
-          assigneeName: '张三',
-          creatorId: 1,
-          creatorName: 'admin',
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-01T00:00:00Z',
-        },
-      ],
-      total: 1,
-      page: 1,
-      pageSize: 20,
-    };
-
     mockAxios
-      .onGet('/work-orders', { params: { status: 'pending', pageSize: 20 } })
-      .reply(200, { code: 0, message: 'ok', data: orders });
+      .onGet('/work-orders')
+      .reply(200, {
+        code: 200, message: 'success',
+        data: {
+          items: [{
+            id: 'WO-20240101-0001',
+            station_id: 1,
+            fault_desc: '维修充电桩',
+            type: 'repair',
+            level: 'P1',
+            status: 'pending',
+            creator_id: 1,
+            create_time: '2024-01-01T00:00:00Z',
+          }],
+          total: 1, page: 1, page_size: 20,
+        },
+      });
 
     const result = await executeToolCall('list_workorders', { status: 'pending' });
     const parsed = JSON.parse(result);
@@ -197,33 +186,41 @@ describe('executeToolCall', () => {
     expect(parsed.orders).toHaveLength(1);
     expect(parsed.orders[0].title).toBe('维修充电桩');
     expect(parsed.orders[0].priority).toBe('high');
+    expect(parsed.orders[0].id).toBe('WO-20240101-0001');
   });
 
   it('get_revenue_stats with period=day should return summary', async () => {
-    const summary = { today: 12345, week: 80000, month: 350000, total: 5000000 };
-
+    // A3 经营域契约: /business/revenue/summary 返回 net_revenue(元) + daily 明细
     mockAxios
-      .onGet('/revenue/summary')
-      .reply(200, { code: 0, message: 'ok', data: summary });
+      .onGet('/business/revenue/summary')
+      .reply(200, { code: 200, message: 'success', data: { order_count: 5, net_revenue: 5000.0 } });
+    mockAxios
+      .onGet('/business/revenue/daily')
+      .reply(200, { code: 200, message: 'success', data: Array.from({ length: 30 }, (_, i) => ({
+        date: `2024-01-${String(i + 1).padStart(2, '0')}`,
+        order_count: 1,
+        net_revenue: i >= 23 ? 100 : 80,
+      })) });
 
     const result = await executeToolCall('get_revenue_stats', { period: 'day' });
     const parsed = JSON.parse(result);
 
-    expect(parsed.today).toBe('¥123.45');
-    expect(parsed.week).toBe('¥800.00');
-    expect(parsed.month).toBe('¥3500.00');
+    expect(parsed.today).toBe('¥100.00');
+    expect(parsed.week).toBe('¥700.00');
+    expect(parsed.total).toBe('¥5000.00');
     expect(parsed.period).toBe('day');
   });
 
   it('get_revenue_stats with period=month should return records', async () => {
-    const records = [
-      { date: '2024-01-01', amount: 1000, orderCount: 10 },
-      { date: '2024-01-02', amount: 2000, orderCount: 20 },
-    ];
-
     mockAxios
-      .onGet('/revenue/records', { params: { type: 'month' } })
-      .reply(200, { code: 0, message: 'ok', data: records });
+      .onGet('/business/revenue/daily')
+      .reply(200, {
+        code: 200, message: 'success',
+        data: [
+          { date: '2024-01-01', order_count: 10, net_revenue: 10.0 },
+          { date: '2024-01-02', order_count: 20, net_revenue: 20.0 },
+        ],
+      });
 
     const result = await executeToolCall('get_revenue_stats', { period: 'month' });
     const parsed = JSON.parse(result);
@@ -234,18 +231,23 @@ describe('executeToolCall', () => {
   });
 
   it('get_dashboard_summary should return dashboard stats', async () => {
-    const stats = {
-      totalStations: 10,
-      onlineStations: 8,
-      offlineStations: 2,
-      totalAlarms: 5,
-      unhandledAlarms: 2,
-      revenueSummary: { today: 5000, week: 35000, month: 150000, total: 2000000 },
-    };
-
-    mockAxios
-      .onGet('/dashboard/stats')
-      .reply(200, { code: 0, message: 'ok', data: stats });
+    // 真云端无 dashboard 端点: 聚合 work-orders/stats + alarms + stations
+    mockAxios.onGet('/work-orders/stats').reply(200, {
+      code: 200, message: 'success',
+      data: { total: 12, status_distribution: { pending: 2, processing: 1, completed: 9 } },
+    });
+    mockAxios.onGet('/alarms').reply((config) => {
+      const p = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: p.status === 'active' ? 2 : 5, page: 1, page_size: 1 } }];
+    });
+    mockAxios.onGet('/stations').reply(200, {
+      code: 200, message: 'success',
+      data: {
+        items: Array.from({ length: 8 }, (_, i) => ({ id: i + 1, name: `s${i}`, status: 'normal', lat: 0, lon: 0 }))
+          .concat(Array.from({ length: 2 }, (_, i) => ({ id: i + 9, name: `x${i}`, status: 'offline', lat: 0, lon: 0 }))),
+        total: 10, page: 1, page_size: 100,
+      },
+    });
 
     const result = await executeToolCall('get_dashboard_summary', {});
     const parsed = JSON.parse(result);
@@ -253,7 +255,7 @@ describe('executeToolCall', () => {
     expect(parsed.totalStations).toBe(10);
     expect(parsed.onlineStations).toBe(8);
     expect(parsed.unhandledAlarms).toBe(2);
-    expect(parsed.revenueToday).toBe('¥50.00');
+    expect(parsed.totalAlarms).toBe(5);
   });
 
   it('control_device should send control command', async () => {

@@ -138,11 +138,9 @@ const RevenueScreen: React.FC = () => {
 
       {loading && !refreshing ? (
         <LoadingSpinner text="加载营收数据..." />
-      ) : records.length === 0 ? (
-        <EmptyState icon="💰" title="暂无营收数据" message="当前周期内没有营收记录" />
       ) : (
         <>
-          {/* 汇总数据 */}
+          {/* 汇总数据 (独立于明细, 无明细也展示) */}
           <View style={styles.summaryGrid}>
             <View style={styles.summaryCard}>
               <Text style={styles.summaryLabel}>今日</Text>
@@ -164,6 +162,10 @@ const RevenueScreen: React.FC = () => {
             </View>
           </View>
 
+          {records.length === 0 ? (
+            <EmptyState icon="💰" title="暂无营收明细" message="当前周期内没有营收记录" />
+          ) : (
+            <>
           {/* 图表 */}
           <View style={styles.chartContainer}>
             <View style={styles.chartHeader}>
@@ -231,6 +233,8 @@ const RevenueScreen: React.FC = () => {
               <Text style={styles.recordCount}>{record.orderCount}笔</Text>
             </View>
           ))}
+            </>
+          )}
         </>
       )}
     </ScrollView>

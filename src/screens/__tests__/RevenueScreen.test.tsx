@@ -128,6 +128,6 @@ describe('RevenueScreen', () => {
     (revenueApi.getRecords as jest.Mock).mockResolvedValue({ data: [] });
 
     const { findByText } = render(<RevenueScreen />);
-    expect(await findByText('暂无营收数据')).toBeTruthy();
+    expect(await findByText('暂无营收明细')).toBeTruthy();
   });
 });

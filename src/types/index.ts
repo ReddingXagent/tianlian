@@ -12,6 +12,8 @@ export interface Station {
   deviceCount: number;
   onlineDeviceCount: number;
   alarmCount: number;
+  healthScore?: number;
+  totalPower?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,7 +71,7 @@ export type AlarmStatus = 'unhandled' | 'processing' | 'resolved';
 // 工单 (WorkOrder)
 // =====================
 export interface WorkOrder {
-  id: number;
+  id: string;
   stationId: number;
   stationName: string;
   title: string;
@@ -82,6 +84,7 @@ export interface WorkOrder {
   creatorId: number;
   creatorName: string;
   alarmId?: number;
+  solution?: string;
   scheduledAt?: string;
   completedAt?: string;
   createdAt: string;
@@ -160,7 +163,9 @@ export interface DashboardStats {
   offlineStations: number;
   totalAlarms: number;
   unhandledAlarms: number;
-  revenueSummary: RevenueSummary;
+  pendingWorkOrders?: number;
+  totalWorkOrders?: number;
+  revenueSummary?: RevenueSummary;
 }
 
 export interface RevenueQuery {
@@ -302,6 +307,7 @@ export interface CreateWorkOrderData {
   type: WorkOrderType;
   priority: WorkOrderPriority;
   alarmId?: number;
+  deviceId?: number;
 }
 
 export type RootStackParamList = {

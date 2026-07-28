@@ -313,18 +313,18 @@ export async function executeToolCall(
           const resp = await revenueApi.getSummary();
           const summary = resp.data;
           return JSON.stringify({
-            today: `¥${(summary.today / 100).toFixed(2)}`,
-            week: `¥${(summary.week / 100).toFixed(2)}`,
-            month: `¥${(summary.month / 100).toFixed(2)}`,
-            total: `¥${(summary.total / 100).toFixed(2)}`,
+            today: `¥${summary.today.toFixed(2)}`,
+            week: `¥${summary.week.toFixed(2)}`,
+            month: `¥${summary.month.toFixed(2)}`,
+            total: `¥${summary.total.toFixed(2)}`,
             period,
           });
         }
-        // week/month 用 revenue records
+        // week/month 用 revenue records (金额单位: 元)
         const resp = await revenueApi.getRecords({ type: period });
         const records = resp.data.map((r: RevenueRecord) => ({
           date: r.date,
-          amount: `¥${(r.amount / 100).toFixed(2)}`,
+          amount: `¥${r.amount.toFixed(2)}`,
           orderCount: r.orderCount,
         }));
         return JSON.stringify({ records, period });
@@ -339,9 +339,9 @@ export async function executeToolCall(
           offlineStations: stats.offlineStations,
           totalAlarms: stats.totalAlarms,
           unhandledAlarms: stats.unhandledAlarms,
-          revenueToday: `¥${(stats.revenueSummary.today / 100).toFixed(2)}`,
-          revenueWeek: `¥${(stats.revenueSummary.week / 100).toFixed(2)}`,
-          revenueMonth: `¥${(stats.revenueSummary.month / 100).toFixed(2)}`,
+          revenueToday: `¥${(stats.revenueSummary?.today ?? 0).toFixed(2)}`,
+          revenueWeek: `¥${(stats.revenueSummary?.week ?? 0).toFixed(2)}`,
+          revenueMonth: `¥${(stats.revenueSummary?.month ?? 0).toFixed(2)}`,
         });
       }
 
@@ -388,7 +388,7 @@ export async function sendChatMessage(
   return {
     id: resp.data.id || generateId(),
     role: 'assistant',
-    content: msg.content,
+    content: msg.content ?? '',
     toolCalls: msg.toolCalls,
     timestamp: Date.now(),
   };
@@ -535,7 +535,7 @@ export async function chat(
     const assistantMsg: ChatMessage = {
       id: generateId(),
       role: 'assistant',
-      content: fullContent || null,
+      content: fullContent || '',
       toolCalls,
       timestamp: Date.now(),
     };

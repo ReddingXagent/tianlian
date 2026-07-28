@@ -10,9 +10,9 @@ interface WorkOrderState {
   loading: boolean;
   error: string | null;
   fetchOrders: (params?: { stationId?: number; status?: string; page?: number; pageSize?: number }) => Promise<void>;
-  fetchOrderDetail: (id: number) => Promise<void>;
+  fetchOrderDetail: (id: string) => Promise<void>;
   createOrder: (data: CreateWorkOrderData) => Promise<void>;
-  completeOrder: (id: number) => Promise<void>;
+  completeOrder: (id: string, solution?: string) => Promise<void>;
   setSelectedOrder: (order: WorkOrder | null) => void;
   reset: () => void;
 }
@@ -42,7 +42,7 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
     }
   },
 
-  fetchOrderDetail: async (id: number) => {
+  fetchOrderDetail: async (id: string) => {
     set({ loading: true, error: null });
     try {
       const response = await workOrderApi.getDetail(id);
@@ -68,10 +68,10 @@ export const useWorkOrderStore = create<WorkOrderState>((set, get) => ({
     }
   },
 
-  completeOrder: async (id: number) => {
+  completeOrder: async (id: string, solution?: string) => {
     set({ loading: true, error: null });
     try {
-      await workOrderApi.completeWorkOrder(id);
+      await workOrderApi.completeWorkOrder(id, solution);
       set({ loading: false });
       // Refresh the list
       const currentState = get();

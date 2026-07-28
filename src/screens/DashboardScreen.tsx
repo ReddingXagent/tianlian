@@ -88,15 +88,15 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>营收概览</Text>
           <View style={styles.revenueRow}>
             <View style={styles.revenueItem}>
-              <Text style={styles.revenueAmount}>¥{(stats.revenueSummary.today / 100).toFixed(2)}</Text>
+              <Text style={styles.revenueAmount}>¥{stats.revenueSummary.today.toFixed(2)}</Text>
               <Text style={styles.revenueLabel}>今日</Text>
             </View>
             <View style={styles.revenueItem}>
-              <Text style={styles.revenueAmount}>¥{(stats.revenueSummary.week / 100).toFixed(2)}</Text>
+              <Text style={styles.revenueAmount}>¥{stats.revenueSummary.week.toFixed(2)}</Text>
               <Text style={styles.revenueLabel}>本周</Text>
             </View>
             <View style={styles.revenueItem}>
-              <Text style={styles.revenueAmount}>¥{(stats.revenueSummary.month / 100).toFixed(2)}</Text>
+              <Text style={styles.revenueAmount}>¥{stats.revenueSummary.month.toFixed(2)}</Text>
               <Text style={styles.revenueLabel}>本月</Text>
             </View>
           </View>
@@ -109,7 +109,7 @@ export default function DashboardScreen() {
         <View style={styles.actionGrid}>
           <TouchableOpacity
             style={styles.actionItem}
-            onPress={() => navigation.navigate('Stations')}
+            onPress={() => navigation.navigate('Stations' as never)}
           >
             <Text style={styles.actionIcon}>📍</Text>
             <Text style={styles.actionText}>站点管理</Text>
@@ -130,7 +130,7 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionItem}
-            onPress={() => navigation.navigate('Revenue')}
+            onPress={() => navigation.navigate('Revenue' as never)}
           >
             <Text style={styles.actionIcon}>💰</Text>
             <Text style={styles.actionText}>营收统计</Text>
@@ -142,7 +142,7 @@ export default function DashboardScreen() {
       <View style={styles.stationPreview}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>我的站点</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Stations')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Stations' as never)}>
             <Text style={styles.seeAll}>查看全部 →</Text>
           </TouchableOpacity>
         </View>

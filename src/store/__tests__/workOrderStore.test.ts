@@ -15,7 +15,7 @@ jest.mock('../../services/api', () => ({
 
 const MOCK_ORDERS: WorkOrder[] = [
   {
-    id: 1,
+    id: 'WO-1',
     stationId: 1,
     stationName: '充电站A',
     title: '维修工单',
@@ -29,7 +29,7 @@ const MOCK_ORDERS: WorkOrder[] = [
     updatedAt: '2024-01-15T10:30:00Z',
   },
   {
-    id: 2,
+    id: 'WO-2',
     stationId: 1,
     stationName: '充电站A',
     title: '巡检工单',
@@ -116,7 +116,7 @@ describe('useWorkOrderStore', () => {
       (workOrderApi.getDetail as jest.Mock).mockResolvedValue(response);
 
       await act(async () => {
-        await useWorkOrderStore.getState().fetchOrderDetail(1);
+        await useWorkOrderStore.getState().fetchOrderDetail('WO-1');
       });
 
       const state = useWorkOrderStore.getState();
@@ -130,7 +130,7 @@ describe('useWorkOrderStore', () => {
       (workOrderApi.getDetail as jest.Mock).mockRejectedValue(error);
 
       await act(async () => {
-        await useWorkOrderStore.getState().fetchOrderDetail(999);
+        await useWorkOrderStore.getState().fetchOrderDetail('WO-999');
       });
 
       const state = useWorkOrderStore.getState();
