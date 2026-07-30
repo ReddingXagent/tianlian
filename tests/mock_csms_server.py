@@ -18,10 +18,9 @@ import asyncio
 import json
 import logging
 import uuid
-from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Set
+from datetime import UTC, datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +50,10 @@ OCPP_ACTIONS = [
 class ReceivedMessage:
     """Record of an OCPP message received by the mock CSMS"""
     action: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     charge_point_id: str
     timestamp: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+        default_factory=lambda: datetime.now(UTC).isoformat()
     )
     message_id: str = field(default_factory=lambda: str(uuid.uuid4()))
 
@@ -64,10 +63,10 @@ class ConnectedChargePoint:
     """Tracks a connected ChargePoint"""
     charge_point_id: str
     connected_at: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+        default_factory=lambda: datetime.now(UTC).isoformat()
     )
-    last_heartbeat: Optional[str] = None
-    transactions: Dict[int, Dict[str, Any]] = field(default_factory=dict)
+    last_heartbeat: str | None = None
+    transactions: dict[int, dict[str, Any]] = field(default_factory=dict)
     meter_values_count: int = 0
     status: str = "Available"
     boot_notified: bool = False
@@ -99,24 +98,24 @@ class MockCSMSServer:
         self.registration_status = registration_status
         self.heartbeat_interval = heartbeat_interval
 
-        self._server: Optional[asyncio.AbstractServer] = None
+        self._server: asyncio.AbstractServer | None = None
         self._running = False
-        self._connections: Dict[str, asyncio.Queue] = {}  # cp_id → outgoing queue
-        self._ws_connections: Dict[str, Any] = {}  # cp_id → websocket connection
+        self._connections: dict[str, asyncio.Queue] = {}  # cp_id → outgoing queue
+        self._ws_connections: dict[str, Any] = {}  # cp_id → websocket connection
 
         # Test-accessible state
-        self.boot_notifications: List[ReceivedMessage] = []
-        self.heartbeats: List[ReceivedMessage] = []
-        self.authorizations: List[ReceivedMessage] = []
-        self.start_transactions: List[ReceivedMessage] = []
-        self.stop_transactions: List[ReceivedMessage] = []
-        self.meter_values: List[ReceivedMessage] = []
-        self.status_notifications: List[ReceivedMessage] = []
-        self.all_messages: List[ReceivedMessage] = []
-        self.connected_charge_points: Dict[str, ConnectedChargePoint] = {}
+        self.boot_notifications: list[ReceivedMessage] = []
+        self.heartbeats: list[ReceivedMessage] = []
+        self.authorizations: list[ReceivedMessage] = []
+        self.start_transactions: list[ReceivedMessage] = []
+        self.stop_transactions: list[ReceivedMessage] = []
+        self.meter_values: list[ReceivedMessage] = []
+        self.status_notifications: list[ReceivedMessage] = []
+        self.all_messages: list[ReceivedMessage] = []
+        self.connected_charge_points: dict[str, ConnectedChargePoint] = {}
 
         # HTTP state
-        self._http_server: Optional[asyncio.AbstractServer] = None
+        self._http_server: asyncio.AbstractServer | None = None
 
     @property
     def is_running(self) -> bool:
@@ -152,7 +151,7 @@ class MockCSMSServer:
         self._running = False
 
         # Close all WebSocket connections
-        for cp_id, ws in list(self._ws_connections.items()):
+        for _cp_id, ws in list(self._ws_connections.items()):
             try:
                 await ws.close(code=1001, reason="Server shutting down")
             except Exception:
@@ -219,7 +218,7 @@ class MockCSMSServer:
 
     # ── Message Processing ───────────────────────────────────────────
 
-    async def _process_message(self, cp_id: str, raw: str) -> Optional[str]:
+    async def _process_message(self, cp_id: str, raw: str) -> str | None:
         """Process an incoming OCPP message and return a response (or None)"""
         msg = json.loads(raw)
 
@@ -286,8 +285,8 @@ class MockCSMSServer:
     # ── Action Handlers ──────────────────────────────────────────────
 
     def _handle_boot_notification(
-        self, cp_id: str, payload: Dict[str, Any], received: ReceivedMessage
-    ) -> Dict[str, Any]:
+        self, cp_id: str, payload: dict[str, Any], received: ReceivedMessage
+    ) -> dict[str, Any]:
         """Handle BootNotification request"""
         self.boot_notifications.append(received)
         cp = self.connected_charge_points.get(cp_id)
@@ -303,25 +302,25 @@ class MockCSMSServer:
 
         return {
             "status": self.registration_status,
-            "currentTime": datetime.now(timezone.utc).isoformat(),
+            "currentTime": datetime.now(UTC).isoformat(),
             "interval": self.heartbeat_interval,
         }
 
     def _handle_heartbeat(
-        self, cp_id: str, payload: Dict[str, Any], received: ReceivedMessage
-    ) -> Dict[str, Any]:
+        self, cp_id: str, payload: dict[str, Any], received: ReceivedMessage
+    ) -> dict[str, Any]:
         """Handle Heartbeat request"""
         self.heartbeats.append(received)
         cp = self.connected_charge_points.get(cp_id)
         if cp:
-            cp.last_heartbeat = datetime.now(timezone.utc).isoformat()
+            cp.last_heartbeat = datetime.now(UTC).isoformat()
 
         logger.debug("Mock CSMS: Heartbeat from %s", cp_id)
-        return {"currentTime": datetime.now(timezone.utc).isoformat()}
+        return {"currentTime": datetime.now(UTC).isoformat()}
 
     def _handle_authorize(
-        self, cp_id: str, payload: Dict[str, Any], received: ReceivedMessage
-    ) -> Dict[str, Any]:
+        self, cp_id: str, payload: dict[str, Any], received: ReceivedMessage
+    ) -> dict[str, Any]:
         """Handle Authorize request"""
         self.authorizations.append(received)
         id_tag = payload.get("idTag", "")
@@ -335,8 +334,8 @@ class MockCSMSServer:
         }
 
     def _handle_start_transaction(
-        self, cp_id: str, payload: Dict[str, Any], received: ReceivedMessage
-    ) -> Dict[str, Any]:
+        self, cp_id: str, payload: dict[str, Any], received: ReceivedMessage
+    ) -> dict[str, Any]:
         """Handle StartTransaction request"""
         self.start_transactions.append(received)
         transaction_id = hash(f"{cp_id}-{payload.get('connectorId', 1)}-{len(self.start_transactions)}")
@@ -348,7 +347,7 @@ class MockCSMSServer:
                 "connector_id": payload.get("connectorId"),
                 "id_tag": payload.get("idTag"),
                 "meter_start": payload.get("meterStart"),
-                "started_at": datetime.now(timezone.utc).isoformat(),
+                "started_at": datetime.now(UTC).isoformat(),
             }
             cp.status = "Charging"
 
@@ -366,8 +365,8 @@ class MockCSMSServer:
         }
 
     def _handle_stop_transaction(
-        self, cp_id: str, payload: Dict[str, Any], received: ReceivedMessage
-    ) -> Dict[str, Any]:
+        self, cp_id: str, payload: dict[str, Any], received: ReceivedMessage
+    ) -> dict[str, Any]:
         """Handle StopTransaction request"""
         self.stop_transactions.append(received)
         tx_id = payload.get("transactionId")
@@ -375,7 +374,7 @@ class MockCSMSServer:
         cp = self.connected_charge_points.get(cp_id)
         if cp and tx_id in cp.transactions:
             cp.transactions[tx_id]["meter_stop"] = payload.get("meterStop")
-            cp.transactions[tx_id]["stopped_at"] = datetime.now(timezone.utc).isoformat()
+            cp.transactions[tx_id]["stopped_at"] = datetime.now(UTC).isoformat()
             cp.status = "Available"
 
         logger.info(
@@ -389,8 +388,8 @@ class MockCSMSServer:
         return {"idTagInfo": {"status": "Accepted"}}
 
     def _handle_meter_values(
-        self, cp_id: str, payload: Dict[str, Any], received: ReceivedMessage
-    ) -> Dict[str, Any]:
+        self, cp_id: str, payload: dict[str, Any], received: ReceivedMessage
+    ) -> dict[str, Any]:
         """Handle MeterValues request"""
         self.meter_values.append(received)
         cp = self.connected_charge_points.get(cp_id)
@@ -407,8 +406,8 @@ class MockCSMSServer:
         return {}
 
     def _handle_status_notification(
-        self, cp_id: str, payload: Dict[str, Any], received: ReceivedMessage
-    ) -> Dict[str, Any]:
+        self, cp_id: str, payload: dict[str, Any], received: ReceivedMessage
+    ) -> dict[str, Any]:
         """Handle StatusNotification request"""
         self.status_notifications.append(received)
         cp = self.connected_charge_points.get(cp_id)
@@ -426,7 +425,7 @@ class MockCSMSServer:
 
     # ── Message Building ─────────────────────────────────────────────
 
-    def _build_call_result(self, message_id: str, action: str, payload: Dict[str, Any]) -> str:
+    def _build_call_result(self, message_id: str, action: str, payload: dict[str, Any]) -> str:
         """Build an OCPP CALL_RESULT message"""
         result = json.dumps([CALL_RESULT, message_id, payload])
         return result
@@ -455,12 +454,12 @@ class MockCSMSServer:
         """Check if a charge point is connected"""
         return cp_id in self.connected_charge_points
 
-    def get_cp_status(self, cp_id: str) -> Optional[str]:
+    def get_cp_status(self, cp_id: str) -> str | None:
         """Get the status of a connected charge point"""
         cp = self.connected_charge_points.get(cp_id)
         return cp.status if cp else None
 
-    def get_last_heartbeat(self, cp_id: str) -> Optional[str]:
+    def get_last_heartbeat(self, cp_id: str) -> str | None:
         """Get the last heartbeat time for a charge point"""
         cp = self.connected_charge_points.get(cp_id)
         return cp.last_heartbeat if cp else None
@@ -469,7 +468,7 @@ class MockCSMSServer:
         """Get the count of messages for a specific action"""
         return len([m for m in self.all_messages if m.action == action])
 
-    def get_messages_for_cp(self, cp_id: str) -> List[ReceivedMessage]:
+    def get_messages_for_cp(self, cp_id: str) -> list[ReceivedMessage]:
         """Get all messages from a specific charge point"""
         return [m for m in self.all_messages if m.charge_point_id == cp_id]
 

@@ -13,9 +13,8 @@ import logging
 import sqlite3
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from config import StorageConfig
 from models import TelemetryPoint
@@ -28,7 +27,7 @@ class TelemetryCache:
 
     def __init__(self, config: StorageConfig):
         self.config = config
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._lock = threading.Lock()  # protect SQLite from concurrent async access
 
     def _get_conn(self) -> sqlite3.Connection:
@@ -121,7 +120,7 @@ class TelemetryCache:
             conn.commit()
             self._enforce_cache_limit(conn)
 
-    def cache_telemetry_batch(self, points: List[TelemetryPoint], priority: int = 0) -> int:
+    def cache_telemetry_batch(self, points: list[TelemetryPoint], priority: int = 0) -> int:
         """Cache multiple telemetry points in a single transaction (T-1102)
 
         Args:
@@ -151,7 +150,7 @@ class TelemetryCache:
         logger.debug("Cached %d telemetry points (priority=%d)", len(rows), priority)
         return len(rows)
 
-    def get_unsynced(self, limit: int = 100, priority_only: bool = False) -> List[dict]:
+    def get_unsynced(self, limit: int = 100, priority_only: bool = False) -> list[dict]:
         """Get unsynced telemetry points, ordered by priority then time"""
         with self._lock:
             conn = self._get_conn()
@@ -193,7 +192,7 @@ class TelemetryCache:
             alarm_count = cursor.fetchone()[0]
             return tel_count + alarm_count
 
-    def mark_synced(self, ids: List[int]) -> None:
+    def mark_synced(self, ids: list[int]) -> None:
         """Mark telemetry points as synced"""
         if not ids:
             return
@@ -205,11 +204,11 @@ class TelemetryCache:
             )
             conn.commit()
 
-    def mark_synced_batch(self, ids: List[int]) -> None:
+    def mark_synced_batch(self, ids: list[int]) -> None:
         """Alias for mark_synced - batch operation"""
         self.mark_synced(ids)
 
-    def increment_retry(self, ids: List[int]) -> None:
+    def increment_retry(self, ids: list[int]) -> None:
         """Increment retry count for failed syncs"""
         if not ids:
             return
@@ -231,13 +230,13 @@ class TelemetryCache:
                 "INSERT INTO alarm_cache (device_id, payload, created_at, cached_at) "
                 "VALUES (?, ?, ?, ?)",
                 (device_id, json.dumps(alarm_payload),
-                 alarm_payload.get("timestamp", datetime.now(timezone.utc).isoformat()),
+                 alarm_payload.get("timestamp", datetime.now(UTC).isoformat()),
                  time.time()),
             )
             conn.commit()
             return cursor.lastrowid
 
-    def get_unsynced_alarms(self, limit: int = 50) -> List[dict]:
+    def get_unsynced_alarms(self, limit: int = 50) -> list[dict]:
         """Get unsynced alarm events"""
         with self._lock:
             conn = self._get_conn()
@@ -258,7 +257,7 @@ class TelemetryCache:
                 for row in cursor.fetchall()
             ]
 
-    def mark_alarms_synced(self, ids: List[int]) -> None:
+    def mark_alarms_synced(self, ids: list[int]) -> None:
         """Mark alarm events as synced"""
         if not ids:
             return
@@ -270,7 +269,7 @@ class TelemetryCache:
             )
             conn.commit()
 
-    def increment_alarm_retry(self, ids: List[int]) -> None:
+    def increment_alarm_retry(self, ids: list[int]) -> None:
         """Increment retry count for failed alarm syncs"""
         if not ids:
             return
@@ -304,7 +303,7 @@ class TelemetryCache:
             row = cursor.fetchone()
             return row[0] if row else default
 
-    def load_all_state(self) -> Dict[str, str]:
+    def load_all_state(self) -> dict[str, str]:
         """Load all gateway state key-values"""
         with self._lock:
             conn = self._get_conn()
@@ -313,7 +312,7 @@ class TelemetryCache:
 
     # ── Cloud Sync Operations (separate from MQTT sync) ────────────
 
-    def get_cloud_unsynced(self, limit: int = 100) -> List[dict]:
+    def get_cloud_unsynced(self, limit: int = 100) -> list[dict]:
         """Get telemetry points not yet synced to cloud (cloud_synced=0)"""
         with self._lock:
             conn = self._get_conn()
@@ -336,7 +335,7 @@ class TelemetryCache:
                 for row in cursor.fetchall()
             ]
 
-    def mark_cloud_synced(self, ids: List[int]) -> None:
+    def mark_cloud_synced(self, ids: list[int]) -> None:
         """Mark telemetry points as synced to cloud"""
         if not ids:
             return
@@ -348,7 +347,7 @@ class TelemetryCache:
             )
             conn.commit()
 
-    def get_cloud_unsynced_alarms(self, limit: int = 50) -> List[dict]:
+    def get_cloud_unsynced_alarms(self, limit: int = 50) -> list[dict]:
         """Get alarm events not yet synced to cloud"""
         with self._lock:
             conn = self._get_conn()
@@ -369,7 +368,7 @@ class TelemetryCache:
                 for row in cursor.fetchall()
             ]
 
-    def mark_alarms_cloud_synced(self, ids: List[int]) -> None:
+    def mark_alarms_cloud_synced(self, ids: list[int]) -> None:
         """Mark alarm events as synced to cloud"""
         if not ids:
             return
@@ -462,7 +461,7 @@ class TelemetryCache:
     def cleanup(self, max_age_days: int = 7) -> int:
         """Remove old synced entries and reclaim disk space. Returns count deleted."""
         from datetime import timedelta
-        cutoff_dt = datetime.now(timezone.utc) - timedelta(days=max_age_days)
+        cutoff_dt = datetime.now(UTC) - timedelta(days=max_age_days)
         cutoff = cutoff_dt.isoformat()
 
         with self._lock:

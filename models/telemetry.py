@@ -1,8 +1,7 @@
 """Telemetry data models"""
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Optional
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 
 # 设备名→云端ID映射（云端要求整数device_id）
 DEVICE_ID_MAP = {
@@ -16,19 +15,19 @@ DEVICE_ID_MAP = {
 class TelemetryPoint:
     """Single telemetry data point"""
     device_id: str
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     power: float = 0.0        # kW
     voltage: float = 0.0      # V
     current: float = 0.0      # A
     temperature: float = 0.0  # °C
     energy: float = 0.0       # kWh
-    soc: Optional[float] = None  # State of charge (%)
+    soc: float | None = None  # State of charge (%)
     status: str = "normal"    # normal | warning | fault
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
-    def to_api_payload(self) -> Dict:
+    def to_api_payload(self) -> dict:
         """Format for cloud V3 TelemetryReportLegacy schema
 
         Maps edge gateway fields to cloud V3 fields:
@@ -83,12 +82,12 @@ class TelemetryBatch:
     """Batch of telemetry points"""
     gateway_id: str
     points: list[TelemetryPoint] = field(default_factory=list)
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
     def add(self, point: TelemetryPoint) -> None:
         self.points.append(point)
 
-    def to_api_payload(self) -> Dict:
+    def to_api_payload(self) -> dict:
         return {
             "records": [p.to_api_payload() for p in self.points],
             "pod_id": self.gateway_id,

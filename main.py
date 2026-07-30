@@ -37,23 +37,22 @@ import logging
 import signal
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 # Ensure project root is on sys.path
 _project_root = Path(__file__).resolve().parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from config import GatewayConfig, CloudConfig
-from models import TelemetryPoint, TelemetryBatch
-from adapters.modbus_adapter import ModbusAdapter
-from adapters.ocpp_adapter import OCPPAdapter
-from adapters.mqtt_client import MQTTClient
 from adapters.cloud_client import CloudClient
-from storage.cache import TelemetryCache
+from adapters.modbus_adapter import ModbusAdapter
+from adapters.mqtt_client import MQTTClient
+from adapters.ocpp_adapter import OCPPAdapter
 from api.server import create_app, run_api
+from config import GatewayConfig
+from models import TelemetryPoint
+from storage.cache import TelemetryCache
 
 # ── Logging ─────────────────────────────────────────────────────────────
 
@@ -85,10 +84,10 @@ class EdgeGateway:
         # State
         self._start_time: float = 0.0
         self._running: bool = False
-        self._latest_telemetry: Dict[str, dict] = {}
+        self._latest_telemetry: dict[str, dict] = {}
         self._device_count: int = 0
         self._registered: bool = False
-        self._cloud_token: Optional[str] = None
+        self._cloud_token: str | None = None
 
         # Throughput counters (T-1202)
         self._telemetry_count: int = 0
@@ -97,18 +96,21 @@ class EdgeGateway:
         self._cloud_push_failures: int = 0
 
         # Telemetry batch buffer for cloud upload
-        self._telemetry_buffer: List[TelemetryPoint] = []
-        self._alarm_buffer: List[dict] = []
+        self._telemetry_buffer: list[TelemetryPoint] = []
+        self._alarm_buffer: list[dict] = []
+
+        # Background task strong references (RUF006: prevent fire-and-forget tasks from being GC'd mid-execution)
+        self._bg_tasks: set[asyncio.Task] = set()
 
         # Components (initialized in start())
-        self.cache: Optional[TelemetryCache] = None
-        self.modbus: Optional[ModbusAdapter] = None
-        self.ocpp: Optional[OCPPAdapter] = None
-        self.mqtt: Optional[MQTTClient] = None
-        self.cloud: Optional[CloudClient] = None
-        self._api_task: Optional[asyncio.Task] = None
-        self._sync_task: Optional[asyncio.Task] = None
-        self._cloud_upload_task: Optional[asyncio.Task] = None
+        self.cache: TelemetryCache | None = None
+        self.modbus: ModbusAdapter | None = None
+        self.ocpp: OCPPAdapter | None = None
+        self.mqtt: MQTTClient | None = None
+        self.cloud: CloudClient | None = None
+        self._api_task: asyncio.Task | None = None
+        self._sync_task: asyncio.Task | None = None
+        self._cloud_upload_task: asyncio.Task | None = None
 
     # ── Lifecycle ───────────────────────────────────────────────────
 
@@ -133,11 +135,17 @@ class EdgeGateway:
         self.mqtt = MQTTClient(self.config.mqtt)
 
         # 3. Wire telemetry callbacks: adapter → cache + MQTT publish + cloud buffer
+        def _spawn_bg(coro) -> None:
+            """Create a task and hold a strong reference to prevent GC from reclaiming it mid-execution (RUF006)"""
+            task = asyncio.create_task(coro)
+            self._bg_tasks.add(task)
+            task.add_done_callback(self._bg_tasks.discard)
+
         def on_telemetry(point: TelemetryPoint) -> None:
-            asyncio.create_task(self._handle_telemetry(point))
+            _spawn_bg(self._handle_telemetry(point))
 
         def on_alarm(device_id: str, alarm_type: str, message: str) -> None:
-            asyncio.create_task(self._handle_alarm(device_id, alarm_type, message))
+            _spawn_bg(self._handle_alarm(device_id, alarm_type, message))
 
         self.modbus.on_telemetry(on_telemetry)
         self.modbus.on_alarm(on_alarm)
@@ -357,7 +365,7 @@ class EdgeGateway:
             "device_id": device_id,
             "alarm_type": alarm_type,
             "message": message,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "severity": severity,
         }
 
@@ -495,7 +503,7 @@ class EdgeGateway:
 
 # ── Signal Handling ──────────────────────────────────────────────────────
 
-_gateway: Optional[EdgeGateway] = None
+_gateway: EdgeGateway | None = None
 
 
 def _signal_handler(sig: int) -> None:

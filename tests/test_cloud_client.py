@@ -1,7 +1,5 @@
 """CloudClient 单元测试 — 边缘网关→云端对接验证"""
 
-import asyncio
-import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -168,7 +166,13 @@ class TestCloudLifecycle:
         client = CloudClient(cloud_config, "GW-LC")
 
         with patch("httpx.AsyncClient") as mock_cls:
-            mock_cls.return_value = AsyncMock()
+            mock_client = AsyncMock()
+            # 响应对象的 cookies.get 必须是同步 MagicMock，
+            # 否则 AsyncMock 子属性会返回未 await 的 coroutine（mock 卫生债 F6）
+            resp = MagicMock()
+            resp.cookies.get.return_value = ""
+            mock_client.get.return_value = resp
+            mock_cls.return_value = mock_client
             await client.start()
             assert client._client is not None
 

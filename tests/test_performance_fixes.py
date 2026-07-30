@@ -3,11 +3,9 @@
 Covers T-1202: Performance optimization + Bug fixes.
 """
 
-import asyncio
 import os
 import sys
 import tempfile
-import time
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -18,10 +16,11 @@ _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from config import GatewayConfig, StorageConfig
-from storage.cache import TelemetryCache
-from models import TelemetryPoint
+from datetime import UTC
 
+from config import GatewayConfig, StorageConfig
+from models import TelemetryPoint
+from storage.cache import TelemetryCache
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 
@@ -224,8 +223,8 @@ class TestCleanupCutoff:
         tmp_cache.mark_synced([unsynced[0]["id"]])
 
         # Manually backdate the created_at to 10 days ago
-        from datetime import datetime, timezone, timedelta
-        old_date = (datetime.now(timezone.utc) - timedelta(days=10)).isoformat()
+        from datetime import datetime, timedelta
+        old_date = (datetime.now(UTC) - timedelta(days=10)).isoformat()
         conn = tmp_cache._get_conn()
         conn.execute("UPDATE telemetry_cache SET created_at = ? WHERE id = ?", (old_date, unsynced[0]["id"]))
         conn.commit()
@@ -266,7 +265,7 @@ class TestCacheSyncLoop:
         from config import CloudConfig
 
         # Seed cache with unsynced telemetry
-        for i in range(5):
+        for _i in range(5):
             tmp_cache.cache_telemetry(make_telemetry_point())
         assert tmp_cache.get_cache_size() == 5
 
@@ -307,11 +306,12 @@ class TestCacheSyncLoop:
     @pytest.mark.asyncio
     async def test_sync_cached_telemetry_failure_increments_retry(self, tmp_cache, make_telemetry_point):
         """Failed sync should increment retry count, not mark synced"""
-        from unittest.mock import AsyncMock, patch
+        from unittest.mock import AsyncMock
+
         from adapters.cloud_client import CloudClient
         from config import CloudConfig
 
-        for i in range(3):
+        for _i in range(3):
             tmp_cache.cache_telemetry(make_telemetry_point())
 
         config = CloudConfig(
@@ -374,7 +374,8 @@ class TestCacheSyncLoop:
     @pytest.mark.asyncio
     async def test_sync_cached_alarms_failure_increments_retry(self, tmp_cache):
         """Failed alarm sync should increment retry count"""
-        from unittest.mock import AsyncMock, patch
+        from unittest.mock import AsyncMock
+
         from adapters.cloud_client import CloudClient
         from config import CloudConfig
 

@@ -8,10 +8,10 @@ Simulated mode: generates realistic telemetry without hardware.
 import asyncio
 import logging
 import random
-from typing import Callable, Optional
+from typing import Callable
 
-from models import TelemetryPoint, DeviceInfo
 from config import ModbusConfig
+from models import TelemetryPoint
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +46,9 @@ class ModbusAdapter:
     def __init__(self, config: ModbusConfig):
         self.config = config
         self._running = False
-        self._task: Optional[asyncio.Task] = None
-        self._on_telemetry: Optional[Callable[[TelemetryPoint], None]] = None
-        self._on_alarm: Optional[Callable[[str, str, str], None]] = None
+        self._task: asyncio.Task | None = None
+        self._on_telemetry: Callable[[TelemetryPoint], None] | None = None
+        self._on_alarm: Callable[[str, str, str], None] | None = None
         self._client = None
         self._connected = False
         self._sim_energy: float = 0.0  # cumulative energy for simulation
@@ -288,7 +288,7 @@ class ModbusAdapter:
         voltage: float = 380.0,
         current: float = 0.0,
         temperature: float = 25.0,
-        energy: Optional[float] = None,
+        energy: float | None = None,
         status: str = "normal",
     ) -> TelemetryPoint:
         """Manually inject a telemetry point (for debug/simulation API).

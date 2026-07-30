@@ -9,12 +9,11 @@ Tests cover:
 """
 
 import asyncio
-import json
-import pytest
 import sys
-import time
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Ensure project root on path
 _project_root = Path(__file__).resolve().parent.parent
@@ -24,7 +23,6 @@ if str(_project_root) not in sys.path:
 from config import GatewayConfig, StorageConfig
 from models import TelemetryPoint
 from storage.cache import TelemetryCache
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────
 
@@ -136,7 +134,6 @@ class TestCloudSyncDynamicInterval:
             sleep_calls.append(duration)
             if len(sleep_calls) >= 3:
                 raise asyncio.CancelledError()
-            return
 
         with patch('asyncio.sleep', side_effect=fast_sleep):
             try:
@@ -166,7 +163,6 @@ class TestCloudSyncDynamicInterval:
             sleep_calls.append(duration)
             if len(sleep_calls) >= 5:
                 raise asyncio.CancelledError()
-            return
 
         with patch('asyncio.sleep', side_effect=fast_sleep):
             try:
@@ -189,7 +185,6 @@ class TestBufferTrimming:
     def test_telemetry_buffer_trim(self):
         """Simulate buffer overflow and verify it's capped"""
         from main import EdgeGateway
-        from config import GatewayConfig
 
         gw = EdgeGateway(GatewayConfig.from_env())
 
@@ -205,7 +200,6 @@ class TestBufferTrimming:
 
     def test_alarm_buffer_trim(self):
         from main import EdgeGateway
-        from config import GatewayConfig
 
         gw = EdgeGateway(GatewayConfig.from_env())
 

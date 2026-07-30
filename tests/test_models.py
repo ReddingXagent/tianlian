@@ -1,11 +1,8 @@
 """Tests for models/telemetry.py and models/device.py"""
 
-import json
-import pytest
-from datetime import datetime, timezone
 
-from models.telemetry import TelemetryPoint, TelemetryBatch
 from models.device import DeviceInfo, DeviceStatus, DeviceType, ProtocolType
+from models.telemetry import TelemetryBatch, TelemetryPoint
 
 
 class TestTelemetryPoint:

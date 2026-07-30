@@ -1,9 +1,9 @@
 """Tests for storage/cache.py"""
 
-import json
 import os
-import pytest
 import tempfile
+
+import pytest
 
 from config import StorageConfig
 from models.telemetry import TelemetryPoint

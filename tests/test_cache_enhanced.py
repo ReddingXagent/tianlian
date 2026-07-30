@@ -1,14 +1,11 @@
 """Tests for enhanced TelemetryCache (T-1102: batch ops, alarms, stats, state)"""
 
-import json
+
 import pytest
-import tempfile
-import os
-from pathlib import Path
 
 from config import StorageConfig
-from storage.cache import TelemetryCache
 from models import TelemetryPoint
+from storage.cache import TelemetryCache
 
 
 @pytest.fixture

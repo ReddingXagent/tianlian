@@ -15,7 +15,6 @@ import sqlite3
 import sys
 from pathlib import Path
 
-
 # ── Expected schema definitions ─────────────────────────────────────
 
 EXPECTED_TABLES = {

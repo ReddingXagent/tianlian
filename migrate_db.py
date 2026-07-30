@@ -2,9 +2,9 @@
 """Database migration: ensure all V3 tables and columns exist.
 Safe to run multiple times (IF NOT EXISTS / IF NOT EXISTS column)."""
 
+import os
 import sqlite3
 import sys
-import os
 
 DB_PATH = sys.argv[1] if len(sys.argv) > 1 else "data/gateway.db"
 

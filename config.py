@@ -2,7 +2,6 @@
 
 import os
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
@@ -42,7 +41,7 @@ class ModbusConfig:
     unit_id: int = 1
     timeout: float = 3.0
     poll_interval: int = 5  # seconds
-    registers: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4, 5])
+    registers: list[int] = field(default_factory=lambda: [0, 1, 2, 3, 4, 5])
     use_real_modbus: bool = False  # True = real pymodbus, False = simulated
     retry_count: int = 3  # connection retries before falling back to simulation
     retry_delay: float = 2.0  # seconds between retries

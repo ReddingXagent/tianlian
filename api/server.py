@@ -2,12 +2,11 @@
 
 import logging
 import time
-from typing import Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-import uvicorn
 
 from config import LocalAPIConfig
 from storage.cache import TelemetryCache
@@ -15,7 +14,7 @@ from storage.cache import TelemetryCache
 logger = logging.getLogger(__name__)
 
 # Module-level references set by create_app
-_cache: Optional[TelemetryCache] = None
+_cache: TelemetryCache | None = None
 _start_time: float = 0.0
 _device_count: int = 0
 _latest_telemetry: dict = {}
@@ -32,7 +31,7 @@ class SimulateTelemetryRequest(BaseModel):
     voltage: float = Field(default=380.0, description="Voltage in V")
     current: float = Field(default=0.0, description="Current in A")
     temperature: float = Field(default=25.0, description="Temperature in °C")
-    energy: Optional[float] = Field(default=None, description="Cumulative energy in kWh")
+    energy: float | None = Field(default=None, description="Cumulative energy in kWh")
     status: str = Field(default="normal", description="Device status")
 
 

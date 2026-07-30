@@ -1,4 +1,4 @@
-from .telemetry import TelemetryPoint, TelemetryBatch
 from .device import DeviceInfo, DeviceStatus
+from .telemetry import TelemetryBatch, TelemetryPoint
 
-__all__ = ["TelemetryPoint", "TelemetryBatch", "DeviceInfo", "DeviceStatus"]
+__all__ = ["DeviceInfo", "DeviceStatus", "TelemetryBatch", "TelemetryPoint"]

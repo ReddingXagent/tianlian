@@ -9,17 +9,15 @@ These tests instantiate real TelemetryCache (temp SQLite) and mock only
 external transports (MQTT client, cloud HTTP).
 """
 
-import asyncio
 import json
-import pytest
-import time
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC, datetime
+from unittest.mock import MagicMock, patch
 
-from config import GatewayConfig, MQTTConfig, StorageConfig, ModbusConfig, OCPPConfig, CloudConfig, LocalAPIConfig
+import pytest
+
+from config import CloudConfig, GatewayConfig, LocalAPIConfig, ModbusConfig, MQTTConfig, OCPPConfig, StorageConfig
 from models import TelemetryPoint
 from storage.cache import TelemetryCache
-
 
 # ── Fixtures ────────────────────────────────────────────────────────────
 
@@ -108,7 +106,7 @@ def sample_alarm():
         "alarm_type": "overtemp",
         "message": "Temperature exceeded 80°C",
         "severity": "critical",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
@@ -190,7 +188,7 @@ class TestAlarmPipeline:
                 "alarm_type": f"fault_{i}",
                 "message": f"Fault {i}",
                 "severity": "warning",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             })
 
         alarms = cache.get_unsynced_alarms()

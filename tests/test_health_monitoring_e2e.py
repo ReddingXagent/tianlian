@@ -11,19 +11,16 @@ Tests the full health monitoring pipeline:
     POST /api/simulate/alarm → trigger alarm and verify pipeline
 """
 
-import asyncio
-import pytest
 import time
-from unittest.mock import MagicMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
 
-from config import GatewayConfig, ModbusConfig, OCPPConfig, MQTTConfig, StorageConfig, CloudConfig, LocalAPIConfig
-from storage.cache import TelemetryCache
 from adapters.modbus_adapter import ModbusAdapter
 from adapters.ocpp_adapter import OCPPAdapter
 from api.server import create_app
-
+from config import GatewayConfig, LocalAPIConfig, ModbusConfig, OCPPConfig, StorageConfig
+from storage.cache import TelemetryCache
 
 # ── Fixtures ────────────────────────────────────────────────────────────
 

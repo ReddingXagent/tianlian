@@ -1,9 +1,9 @@
 """Tests for enhanced MQTT client (T-1101: batch publish, LWT, auto-reconnect)"""
 
-import asyncio
 import json
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 
 from adapters.mqtt_client import MQTTClient
 from config import MQTTConfig

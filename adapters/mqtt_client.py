@@ -12,7 +12,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import Callable, List, Optional
+from typing import Callable
 
 import paho.mqtt.client as mqtt
 
@@ -27,14 +27,14 @@ class MQTTClient:
 
     def __init__(self, config: MQTTConfig):
         self.config = config
-        self._client: Optional[mqtt.Client] = None
+        self._client: mqtt.Client | None = None
         self._connected = False
         self._should_reconnect = False
         self._reconnect_attempts = 0
         self._max_reconnect_attempts = 10
-        self._reconnect_task: Optional[asyncio.Task] = None
-        self._on_reconnect_callbacks: List[Callable] = []
-        self._on_disconnect_callbacks: List[Callable] = []
+        self._reconnect_task: asyncio.Task | None = None
+        self._on_reconnect_callbacks: list[Callable] = []
+        self._on_disconnect_callbacks: list[Callable] = []
 
     @property
     def connected(self) -> bool:
@@ -151,7 +151,7 @@ class MQTTClient:
 
         return await self._do_publish(topic, payload)
 
-    async def publish_telemetry_batch(self, points: List[TelemetryPoint]) -> dict:
+    async def publish_telemetry_batch(self, points: list[TelemetryPoint]) -> dict:
         """Publish a batch of telemetry points efficiently (T-1101)
 
         Groups points by device_id and sends as a single message per device,

@@ -1,16 +1,8 @@
 """Tests for config.py"""
 
-import os
-import pytest
 
 from config import (
     GatewayConfig,
-    CloudConfig,
-    MQTTConfig,
-    ModbusConfig,
-    OCPPConfig,
-    StorageConfig,
-    LocalAPIConfig,
 )
 
 

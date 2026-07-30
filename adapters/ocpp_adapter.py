@@ -18,12 +18,12 @@ import asyncio
 import logging
 import random
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable
 
-from models import TelemetryPoint
 from config import OCPPConfig
+from models import TelemetryPoint
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +163,6 @@ class BootNotificationResponse:
 @dataclass
 class HeartbeatRequest:
     """OCPP Heartbeat.req (empty payload)"""
-    pass
 
 
 @dataclass
@@ -181,7 +180,7 @@ class AuthorizeRequest:
 @dataclass
 class AuthorizeResponse:
     """OCPP Authorize.conf"""
-    id_tag_info: Dict[str, Any] = field(default_factory=dict)
+    id_tag_info: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -191,14 +190,14 @@ class StartTransactionRequest:
     id_tag: str
     meter_start: int  # Wh
     timestamp: str = ""
-    reservation_id: Optional[int] = None
+    reservation_id: int | None = None
 
 
 @dataclass
 class StartTransactionResponse:
     """OCPP StartTransaction.conf"""
     transaction_id: int
-    id_tag_info: Dict[str, Any] = field(default_factory=dict)
+    id_tag_info: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -208,14 +207,14 @@ class StopTransactionRequest:
     meter_stop: int  # Wh
     timestamp: str = ""
     reason: StopReason = StopReason.EV_DISCONNECTED
-    id_tag: Optional[str] = None
-    transaction_data: List[Dict[str, Any]] = field(default_factory=list)
+    id_tag: str | None = None
+    transaction_data: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
 class StopTransactionResponse:
     """OCPP StopTransaction.conf"""
-    id_tag_info: Optional[Dict[str, Any]] = None
+    id_tag_info: dict[str, Any] | None = None
 
 
 @dataclass
@@ -227,28 +226,27 @@ class SampledValue:
     context: ReadingContext = ReadingContext.SAMPLE_PERIODIC
     format: str = "Raw"
     location: str = "Outlet"
-    phase: Optional[str] = None
+    phase: str | None = None
 
 
 @dataclass
 class MeterValue:
     """Single meter value with timestamp and sampled values"""
     timestamp: str
-    sampled_value: List[SampledValue] = field(default_factory=list)
+    sampled_value: list[SampledValue] = field(default_factory=list)
 
 
 @dataclass
 class MeterValuesRequest:
     """OCPP MeterValues.req"""
     connector_id: int
-    meter_value: List[MeterValue] = field(default_factory=list)
-    transaction_id: Optional[int] = None
+    meter_value: list[MeterValue] = field(default_factory=list)
+    transaction_id: int | None = None
 
 
 @dataclass
 class MeterValuesResponse:
     """OCPP MeterValues.conf (empty)"""
-    pass
 
 
 @dataclass
@@ -266,7 +264,6 @@ class StatusNotificationRequest:
 @dataclass
 class StatusNotificationResponse:
     """OCPP StatusNotification.conf (empty)"""
-    pass
 
 
 @dataclass
@@ -274,8 +271,8 @@ class OCPPMessageLog:
     """Record of an OCPP message exchange"""
     direction: str  # "req" or "conf"
     action: str
-    payload: Dict[str, Any]
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    payload: dict[str, Any]
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 # ── OCPP ChargePoint (protocol-level) ────────────────────────────────
@@ -290,31 +287,31 @@ class OCPPChargePointProtocol:
 
     def __init__(self, charger_id: str):
         self.charger_id = charger_id
-        self._message_log: List[OCPPMessageLog] = []
-        self._boot_status: Optional[RegistrationStatus] = None
-        self._last_heartbeat_time: Optional[str] = None
-        self._authorized_tags: Dict[str, bool] = {}
+        self._message_log: list[OCPPMessageLog] = []
+        self._boot_status: RegistrationStatus | None = None
+        self._last_heartbeat_time: str | None = None
+        self._authorized_tags: dict[str, bool] = {}
         self._last_authorized_tag: str = ""
-        self._active_transactions: Dict[int, Dict[str, Any]] = {}
+        self._active_transactions: dict[int, dict[str, Any]] = {}
 
     # ── Message Log ──────────────────────────────────────────────
 
     @property
-    def message_log(self) -> List[OCPPMessageLog]:
+    def message_log(self) -> list[OCPPMessageLog]:
         return list(self._message_log)
 
     @property
-    def boot_status(self) -> Optional[RegistrationStatus]:
+    def boot_status(self) -> RegistrationStatus | None:
         return self._boot_status
 
     @property
-    def last_heartbeat_time(self) -> Optional[str]:
+    def last_heartbeat_time(self) -> str | None:
         return self._last_heartbeat_time
 
     def clear_log(self) -> None:
         self._message_log.clear()
 
-    def _log_message(self, direction: str, action: str, payload: Dict[str, Any]) -> None:
+    def _log_message(self, direction: str, action: str, payload: dict[str, Any]) -> None:
         self._message_log.append(OCPPMessageLog(
             direction=direction,
             action=action,
@@ -323,7 +320,7 @@ class OCPPChargePointProtocol:
 
     # ── BootNotification ─────────────────────────────────────────
 
-    def build_boot_notification(self, req: BootNotificationRequest) -> Dict[str, Any]:
+    def build_boot_notification(self, req: BootNotificationRequest) -> dict[str, Any]:
         """Build BootNotification.req payload"""
         payload = {
             "chargePointVendor": req.charge_point_vendor,
@@ -347,7 +344,7 @@ class OCPPChargePointProtocol:
         self._log_message("req", "BootNotification", payload)
         return payload
 
-    def handle_boot_notification_response(self, response: Dict[str, Any]) -> BootNotificationResponse:
+    def handle_boot_notification_response(self, response: dict[str, Any]) -> BootNotificationResponse:
         """Parse BootNotification.conf"""
         status = RegistrationStatus(response.get("status", "Rejected"))
         self._boot_status = status
@@ -361,13 +358,13 @@ class OCPPChargePointProtocol:
 
     # ── Heartbeat ────────────────────────────────────────────────
 
-    def build_heartbeat(self) -> Dict[str, Any]:
+    def build_heartbeat(self) -> dict[str, Any]:
         """Build Heartbeat.req payload (empty)"""
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         self._log_message("req", "Heartbeat", payload)
         return payload
 
-    def handle_heartbeat_response(self, response: Dict[str, Any]) -> HeartbeatResponse:
+    def handle_heartbeat_response(self, response: dict[str, Any]) -> HeartbeatResponse:
         """Parse Heartbeat.conf"""
         self._last_heartbeat_time = response.get("currentTime", "")
         result = HeartbeatResponse(current_time=self._last_heartbeat_time)
@@ -376,7 +373,7 @@ class OCPPChargePointProtocol:
 
     # ── Authorize ────────────────────────────────────────────────
 
-    def build_authorize(self, req: AuthorizeRequest) -> Dict[str, Any]:
+    def build_authorize(self, req: AuthorizeRequest) -> dict[str, Any]:
         """Build Authorize.req payload"""
         payload = {"idTag": req.id_tag}
         self._log_message("req", "Authorize", payload)
@@ -384,7 +381,7 @@ class OCPPChargePointProtocol:
         self._last_authorized_tag = req.id_tag
         return payload
 
-    def handle_authorize_response(self, response: Dict[str, Any]) -> AuthorizeResponse:
+    def handle_authorize_response(self, response: dict[str, Any]) -> AuthorizeResponse:
         """Parse Authorize.conf"""
         id_tag_info = response.get("idTagInfo", {})
         status = id_tag_info.get("status", "Invalid")
@@ -402,13 +399,13 @@ class OCPPChargePointProtocol:
 
     # ── StartTransaction ─────────────────────────────────────────
 
-    def build_start_transaction(self, req: StartTransactionRequest) -> Dict[str, Any]:
+    def build_start_transaction(self, req: StartTransactionRequest) -> dict[str, Any]:
         """Build StartTransaction.req payload"""
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "connectorId": req.connector_id,
             "idTag": req.id_tag,
             "meterStart": req.meter_start,
-            "timestamp": req.timestamp or datetime.now(timezone.utc).isoformat(),
+            "timestamp": req.timestamp or datetime.now(UTC).isoformat(),
         }
         if req.reservation_id is not None:
             payload["reservationId"] = req.reservation_id
@@ -416,13 +413,13 @@ class OCPPChargePointProtocol:
         self._log_message("req", "StartTransaction", payload)
         return payload
 
-    def handle_start_transaction_response(self, response: Dict[str, Any]) -> StartTransactionResponse:
+    def handle_start_transaction_response(self, response: dict[str, Any]) -> StartTransactionResponse:
         """Parse StartTransaction.conf"""
         transaction_id = int(response.get("transactionId", 0))
         id_tag_info = response.get("idTagInfo", {})
         self._active_transactions[transaction_id] = {
             "id_tag_info": id_tag_info,
-            "started_at": datetime.now(timezone.utc).isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
         }
         result = StartTransactionResponse(
             transaction_id=transaction_id,
@@ -433,12 +430,12 @@ class OCPPChargePointProtocol:
 
     # ── StopTransaction ──────────────────────────────────────────
 
-    def build_stop_transaction(self, req: StopTransactionRequest) -> Dict[str, Any]:
+    def build_stop_transaction(self, req: StopTransactionRequest) -> dict[str, Any]:
         """Build StopTransaction.req payload"""
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "transactionId": req.transaction_id,
             "meterStop": req.meter_stop,
-            "timestamp": req.timestamp or datetime.now(timezone.utc).isoformat(),
+            "timestamp": req.timestamp or datetime.now(UTC).isoformat(),
             "reason": req.reason.value if isinstance(req.reason, StopReason) else req.reason,
         }
         if req.id_tag:
@@ -449,7 +446,7 @@ class OCPPChargePointProtocol:
         self._log_message("req", "StopTransaction", payload)
         return payload
 
-    def handle_stop_transaction_response(self, response: Dict[str, Any]) -> StopTransactionResponse:
+    def handle_stop_transaction_response(self, response: dict[str, Any]) -> StopTransactionResponse:
         """Parse StopTransaction.conf"""
         id_tag_info = response.get("idTagInfo")
         result = StopTransactionResponse(id_tag_info=id_tag_info)
@@ -464,13 +461,13 @@ class OCPPChargePointProtocol:
 
     # ── MeterValues ──────────────────────────────────────────────
 
-    def build_meter_values(self, req: MeterValuesRequest) -> Dict[str, Any]:
+    def build_meter_values(self, req: MeterValuesRequest) -> dict[str, Any]:
         """Build MeterValues.req payload"""
         meter_value_list = []
         for mv in req.meter_value:
             sv_list = []
             for sv in mv.sampled_value:
-                sv_dict: Dict[str, Any] = {
+                sv_dict: dict[str, Any] = {
                     "value": sv.value,
                     "measurand": sv.measurand.value if isinstance(sv.measurand, Measurand) else sv.measurand,
                     "unit": sv.unit.value if isinstance(sv.unit, UnitOfMeasure) else sv.unit,
@@ -489,7 +486,7 @@ class OCPPChargePointProtocol:
                 "sampledValue": sv_list,
             })
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "connectorId": req.connector_id,
             "meterValue": meter_value_list,
         }
@@ -499,20 +496,20 @@ class OCPPChargePointProtocol:
         self._log_message("req", "MeterValues", payload)
         return payload
 
-    def handle_meter_values_response(self, response: Dict[str, Any]) -> MeterValuesResponse:
+    def handle_meter_values_response(self, response: dict[str, Any]) -> MeterValuesResponse:
         """Parse MeterValues.conf (empty)"""
         self._log_message("conf", "MeterValues", response)
         return MeterValuesResponse()
 
     # ── StatusNotification ───────────────────────────────────────
 
-    def build_status_notification(self, req: StatusNotificationRequest) -> Dict[str, Any]:
+    def build_status_notification(self, req: StatusNotificationRequest) -> dict[str, Any]:
         """Build StatusNotification.req payload"""
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "connectorId": req.connector_id,
             "errorCode": req.error_code.value if isinstance(req.error_code, ChargePointErrorCode) else req.error_code,
             "status": req.status.value if isinstance(req.status, ChargePointStatus) else req.status,
-            "timestamp": req.timestamp or datetime.now(timezone.utc).isoformat(),
+            "timestamp": req.timestamp or datetime.now(UTC).isoformat(),
         }
         if req.info:
             payload["info"] = req.info
@@ -524,7 +521,7 @@ class OCPPChargePointProtocol:
         self._log_message("req", "StatusNotification", payload)
         return payload
 
-    def handle_status_notification_response(self, response: Dict[str, Any]) -> StatusNotificationResponse:
+    def handle_status_notification_response(self, response: dict[str, Any]) -> StatusNotificationResponse:
         """Parse StatusNotification.conf (empty)"""
         self._log_message("conf", "StatusNotification", response)
         return StatusNotificationResponse()
@@ -564,8 +561,8 @@ class OCPPAdapter:
         self.config = config
         self._running = False
         self._tasks: list[asyncio.Task] = []
-        self._on_telemetry: Optional[Callable[[TelemetryPoint], None]] = None
-        self._on_alarm: Optional[Callable[[str, str, str], None]] = None
+        self._on_telemetry: Callable[[TelemetryPoint], None] | None = None
+        self._on_alarm: Callable[[str, str, str], None] | None = None
 
         # Runtime state
         self._meter_value: float = 0.0  # cumulative energy (kWh)
@@ -598,7 +595,7 @@ class OCPPAdapter:
         return self._protocol
 
     @property
-    def message_log(self) -> List[OCPPMessageLog]:
+    def message_log(self) -> list[OCPPMessageLog]:
         """Access message log for testing"""
         return self._protocol.message_log
 
@@ -658,7 +655,7 @@ class OCPPAdapter:
         self._protocol.build_boot_notification(boot_req)
         self._protocol.handle_boot_notification_response({
             "status": "Accepted",
-            "currentTime": datetime.now(timezone.utc).isoformat(),
+            "currentTime": datetime.now(UTC).isoformat(),
             "interval": self.config.heartbeat_interval,
         })
         logger.info(
@@ -754,7 +751,7 @@ class OCPPAdapter:
             self._sim_temperature = temperature
 
             # Send MeterValues via protocol
-            now = datetime.now(timezone.utc).isoformat()
+            now = datetime.now(UTC).isoformat()
             self._protocol.build_meter_values(MeterValuesRequest(
                 connector_id=self._connector_id,
                 transaction_id=self._transaction_id,
@@ -825,7 +822,7 @@ class OCPPAdapter:
             self._sim_temperature = round(random.uniform(22.0, 28.0), 1)
 
             # Send idle MeterValues via protocol
-            now = datetime.now(timezone.utc).isoformat()
+            now = datetime.now(UTC).isoformat()
             self._protocol.build_meter_values(MeterValuesRequest(
                 connector_id=self._connector_id,
                 meter_value=[MeterValue(
@@ -864,15 +861,21 @@ class OCPPAdapter:
           - Authorize
         """
         try:
-            from ocpp.v16 import ChargePoint as Cp
-            from ocpp.routing import after, on
-            from ocpp.v16.enums import (
-                Action, RegistrationStatus as OcppRegStatus,
-                ChargePointStatus as OcppCpStatus,
-                ChargePointErrorCode as OcppCpErrorCode,
-                AuthorizationStatus as OcppAuthStatus,
-            )
             import websockets
+            from ocpp.routing import after, on
+            from ocpp.v16 import ChargePoint as Cp
+            from ocpp.v16.enums import (
+                Action,
+            )
+            from ocpp.v16.enums import (
+                ChargePointErrorCode as OcppCpErrorCode,
+            )
+            from ocpp.v16.enums import (
+                ChargePointStatus as OcppCpStatus,
+            )
+            from ocpp.v16.enums import (
+                RegistrationStatus as OcppRegStatus,
+            )
 
             adapter = self
 
@@ -997,7 +1000,7 @@ class OCPPAdapter:
                         connector_id=self._connector_id,
                         error_code=OcppCpErrorCode.no_error,
                         status=OcppCpStatus.available,
-                        timestamp=datetime.now(timezone.utc).isoformat(),
+                        timestamp=datetime.now(UTC).isoformat(),
                     ))
 
                     # 3. Main message loop: heartbeat + meter values
@@ -1040,7 +1043,7 @@ class OCPPAdapter:
             logger.info("Falling back to simulation mode")
             self.config.use_real_charger = False
             await self._run_simulated_charger()
-        except (OSError, ConnectionRefusedError, asyncio.TimeoutError) as e:
+        except (TimeoutError, OSError, ConnectionRefusedError) as e:
             self._reconnect_count += 1
             logger.error("OCPP WebSocket connection failed: %s (attempt %d/%d)",
                          e, self._reconnect_count, self._max_reconnects)
@@ -1095,9 +1098,11 @@ class OCPPAdapter:
                     break
 
                 # Build MeterValues payload
-                from ocpp.v16.enums import Measurand as OcppMeasurand, UnitOfMeasure as OcppUnit, ReadingContext as OcppContext  # noqa: E402
+                from ocpp.v16.enums import Measurand as OcppMeasurand
+                from ocpp.v16.enums import ReadingContext as OcppContext
+                from ocpp.v16.enums import UnitOfMeasure as OcppUnit
 
-                now = datetime.now(timezone.utc).isoformat()
+                now = datetime.now(UTC).isoformat()
                 sampled_values = [
                     {
                         "value": str(round(self._last_voltage, 1)),
@@ -1163,7 +1168,7 @@ class OCPPAdapter:
                 if self._running and not self.config.use_real_charger:
                     self._protocol.build_heartbeat()
                     self._protocol.handle_heartbeat_response({
-                        "currentTime": datetime.now(timezone.utc).isoformat(),
+                        "currentTime": datetime.now(UTC).isoformat(),
                     })
                     logger.debug("OCPP heartbeat: charger=%s", self.config.charger_id)
             except asyncio.CancelledError:
@@ -1202,7 +1207,7 @@ class OCPPAdapter:
         voltage: float = 380.0,
         current: float = 0.0,
         temperature: float = 25.0,
-        energy: Optional[float] = None,
+        energy: float | None = None,
         status: str = "Available",
     ) -> TelemetryPoint:
         """Manually inject a telemetry point (for debug/simulation API).

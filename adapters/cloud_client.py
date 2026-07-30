@@ -12,8 +12,7 @@ API对齐日期: 2026-07-06 (对齐云端334端点真实OpenAPI schema)
 
 import asyncio
 import logging
-import time
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import httpx
 
@@ -52,12 +51,12 @@ class CloudClient:
         self.gateway_id = gateway_id  # 对应云端的 pod_id
         self.region_id = getattr(config, 'region_id', 'default')
         self.cache = cache
-        self._token: Optional[str] = None
+        self._token: str | None = None
         self._csrf_token: str = ""
         self._registered = False
-        self._heartbeat_task: Optional[asyncio.Task] = None
-        self._sync_task: Optional[asyncio.Task] = None
-        self._client: Optional[httpx.AsyncClient] = None
+        self._heartbeat_task: asyncio.Task | None = None
+        self._sync_task: asyncio.Task | None = None
+        self._client: httpx.AsyncClient | None = None
 
     @property
     def pod_id(self) -> str:
@@ -192,7 +191,7 @@ class CloudClient:
     # 遥测推送 (对齐 V3 telemetry/batch-report 端点)
     # ============================================================
 
-    async def push_telemetry_batch(self, points: List[TelemetryPoint]) -> bool:
+    async def push_telemetry_batch(self, points: list[TelemetryPoint]) -> bool:
         """批量推送遥测数据到云端 → POST /api/v1/telemetry/batch"""
         if not self._client or not points:
             return False
@@ -257,7 +256,7 @@ class CloudClient:
             })
         return False
 
-    async def push_alarm_batch(self, alarms: List[dict]) -> bool:
+    async def push_alarm_batch(self, alarms: list[dict]) -> bool:
         """批量推送告警 → 逐条 POST /api/v1/alarms (云端无batch端点)
 
         Returns:

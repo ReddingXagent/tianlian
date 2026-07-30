@@ -1,7 +1,6 @@
 """Device data models"""
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Optional
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 
 
@@ -41,11 +40,11 @@ class DeviceInfo:
     address: str = ""           # IP or serial port
     port: int = 0
     unit_id: int = 1            # Modbus unit ID
-    config: Dict = field(default_factory=dict)
+    config: dict = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict) -> "DeviceInfo":
+    def from_dict(cls, data: dict) -> "DeviceInfo":
         return cls(**data)

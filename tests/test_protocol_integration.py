@@ -7,14 +7,14 @@ mocked; adapter logic and TelemetryCache run real.
 """
 
 import asyncio
+
 import pytest
 
-from config import GatewayConfig, ModbusConfig, OCPPConfig, StorageConfig
-from models import TelemetryPoint
-from storage.cache import TelemetryCache
 from adapters.modbus_adapter import ModbusAdapter
 from adapters.ocpp_adapter import OCPPAdapter
-
+from config import ModbusConfig, OCPPConfig, StorageConfig
+from models import TelemetryPoint
+from storage.cache import TelemetryCache
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 
