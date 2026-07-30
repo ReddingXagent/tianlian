@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- 部署链路补齐：eas.json（development/preview-APK/production 三档 profile）
+- 品牌占位 assets：icon/adaptive-icon/splash/favicon（蓝底白字 TL，待设计稿替换）
+- README 新增「构建与部署」章节（OTA 导出 / EAS 构建命令 + 已知缺口 F22/F24/F25）
 - 项目 README：技术栈、功能模块、质量门控、目录结构、Roadmap 缺口说明
 - 本 CHANGELOG 文件
 

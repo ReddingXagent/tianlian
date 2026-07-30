@@ -45,6 +45,19 @@ npx expo export --platform ios   # 产物构建验证
 - 测试覆盖：components / hooks / services / store 全覆盖；screens 层待补（F17）
 - coverage 收集范围：`src/**`（排除 `*.d.ts` 与 `types/`）
 
+## 构建与部署
+
+```bash
+npx expo export --platform android   # OTA 更新包（JS bundle + assets）
+npx expo export --platform ios       # 同上，iOS 平台
+eas build --profile preview          # 内测 APK（需 EAS 账号）
+eas build --profile production       # 商店构建
+```
+
+- `eas.json`：development / preview(内部 APK) / production 三档 profile
+- `assets/`：icon / adaptive-icon / splash / favicon 品牌占位图（蓝底白字 TL，待设计稿替换）
+- 已知缺口：web 导出缺 react-dom/react-native-web/@expo/metro-runtime（F24）；BASE_URL 硬编码生产 IP 无环境切换（F22）；EAS Update 通道未配（需账号，F25）
+
 ## 目录结构
 
 ```
