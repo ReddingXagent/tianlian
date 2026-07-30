@@ -1,67 +1,112 @@
 #!/bin/bash
 # 天链V3 边缘网关一键部署脚本
 # 在树莓派上运行: bash deploy.sh
+#
+# v2 (2026-07-31 自驱部署验证轮, 树莓派192.168.31.10实测修):
+#   - fix: REPO_DIR 旧值 /home/tl/tianlian-v3-edge-gateway 在Pi上不存在(实际是
+#     tianlian-edge-gateway-v3), cd失败+set -e 使脚本第2步即死 → 改为自动探测
+#   - fix: 依赖安装只装 httpx/uvicorn/fastapi 3个, 缺 ocpp/pymodbus/paho-mqtt/
+#     aiosqlite 等11个 → 全新部署import即崩 → 改为 pip install -r requirements.txt
+#   - fix: 步骤3无条件覆写 .env 且硬编码已过期token(尾PUzwg), 会冲掉正确配置
+#     (云端07-24已重签token) → 改为 .env 存在即保留, 缺失才生成模板(不含真token)
+#   - 新增: .git 存在时 git fetch+ff-only 同步(兼容 remote 名 synology/origin),
+#     失败不阻塞(Pi→NAS 无免密时降级为部署当前代码)
+#   - 改进: pgrep 精确匹配本目录 main.py; 日志写 gateway.log(Pi现状); .pid 记录
 set -e
 
-echo "=== 天链V3 边缘网关部署 ==="
-
-# 配置
-REPO_DIR="/home/tl/tianlian-v3-edge-gateway"
+# 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/main.py" ]; then
+    REPO_DIR="$SCRIPT_DIR"
+elif [ -d /home/tl/tianlian-edge-gateway-v3 ]; then
+    REPO_DIR=/home/tl/tianlian-edge-gateway-v3
+else
+    echo "❌ 未找到仓库目录(需含 main.py)"; exit 1
+fi
 PYTHON="python3"
-PORT=8080
+PORT="${PORT:-8080}"
+
+echo "=== 天链V3 边缘网关部署 === ($REPO_DIR)"
 
 # 1. 检查 Python
-echo "[1/6] 检查环境..."
+echo "[1/7] 检查环境..."
 $PYTHON --version || { echo "需要 Python 3.10+"; exit 1; }
 
-# 2. 安装依赖
-echo "[2/6] 安装依赖..."
 cd "$REPO_DIR"
-$PYTHON -m pip install -q httpx uvicorn fastapi 2>/dev/null || {
-    echo "依赖安装失败，尝试用户级安装..."
-    $PYTHON -m pip install --user -q httpx uvicorn fastapi
+
+# 2. 同步代码(失败不阻塞)
+echo "[2/7] 同步代码..."
+if [ -d .git ]; then
+    REMOTE=*** remote | grep -E '^(synology|origin)$' | head -1 || true)
+    if [ -n "$REMOTE" ] && git fetch "$REMOTE" 2>/dev/null; then
+        if git merge --ff-only "$REMOTE/master" 2>/dev/null; then
+            echo "已同步: $(git rev-parse --short HEAD)"
+        else
+            echo "⚠️ ff合并失败(本地有分叉?), 部署当前代码"
+        fi
+    else
+        echo "⚠️ fetch失败(检查NAS免密), 部署当前代码"
+    fi
+else
+    echo "非git仓库, 跳过同步"
+fi
+
+# 3. 安装依赖(requirements.txt 全量)
+echo "[3/7] 安装依赖..."
+$PYTHON -m pip install -q -r requirements.txt 2>/dev/null || {
+    echo "系统级安装失败, 尝试 --user..."
+    $PYTHON -m pip install --user -q -r requirements.txt
 }
 
-# 3. 配置环境变量
-echo "[3/6] 配置..."
-cat > .env << 'ENVEOF'
-# 天链V3边缘网关环境变量
+# 4. 环境变量(绝不覆写已有 .env)
+echo "[4/7] 配置..."
+if [ -f .env ]; then
+    echo ".env 已存在, 保留不动"
+else
+    cat > .env << 'ENVEOF'
+# 天链V3边缘网关环境变量(模板, 填好token再启动)
 CLOUD_BASE_URL=http://8.134.106.166
-CLOUD_TOKEN=eyJhbG…Uzwg
+CLOUD_TOKEN=*** 云端签发长期token, user=edge_gateway_telemetry>
 GATEWAY_ID=GW-001
 GATEWAY_NAME=RaspberryPi-Gateway
 ENVEOF
+    echo "⚠️ 已生成 .env 模板, 启动前必须填写 CLOUD_TOKEN"
+fi
 
-# 4. 数据库迁移
-echo "[4/6] 数据库迁移..."
+# 5. 数据库迁移
+echo "[5/7] 数据库迁移..."
 $PYTHON migrate_db.py 2>/dev/null || echo "数据库已是最新或迁移跳过"
 
-# 5. 停止旧服务
-echo "[5/6] 停止旧服务..."
-OLD_PID=$(pgrep -f "main.py" 2>/dev/null || true)
-if [ -n "$OLD_PID" ]; then
-    kill $OLD_PID 2>/dev/null || true
+# 6. 停止旧服务(精确匹配本目录 main.py)
+echo "[6/7] 停止旧服务..."
+OLD_PID="$(pgre…y" 2>/dev/null || true)"
+if [ -z "$OLD_PID" ] && [ -f .pid ]; then
+    OLD_PID="$(cat .pid 2>/dev/null || true)"
+fi
+if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+    kill "$OLD_PID" 2>/dev/null || true
     sleep 2
 fi
 
-# 6. 启动服务
-echo "[6/6] 启动边缘网关..."
-nohup $PYTHON main.py > /tmp/tianlian-gateway.log 2>&1 &
+# 7. 启动服务
+echo "[7/7] 启动边缘网关..."
+nohup $PYTHON main.py > gateway.log 2>&1 &
 NEW_PID=$!
+echo "$NEW_PID" > .pid
 
 sleep 3
 
 # 验证
-if kill -0 $NEW_PID 2>/dev/null; then
+if kill -0 "$NEW_PID" 2>/dev/null; then
     echo ""
-    echo "✅ 部署成功！PID: $NEW_PID"
+    echo "✅ 部署成功! PID: $NEW_PID"
     echo "   健康检查: http://$(hostname -I | awk '{print $1}'):$PORT/health"
-    echo "   日志: /tmp/tianlian-gateway.log"
-    # 快速验证
+    echo "   运行状态: http://localhost:$PORT/api/v1/status"
+    echo "   日志: $REPO_DIR/gateway.log"
     sleep 1
-    curl -s http://localhost:$PORT/health 2>/dev/null && echo "" || echo "⚠️ 健康检查失败，请查看日志"
+    curl -s -m 5 "http://localhost:$PORT/health" 2>/dev/null && echo "" || echo "⚠️ 健康检查失败, 请查看日志"
 else
-    echo "❌ 启动失败，请查看日志:"
-    cat /tmp/tianlian-gateway.log
+    echo "❌ 启动失败, 日志最后20行:"
+    tail -20 gateway.log
     exit 1
 fi

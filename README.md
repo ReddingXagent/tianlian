@@ -61,7 +61,8 @@ ruff check .                # lint 门控（配置见 pyproject.toml，债务以
 ## 部署（树莓派）
 
 ```bash
-bash deploy.sh   # 目标机: tl@192.168.31.10, 仓库 /home/tl/tianlian-v3-edge-gateway, 端口 8080
+bash deploy.sh   # 目标机: tl@192.168.31.10, 仓库 /home/tl/tianlian-edge-gateway-v3, 端口 8080
+                 # v2: 自动探测仓库目录/全量装依赖/保留.env/git ff同步
 ```
 
 ## 目录结构
