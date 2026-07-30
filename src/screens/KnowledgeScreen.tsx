@@ -17,7 +17,7 @@ import EmptyState from '../components/EmptyState';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const CATEGORIES: Array<{ key: string; label: string; icon: string }> = [
+const CATEGORIES: { key: string; label: string; icon: string }[] = [
   { key: 'all', label: '全部', icon: '📚' },
   { key: 'operation', label: '操作', icon: '📖' },
   { key: 'maintenance', label: '维护', icon: '🔧' },

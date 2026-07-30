@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { RootStackParamList, WorkOrderType, WorkOrderPriority } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const ORDER_TYPES: Array<{ key: WorkOrderType; label: string }> = [
+const ORDER_TYPES: { key: WorkOrderType; label: string }[] = [
   { key: 'repair', label: '维修' },
   { key: 'inspection', label: '巡检' },
   { key: 'installation', label: '安装' },
@@ -26,7 +26,7 @@ const ORDER_TYPES: Array<{ key: WorkOrderType; label: string }> = [
   { key: 'other', label: '其他' },
 ];
 
-const PRIORITIES: Array<{ key: WorkOrderPriority; label: string; color: string }> = [
+const PRIORITIES: { key: WorkOrderPriority; label: string; color: string }[] = [
   { key: 'low', label: '低', color: '#2e7d32' },
   { key: 'normal', label: '中', color: '#1565c0' },
   { key: 'high', label: '高', color: '#c62828' },

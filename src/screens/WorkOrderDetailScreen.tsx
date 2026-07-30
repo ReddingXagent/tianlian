@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { useWorkOrderStore } from '../store/workOrderStore';
 import { workOrderRecordApi, workOrderActionApi } from '../services/api';
 import { RootStackParamList, WorkOrder, WorkOrderRecord } from '../types';
@@ -43,7 +43,6 @@ const WORK_ORDER_ACTION_LABEL: Record<string, { label: string; color: string }> 
 
 const WorkOrderDetailScreen: React.FC = () => {
   const route = useRoute<DetailRouteProp>();
-  const navigation = useNavigation();
   const { orderId } = route.params;
   const { selectedOrder, loading, error, fetchOrderDetail } =
     useWorkOrderStore();
@@ -52,16 +51,7 @@ const WorkOrderDetailScreen: React.FC = () => {
   const [records, setRecords] = useState<WorkOrderRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(false);
 
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      await Promise.all([fetchOrderDetail(orderId), loadRecords()]);
-      if (isRefresh) setRefreshing(false);
-    },
-    [orderId, fetchOrderDetail]
-  );
-
-  const loadRecords = async () => {
+  const loadRecords = useCallback(async () => {
     setRecordsLoading(true);
     try {
       const res = await workOrderRecordApi.getRecords(orderId);
@@ -71,7 +61,16 @@ const WorkOrderDetailScreen: React.FC = () => {
     } finally {
       setRecordsLoading(false);
     }
-  };
+  }, [orderId]);
+
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      await Promise.all([fetchOrderDetail(orderId), loadRecords()]);
+      if (isRefresh) setRefreshing(false);
+    },
+    [orderId, fetchOrderDetail, loadRecords]
+  );
 
   useEffect(() => {
     loadData();

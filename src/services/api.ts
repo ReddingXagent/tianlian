@@ -142,7 +142,7 @@ export const WO_CLIENT_STATUS_TO_BACKEND: Record<string, string> = {
   completed: 'completed',
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function mapWorkOrder(raw: any): WorkOrder {
   return {
     id: String(raw.id),
@@ -186,12 +186,12 @@ export const workOrderApi = {
     }
     return api.get('/work-orders', { params: query }).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const rawPage: any = env.data ?? {};
       return {
         ...env,
         data: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           items: (rawPage.items ?? []).map((it: any) => mapWorkOrder(it)),
           total: rawPage.total ?? 0,
           page: rawPage.page ?? params?.page ?? 1,
@@ -365,7 +365,7 @@ export const workOrderRecordApi = {
   getRecords(orderId: string): Promise<ApiResponse<WorkOrderRecord[]>> {
     return api.get(`/work-orders/${orderId}/logs`).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const items: any[] = (env.data as any)?.items ?? [];
       return {
         ...env,
@@ -384,7 +384,7 @@ export const workOrderRecordApi = {
   addRecord(orderId: string, data: { action: string; note: string }): Promise<ApiResponse<WorkOrderRecord>> {
     return api.post(`/work-orders/${orderId}/notes`, data).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const it: any = env.data ?? {};
       return {
         ...env,

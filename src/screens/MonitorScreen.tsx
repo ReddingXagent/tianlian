@@ -15,7 +15,7 @@ import EmptyState from '../components/EmptyState';
 
 type MonitorTab = 'devices' | 'faults' | 'alarms';
 
-const TABS: Array<{ key: MonitorTab; label: string }> = [
+const TABS: { key: MonitorTab; label: string }[] = [
   { key: 'devices', label: '实时监控' },
   { key: 'faults', label: '故障设备' },
   { key: 'alarms', label: '严重告警' },

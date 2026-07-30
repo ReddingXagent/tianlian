@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { diagnosisApi } from '../services/api';
 import { DiagnosisResult } from '../types';
-import StatusBadge from '../components/StatusBadge';
 
 const FAULT_CODE_EXAMPLES = [
   { code: 'E001', label: 'E001-过压' },

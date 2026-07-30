@@ -11,7 +11,7 @@ import { useDashboardStore } from '../store/dashboardStore';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
-const PERIODS: Array<{ key: 'week' | 'month' | 'quarter'; label: string }> = [
+const PERIODS: { key: 'week' | 'month' | 'quarter'; label: string }[] = [
   { key: 'week', label: '周' },
   { key: 'month', label: '月' },
   { key: 'quarter', label: '季' },

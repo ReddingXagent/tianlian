@@ -11,9 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { workbenchApi } from '../services/api';
 import {
-  WorkbenchStats,
   WorkOrder,
-  Alarm,
   RootStackParamList,
   MainTabParamList,
 } from '../types';

@@ -17,7 +17,7 @@ import WorkOrderCard from '../components/WorkOrderCard';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const STATUS_FILTERS: Array<{ key: WorkOrderStatus | 'all'; label: string }> = [
+const STATUS_FILTERS: { key: WorkOrderStatus | 'all'; label: string }[] = [
   { key: 'all', label: '全部' },
   { key: 'pending', label: '待接单' },
   { key: 'in_progress', label: '进行中' },
@@ -136,7 +136,7 @@ const WorkOrderListScreen: React.FC = () => {
 
 // 可滚动筛选条组件
 const ScrollableFilter: React.FC<{
-  filters: Array<{ key: string; label: string }>;
+  filters: { key: string; label: string }[];
   active: string;
   onSelect: (key: WorkOrderStatus | 'all') => void;
 }> = ({ filters, active, onSelect }) => (

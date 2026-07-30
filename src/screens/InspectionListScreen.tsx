@@ -17,7 +17,7 @@ import EmptyState from '../components/EmptyState';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const STATUS_FILTERS: Array<{ key: InspectionStatus | 'all'; label: string }> = [
+const STATUS_FILTERS: { key: InspectionStatus | 'all'; label: string }[] = [
   { key: 'all', label: '全部' },
   { key: 'pending', label: '待巡检' },
   { key: 'in_progress', label: '进行中' },

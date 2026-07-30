@@ -377,10 +377,10 @@ export interface DashboardData {
   deviceHealth: DeviceHealthStats;
   alarmTrends: AlarmTrend[];
   workOrderTrends: WorkOrderTrend[];
-  topFaultDevices: Array<{
+  topFaultDevices: {
     deviceId: number;
     deviceName: string;
     stationName: string;
     faultCount: number;
-  }>;
+  }[];
 }
