@@ -45,6 +45,11 @@
     },
     "setupFilesAfterEnv": [
       "@testing-library/jest-native/extend-expect"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/types/**"
     ]
   },
   "private": true
