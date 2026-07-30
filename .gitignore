@@ -4,3 +4,4 @@ data/
 *.db
 .env
 node_modules/
+.venv*/
