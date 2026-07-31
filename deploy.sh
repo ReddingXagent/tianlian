@@ -86,10 +86,20 @@ fi
 if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
     kill "$OLD_PID" 2>/dev/null || true
     sleep 2
+    # 确保端口释放
+    if kill -0 "$OLD_PID" 2>/dev/null; then
+        kill -9 "$OLD_PID" 2>/dev/null || true
+        sleep 1
+    fi
 fi
 
-# 7. 启动服务
+# 7. 启动服务(加载.env到环境变量)
 echo "[7/7] 启动边缘网关..."
+if [ -f .env ]; then
+    set -a
+    . .env
+    set +a
+fi
 nohup $PYTHON main.py > gateway.log 2>&1 &
 NEW_PID=$!
 echo "$NEW_PID" > .pid
