@@ -71,7 +71,7 @@ export default function AlarmListScreen() {
     </View>
   );
 
-  const filters: Array<{ key: AlarmStatus | 'all'; label: string }> = [
+  const filters: { key: AlarmStatus | 'all'; label: string }[] = [
     { key: 'all', label: '全部' },
     { key: 'unhandled', label: '未处理' },
     { key: 'processing', label: '处理中' },

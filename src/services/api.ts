@@ -138,7 +138,6 @@ const WO_STATUS_REVERSE: Record<string, string> = {
   completed: 'completed',
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Raw = Record<string, any>;
 
 export function mapAlarm(raw: Raw): Alarm {
@@ -449,7 +448,7 @@ export const revenueApi = {
       api.get('/business/revenue/daily', { params: { days: 30 } }),
     ]);
     const total = totalRes.data?.data?.net_revenue ?? 0;
-    const daily: Array<{ date: string; net_revenue: number }> = dailyRes.data?.data ?? [];
+    const daily: { date: string; net_revenue: number }[] = dailyRes.data?.data ?? [];
     const month = daily.reduce((s, d) => s + (d.net_revenue || 0), 0);
     const week = daily.slice(-7).reduce((s, d) => s + (d.net_revenue || 0), 0);
     const today = daily.length > 0 ? daily[daily.length - 1].net_revenue || 0 : 0;

@@ -59,8 +59,13 @@ export function usePolling<T>(
   const mountedRef = useRef(true);
   const retryCountRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 自递归调度用 ref 持有最新引用, 避免 useCallback 自引用(react-hooks/immutability)
+  const scheduleNextRef = useRef<() => void>(() => {});
 
-  fetcherRef.current = fetcher;
+  // ref 同步移入 effect: 渲染期写 ref 违反 react-hooks/refs
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  });
 
   const execute = useCallback(async () => {
     if (!mountedRef.current) return;
@@ -91,9 +96,13 @@ export function usePolling<T>(
     const delay = retryCountRef.current > 0 ? retryDelay : interval;
     timerRef.current = setTimeout(async () => {
       await execute();
-      scheduleNext();
+      scheduleNextRef.current();
     }, delay);
   }, [enabled, interval, maxRetries, retryDelay, execute]);
+
+  useEffect(() => {
+    scheduleNextRef.current = scheduleNext;
+  }, [scheduleNext]);
 
   const refresh = useCallback(() => {
     setLoading(true);

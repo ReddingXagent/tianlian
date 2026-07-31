@@ -3,9 +3,8 @@ import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, RefreshControl, ActivityIndicator,
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { useStationStore } from '../store/stationStore';
-import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 

@@ -14,8 +14,8 @@ import api, {
   workOrderApi,
   dashboardApi,
   revenueApi,
+  tokenStorage,
 } from './api';
-import { tokenStorage } from './api';
 import type {
   AlarmStatus,
   WorkOrderStatus,
@@ -68,14 +68,14 @@ export interface ChatRequest {
 /** AI 对话响应（非流式） */
 export interface ChatResponse {
   id: string;
-  choices: Array<{
+  choices: {
     message: {
       role: 'assistant';
       content: string | null;
       toolCalls?: ToolCall[];
     };
     finishReason: 'stop' | 'tool_calls' | 'length';
-  }>;
+  }[];
   usage?: {
     promptTokens: number;
     completionTokens: number;
@@ -86,11 +86,11 @@ export interface ChatResponse {
 /** 流式响应的 chunk */
 export interface ChatStreamChunk {
   id: string;
-  choices: Array<{
+  choices: {
     delta: {
       role?: string;
       content?: string;
-      toolCalls?: Array<{
+      toolCalls?: {
         index: number;
         id?: string;
         type?: 'function';
@@ -98,10 +98,10 @@ export interface ChatStreamChunk {
           name?: string;
           arguments?: string;
         };
-      }>;
+      }[];
     };
     finishReason?: 'stop' | 'tool_calls' | 'length';
-  }>;
+  }[];
 }
 
 /** Function 定义（OpenAI 兼容格式） */

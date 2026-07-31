@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -62,7 +62,8 @@ const RevenueScreen: React.FC = () => {
   }, [fetchData]);
 
   // 图表入场动画：每次数据加载完成淡入 + 上移
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  // useState 惰性初始化替代 useRef().current: 渲染期读 ref 违反 react-hooks/refs
+  const [fadeAnim] = useState(() => new Animated.Value(0));
   useEffect(() => {
     if (records.length > 0 && !loading) {
       fadeAnim.setValue(0);
