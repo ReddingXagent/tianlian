@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -12,7 +13,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { workOrderApi } from '../services/api';
 import { WorkOrder, RootStackParamList, WorkOrderType, WorkOrderPriority } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -48,7 +49,6 @@ const PRIORITIES: WorkOrderPriority[] = ['low', 'normal', 'high', 'urgent'];
 
 const WorkOrderScreen: React.FC = () => {
   const route = useRoute<WorkOrderRouteProp>();
-  const navigation = useNavigation();
   const stationId = route.params?.stationId;
 
   const [orders, setOrders] = useState<WorkOrder[]>([]);

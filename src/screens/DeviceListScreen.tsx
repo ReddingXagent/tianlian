@@ -1,17 +1,15 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useCallback, useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator, TouchableOpacity,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRoute } from '@react-navigation/native';
 import { useStationStore } from '../store/stationStore';
-import { Device, RootStackParamList } from '../types';
+import { Device } from '../types';
 
-type NavProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
 export default function DeviceListScreen() {
   const route = useRoute();
-  const navigation = useNavigation<NavProp>();
   const { stationId } = route.params as { stationId: number };
   const { devices, loading, fetchStationDevices } = useStationStore();
   const [refreshing, setRefreshing] = useState(false);

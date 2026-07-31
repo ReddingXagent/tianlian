@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useCallback, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,

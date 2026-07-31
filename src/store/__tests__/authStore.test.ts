@@ -4,17 +4,6 @@ import { authApi, tokenStorage } from '../../services/api';
 import { User } from '../../types';
 
 // Mock the API module
-const mockUser: User = {
-  id: 1,
-  username: 'admin',
-  nickname: '管理员',
-  email: 'admin@test.com',
-  phone: '13800138000',
-  role: 'admin',
-  stationIds: [1, 2],
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-};
 
 jest.mock('../../services/api', () => ({
   tokenStorage: {

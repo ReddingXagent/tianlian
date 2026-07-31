@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { render, act, fireEvent } from '@testing-library/react-native';
 import DeviceDetailScreen from '../DeviceDetailScreen';

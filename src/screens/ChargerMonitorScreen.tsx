@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { chargerApi } from '../services/api';
-import { ChargerStatus, ChargerMonitorSummary, RootStackParamList } from '../types';
+import { RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';

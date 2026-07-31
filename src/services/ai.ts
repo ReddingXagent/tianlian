@@ -8,7 +8,6 @@
  */
 
 import api, {
-  stationApi,
   deviceApi,
   alarmApi,
   workOrderApi,
@@ -19,8 +18,6 @@ import api, {
 import type {
   AlarmStatus,
   WorkOrderStatus,
-  Station,
-  Device,
   Alarm,
   WorkOrder,
   DashboardStats,

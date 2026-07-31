@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -30,7 +31,7 @@ const DEVICE_TYPE_LABEL: Record<string, string> = {
 
 const DeviceDetailScreen: React.FC = () => {
   const route = useRoute<DeviceDetailRouteProp>();
-  const { deviceId, stationId } = route.params;
+  const { deviceId } = route.params;
 
   const [device, setDevice] = useState<Device | null>(null);
   const [telemetry, setTelemetry] = useState<DeviceTelemetry | null>(null);

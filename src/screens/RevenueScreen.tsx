@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -16,7 +17,7 @@ import { revenueApi } from '../services/api';
 import { RevenueRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
-import { buildRevenueCsv, revenueCsvFilename } from '../utils/csvExport';
+import { buildRevenueCsv } from '../utils/csvExport';
 
 type PeriodType = 'day' | 'week' | 'month';
 

@@ -8,14 +8,10 @@ import { RootStackParamList } from './src/types';
 
 // Screens
 import LoginScreen from './src/screens/LoginScreen';
-import DashboardScreen from './src/screens/DashboardScreen';
-import StationListScreen from './src/screens/StationListScreen';
 import StationDetailScreen from './src/screens/StationDetailScreen';
 import DeviceListScreen from './src/screens/DeviceListScreen';
 import AlarmListScreen from './src/screens/AlarmListScreen';
 import WorkOrderScreen from './src/screens/WorkOrderScreen';
-import RevenueScreen from './src/screens/RevenueScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
 import MainTabNavigator from './src/screens/MainTabNavigator';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

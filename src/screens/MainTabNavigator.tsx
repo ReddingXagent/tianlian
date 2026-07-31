@@ -4,7 +4,7 @@ import { MainTabParamList } from '../types';
 import DashboardScreen from './DashboardScreen';
 import StationListScreen from './StationListScreen';
 import RevenueScreen from './RevenueScreen';
-import AIChatPanel from '../components/AIChatPanel';
+import { AIChatPanel } from '../components/AIChatPanel';
 import ProfileScreen from './ProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();

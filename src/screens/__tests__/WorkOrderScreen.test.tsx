@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { render, act } from '@testing-library/react-native';
 import WorkOrderScreen from '../WorkOrderScreen';
@@ -140,7 +141,7 @@ describe('WorkOrderScreen', () => {
   });
 
   it('should render status filter chips', async () => {
-    const { findAllByText, findByText } = render(<WorkOrderScreen />);
+    const { findByText } = render(<WorkOrderScreen />);
 
     expect(await findByText('全部')).toBeTruthy();
     expect(await findByText('待处理')).toBeTruthy();
@@ -171,7 +172,7 @@ describe('WorkOrderScreen', () => {
   });
 
   it('should show create button when stationId is provided', async () => {
-    const { findByText } = render(<WorkOrderScreen />);
+    render(<WorkOrderScreen />);
 
     // Wait for loading to finish, then the FAB "+" should appear
     await act(async () => {

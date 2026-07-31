@@ -13,7 +13,6 @@ const DEFAULT_TTL = 30_000; // 30 秒
 const MAX_ENTRIES = 50;
 
 const store = new Map<string, CacheEntry<any>>();
-const timers = new Map<string, ReturnType<typeof setTimeout>>();
 let lruSeq = 0; // 递增序列号，保证 LRU 淘汰时 lastAccess 唯一
 
 /**

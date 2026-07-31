@@ -460,16 +460,6 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
     '待处理工单',
   ];
 
-  const handleQuickQuestion = useCallback(
-    (question: string) => {
-      setInputText(question);
-      // 延迟发送以让用户看到输入
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    },
-    []
-  );
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
