@@ -10,7 +10,7 @@ external transports (MQTT client, cloud HTTP).
 """
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,6 +19,7 @@ from config import CloudConfig, GatewayConfig, LocalAPIConfig, ModbusConfig, MQT
 from models import TelemetryPoint
 from storage.cache import TelemetryCache
 
+UTC = timezone.utc  # Py3.10 compat
 # ── Fixtures ────────────────────────────────────────────────────────────
 
 @pytest.fixture

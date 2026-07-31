@@ -16,12 +16,13 @@ _project_root = Path(__file__).resolve().parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from datetime import UTC
+from datetime import timezone
 
 from config import GatewayConfig, StorageConfig
 from models import TelemetryPoint
 from storage.cache import TelemetryCache
 
+UTC = timezone.utc  # Py3.10 compat
 # ── Fixtures ──────────────────────────────────────────────────────────
 
 

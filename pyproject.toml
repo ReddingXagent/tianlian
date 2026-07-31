@@ -1,7 +1,7 @@
 # 天链边缘网关 — ruff lint 门控（2026-07-31 建立）
 # 基线: 首次扫描 283 errors；逐轮收窄，F841/UP035/UP042 已清零(07-31)
 [tool.ruff]
-target-version = "py313"
+target-version = "py310"
 line-length = 120
 extend-exclude = [".venv-build", ".venv"]
 
@@ -22,6 +22,7 @@ ignore = [
     "RUF012",   # 债务: 2处 mutable-class-default
     "RUF013",   # 债务: 1处 implicit-optional
     "RUF059",   # 债务: 3处 unused-unpacked-variable
+    "UP017",   # datetime.UTC 是 Py3.11+, Pi 运行 Py3.10
 ]
 
 [tool.ruff.lint.flake8-bugbear]

@@ -37,7 +37,7 @@ import logging
 import signal
 import sys
 import time
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Ensure project root is on sys.path
@@ -54,6 +54,7 @@ from config import GatewayConfig
 from models import TelemetryPoint
 from storage.cache import TelemetryCache
 
+UTC = timezone.utc  # Py3.10 compat
 # ── Logging ─────────────────────────────────────────────────────────────
 
 def setup_logging(level: str = "INFO") -> None:

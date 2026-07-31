@@ -1,8 +1,9 @@
 """Telemetry data models"""
 
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
+UTC = timezone.utc  # Py3.10 compat
 # 设备名→云端ID映射（云端要求整数device_id）
 DEVICE_ID_MAP = {
     "modbus-1": 1,

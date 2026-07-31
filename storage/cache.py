@@ -13,12 +13,13 @@ import logging
 import sqlite3
 import threading
 import time
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from config import StorageConfig
 from models import TelemetryPoint
 
+UTC = timezone.utc  # Py3.10 compat
 logger = logging.getLogger(__name__)
 
 

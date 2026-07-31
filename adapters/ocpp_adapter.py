@@ -19,13 +19,14 @@ import logging
 import random
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Any
 
 from config import OCPPConfig
 from models import TelemetryPoint
 
+UTC = timezone.utc  # Py3.10 compat
 logger = logging.getLogger(__name__)
 
 
