@@ -51,43 +51,20 @@ Page({
     }
   },
 
-  // 登录
+  // 登录（静默登录）
+  // 注: wx.getUserProfile已于基础库2.27.1废弃，调用仅返回匿名"微信用户"+灰色默认头像，
+  // 继续上行会污染服务端用户资料，故移除(F41)。
+  // 头像/昵称采集需改用 <button open-type="chooseAvatar"> + <input type="nickname"> 组件方案(待UI排期)。
   onLogin() {
     if (app.globalData.token) return;
 
-    wx.getUserProfile({
-      desc: '用于完善用户资料',
-      success: (profileRes) => {
-        const userInfo = profileRes.userInfo;
-        app.login()
-          .then(() => {
-            // 更新用户信息
-            api.updateUserInfo({
-              nickName: userInfo.nickName,
-              avatarUrl: userInfo.avatarUrl
-            }).then(() => {
-              app.globalData.userInfo = {
-                ...app.globalData.userInfo,
-                ...userInfo
-              };
-              this.loadUserInfo();
-            });
-          })
-          .catch(() => {
-            wx.showToast({ title: '登录失败', icon: 'none' });
-          });
-      },
-      fail: () => {
-        // 用户拒绝授权，使用静默登录
-        app.login()
-          .then(() => {
-            this.loadUserInfo();
-          })
-          .catch(() => {
-            wx.showToast({ title: '登录失败', icon: 'none' });
-          });
-      }
-    });
+    app.login()
+      .then(() => {
+        this.loadUserInfo();
+      })
+      .catch(() => {
+        wx.showToast({ title: '登录失败', icon: 'none' });
+      });
   },
 
   // 钱包

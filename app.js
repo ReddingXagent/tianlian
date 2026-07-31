@@ -5,7 +5,6 @@ App({
   globalData: {
     token: null,
     userInfo: null,
-    systemInfo: null,
     // 当前充电会话
     chargingSession: null,
     // 静默重试标记
@@ -13,10 +12,8 @@ App({
   },
 
   onLaunch() {
-    // 获取系统信息
-    this.globalData.systemInfo = wx.getSystemInfoSync();
-
     // 检查登录状态
+    // 注: 原wx.getSystemInfoSync()已废弃(2.20.1+)且systemInfo无消费方，已移除(F40)
     this.checkLogin();
   },
 

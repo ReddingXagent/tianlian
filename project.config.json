@@ -1,7 +1,14 @@
 {
   "description": "天链充电 - 新能源充电小程序",
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      { "type": "dir", "value": "coverage" },
+      { "type": "dir", "value": "scripts" },
+      { "type": "regexp", "value": "__tests__" },
+      { "type": "file", "value": "eslint.config.js" },
+      { "type": "file", "value": "package-lock.json" },
+      { "type": "file", "value": ".gitignore" }
+    ],
     "include": []
   },
   "setting": {
