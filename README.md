@@ -65,6 +65,28 @@ bash deploy.sh   # 目标机: tl@192.168.31.10, 仓库 /home/tl/tianlian-edge-ga
                  # v2: 自动探测仓库目录/全量装依赖/保留.env/git ff同步
 ```
 
+## 配置文件
+
+除环境变量外，可通过 YAML 配置文件覆盖默认值：
+
+```bash
+python main.py --config my-gateway.yaml
+```
+
+YAML 字段与 `GatewayConfig` dataclass 一一对应（参见 `config.py`）。命令行 `--config` > 环境变量 > 默认值。
+
+## 故障排查
+
+| 症状 | 排查 |
+|------|------|
+| 启动报 `ModuleNotFoundError` | `pip install -r requirements.txt`，确认 Python ≥ 3.10 |
+| OCPP 连接超时 | 检查 `OCPP_REAL=true` 时 CSMS 地址可达；默认模拟器 `OCPP_REAL=false` |
+| Modbus 读取失败 | `MODBUS_REAL=true` 需真实设备；模拟器 `MODBUS_REAL=false` 仅供调试 |
+| 云端心跳 401 | `CLOUD_TOKEN` 过期或未设；可改用 `CLOUD_USERNAME` + `CLOUD_PASSWORD` 自动签发 |
+| 缓存持续增长 | `GET /api/v1/cache/stats` 查看；断网时正常，恢复后批量上传自动消减 |
+| `/api/v1/status` cache_size > cache_max | 已知观察点（F15），疑似缓存淘汰未生效，关注但不阻塞 |
+| 树莓派部署失败 | `deploy.sh v2` 自动探测仓库路径；确认 `tl@192.168.31.10` SSH 可达 |
+
 ## 目录结构
 
 ```
