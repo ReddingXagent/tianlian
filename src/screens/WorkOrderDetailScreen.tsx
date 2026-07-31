@@ -73,8 +73,9 @@ const WorkOrderDetailScreen: React.FC = () => {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
-  }, [orderId]);
+  }, [orderId, loadData]);
 
   const handleAction = (action: 'accept' | 'execute' | 'complete') => {
     const confirmMessages: Record<string, string> = {

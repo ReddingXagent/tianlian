@@ -65,8 +65,9 @@ const KnowledgeScreen: React.FC = () => {
   }, [searchQuery, activeCategory]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchArticles();
-  }, [activeCategory]);
+  }, [activeCategory, fetchArticles]);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);

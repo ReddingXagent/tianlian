@@ -51,8 +51,9 @@ const InspectionDetailScreen: React.FC = () => {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
-  }, [taskId]);
+  }, [taskId, loadData]);
 
   const handleStart = () => {
     Alert.alert('开始巡检', '确定要开始执行此巡检任务吗？', [

@@ -26,6 +26,7 @@ import {
 const TOKEN_KEY = 'auth_token';
 const BASE_URL = 'http://8.134.106.166/api/v1';
 
+// eslint-disable-next-line import/no-named-as-default-member
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,

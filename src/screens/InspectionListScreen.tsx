@@ -52,8 +52,9 @@ const InspectionListScreen: React.FC = () => {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
-  }, [activeFilter]);
+  }, [activeFilter, loadData]);
 
   const handleTaskPress = (task: InspectionTask) => {
     navigation.navigate('InspectionDetail', { taskId: task.id });
