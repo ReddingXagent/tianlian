@@ -206,3 +206,65 @@ describe('createPolling', () => {
     expect(polling.isActive()).toBe(false);
   });
 });
+
+describe('createPagePolling', () => {
+  const { createPagePolling } = require('../polling');
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test('onShow 启动轮询, onHide/onUnload 停止', () => {
+    const fn = jest.fn().mockResolvedValue(undefined);
+    const page = {};
+    const polling = createPagePolling(page, fn, { interval: 1000 });
+
+    expect(polling.isActive()).toBe(false);
+
+    page.onShow();
+    expect(polling.isActive()).toBe(true);
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    page.onHide();
+    expect(polling.isActive()).toBe(false);
+
+    page.onShow();
+    expect(polling.isActive()).toBe(true);
+
+    page.onUnload();
+    expect(polling.isActive()).toBe(false);
+  });
+
+  test('onShow 不重复启动已活跃的轮询', () => {
+    const fn = jest.fn().mockResolvedValue(undefined);
+    const page = {};
+    createPagePolling(page, fn, { interval: 1000 });
+
+    page.onShow();
+    page.onShow(); // 第二次不应触发新的 execute
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    page.onUnload();
+  });
+
+  test('保留并调用页面原有生命周期钩子', () => {
+    const fn = jest.fn().mockResolvedValue(undefined);
+    const origShow = jest.fn();
+    const origHide = jest.fn();
+    const origUnload = jest.fn();
+    const page = { onShow: origShow, onHide: origHide, onUnload: origUnload };
+    createPagePolling(page, fn, { interval: 1000 });
+
+    page.onShow();
+    page.onHide();
+    page.onUnload();
+
+    expect(origShow).toHaveBeenCalledTimes(1);
+    expect(origHide).toHaveBeenCalledTimes(1);
+    expect(origUnload).toHaveBeenCalledTimes(1);
+  });
+});
