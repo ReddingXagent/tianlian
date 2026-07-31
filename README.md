@@ -1,22 +1,77 @@
-# 天链用户端App
+# 天链用户端App（tianlian-user-app）
 
-充电用户端App（React Native + Expo），面向C端充电用户。
+充电用户端 App（React Native + Expo SDK 52），面向 C 端充电用户。天链终端 app 矩阵之一，与 ops-app（运维端）/ station-app（场站端）/ user-mp（微信小程序）并列。
 
 ## 功能
-- 附近站点搜索 + 导航
-- 扫码充电
-- 实时充电监控
+
+- 附近站点搜索 + 地图导航
+- 扫码充电（扫码 → 确认 → 启动）
+- 实时充电监控（轮询充电状态，前后台/联网感知自动暂停恢复）
 - 订单管理 + 支付
-- 个人中心（车辆管理/钱包/充电记录）
+- 优惠券 / 钱包 / 充电记录
+- 个人中心（车辆管理）
 
 ## 技术栈
-- React Native (Expo SDK 52)
-- TypeScript
-- Zustand (状态管理)
-- React Navigation
 
-## 开发
+- React Native（Expo SDK 52，纯 Expo 工作流，无原生构建脚本）
+- TypeScript（严格模式，`tsc --noEmit` 为构建门）
+- Zustand（状态管理：authStore / orderStore / stationStore）
+- React Navigation（native-stack + bottom-tabs）
+- axios（API 层，token 存 expo-secure-store）
+- @react-native-community/netinfo（联网状态感知）
+
+## 快速开始
+
 ```bash
-npm install
-npx expo start
+npm ci            # 或 npm install
+npx expo start    # 启动 Metro，Expo Go 扫码调试
 ```
+
+平台脚本：`npm run android` / `npm run ios` / `npm run web`。
+
+## 质量门控
+
+| 门 | 命令 | 当前基线 |
+|----|------|---------|
+| 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
+| 测试 | `npm run test:ci` | 108 全绿 ✅ |
+| 覆盖率棘轮 | jest coverageThreshold | statements 34 / branches 24 / functions 28 / lines 34（只升不降） |
+| Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤21 警告（`--max-warnings=21`，只降不升） |
+
+覆盖率与警告数均为棘轮门控：新增代码不得使指标回退。
+
+## 项目结构
+
+```
+App.tsx                  # 入口：SafeAreaProvider + AppNavigator
+src/
+  navigation/            # AppNavigator（登录态切换 + Tab 导航）
+  screens/               # 12 个页面（Home/Scan/Charging/Order/Payment/Profile...）
+  components/            # MapView / StationCard / StatusBadge / EmptyState / LoadingSpinner
+  hooks/
+    useAppLifecycle.ts   # 前后台(AppState) + 联网(NetInfo) 状态聚合
+    useChargingPolling.ts# 充电轮询；后台/离线自动暂停，回前台/复网立即补拉
+  services/api.ts        # axios 实例 + 全部 API 封装（token 拦截器自动附加）
+  store/                 # Zustand stores
+  types/                 # 共享类型定义
+__mocks__/               # expo-secure-store / expo-status-bar 的 jest mock
+jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
+```
+
+## 架构备注
+
+- **生命周期感知轮询**：`useChargingPolling` 通过 `useAppLifecycle` 订阅 AppState 与 NetInfo，进入后台或确认离线时自动暂停轮询，回前台或复网立即补拉一次，避免无效请求与电量浪费（`pauseWhenInactive` 开关可控）。
+- **Jest 原生模块坑**：jest 自动 mock 会导致 `AppState.currentState` 变成 `jest.fn()` 而非字符串，`??` 兜底无效；`jest.setup.ts` 中已将其钉死为 `'active'`，NetInfo 同理。新增原生模块 mock 时注意同型问题。
+- **API 基址**：`src/services/api.ts` 中 `BASE_URL` 当前硬编码为生产云端 IP，尚无 dev/mock 环境切换（已知债，待改造）。
+
+## 已知限制
+
+- Web 导出（`expo export --platform web`）未验证，web 部署待定。
+- EAS Update 渠道与 Expo 账号未配置，OTA 升级通道待开通。
+- 12 个 screen 中仅 3 个有测试（Home/Login/Coupon），screen 测试为后续补强重点。
+
+## 关联仓库
+
+- `tianlian-ops-app`（运维端）/ `tianlian-station-app`（场站端）/ `tianlian-user-mp`（用户小程序）
+- `tianlian-shared`（共享 cli/docs/tests/cloud-mock）
+- 云端后端为独立仓库，终端侧仅通过 HTTP API 对接。
