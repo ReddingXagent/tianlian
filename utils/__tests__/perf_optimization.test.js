@@ -5,6 +5,12 @@ const { cache, cachedRequest, LRUCache } = require('../cache');
 const { createPolling } = require('../polling');
 const util = require('../util');
 
+// 套件结束清理全局缓存的 TTL 定时器（真实 setTimeout，最长30s）
+// 否则并行跑时 worker 因 pending timer 无法优雅退出（force exited 告警）
+afterAll(() => {
+  cache.clear();
+});
+
 // 模拟微信环境
 global.wx = {
   getStorageSync: jest.fn(() => null),

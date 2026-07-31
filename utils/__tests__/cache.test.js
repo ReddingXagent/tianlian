@@ -1,6 +1,11 @@
 // utils/__tests__/cache.test.js - 缓存层测试
 const { cache, cachedRequest, LRUCache } = require('../cache');
 
+// 套件结束清理全局缓存 TTL 定时器，避免并行跑时 worker pending timer 泄漏
+afterAll(() => {
+  cache.clear();
+});
+
 // 微信小程序环境模拟
 global.wx = {
   getStorageSync: jest.fn(() => null),
