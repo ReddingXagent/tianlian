@@ -7,14 +7,18 @@
 ### Added
 - 部署门控 `scripts/deploy-check.js` + `npm run deploy:check`：app.json/eas.json/expo-updates/凭证四步检查，退2设计内拦截待Expo账号（对齐user-mp deploy:check模式）
 - 验证 `expo export --platform android` 产物管线可出 Hermes bundle（2.24MB）
+- 新增 4 个 screen 测试（Profile/Wallet/OrderList/StationDetail），screen 测试 3→7，总测试数 108→135
 
 ### Fixed
 - F51: export 崩溃（metro/expo-asset 嵌套未提升顶层致 @expo/cli MODULE_NOT_FOUND）→ 显式声明 metro@0.81.5(devDep) + expo-asset@~11.0.5
 - eslint flat config 补 scripts/**/*.js node globals 豁免（新脚本 __dirname no-undef）
 
+### Changed
+- README 同步实际测试数（135）与 screen 测试覆盖（7/12）
+
 ### 已知债务
 - `src/services/api.ts` BASE_URL 硬编码生产 IP，缺 dev/mock 环境切换
-- screen 测试覆盖不足（12 个 screen 仅 3 个有测试）
+- screen 测试覆盖 7/12，剩余 5 个（Scan/Charging/OrderDetail/Payment/Vehicle）待补
 - Web 导出未验证；EAS Update 渠道未配置
 
 ## [0.3.0] - 2026-07-31

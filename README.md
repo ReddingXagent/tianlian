@@ -34,7 +34,7 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 108 全绿 ✅ |
+| 测试 | `npm run test:ci` | 135 全绿（18 suites）✅ |
 | 覆盖率棘轮 | jest coverageThreshold | statements 34 / branches 24 / functions 28 / lines 34（只升不降） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤21 警告（`--max-warnings=21`，只降不升） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（Expo账号/EAS/OTA 待丁哥，F25/F33） |
@@ -75,7 +75,7 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 
 - Web 导出（`expo export --platform web`）未验证，web 部署待定（同 ops/station F24/F34）。
 - EAS Update 渠道与 Expo 账号未配置，OTA 升级通道待开通（deploy:check 门控跟踪）。
-- 12 个 screen 中仅 3 个有测试（Home/Login/Coupon），screen 测试为后续补强重点。
+- 12 个 screen 中 7 个有测试（Home/Login/Coupon/OrderList/Profile/StationDetail/Wallet），剩余 5 个（Scan/Charging/OrderDetail/Payment/Vehicle）为后续补强重点。
 
 ## 关联仓库
 
