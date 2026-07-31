@@ -68,7 +68,7 @@ const ChargingScreen: React.FC = () => {
               if (status) {
                 navigation.replace('Payment', { orderId, amount: status.amount });
               }
-            } catch (err: unknown) {
+            } catch {
               Alert.alert('操作失败', '停止充电失败，请重试');
             } finally {
               setStopping(false);

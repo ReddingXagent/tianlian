@@ -1,4 +1,5 @@
 // Jest setup for tianlian-user-app
+/* eslint-disable @typescript-eslint/no-require-imports -- jest.mock工厂与setup需CJS require, 有意为之 */
 
 // Global mock for axios to prevent actual HTTP calls in tests
 jest.mock('axios', () => {

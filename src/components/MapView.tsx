@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
 } from 'react-native';
 import { Station } from '../types';
@@ -14,8 +13,6 @@ interface MapViewProps {
   onStationPress?: (station: Station) => void;
   height?: number;
 }
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /**
  * MapView component for displaying charging stations on a map.

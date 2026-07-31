@@ -73,7 +73,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
   },
 
   stopCharging: async (orderId: number) => {
-    const response = await chargingApi.stop(orderId);
+    await chargingApi.stop(orderId);
     set({ activeCharging: null });
   },
 

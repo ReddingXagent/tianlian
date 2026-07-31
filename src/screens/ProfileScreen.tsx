@@ -26,10 +26,6 @@ const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuthStore();
   const [stats, setStats] = useState<UserStats | null>(null);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
   const loadStats = async () => {
     try {
       const response = await statsApi.getUserStats();
@@ -38,6 +34,10 @@ const ProfileScreen: React.FC = () => {
       // 静默处理
     }
   };
+
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   const handleLogout = () => {
     Alert.alert(
