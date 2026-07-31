@@ -37,7 +37,7 @@ cd "$REPO_DIR"
 # 2. 同步代码(失败不阻塞)
 echo "[2/7] 同步代码..."
 if [ -d .git ]; then
-    REMOTE=*** remote | grep -E '^(synology|origin)$' | head -1 || true)
+    REMOTE=$(git remote | grep -E '^(synology|origin)$' | head -1 || true)
     if [ -n "$REMOTE" ] && git fetch "$REMOTE" 2>/dev/null; then
         if git merge --ff-only "$REMOTE/master" 2>/dev/null; then
             echo "已同步: $(git rev-parse --short HEAD)"
@@ -79,7 +79,7 @@ $PYTHON migrate_db.py 2>/dev/null || echo "数据库已是最新或迁移跳过"
 
 # 6. 停止旧服务(精确匹配本目录 main.py)
 echo "[6/7] 停止旧服务..."
-OLD_PID="$(pgre…y" 2>/dev/null || true)"
+OLD_PID=$(pgrep -f "$REPO_DIR/main.py" 2>/dev/null || true)
 if [ -z "$OLD_PID" ] && [ -f .pid ]; then
     OLD_PID="$(cat .pid 2>/dev/null || true)"
 fi
