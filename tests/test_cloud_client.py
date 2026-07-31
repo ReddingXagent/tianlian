@@ -180,6 +180,14 @@ class TestCloudLifecycle:
     async def test_heartbeat_loop_cancelled(self, cloud_config):
         cloud_config.heartbeat_interval = 0  # no heartbeat
         client = CloudClient(cloud_config, "GW-HB")
-        await client.start()
-        assert client._heartbeat_task is None
-        await client.stop()
+
+        # F7修复: mock httpx.AsyncClient, 避免 _fetch_csrf_token 发真实HTTP
+        with patch("httpx.AsyncClient") as mock_cls:
+            mock_client = AsyncMock()
+            resp = MagicMock()
+            resp.cookies.get.return_value = ""
+            mock_client.get.return_value = resp
+            mock_cls.return_value = mock_client
+            await client.start()
+            assert client._heartbeat_task is None
+            await client.stop()
