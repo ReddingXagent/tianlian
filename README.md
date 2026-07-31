@@ -37,6 +37,7 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 测试 | `npm run test:ci` | 108 全绿 ✅ |
 | 覆盖率棘轮 | jest coverageThreshold | statements 34 / branches 24 / functions 28 / lines 34（只升不降） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤21 警告（`--max-warnings=21`，只降不升） |
+| 部署门控 | `npm run deploy:check` | 退2 设计内拦截（Expo账号/EAS/OTA 待丁哥，F25/F33） |
 
 覆盖率与警告数均为棘轮门控：新增代码不得使指标回退。
 
@@ -64,10 +65,16 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 - **Jest 原生模块坑**：jest 自动 mock 会导致 `AppState.currentState` 变成 `jest.fn()` 而非字符串，`??` 兜底无效；`jest.setup.ts` 中已将其钉死为 `'active'`，NetInfo 同理。新增原生模块 mock 时注意同型问题。
 - **API 基址**：`src/services/api.ts` 中 `BASE_URL` 当前硬编码为生产云端 IP，尚无 dev/mock 环境切换（已知债，待改造）。
 
+## 部署
+
+- **产物验证**：`npx expo export --platform android` 已验证可出 Hermes bundle（2.24MB）。
+- **部署门控**：`npm run deploy:check`（`scripts/deploy-check.js`）四步检查 app.json → eas.json → expo-updates → 凭证；退出码 0=就绪 / 1=配置错误 / 2=外部依赖待就位（设计内拦截）。当前退2，就绪清单：Expo账号 → EXPO_TOKEN → `eas build:configure` → 装 expo-updates → 配 updates.url/channel。
+- **依赖坑（F51）**：`metro`/`expo-asset` 若只被嵌套安装（未提升顶层），`@expo/cli` 顶层解析会 MODULE_NOT_FOUND 致 export 崩；本仓已显式声明 `metro@0.81.5`(dev) + `expo-asset@~11.0.5` 钉死。
+
 ## 已知限制
 
-- Web 导出（`expo export --platform web`）未验证，web 部署待定。
-- EAS Update 渠道与 Expo 账号未配置，OTA 升级通道待开通。
+- Web 导出（`expo export --platform web`）未验证，web 部署待定（同 ops/station F24/F34）。
+- EAS Update 渠道与 Expo 账号未配置，OTA 升级通道待开通（deploy:check 门控跟踪）。
 - 12 个 screen 中仅 3 个有测试（Home/Login/Coupon），screen 测试为后续补强重点。
 
 ## 关联仓库

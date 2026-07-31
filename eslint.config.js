@@ -17,6 +17,20 @@ module.exports = defineConfig([
     },
   },
   {
+    // Node脚本(部署门控等)放开node全局
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        require: 'readonly',
+        module: 'writable',
+        process: 'readonly',
+        console: 'readonly',
+        __dirname: 'readonly',
+        Buffer: 'readonly',
+      },
+    },
+  },
+  {
     // 测试文件放开 jest 全局
     files: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
     languageOptions: {
