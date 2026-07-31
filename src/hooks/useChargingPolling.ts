@@ -1,11 +1,14 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { chargingApi } from '../services/api';
 import { ChargingStatus } from '../types';
+import { useAppLifecycle } from './useAppLifecycle';
 
 interface UseChargingPollingOptions {
   orderId: number;
   interval?: number; // ms, default 3000
   enabled?: boolean;
+  /** 后台/离线时暂停轮询, 回前台/恢复联网立即补拉 (默认 true) */
+  pauseWhenInactive?: boolean;
   onStatusChange?: (status: ChargingStatus) => void;
   onComplete?: (status: ChargingStatus) => void;
   onError?: (error: Error) => void;
@@ -15,6 +18,8 @@ interface UseChargingPollingReturn {
   status: ChargingStatus | null;
   loading: boolean;
   error: string | null;
+  /** enabled 但因后台/离线被暂停 */
+  paused: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -29,6 +34,7 @@ export function useChargingPolling({
   orderId,
   interval = 3000,
   enabled = true,
+  pauseWhenInactive = true,
   onStatusChange,
   onComplete,
   onError,
@@ -36,6 +42,10 @@ export function useChargingPolling({
   const [status, setStatus] = useState<ChargingStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isForeground, isConnected } = useAppLifecycle();
+  // NetInfo 首帧未到时(isConnected=null)不阻塞; 仅确认离线才暂停
+  const active =
+    enabled && (!pauseWhenInactive || (isForeground && isConnected !== false));
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onCompleteRef = useRef(onComplete);
   const onStatusChangeRef = useRef(onStatusChange);
@@ -85,8 +95,9 @@ export function useChargingPolling({
   }, [fetchStatus]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!active) return;
 
+    // active 由 false→true (回前台/恢复联网) 时立即补拉一次再续轮询
     fetchStatus();
 
     intervalRef.current = setInterval(fetchStatus, interval);
@@ -97,9 +108,9 @@ export function useChargingPolling({
         intervalRef.current = null;
       }
     };
-  }, [orderId, interval, enabled, fetchStatus]);
+  }, [orderId, interval, active, fetchStatus]);
 
-  return { status, loading, error, refresh };
+  return { status, loading, error, paused: enabled && !active, refresh };
 }
 
 /**

@@ -1,5 +1,34 @@
 // Jest setup for tianlian-user-app
 /* eslint-disable @typescript-eslint/no-require-imports -- jest.mock工厂与setup需CJS require, 有意为之 */
+import { AppState } from 'react-native';
+
+// AppState.addEventListener: jest 无原生事件发射器, 全局兜底空订阅;
+// 需要模拟前后台切换的测试用 jest.spyOn 覆盖即可
+jest.spyOn(AppState, 'addEventListener').mockImplementation(
+  () => ({ remove: jest.fn() }) as never,
+);
+// jest 自动mock NativeModules 导致 AppState.currentState 是 jest.fn() 而非字符串,
+// 钉死为 'active'(真机运行时恒为字符串)
+Object.defineProperty(AppState, 'currentState', {
+  value: 'active',
+  configurable: true,
+  writable: true,
+});
+
+// Global mock for @react-native-community/netinfo: 默认在线,
+// addEventListener 订阅时同步回推首帧(与真机一致); 测试可 mockImplementation 覆盖
+jest.mock('@react-native-community/netinfo', () => ({
+  __esModule: true,
+  default: {
+    addEventListener: jest.fn(
+      (cb: (state: { isConnected: boolean; isInternetReachable: boolean }) => void) => {
+        cb({ isConnected: true, isInternetReachable: true });
+        return jest.fn();
+      },
+    ),
+    fetch: jest.fn(() => Promise.resolve({ isConnected: true, isInternetReachable: true })),
+  },
+}));
 
 // Global mock for axios to prevent actual HTTP calls in tests
 jest.mock('axios', () => {

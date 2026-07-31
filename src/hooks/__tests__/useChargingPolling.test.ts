@@ -1,4 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
+import { AppState } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { chargingApi } from '../../services/api';
 import { useChargingPolling, useActiveCharging } from '../../hooks/useChargingPolling';
 import { ChargingStatus } from '../../types';
@@ -206,5 +208,103 @@ describe('useActiveCharging', () => {
 
     expect(result.current.error).toBe('查询失败');
     expect(result.current.activeOrderId).toBeNull();
+  });
+});
+
+describe('useChargingPolling 前后台/网络感知 (F32同型补齐)', () => {
+  type NetInfoCb = (state: { isConnected: boolean; isInternetReachable: boolean }) => void;
+  let appStateCb: ((state: string) => void) | null = null;
+  let netInfoCb: NetInfoCb | null = null;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    appStateCb = null;
+    netInfoCb = null;
+    jest.spyOn(AppState, 'addEventListener').mockImplementation(((_e: string, cb: unknown) => {
+      appStateCb = cb as (state: string) => void;
+      return { remove: jest.fn() };
+    }) as typeof AppState.addEventListener);
+    (NetInfo.addEventListener as jest.Mock).mockImplementation((cb: NetInfoCb) => {
+      netInfoCb = cb;
+      cb({ isConnected: true, isInternetReachable: true });
+      return jest.fn();
+    });
+    (chargingApi.getStatus as jest.Mock).mockResolvedValue({ data: mockChargingStatus });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it('切后台: 暂停轮询, paused=true, 不再请求', async () => {
+    const { result } = renderHook(() => useChargingPolling({ orderId: 1, interval: 3000 }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.paused).toBe(false);
+
+    const calls = (chargingApi.getStatus as jest.Mock).mock.calls.length;
+    act(() => appStateCb?.('background'));
+    expect(result.current.paused).toBe(true);
+
+    await act(async () => {
+      jest.advanceTimersByTime(10000);
+    });
+    expect((chargingApi.getStatus as jest.Mock).mock.calls.length).toBe(calls);
+  });
+
+  it('回前台: 立即补拉一次并恢复轮询', async () => {
+    const { result } = renderHook(() => useChargingPolling({ orderId: 1, interval: 3000 }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    act(() => appStateCb?.('background'));
+    const calls = (chargingApi.getStatus as jest.Mock).mock.calls.length;
+
+    await act(async () => {
+      appStateCb?.('active');
+    });
+    expect(result.current.paused).toBe(false);
+    // 立即补拉
+    expect((chargingApi.getStatus as jest.Mock).mock.calls.length).toBe(calls + 1);
+
+    // 轮询恢复
+    await act(async () => {
+      jest.advanceTimersByTime(3000);
+    });
+    expect((chargingApi.getStatus as jest.Mock).mock.calls.length).toBe(calls + 2);
+  });
+
+  it('确认离线: 暂停; 恢复联网: 立即补拉', async () => {
+    const { result } = renderHook(() => useChargingPolling({ orderId: 1, interval: 3000 }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    const calls = (chargingApi.getStatus as jest.Mock).mock.calls.length;
+    act(() => netInfoCb?.({ isConnected: false, isInternetReachable: false }));
+    expect(result.current.paused).toBe(true);
+    await act(async () => {
+      jest.advanceTimersByTime(9000);
+    });
+    expect((chargingApi.getStatus as jest.Mock).mock.calls.length).toBe(calls);
+
+    await act(async () => {
+      netInfoCb?.({ isConnected: true, isInternetReachable: true });
+    });
+    expect(result.current.paused).toBe(false);
+    expect((chargingApi.getStatus as jest.Mock).mock.calls.length).toBe(calls + 1);
+  });
+
+  it('pauseWhenInactive=false: 后台仍轮询', async () => {
+    const { result } = renderHook(() =>
+      useChargingPolling({ orderId: 1, interval: 3000, pauseWhenInactive: false }),
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => appStateCb?.('background'));
+    expect(result.current.paused).toBe(false);
+
+    const calls = (chargingApi.getStatus as jest.Mock).mock.calls.length;
+    await act(async () => {
+      jest.advanceTimersByTime(3000);
+    });
+    expect((chargingApi.getStatus as jest.Mock).mock.calls.length).toBe(calls + 1);
   });
 });
