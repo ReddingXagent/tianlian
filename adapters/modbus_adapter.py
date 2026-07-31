@@ -8,7 +8,7 @@ Simulated mode: generates realistic telemetry without hardware.
 import asyncio
 import logging
 import random
-from typing import Callable
+from collections.abc import Callable
 
 from config import ModbusConfig
 from models import TelemetryPoint

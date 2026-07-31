@@ -219,7 +219,7 @@ class TestCleanup:
     def test_cleanup_keeps_unsynced(self, temp_db, sample_points):
         temp_db.cache_telemetry_batch(sample_points)
         # Don't mark as synced
-        deleted = temp_db.cleanup(max_age_days=0)  # aggressive
+        temp_db.cleanup(max_age_days=0)  # aggressive
         # Should still not delete unsynced
         assert temp_db.get_cache_size() == 5
 

@@ -1,10 +1,10 @@
 """Device data models"""
 
 from dataclasses import asdict, dataclass, field
-from enum import Enum
+from enum import StrEnum
 
 
-class DeviceStatus(str, Enum):
+class DeviceStatus(StrEnum):
     ONLINE = "online"
     OFFLINE = "offline"
     FAULT = "fault"
@@ -12,7 +12,7 @@ class DeviceStatus(str, Enum):
     IDLE = "idle"
 
 
-class DeviceType(str, Enum):
+class DeviceType(StrEnum):
     CHARGER = "charger"          # 充电桩
     INVERTER = "inverter"        # 逆变器
     BATTERY = "battery"          # 储能
@@ -20,7 +20,7 @@ class DeviceType(str, Enum):
     SENSOR = "sensor"            # 传感器
 
 
-class ProtocolType(str, Enum):
+class ProtocolType(StrEnum):
     OCPP = "ocpp"
     MODBUS_TCP = "modbus_tcp"
     MODBUS_RTU = "modbus_rtu"

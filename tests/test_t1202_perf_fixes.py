@@ -128,7 +128,6 @@ class TestCloudSyncDynamicInterval:
 
         # Track sleep calls
         sleep_calls = []
-        original_sleep = asyncio.sleep
 
         async def fast_sleep(duration):
             sleep_calls.append(duration)

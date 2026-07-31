@@ -17,10 +17,11 @@ OCPP 1.6J ChargePoint operations:
 import asyncio
 import logging
 import random
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
-from typing import Any, Callable
+from enum import StrEnum
+from typing import Any
 
 from config import OCPPConfig
 from models import TelemetryPoint
@@ -31,14 +32,14 @@ logger = logging.getLogger(__name__)
 # ── OCPP 1.6J Message Types ──────────────────────────────────────────
 
 
-class RegistrationStatus(str, Enum):
+class RegistrationStatus(StrEnum):
     """BootNotification response status"""
     ACCEPTED = "Accepted"
     PENDING = "Pending"
     REJECTED = "Rejected"
 
 
-class ChargePointStatus(str, Enum):
+class ChargePointStatus(StrEnum):
     """StatusNotification status values"""
     AVAILABLE = "Available"
     PREPARING = "Preparing"
@@ -51,7 +52,7 @@ class ChargePointStatus(str, Enum):
     FAULTED = "Faulted"
 
 
-class ChargePointErrorCode(str, Enum):
+class ChargePointErrorCode(StrEnum):
     """StatusNotification error codes"""
     NO_ERROR = "NoError"
     CONNECTOR_LOCK_FAILURE = "ConnectorLockFailure"
@@ -71,7 +72,7 @@ class ChargePointErrorCode(str, Enum):
     WEAK_SIGNAL = "WeakSignal"
 
 
-class AuthorizationStatus(str, Enum):
+class AuthorizationStatus(StrEnum):
     """Authorize response status"""
     ACCEPTED = "Accepted"
     BLOCKED = "Blocked"
@@ -80,7 +81,7 @@ class AuthorizationStatus(str, Enum):
     EXPIRED = "Expired"
 
 
-class StopReason(str, Enum):
+class StopReason(StrEnum):
     """StopTransaction reason codes"""
     EMERGENCY_STOP = "EmergencyStop"
     EV_DISCONNECTED = "EVDisconnected"
@@ -95,7 +96,7 @@ class StopReason(str, Enum):
     DE_AUTHORIZED = "DeAuthorized"
 
 
-class Measurand(str, Enum):
+class Measurand(StrEnum):
     """MeterValues measurand types"""
     VOLTAGE = "Voltage"
     CURRENT_IMPORT = "Current.Import"
@@ -109,7 +110,7 @@ class Measurand(str, Enum):
     FREQUENCY = "Frequency"
 
 
-class UnitOfMeasure(str, Enum):
+class UnitOfMeasure(StrEnum):
     """MeterValues unit types"""
     V = "V"
     A = "A"
@@ -123,7 +124,7 @@ class UnitOfMeasure(str, Enum):
     HZ = "Hz"
 
 
-class ReadingContext(str, Enum):
+class ReadingContext(StrEnum):
     """MeterValues reading context"""
     INTERRUPTION_BEGIN = "Interruption.Begin"
     INTERRUPTION_END = "Interruption.End"

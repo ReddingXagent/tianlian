@@ -125,7 +125,6 @@ class TestTelemetryCache:
 
     def test_mark_synced_multiple(self, cache):
         """Test marking multiple points as synced at once"""
-        ids = []
         for i in range(3):
             cache.cache_telemetry(TelemetryPoint(device_id=f"DEVICE-{i}", power=float(i)))
 

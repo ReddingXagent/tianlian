@@ -12,7 +12,7 @@ import asyncio
 import json
 import logging
 import time
-from typing import Callable
+from collections.abc import Callable
 
 import paho.mqtt.client as mqtt
 

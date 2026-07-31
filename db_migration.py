@@ -259,7 +259,7 @@ def run_migration(db_path: str) -> int:
 def main():
     db_path = sys.argv[1] if len(sys.argv) > 1 else "data/gateway.db"
     try:
-        changes = run_migration(db_path)
+        run_migration(db_path)
         sys.exit(0)
     except Exception as e:
         print(f"[ERROR] Migration failed: {e}", file=sys.stderr)

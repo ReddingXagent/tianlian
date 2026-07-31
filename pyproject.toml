@@ -1,5 +1,5 @@
-# 天链边缘网关 — ruff lint 门控（2026-07-31 自驱lint轮建立）
-# 基线: 首次扫描 283 errors；安全自动修复后剩余项以 ignore 登记为债务，逐条收窄
+# 天链边缘网关 — ruff lint 门控（2026-07-31 建立）
+# 基线: 首次扫描 283 errors；逐轮收窄，F841/UP035/UP042 已清零(07-31)
 [tool.ruff]
 target-version = "py313"
 line-length = 120
@@ -18,13 +18,10 @@ select = [
 ignore = [
     "BLE001",   # 债务: 33处 blind-except，需逐步收窄异常类型
     "E402",     # 债务: 14处 import不在顶部（scripts路径注入等，需人工确认）
-    "F841",     # 债务: 4处 unused-variable，需人工确认
     "RUF001", "RUF002", "RUF003",  # 中文注释/文档的全角标点，非歧义误报
     "RUF012",   # 债务: 2处 mutable-class-default
     "RUF013",   # 债务: 1处 implicit-optional
     "RUF059",   # 债务: 3处 unused-unpacked-variable
-    "UP035",    # 债务: 17处 deprecated-import（unsafe-fix，人工迁移）
-    "UP042",    # 债务: 11处 replace-str-enum（unsafe-fix，需验证行为等价）
 ]
 
 [tool.ruff.lint.flake8-bugbear]
