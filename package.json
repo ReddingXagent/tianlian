@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "天链V3用户小程序",
   "scripts": {
+    "check": "node scripts/check-mp-structure.js",
     "test": "jest --passWithNoTests"
   },
   "jest": {
