@@ -12,6 +12,11 @@
 #   - 新增: .git 存在时 git fetch+ff-only 同步(兼容 remote 名 synology/origin),
 #     失败不阻塞(Pi→NAS 无免密时降级为部署当前代码)
 #   - 改进: pgrep 精确匹配本目录 main.py; 日志写 gateway.log(Pi现状); .pid 记录
+# v3 (2026-08-01 自驱部署验证轮):
+#   - fix: 步骤6杀旧进程后端口8080未完全释放→新服务uvicorn bind失败SystemExit
+#     增加端口等待释放循环(最多10秒), 确保bind前端口可用
+#   - fix: 步骤7启动后只等3秒, 改为轮询健康检查(最多15秒)
+#   - fix: 首次启动失败时自动重试一次(等待2秒后)
 set -e
 
 # 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
@@ -86,11 +91,27 @@ fi
 if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
     kill "$OLD_PID" 2>/dev/null || true
     sleep 2
-    # 确保端口释放
+    # 确保进程终止
     if kill -0 "$OLD_PID" 2>/dev/null; then
         kill -9 "$OLD_PID" 2>/dev/null || true
         sleep 1
     fi
+fi
+
+# 等待端口释放(最多10秒)
+WAIT_CNT=0
+while [ $WAIT_CNT -lt 10 ]; do
+    if ! ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
+        break
+    fi
+    echo "等待端口 $PORT 释放... ($((WAIT_CNT + 1))/10)"
+    sleep 1
+    WAIT_CNT=$((WAIT_CNT + 1))
+done
+if [ $WAIT_CNT -ge 10 ]; then
+    echo "⚠️ 端口 $PORT 仍未释放, 强制fuser kill"
+    fuser -k "${PORT}/tcp" 2>/dev/null || true
+    sleep 2
 fi
 
 # 7. 启动服务(加载.env到环境变量)
@@ -100,14 +121,36 @@ if [ -f .env ]; then
     . .env
     set +a
 fi
-nohup $PYTHON main.py > gateway.log 2>&1 &
-NEW_PID=$!
-echo "$NEW_PID" > .pid
+start_gateway() {
+    nohup $PYTHON main.py > gateway.log 2>&1 &
+    NEW_PID=$!
+    echo "$NEW_PID" > .pid
+}
 
-sleep 3
+start_gateway
+
+# 轮询健康检查(最多15秒)
+HEALTH_OK=false
+for i in $(seq 1 15); do
+    sleep 1
+    if ! kill -0 "$NEW_PID" 2>/dev/null; then
+        echo "⚠️ 进程退出(第1次), 等待2秒重试..."
+        if [ $i -le 5 ]; then
+            sleep 2
+            start_gateway
+            continue
+        else
+            break
+        fi
+    fi
+    if curl -s -m 2 "http://localhost:$PORT/health" >/dev/null 2>&1; then
+        HEALTH_OK=true
+        break
+    fi
+done
 
 # 验证
-if kill -0 "$NEW_PID" 2>/dev/null; then
+if [ "$HEALTH_OK" = true ] && kill -0 "$NEW_PID" 2>/dev/null; then
     echo ""
     echo "✅ 部署成功! PID: $NEW_PID"
     echo "   健康检查: http://$(hostname -I | awk '{print $1}'):$PORT/health"
