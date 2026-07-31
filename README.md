@@ -18,6 +18,8 @@
 | `npm run check` | 小程序结构门控（JSON 合法性 / 页面四件套 / tabBar 图标 / 组件引用解析），错误退 1 |
 | `npm test` | Jest 单测（8 套件 / 215 用例，覆盖率 92.9%） |
 | `npm run lint` | ESLint flat config 门控（0 错 0 警） |
+| `npm run deploy:check` | 部署管线就绪验证（门控→appid→密钥，不上传） |
+| `npm run deploy` | miniprogram-ci 上传体验版（需真 appid + 密钥） |
 
 > 微信小程序无 CLI 构建，`npm run check` 即 CI 构建替代；提交前三件套：`check` + `test` + `lint`。
 
@@ -32,7 +34,7 @@ components/       empty / loading / station-card
 services/api.js   唯一 API 层：request 封装 + snake→camel 归一化 + 全业务域方法
 utils/            cache(TTL缓存) polling(轮询) perf(性能打点) util
 config/index.js   环境配置（dev/staging/prod 切换 + 超时/轮询/缓存TTL）
-scripts/          check-mp-structure.js 结构门控
+scripts/          check-mp-structure.js 结构门控 / deploy.js 部署门控(miniprogram-ci)
 ```
 
 ## 环境与配置（config/index.js）
@@ -55,6 +57,17 @@ scripts/          check-mp-structure.js 结构门控
 - lint：ESLint 10 flat config，0 错 0 警
 - 上传包：主包 ~704K（≪2MB 限额），packOptions.ignore 已排除开发产物
 - 合规：`lazyCodeLoading` / `requiredPrivateInfos` / `permission` 声明齐全；废弃 API（`wx.getSystemInfoSync` / `wx.getUserProfile`）已清零
+
+## 部署与发布
+
+微信小程序发布走 **miniprogram-ci 上传体验版 → 公众平台提交审核** 链路，脚本 `scripts/deploy.js`：
+
+1. **结构门控**（复用 `check-mp-structure.js`，失败即中止）
+2. **appid 校验**：占位符 `wx0000000000000000` 直接拦截（退 2）
+3. **密钥校验**：`private-key/<appid>.key`（小程序后台→开发设置→生成代码上传密钥，已 gitignore），或 `MP_KEY_PATH` 环境变量
+4. **上传**：`--check` 模式在第 3 步后止步；正式上传参数 `--version=` / `--robot=` / `--desc=`（默认取 package.json 版本 + git 分支@SHA）
+
+退出码：0=成功/就绪 · 1=门控失败/运行错误 · 2=appid 占位 · 3=缺密钥。当前 appid 为占位符，`deploy:check` 会停在第 2 步——真 appid 待丁哥提供后即可贯通。
 
 ## 已知限制 / TODO
 

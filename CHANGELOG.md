@@ -10,6 +10,17 @@
 - 头像昵称 `<button open-type="chooseAvatar">` 采集方案
 - api.js 错误路径分支覆盖补强（当前 branch 69.6%）
 
+## [1.1.0] - 2026-07-31
+
+### Added
+- 部署门控脚本 `npm run deploy` / `deploy:check`（scripts/deploy.js）：结构门控→appid校验→密钥校验→miniprogram-ci 上传体验版，分级退出码（0/1/2/3），`--check` 干跑验证管线
+- 部署脚本行为测试 ×3（门控先行 / appid占位拦截 / 参数校验），测试总数 215→218
+- `.gitignore` 补 `private-key/`（代码上传密钥不落库）
+- README 补「部署与发布」段 + 命令表
+
+### 已知阻塞
+- 真 appid + 上传密钥待丁哥；就位前 `deploy:check` 止步于 appid 校验（设计内拦截）
+
 ## [1.0.0] - 2026-07-31
 
 ### Fixed

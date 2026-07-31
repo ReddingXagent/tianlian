@@ -2,3 +2,4 @@ node_modules/
 miniprogram_npm/
 coverage/
 .env
+private-key/
