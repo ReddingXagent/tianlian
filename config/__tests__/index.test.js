@@ -251,7 +251,7 @@ describe('Config', () => {
     });
 
     it('should not have undefined values', () => {
-      Object.entries(config).forEach(([key, value]) => {
+      Object.entries(config).forEach(([, value]) => {
         expect(value).toBeDefined();
       });
     });

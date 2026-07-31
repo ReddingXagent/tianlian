@@ -4,7 +4,8 @@
   "description": "天链V3用户小程序",
   "scripts": {
     "check": "node scripts/check-mp-structure.js",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "lint": "eslint ."
   },
   "jest": {
     "testEnvironment": "node",
@@ -22,6 +23,8 @@
     ]
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
     "jest": "^29.7.0"
   }
 }

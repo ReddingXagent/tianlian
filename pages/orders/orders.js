@@ -3,7 +3,6 @@
 const api = require('../../services/api');
 const util = require('../../utils/util');
 const config = require('../../config/index');
-const { cache } = require('../../utils/cache');
 const { createPagination, guardTap } = require('../../utils/perf');
 
 const STATUS_MAP = {
@@ -76,7 +75,7 @@ Page({
     this.setData(isFirstPage ? { loading: true } : { loadingMore: true });
 
     try {
-      const { list, total, hasMore, page } = await this._pagination.loadMore(reload);
+      const { list, hasMore, page } = await this._pagination.loadMore(reload);
 
       const orders = list.map(order => ({
         ...order,

@@ -1,7 +1,7 @@
 // utils/__tests__/perf_optimization.test.js - T-1202 第3批性能优化测试
 // 测试环境配置切换、缓存集成、防抖节流等优化
 
-const { cache, cachedRequest, LRUCache } = require('../cache');
+const { cache, cachedRequest } = require('../cache');
 const { createPolling } = require('../polling');
 const util = require('../util');
 

@@ -4,7 +4,7 @@ const api = require('../../services/api');
 const util = require('../../utils/util');
 const config = require('../../config/index');
 const { createPolling } = require('../../utils/polling');
-const { createBatchSetData, diffSetData } = require('../../utils/perf');
+const { diffSetData } = require('../../utils/perf');
 
 Page({
   data: {

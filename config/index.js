@@ -1,7 +1,9 @@
 // config/index.js - 全局配置
 
 // 环境切换: 'dev' | 'staging' | 'prod'
-const ENV = process.env.NODE_ENV === 'production' ? 'prod' : 'dev';
+/* global process */
+// 小程序真机无 process 全局, 必须 typeof 守卫(否则 ReferenceError 启动即崩)
+const ENV = (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') ? 'prod' : 'dev';
 
 const ENV_CONFIG = {
   dev: {

@@ -15,14 +15,6 @@ const TYPE_CONFIG = {
   [config.NOTIFICATION_TYPES.PROMOTION]: { icon: '🎉', color: '#FF9500', text: '活动促销' }
 };
 
-// tab 值映射（修正原版空值问题）
-const TAB_VALUES = {
-  all: '',
-  charge: 'charge',
-  coupon: 'coupon_expire',
-  system: 'system'
-};
-
 Page({
   data: {
     tabs: [

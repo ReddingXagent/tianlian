@@ -63,7 +63,7 @@ Page({
     }
 
     // URL解析
-    const urlMatch = result.match(/charger[\/=]([A-Za-z0-9_-]+)/);
+    const urlMatch = result.match(/charger[/=]([A-Za-z0-9_-]+)/);
     if (urlMatch) return urlMatch[1];
 
     // 纯ID
