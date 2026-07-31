@@ -124,7 +124,7 @@ const OrderListScreen: React.FC = () => {
           title="暂无订单"
           message="您还没有充电记录"
           actionLabel="去充电"
-          onAction={() => navigation.navigate('Scan')}
+          onAction={() => navigation.navigate('Main', { screen: 'Scan' })}
         />
       ) : (
         <FlatList

@@ -1,3 +1,5 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 // =====================
 // 站点 (Station)
 // =====================
@@ -235,9 +237,8 @@ export interface PaymentResult {
 // =====================
 export type RootStackParamList = {
   Auth: undefined;
-  Main: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
   StationDetail: { stationId: number };
-  ScanScreen: undefined;
   Charging: { orderId: number };
   OrderDetail: { orderId: number };
   Payment: { orderId: number; amount: number };

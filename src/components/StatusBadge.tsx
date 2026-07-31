@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-type StatusType =
+export type StatusType =
   | 'online'
   | 'offline'
   | 'fault'
@@ -20,7 +20,8 @@ type StatusType =
   | 'timeout';
 
 interface StatusBadgeProps {
-  status: StatusType;
+  /** 已知状态有预设样式/文案；未知字符串原样展示（灰色底） */
+  status: StatusType | (string & {});
   label?: string;
 }
 

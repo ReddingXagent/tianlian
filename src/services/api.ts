@@ -11,6 +11,7 @@ import {
   Order,
   Vehicle,
   Coupon,
+  CouponStatus,
   WalletRecord,
   PaginatedData,
   ScanResult,

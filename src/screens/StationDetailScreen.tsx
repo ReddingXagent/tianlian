@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Linking,
   Alert,
+  Platform,
 } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -90,7 +91,7 @@ const StationDetailScreen: React.FC = () => {
             text: '去充电',
             onPress: () => {
               // 跳转到扫码页，模拟已扫描
-              navigation.navigate('Scan');
+              navigation.navigate('Main', { screen: 'Scan' });
             },
           },
         ]
