@@ -222,22 +222,17 @@ Page({
     this.getLocation();
   }, 2000),
 
-  // 地图标记点击
+  // 地图标记点击 (F70: station-detail页未创建,临时toast提示)
   onMarkerTap(e) {
     const station = this.data.stations[e.markerId];
     if (station) {
-      wx.navigateTo({
-        url: `/pages/station-detail/station-detail?id=${station.id}`
-      });
+      wx.showToast({ title: '站点详情开发中', icon: 'none' });
     }
   },
 
-  // 站点卡片点击
-  onStationTap(e) {
-    const { station } = e.detail;
-    wx.navigateTo({
-      url: `/pages/station-detail/station-detail?id=${station.id}`
-    });
+  // 站点卡片点击 (F70: station-detail页未创建)
+  onStationTap(_e) {
+    wx.showToast({ title: '站点详情开发中', icon: 'none' });
   },
 
   // 刷新（防连点）

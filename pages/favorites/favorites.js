@@ -44,12 +44,9 @@ Page({
     }
   },
 
-  // 站点点击
-  onStationTap(e) {
-    const { id } = e.currentTarget.dataset;
-    wx.navigateTo({
-      url: `/pages/station-detail/station-detail?id=${id}`
-    });
+  // 站点点击 (F70: station-detail页未创建,临时toast提示)
+  onStationTap(_e) {
+    wx.showToast({ title: '站点详情开发中', icon: 'none' });
   },
 
   // 取消收藏（防连点）

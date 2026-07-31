@@ -67,9 +67,9 @@ Page({
       });
   },
 
-  // 钱包
+  // 钱包 (F70: wallet页未创建)
   onWalletTap() {
-    wx.navigateTo({ url: '/pages/wallet/wallet' });
+    wx.showToast({ title: '钱包功能开发中', icon: 'none' });
   },
 
   // 充值
@@ -97,9 +97,9 @@ Page({
     wx.switchTab({ url: '/pages/orders/orders' });
   },
 
-  // 交易明细
+  // 交易明细 (F70: transactions页未创建)
   onTransactions() {
-    wx.navigateTo({ url: '/pages/transactions/transactions' });
+    wx.showToast({ title: '交易明细开发中', icon: 'none' });
   },
 
   // 收藏站点
