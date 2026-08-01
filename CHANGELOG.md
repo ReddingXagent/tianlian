@@ -7,8 +7,19 @@
 ## [Unreleased]
 
 ### Added
-- 项目 README：技术栈、功能模块、质量门控（200 用例 / coverage 80.8% / doctor 18/18）、目录结构、Roadmap 缺口（F27/F28/F30/F31/F32/F33）
-- 本 CHANGELOG 文件
+- 全局错误边界 `ErrorBoundary.tsx`：捕获子树渲染异常防白屏，DEV 模式显示堆栈（`e4dc934`）
+- 网络状态横幅 `NetworkStatus.tsx`：AppState 监听前后台切换，回前台 ping API 检测连通性，离线显示红色横幅；无需额外依赖（`e4dc934`）
+- `App.tsx` 包裹 ErrorBoundary + NetworkStatus（`e4dc934`）
+- `eas.json` 三档构建 profile：development / preview(APK) / production（`e876fd8`，关闭 F33）
+
+### Changed
+- eslint 警告清零：84 → 0（`474492b`）
+- README 同步最新质量指标（coverage 80.9%、eslint 0 warn、eas.json 就位、F80 已修复）
+
+### Fixed
+- F32: 无 AppState / 网络状态检测 → ErrorBoundary + NetworkStatus 已接入 ✅
+- F33: 缺 eas.json → 三档 profile 已配置 ✅
+- F80: eslint 84 warn → 全部清零 ✅
 
 ## [1.0.0] - 2026-07-31
 

@@ -40,14 +40,14 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（200 用例全绿，coverage 80.8%）
-npm run lint         # eslint（0 err / 84 warn）
+npm test             # jest 单测（200 用例全绿，coverage 80.9%）
+npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）
 ```
 
-- 测试覆盖：screens / components / hooks / services / store / utils 六层全覆盖
-- 覆盖薄弱点（F27）：authStore 45%（branch 0%）/ stationStore+workOrderStore branch 25% / WorkOrderScreen 60% / NotificationCenter 69% / api.ts 73%
+- 测试覆盖：screens / components / hooks / services / store / utils 六层全覆盖（总体 80.9%）
+- 覆盖薄弱点（F75）：authStore 45.8%（branch 0%）/ stationStore 57.7%（branch 25%）/ workOrderStore 65.7%（branch 25%）/ WorkOrderScreen 59.6% / NotificationCenter 69.7% / api.ts 73.3%
 - warn 分布（F29）：require-imports×48 + unused-vars×23 + set-state-in-effect×10 + 其他×3
 
 ## 构建与部署
@@ -57,8 +57,8 @@ npx expo export --platform android   # OTA 更新包（JS bundle + assets）
 npx expo export --platform ios       # 同上，iOS 平台
 ```
 
-- ⚠️ 尚未配置 `eas.json`（F33）：原生 APK/IPA 构建需补 EAS profile（development/preview/production）
-- ⚠️ EAS Update 通道未配（app.json 无 updates.url），OTA 需账号配置
+- `eas.json`：三档 profile（development / preview / production）已就位 ✅
+- ⚠️ EAS Update 通道未配（app.json 无 updates.url），OTA 需 Expo 账号（F25，等丁哥）
 - `assets/`：icon / adaptive-icon / splash / favicon 品牌占位图
 
 ## 目录结构
@@ -79,7 +79,7 @@ src/
 
 - **F30**: react-native-chart-kit 已停更且 New Arch 未测（doctor 已 exclude）→ 待迁移 gifted-charts / victory
 - **F31**: `api.ts` BASE_URL 硬编码生产 IP，缺 dev/mock 环境切换（同 ops-app F22）
-- **F32**: 无 AppState / NetInfo 接入 → usePolling 后台不暂停（耗电/流量）+ 无离线检测
-- **F27**: 覆盖率薄弱点见「质量门控」章节
-- **F28**: 10 处 set-state-in-effect warn，待 screen 测试补齐后逐处收敛
-- **F33**: 缺 eas.json，原生构建链路未建立
+- **F32**: ✅ 已修复 — ErrorBoundary + NetworkStatus（AppState 监听）已接入 App.tsx（`e4dc934`）
+- **F27/F75**: 覆盖率薄弱点见「质量门控」章节
+- **F28**: set-state-in-effect warn，待 screen 测试补齐后逐处收敛
+- **F33**: ✅ eas.json 三档 profile 已就位（`e876fd8`）
