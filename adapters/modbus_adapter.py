@@ -234,7 +234,10 @@ class ModbusAdapter:
             if status_code == 2:  # fault
                 self._emit_alarm("device_fault", f"Modbus device {self.config.unit_id} reported fault status")
             elif temperature > 60.0:
-                self._emit_alarm("high_temperature", f"Modbus device {self.config.unit_id} temperature high: {temperature}°C")
+                self._emit_alarm(
+                    "high_temperature",
+                    f"Modbus device {self.config.unit_id} temperature high: {temperature}°C",
+                )
 
         except Exception as e:
             logger.error("Modbus real poll error: %s", e)
@@ -278,7 +281,10 @@ class ModbusAdapter:
         if status == "warning" and random.random() < 0.2:
             self._emit_alarm("device_warning", f"Modbus device {self.config.unit_id} warning status")
         if temperature > 55.0 and random.random() < 0.1:
-            self._emit_alarm("high_temperature", f"Modbus device {self.config.unit_id} temperature high: {temperature}°C")
+            self._emit_alarm(
+                "high_temperature",
+                f"Modbus device {self.config.unit_id} temperature high: {temperature}°C",
+            )
 
     # ── Manual injection (for debug API) ──────────────────────────────
 

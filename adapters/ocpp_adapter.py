@@ -763,7 +763,11 @@ class OCPPAdapter:
                         SampledValue(str(round(voltage, 1)), Measurand.VOLTAGE, UnitOfMeasure.V),
                         SampledValue(str(round(current, 1)), Measurand.CURRENT_IMPORT, UnitOfMeasure.A),
                         SampledValue(str(round(power * 1000, 0)), Measurand.POWER_ACTIVE_IMPORT, UnitOfMeasure.W),
-                        SampledValue(str(round(self._meter_value * 1000, 0)), Measurand.ENERGY_ACTIVE_IMPORT_REGISTER, UnitOfMeasure.WH),
+                        SampledValue(
+                            str(round(self._meter_value * 1000, 0)),
+                            Measurand.ENERGY_ACTIVE_IMPORT_REGISTER,
+                            UnitOfMeasure.WH,
+                        ),
                         SampledValue(str(round(temperature, 1)), Measurand.TEMPERATURE, UnitOfMeasure.CELSIUS),
                     ],
                 )],
@@ -833,8 +837,16 @@ class OCPPAdapter:
                         SampledValue(str(round(self._sim_voltage, 1)), Measurand.VOLTAGE, UnitOfMeasure.V),
                         SampledValue(str(round(self._sim_current, 1)), Measurand.CURRENT_IMPORT, UnitOfMeasure.A),
                         SampledValue("0", Measurand.POWER_ACTIVE_IMPORT, UnitOfMeasure.W),
-                        SampledValue(str(round(self._meter_value * 1000, 0)), Measurand.ENERGY_ACTIVE_IMPORT_REGISTER, UnitOfMeasure.WH),
-                        SampledValue(str(round(self._sim_temperature, 1)), Measurand.TEMPERATURE, UnitOfMeasure.CELSIUS),
+                        SampledValue(
+                            str(round(self._meter_value * 1000, 0)),
+                            Measurand.ENERGY_ACTIVE_IMPORT_REGISTER,
+                            UnitOfMeasure.WH,
+                        ),
+                        SampledValue(
+                            str(round(self._sim_temperature, 1)),
+                            Measurand.TEMPERATURE,
+                            UnitOfMeasure.CELSIUS,
+                        ),
                     ],
                 )],
             ))

@@ -443,7 +443,11 @@ class TestBatchMQTTPublish:
         assert payload["device_id"] == "EVSE-001"
         assert payload["count"] == 2
         assert len(payload["telemetry"]) == 2
-        assert "power" in payload["telemetry"][0] or "charger_power" in payload["telemetry"][0] or "grid_power_total" in payload["telemetry"][0]
+        assert (
+            "power" in payload["telemetry"][0]
+            or "charger_power" in payload["telemetry"][0]
+            or "grid_power_total" in payload["telemetry"][0]
+        )
 
 
 # ── Test: Cleanup & Maintenance ─────────────────────────────────────────
