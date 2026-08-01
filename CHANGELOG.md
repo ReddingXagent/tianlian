@@ -4,11 +4,16 @@
 
 ## [Unreleased]
 
+### Fixed
+- `scan.wxml` 引用缺失的 `/assets/icons/scan-big.png` → 替换为 emoji 占位图标（F87）
+- 6 处页面死链导航修复（F70：navigateBack/navigateTo 缺 fallback）
+
 ### 待办
 - 真 appid 替换（当前占位符，待丁哥）
 - 腾讯地图 MAP_KEY 配置
 - 头像昵称 `<button open-type="chooseAvatar">` 采集方案
 - api.js 错误路径分支覆盖补强（当前 branch 69.6%）
+- scan-big.png 正式图标替换（当前 emoji 占位）
 
 ## [1.1.0] - 2026-07-31
 

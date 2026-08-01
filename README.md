@@ -16,7 +16,7 @@
 | 命令 | 作用 |
 |------|------|
 | `npm run check` | 小程序结构门控（JSON 合法性 / 页面四件套 / tabBar 图标 / 组件引用解析），错误退 1 |
-| `npm test` | Jest 单测（8 套件 / 215 用例，覆盖率 92.9%） |
+| `npm test` | Jest 单测（9 套件 / 218 用例，覆盖率 92.9%） |
 | `npm run lint` | ESLint flat config 门控（0 错 0 警） |
 | `npm run deploy:check` | 部署管线就绪验证（门控→appid→密钥，不上传） |
 | `npm run deploy` | miniprogram-ci 上传体验版（需真 appid + 密钥） |
@@ -53,7 +53,7 @@ scripts/          check-mp-structure.js 结构门控 / deploy.js 部署门控(mi
 
 ## 质量现状
 
-- 测试：215 全绿，coverage 92.9%（services/utils/config 全量收集）
+- 测试：218 全绿，coverage 92.9%（Stmts 92.85% / Branch 82.39% / Funcs 86.32% / Lines 93.11%）
 - lint：ESLint 10 flat config，0 错 0 警
 - 上传包：主包 ~704K（≪2MB 限额），packOptions.ignore 已排除开发产物
 - 合规：`lazyCodeLoading` / `requiredPrivateInfos` / `permission` 声明齐全；废弃 API（`wx.getSystemInfoSync` / `wx.getUserProfile`）已清零
