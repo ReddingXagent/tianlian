@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import LoginScreen from '../LoginScreen';
 import { useAuthStore } from '../../store/authStore';

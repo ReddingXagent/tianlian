@@ -1,4 +1,3 @@
-import React from 'react';
 import { ActivityIndicator } from 'react-native';
 import { render } from '@testing-library/react-native';
 import LoadingSpinner from '../LoadingSpinner';

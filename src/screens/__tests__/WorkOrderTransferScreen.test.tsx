@@ -1,4 +1,3 @@
-import React from 'react';
 import { Alert } from 'react-native';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import WorkOrderTransferScreen from '../WorkOrderTransferScreen';

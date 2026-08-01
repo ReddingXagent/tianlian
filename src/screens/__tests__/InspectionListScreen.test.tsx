@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import InspectionListScreen from '../InspectionListScreen';
 import { useInspectionStore } from '../../store/inspectionStore';

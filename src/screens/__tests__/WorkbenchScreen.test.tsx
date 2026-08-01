@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import WorkbenchScreen from '../WorkbenchScreen';
 import { usePolling } from '../../hooks/usePolling';

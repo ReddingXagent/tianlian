@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { WorkOrder } from '../types';
 import StatusBadge from './StatusBadge';

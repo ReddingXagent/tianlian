@@ -1,4 +1,4 @@
-import React from 'react';
+import { FC, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -136,12 +136,12 @@ function MainNavigator() {
   );
 }
 
-export const AppNavigator: React.FC = () => {
+export const AppNavigator: FC = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
   const checkAuth = useAuthStore((s) => s.checkAuth);
 
-  React.useEffect(() => {
+  useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
