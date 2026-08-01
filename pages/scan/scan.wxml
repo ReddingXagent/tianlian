@@ -3,7 +3,7 @@
   <!-- 扫码区域 -->
   <view class="scan-area">
     <view class="scan-frame">
-      <image class="scan-icon" src="/assets/icons/scan-big.png" mode="aspectFit" />
+      <view class="scan-icon-placeholder">📷</view>
       <text class="scan-title">扫描充电桩二维码</text>
       <text class="scan-desc">将二维码放入框内，即可自动扫描</text>
     </view>

@@ -20,11 +20,10 @@
   margin-bottom: 48rpx;
 }
 
-.scan-icon {
-  width: 200rpx;
-  height: 200rpx;
-  margin-bottom: 32rpx;
-  opacity: 0.8;
+.scan-icon-placeholder {
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.6;
 }
 
 .scan-title {
