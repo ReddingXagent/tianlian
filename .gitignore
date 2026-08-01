@@ -4,3 +4,4 @@ dist/
 *.jks
 *.keystore
 .env
+coverage/

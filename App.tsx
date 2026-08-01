@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,6 +14,8 @@ import DeviceListScreen from './src/screens/DeviceListScreen';
 import AlarmListScreen from './src/screens/AlarmListScreen';
 import WorkOrderScreen from './src/screens/WorkOrderScreen';
 import MainTabNavigator from './src/screens/MainTabNavigator';
+import ErrorBoundary from './src/components/ErrorBoundary';
+import NetworkStatus from './src/components/NetworkStatus';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -30,8 +33,11 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer theme={DarkTheme}>
-        <StatusBar style="light" />
+      <ErrorBoundary>
+        <View style={{ flex: 1 }}>
+          <NetworkStatus />
+          <NavigationContainer theme={DarkTheme}>
+            <StatusBar style="light" />
         <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: '#1a1a2e' }, headerTintColor: '#fff' }}>
           {isAuthenticated ? (
             <>
@@ -52,8 +58,10 @@ export default function App() {
           ) : (
             <Stack.Screen name="Auth" component={LoginScreen} options={{ headerShown: false }} />
           )}
-        </Stack.Navigator>
-      </NavigationContainer>
+          </Stack.Navigator>
+          </NavigationContainer>
+        </View>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
