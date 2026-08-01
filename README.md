@@ -33,9 +33,12 @@ GATEWAY_ID=GW-002 python main.py  # 环境变量覆盖
 | `CLOUD_TOKEN` / `CLOUD_USERNAME` / `CLOUD_PASSWORD` | 空 | 云端认证 |
 | `CLOUD_REGISTER` / `CLOUD_DEREGISTER` | `true` | 启停时自动注册/注销 |
 | `MQTT_HOST` / `MQTT_PORT` | `localhost` / `1883` | MQTT broker |
+| `MQTT_CLIENT_ID` | 空 | MQTT 客户端 ID（空=自动生成） |
 | `MQTT_BATCH_SIZE` / `MQTT_BATCH_INTERVAL` | `50` / `10` | 点位批量发布 |
 | `MODBUS_HOST` / `MODBUS_PORT` / `MODBUS_REAL` | `127.0.0.1` / `502` / `false` | Modbus 设备（默认模拟器） |
 | `OCPP_CHARGER_ID` / `OCPP_REAL` | `CHARGER-001` / `false` | OCPP 充电枪（默认模拟器） |
+| `STORAGE_DB_PATH` | `data/gateway.db` | SQLite 缓存路径 |
+| `LOG_LEVEL` | `INFO` | 日志级别（DEBUG/INFO/WARNING/ERROR） |
 
 ## 本地 API（默认 :8080）
 
@@ -58,10 +61,15 @@ python -m pytest tests/     # 198 用例全绿（含 mock CSMS）
 ruff check .                # lint 门控（配置见 pyproject.toml，债务以 ignore 登记并逐条收窄）
 ```
 
+## .env 文件
+
+除环境变量和 YAML 外，启动目录的 `.env` 文件会被 `deploy.sh` 自动 `source`（key=value 格式，无需 `export`）。优先级：`--config` YAML > 已有环境变量 > `.env` > 默认值。
+
 ## 部署（树莓派）
 
 ```bash
 bash deploy.sh   # 目标机: tl@192.168.31.10, 仓库 /home/tl/tianlian-edge-gateway-v3, 端口 8080
+                 # v3: 端口释放等待+启动重试+健康轮询；deploy.sh 自动 source .env
                  # v2: 自动探测仓库目录/全量装依赖/保留.env/git ff同步
 ```
 

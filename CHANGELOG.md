@@ -8,6 +8,17 @@
 - README.md：架构、环境变量、本地 API、测试与部署说明（自驱文档轮补全，此前仓库无 README）
 - 本 CHANGELOG
 - README 补充故障排查（troubleshooting）段和配置文件说明
+- README 补全环境变量表（STORAGE_DB_PATH/LOG_LEVEL/MQTT_CLIENT_ID）和 .env 文件段
+
+## 2026-08-01
+
+### Changed
+- `95cb038` style(lint): 修复 W292（EOF 缺换行×9）+ E501（行过长×6）
+- `b3f8f22` fix(deploy): deploy.sh v3 — 端口释放等待循环 + 启动重试 + 健康轮询（解决旧进程杀后端口未释放致 bind 失败）
+- `8ef586c` fix(deploy): .env 从未加载到环境变量——deploy.sh 启动前 source .env；kill -9 兜底确保端口释放
+- `65faebd` fix(py310-compat): StrEnum→(str, Enum) 回退（Pi Python 3.10 无 StrEnum）
+- `3da23cb` fix(py310-compat): datetime.UTC→timezone.utc（Pi 3.10 兼容）；deploy.sh 语法修复；pyproject target py310 + ignore UP017
+- `192192a` fix(deploy): 修复 deploy.sh 两处语法损坏（REMOTE= 赋值被截断）
 
 ## 2026-07-31
 
