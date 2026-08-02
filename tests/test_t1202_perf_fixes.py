@@ -9,6 +9,7 @@ Tests cover:
 """
 
 import asyncio
+import contextlib
 import sys
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -135,10 +136,8 @@ class TestCloudSyncDynamicInterval:
                 raise asyncio.CancelledError()
 
         with patch('asyncio.sleep', side_effect=fast_sleep):
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await client._cache_sync_loop()
-            except asyncio.CancelledError:
-                pass
 
         # When backlog exists, should use active_interval (5s)
         assert sleep_calls[0] == 5, f"Expected active_interval=5, got {sleep_calls[0]}"
@@ -164,10 +163,8 @@ class TestCloudSyncDynamicInterval:
                 raise asyncio.CancelledError()
 
         with patch('asyncio.sleep', side_effect=fast_sleep):
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await client._cache_sync_loop()
-            except asyncio.CancelledError:
-                pass
 
         # Idle: intervals should increase: 5*2=10, 5*4=20, 5*8=40, min(60, 5*16=80)=60
         assert sleep_calls[0] == 10, f"First idle interval should be 10, got {sleep_calls[0]}"

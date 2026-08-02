@@ -11,6 +11,7 @@ API对齐日期: 2026-07-06 (对齐云端334端点真实OpenAPI schema)
 """
 
 import asyncio
+import contextlib
 import logging
 from typing import TYPE_CHECKING, Optional
 
@@ -109,17 +110,13 @@ class CloudClient:
         """停止云端连接"""
         if self._heartbeat_task:
             self._heartbeat_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._heartbeat_task
-            except asyncio.CancelledError:
-                pass
 
         if hasattr(self, '_sync_task') and self._sync_task:
             self._sync_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._sync_task
-            except asyncio.CancelledError:
-                pass
 
         if self.config.deregister_on_shutdown:
             await self.deregister()

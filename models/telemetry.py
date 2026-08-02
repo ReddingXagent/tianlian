@@ -1,5 +1,6 @@
 """Telemetry data models"""
 
+import contextlib
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
@@ -36,10 +37,8 @@ class TelemetryPoint:
         - CHARGER-001 → charger_* fields (充电桩)
         """
         cloud_id = DEVICE_ID_MAP.get(self.device_id, self.device_id)
-        try:
+        with contextlib.suppress(ValueError, TypeError):
             cloud_id = int(cloud_id)
-        except (ValueError, TypeError):
-            pass
 
         # 通用基础字段
         payload = {"device_id": cloud_id}

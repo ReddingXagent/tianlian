@@ -11,6 +11,7 @@ Usage:
 Default db_path: data/gateway.db
 """
 
+import contextlib
 import sqlite3
 import sys
 from pathlib import Path
@@ -151,12 +152,10 @@ def add_missing_column(conn: sqlite3.Connection, table: str, col_name: str,
 def create_index_if_missing(conn: sqlite3.Connection, index_name: str,
                             table: str, columns: str) -> None:
     """Create an index if it doesn't exist."""
-    try:
+    with contextlib.suppress(sqlite3.OperationalError):
         conn.execute(
             f"CREATE INDEX IF NOT EXISTS {index_name} ON {table}({columns})"
         )
-    except sqlite3.OperationalError:
-        pass  # index already exists or table missing
 
 
 def run_migration(db_path: str) -> int:

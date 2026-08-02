@@ -15,6 +15,7 @@ Usage:
 """
 
 import asyncio
+import contextlib
 import json
 import logging
 import uuid
@@ -153,10 +154,8 @@ class MockCSMSServer:
 
         # Close all WebSocket connections
         for _cp_id, ws in list(self._ws_connections.items()):
-            try:
+            with contextlib.suppress(Exception):
                 await ws.close(code=1001, reason="Server shutting down")
-            except Exception:
-                pass
 
         self._ws_connections.clear()
         self._connections.clear()
