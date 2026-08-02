@@ -317,9 +317,40 @@ describe('API Service (B3 真契约)', () => {
       await expect(api.redeemPoints()).rejects.toThrow('FEATURE_UNAVAILABLE');
     });
 
+    it('recharge/getTransactions FEATURE_UNAVAILABLE', async () => {
+      await expect(api.recharge()).rejects.toThrow('FEATURE_UNAVAILABLE');
+      await expect(api.getTransactions()).rejects.toThrow('FEATURE_UNAVAILABLE');
+    });
+
+    it('wxLogin 提示用户名密码登录', async () => {
+      await expect(api.wxLogin()).rejects.toThrow('请使用用户名密码登录');
+    });
+
+    it('reviewOrder/updateUserInfo FEATURE_UNAVAILABLE', async () => {
+      await expect(api.reviewOrder()).rejects.toThrow('FEATURE_UNAVAILABLE');
+      await expect(api.updateUserInfo()).rejects.toThrow('FEATURE_UNAVAILABLE');
+    });
+
+    it('站点降级接口: nearby/search/filter 走列表', async () => {
+      mockWxRequest.mockImplementation(({ success }) =>
+        success({ statusCode: 200, data: { code: 200, data: { items: [], total: 0 } } })
+      );
+      mockGetStorageSync.mockReturnValue('tok');
+
+      await api.getStations();
+      await api.getNearbyStations();
+      await api.getStationDetail(1);
+      await api.searchStations();
+      await api.filterStations({ page: 2, pageSize: 5 });
+      expect(mockWxRequest).toHaveBeenCalledTimes(5);
+    });
+
     it('通知占位返回空', async () => {
       expect((await api.getNotifications()).data.total).toBe(0);
       expect((await api.getUnreadNotificationCount()).data.count).toBe(0);
+      // 覆盖 markNotificationRead / markAllNotificationsRead
+      expect((await api.markNotificationRead(1)).code).toBe(200);
+      expect((await api.markAllNotificationsRead()).code).toBe(200);
     });
   });
 });
