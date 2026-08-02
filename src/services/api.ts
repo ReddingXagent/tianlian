@@ -144,7 +144,32 @@ export const WO_CLIENT_STATUS_TO_BACKEND: Record<string, string> = {
 };
 
  
-export function mapWorkOrder(raw: any): WorkOrder {
+interface RawWorkOrder {
+  id?: string | number;
+  station_id?: number;
+  station_name?: string;
+  fault_desc?: string;
+  type?: string;
+  level?: string;
+  status?: string;
+  assignee_id?: number;
+  assignee_name?: string;
+  creator_id?: number;
+  creator_name?: string;
+  finish_time?: string;
+  create_time?: string;
+  update_time?: string;
+  solution?: string;
+}
+
+interface RawRecord {
+  id?: string | number;
+  action?: string;
+  description?: string;
+  created_at?: string;
+}
+
+export function mapWorkOrder(raw: RawWorkOrder): WorkOrder {
   return {
     id: String(raw.id),
     stationId: raw.station_id ?? 0,
@@ -152,8 +177,8 @@ export function mapWorkOrder(raw: any): WorkOrder {
     title: raw.fault_desc ?? '',
     description: raw.fault_desc ?? '',
     type: (raw.type ?? 'repair') as WorkOrder['type'],
-    priority: WO_LEVEL_TO_PRIORITY[raw.level] ?? 'normal',
-    status: WO_BACKEND_STATUS_TO_CLIENT[raw.status] ?? 'pending',
+    priority: WO_LEVEL_TO_PRIORITY[raw.level ?? ''] ?? 'normal',
+    status: WO_BACKEND_STATUS_TO_CLIENT[raw.status ?? ''] ?? 'pending',
     assigneeId: raw.assignee_id ?? undefined,
     assigneeName: raw.assignee_name ?? undefined,
     creatorId: raw.creator_id ?? 999,
@@ -188,15 +213,15 @@ export const workOrderApi = {
     return api.get('/work-orders', { params: query }).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
        
-      const rawPage: any = env.data ?? {};
+      const rawPage = (env.data ?? {}) as Record<string, unknown>;
       return {
         ...env,
         data: {
            
-          items: (rawPage.items ?? []).map((it: any) => mapWorkOrder(it)),
-          total: rawPage.total ?? 0,
-          page: rawPage.page ?? params?.page ?? 1,
-          pageSize: rawPage.page_size ?? params?.pageSize ?? 20,
+          items: ((rawPage.items as RawWorkOrder[]) ?? []).map((it) => mapWorkOrder(it)),
+          total: (rawPage.total as number) ?? 0,
+          page: (rawPage.page as number) ?? params?.page ?? 1,
+          pageSize: (rawPage.page_size as number) ?? params?.pageSize ?? 20,
         },
       };
     });
@@ -367,13 +392,13 @@ export const workOrderRecordApi = {
     return api.get(`/work-orders/${orderId}/logs`).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
        
-      const items: any[] = (env.data as any)?.items ?? [];
+      const items = ((env.data as Record<string, unknown>)?.items as RawRecord[]) ?? [];
       return {
         ...env,
         data: items.map((it) => ({
-          id: it.id,
+          id: Number(it.id ?? 0),
           orderId,
-          action: it.action as WorkOrderRecord['action'],
+          action: (it.action ?? 'executing') as WorkOrderRecord['action'],
           operatorId: 0,
           operatorName: '系统',
           note: it.description ?? '',
@@ -386,17 +411,17 @@ export const workOrderRecordApi = {
     return api.post(`/work-orders/${orderId}/notes`, data).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
        
-      const it: any = env.data ?? {};
+      const it = (env.data ?? {}) as Record<string, unknown>;
       return {
         ...env,
         data: {
-          id: it.id,
+          id: Number(it.id ?? 0),
           orderId,
-          action: (it.action ?? data.action) as WorkOrderRecord['action'],
+          action: (String(it.action ?? data.action)) as WorkOrderRecord['action'],
           operatorId: 0,
           operatorName: '手工记录',
-          note: it.description ?? data.note,
-          createdAt: it.created_at ?? '',
+          note: String(it.description ?? data.note),
+          createdAt: String(it.created_at ?? ''),
         },
       };
     });
