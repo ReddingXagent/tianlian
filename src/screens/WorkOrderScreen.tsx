@@ -76,7 +76,7 @@ const WorkOrderScreen: React.FC = () => {
     setError(null);
 
     try {
-      const params: Record<string, any> = { page: p, pageSize: 20 };
+      const params: { page: number; pageSize: number; stationId?: number; status?: string } = { page: p, pageSize: 20 };
       if (stationId) params.stationId = stationId;
       if (statusFilter !== 'all') params.status = statusFilter;
 

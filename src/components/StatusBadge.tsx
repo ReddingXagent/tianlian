@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-type StatusType = 'online' | 'offline' | 'fault' | 'maintenance' | 'warning' | 'critical' | 'info' | 'unhandled' | 'processing' | 'resolved' | 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'high' | 'normal' | 'low' | 'urgent';
+type StatusType = 'online' | 'offline' | 'fault' | 'maintenance' | 'warning' | 'critical' | 'info' | 'unhandled' | 'processing' | 'resolved' | 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'high' | 'normal' | 'low' | 'urgent' | 'idle' | 'connected' | 'charging' | 'suspended';
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -27,6 +27,10 @@ const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }>
   normal:      { bg: '#e3f2fd', text: '#1565c0', label: '中' },
   low:         { bg: '#e8f5e9', text: '#2e7d32', label: '低' },
   urgent:      { bg: '#ffebee', text: '#b71c1c', label: '紧急' },
+  idle:        { bg: '#f5f5f5', text: '#616161', label: '空闲' },
+  connected:   { bg: '#e3f2fd', text: '#1565c0', label: '已连接' },
+  charging:    { bg: '#e8f5e9', text: '#2e7d32', label: '充电中' },
+  suspended:   { bg: '#fff8e1', text: '#f57f17', label: '已暂停' },
 };
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label }) => {

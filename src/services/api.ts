@@ -139,78 +139,89 @@ const WO_STATUS_REVERSE: Record<string, string> = {
   completed: 'completed',
 };
 
-type Raw = Record<string, any>;
+type Raw = Record<string, unknown>;
+
+// ── type-safe accessors for Raw ──
+const num = (v: unknown, d = 0): number =>
+  typeof v === 'number' && Number.isFinite(v) ? v : typeof v === 'string' && v.trim() !== '' ? Number(v) || d : d;
+const str = (v: unknown, d = ''): string =>
+  v == null ? d : typeof v === 'string' ? v : String(v);
+const numOrUndef = (v: unknown): number | undefined =>
+  v == null ? undefined : typeof v === 'number' && Number.isFinite(v) ? v : typeof v === 'string' && v.trim() !== '' ? Number(v) || undefined : undefined;
+const strOrUndef = (v: unknown): string | undefined =>
+  v == null ? undefined : typeof v === 'string' ? v : String(v);
 
 export function mapAlarm(raw: Raw): Alarm {
-  const alarmType = String(raw.alarm_type ?? 'other');
+  const alarmType = str(raw.alarm_type, 'other');
   return {
-    id: raw.id,
-    stationId: raw.station_id ?? 0,
-    stationName: raw.station_name ?? '',
-    deviceId: raw.device_id ?? undefined,
-    deviceName: raw.device_name ?? undefined,
+    id: num(raw.id),
+    stationId: num(raw.station_id),
+    stationName: str(raw.station_name),
+    deviceId: numOrUndef(raw.device_id),
+    deviceName: strOrUndef(raw.device_name),
     type: (ALARM_TYPE_LABEL[alarmType] ? alarmType : 'other') as Alarm['type'],
-    level: ALARM_LEVEL_MAP[raw.level] ?? 'info',
+    level: ALARM_LEVEL_MAP[str(raw.level)] ?? 'info',
     title: ALARM_TYPE_LABEL[alarmType] ?? alarmType,
-    description: raw.content ?? '',
-    status: ALARM_STATUS_MAP[raw.status] ?? 'unhandled',
-    handledAt: raw.handled_at ?? undefined,
-    createdAt: raw.created_at ?? '',
-    updatedAt: raw.handled_at ?? raw.created_at ?? '',
+    description: str(raw.content),
+    status: ALARM_STATUS_MAP[str(raw.status)] ?? 'unhandled',
+    handledAt: strOrUndef(raw.handled_at),
+    createdAt: str(raw.created_at),
+    updatedAt: str(raw.handled_at ?? raw.created_at),
   };
 }
 
 export function mapWorkOrder(raw: Raw): WorkOrder {
-  const level = String(raw.level ?? 'warning');
-  const status = String(raw.status ?? 'pending');
+  const level = str(raw.level, 'warning');
+  const status = str(raw.status, 'pending');
   return {
-    id: String(raw.id),
-    stationId: raw.station_id ?? 0,
-    stationName: raw.station_name ?? `站点${raw.station_id ?? ''}`,
-    title: raw.fault_desc ?? raw.title ?? '工单',
-    description: raw.fault_desc ?? raw.description ?? '',
-    type: (raw.type ?? 'other') as WorkOrder['type'],
+    id: str(raw.id),
+    stationId: num(raw.station_id),
+    stationName: str(raw.station_name, `站点${str(raw.station_id)}`),
+    title: str(raw.fault_desc ?? raw.title, '工单'),
+    description: str(raw.fault_desc ?? raw.description),
+    type: str(raw.type, 'other') as WorkOrder['type'],
     priority: WO_LEVEL_TO_PRIORITY[level] ?? 'normal',
     status: WO_STATUS_MAP[status] ?? 'pending',
-    assigneeId: raw.assignee_id ?? undefined,
-    assigneeName: raw.assignee_name ?? undefined,
-    creatorId: raw.creator_id ?? 0,
-    creatorName: raw.creator_name ?? '',
-    alarmId: raw.alarm_id ?? undefined,
-    solution: raw.solution ?? undefined,
-    completedAt: raw.finish_time ?? undefined,
-    createdAt: raw.create_time ?? raw.created_at ?? '',
-    updatedAt: raw.finish_time ?? raw.create_time ?? '',
+    assigneeId: numOrUndef(raw.assignee_id),
+    assigneeName: strOrUndef(raw.assignee_name),
+    creatorId: num(raw.creator_id),
+    creatorName: str(raw.creator_name),
+    alarmId: numOrUndef(raw.alarm_id),
+    solution: strOrUndef(raw.solution),
+    completedAt: strOrUndef(raw.finish_time),
+    createdAt: str(raw.create_time ?? raw.created_at),
+    updatedAt: str(raw.finish_time ?? raw.create_time),
   };
 }
 
 export function mapStation(raw: Raw): Station {
-  const status = raw.status === 'normal' || raw.status === 'online' ? 'online'
-    : raw.status === 'maintenance' ? 'maintenance' : 'offline';
+  const rawStatus = str(raw.status);
+  const status = rawStatus === 'normal' || rawStatus === 'online' ? 'online'
+    : rawStatus === 'maintenance' ? 'maintenance' : 'offline';
   return {
-    id: raw.id,
-    name: raw.name ?? '',
-    code: raw.code ?? '',
-    address: raw.address ?? '',
+    id: num(raw.id),
+    name: str(raw.name),
+    code: str(raw.code),
+    address: str(raw.address),
     status,
-    latitude: raw.lat ?? raw.latitude ?? 0,
-    longitude: raw.lon ?? raw.longitude ?? 0,
-    deviceCount: raw.total_devices ?? raw.device_count ?? 0,
-    onlineDeviceCount: raw.online_devices ?? raw.total_devices ?? 0,
-    alarmCount: raw.alarm_count ?? 0,
-    healthScore: raw.health_score ?? undefined,
-    totalPower: raw.total_power ?? undefined,
-    createdAt: raw.created_at ?? '',
-    updatedAt: raw.updated_at ?? raw.created_at ?? '',
+    latitude: num(raw.lat ?? raw.latitude),
+    longitude: num(raw.lon ?? raw.longitude),
+    deviceCount: num(raw.total_devices ?? raw.device_count),
+    onlineDeviceCount: num(raw.online_devices ?? raw.total_devices),
+    alarmCount: num(raw.alarm_count),
+    healthScore: numOrUndef(raw.health_score),
+    totalPower: numOrUndef(raw.total_power),
+    createdAt: str(raw.created_at),
+    updatedAt: str(raw.updated_at ?? raw.created_at),
   };
 }
 
 export function mapPagination<T>(raw: Raw, mapper: (r: Raw) => T): PaginatedData<T> {
   return {
-    items: Array.isArray(raw?.items) ? raw.items.map(mapper) : [],
-    total: raw?.total ?? 0,
-    page: raw?.page ?? 1,
-    pageSize: raw?.page_size ?? raw?.pageSize ?? 20,
+    items: Array.isArray(raw?.items) ? (raw.items as Raw[]).map(mapper) : [],
+    total: num(raw?.total),
+    page: num(raw?.page, 1),
+    pageSize: num(raw?.page_size ?? raw?.pageSize, 20),
   };
 }
 
@@ -470,9 +481,9 @@ export const revenueApi = {
     return api.get('/business/revenue/daily', { params: { days } }).then((res) => ({
       ...res.data,
       data: (res.data?.data ?? []).map((d: Raw) => ({
-        date: d.date,
-        amount: d.net_revenue ?? 0,
-        orderCount: d.order_count ?? 0,
+        date: str(d.date),
+        amount: num(d.net_revenue),
+        orderCount: num(d.order_count),
       })),
     }));
   },

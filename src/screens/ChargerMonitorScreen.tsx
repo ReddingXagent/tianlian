@@ -161,7 +161,7 @@ const ChargerMonitorScreen: React.FC = () => {
                   </Text>
                 </View>
                 <View style={styles.headerRight}>
-                  <StatusBadge status={charger.connectorStatus as any} label={connectorConfig.label} />
+                  <StatusBadge status={charger.connectorStatus} label={connectorConfig.label} />
                   <Text style={styles.trendToggle}>
                     {expandedChargerId === charger.id ? '收起 ▴' : '趋势 ▾'}
                   </Text>

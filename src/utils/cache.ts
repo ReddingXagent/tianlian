@@ -12,6 +12,7 @@ interface CacheEntry<T> {
 const DEFAULT_TTL = 30_000; // 30 秒
 const MAX_ENTRIES = 50;
 
+// internal cache store: heterogeneous values require any at Map level
 const store = new Map<string, CacheEntry<any>>();
 let lruSeq = 0; // 递增序列号，保证 LRU 淘汰时 lastAccess 唯一
 
@@ -93,7 +94,7 @@ export function getCacheStats() {
 /**
  * 去抖动函数 — 用于搜索输入等高频触发场景
  */
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: never[]) => void>(
   fn: T,
   delayMs: number = 300
 ): (...args: Parameters<T>) => void {

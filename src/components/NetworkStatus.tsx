@@ -19,9 +19,10 @@ export default function NetworkStatus(): React.ReactElement | null {
     try {
       await api.get(PING_ENDPOINT, { timeout: PING_TIMEOUT });
       if (mountedRef.current) setOnline(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 401 = 在线但 token 过期，不算离线
-      if (err?.response?.status === 401) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 401) {
         if (mountedRef.current) setOnline(true);
       } else if (mountedRef.current) {
         setOnline(false);
@@ -32,7 +33,7 @@ export default function NetworkStatus(): React.ReactElement | null {
   useEffect(() => {
     mountedRef.current = true;
 
-    const subscription = (AppState.addEventListener as any)('change', (nextState: AppStateStatus) => {
+    const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
       if (nextState === 'active') {
         checkConnectivity();
       }
