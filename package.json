@@ -6,6 +6,7 @@
     "check": "node scripts/check-mp-structure.js",
     "test": "jest --passWithNoTests",
     "lint": "eslint .",
+    "lint:ci": "node scripts/lint-ci.js",
     "deploy": "node scripts/deploy.js",
     "deploy:check": "node scripts/deploy.js --check"
   },
