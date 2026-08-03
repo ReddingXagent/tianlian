@@ -4,6 +4,7 @@ import api, {
   tokenStorage,
   authApi,
   stationApi,
+  deviceApi,
   alarmApi,
   workOrderApi,
   dashboardApi,
@@ -42,6 +43,25 @@ describe('api instance', () => {
     mockAxios.onGet('/alarms').reply(401, { detail: 'Unauthorized' });
     await expect(alarmApi.getList()).rejects.toBeDefined();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('auth_token');
+  });
+
+  it('request interceptor proceeds when SecureStore fails (no Authorization header)', async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockRejectedValueOnce(new Error('store down'));
+    let authHeader: unknown = 'sentinel';
+    mockAxios.onGet('/alarms').reply((config) => {
+      authHeader = config.headers?.Authorization;
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 1 } }];
+    });
+    await alarmApi.getList();
+    expect(authHeader).toBeUndefined();
+  });
+
+  it('request interceptor error handler passes rejection through', async () => {
+    // 后加的 request 拦截器先执行(axios LIFO), 其失败走token拦截器的rejected分支
+    const failId = api.interceptors.request.use(() => Promise.reject(new Error('pre-fail')));
+    mockAxios.onGet('/alarms').reply(200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 1 } });
+    await expect(alarmApi.getList()).rejects.toThrow('pre-fail');
+    api.interceptors.request.eject(failId);
   });
 });
 
@@ -196,6 +216,21 @@ describe('alarmApi contract', () => {
     expect(method).toBe('put');
     expect(resp.data?.status).toBe('processing');
   });
+
+  it('getDetail maps alarm fields + tolerates empty payload', async () => {
+    mockAxios.onGet('/alarms/2983').reply(200, {
+      code: 200, message: 'success',
+      data: { id: 2983, alarm_type: 'high_temperature', level: 'fatal', status: 'active', content: 'x' },
+    });
+    const resp = await alarmApi.getDetail(2983);
+    expect(resp.data.id).toBe(2983);
+    expect(resp.data.level).toBe('critical');
+    expect(resp.data.status).toBe('unhandled');
+
+    mockAxios.onGet('/alarms/0').reply(200, { code: 200, message: 'success' });
+    const empty = await alarmApi.getDetail(0);
+    expect(empty.data).toBeDefined();
+  });
 });
 
 describe('workOrderApi contract', () => {
@@ -277,6 +312,75 @@ describe('stationApi contract', () => {
     expect(resp.data.items[0].status).toBe('online');
     expect(resp.data.items[0].latitude).toBe(36.6);
     expect(resp.data.pageSize).toBe(100);
+  });
+
+  it('getList tolerates missing search param', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/stations').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 20 } }];
+    });
+    await stationApi.getList();
+    expect(params.search).toBeUndefined();
+  });
+
+  it('getDetail maps station fields + tolerates empty payload', async () => {
+    mockAxios.onGet('/stations/16').reply(200, {
+      code: 200, message: 'success',
+      data: { id: 16, name: '济南光伏电站', lat: 36.6, lon: 116.9, status: 'normal', total_devices: 7 },
+    });
+    const resp = await stationApi.getDetail(16);
+    expect(resp.data.id).toBe(16);
+    expect(resp.data.status).toBe('online');
+    expect(resp.data.latitude).toBe(36.6);
+
+    mockAxios.onGet('/stations/99').reply(200, { code: 200, message: 'success' });
+    const empty = await stationApi.getDetail(99);
+    expect(empty.data).toBeDefined();
+  });
+
+  it('getDevices returns raw device list payload', async () => {
+    mockAxios.onGet('/stations/16/devices').reply(200, {
+      code: 200, message: 'success',
+      data: [{ id: 1, code: 'CP-01' }, { id: 2, code: 'CP-02' }],
+    });
+    const resp = await stationApi.getDevices(16);
+    expect(resp.data).toHaveLength(2);
+    expect(resp.data[0].code).toBe('CP-01');
+  });
+
+  it('getAlarms maps snake pagination + alarm fields', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/stations/16/alarms').reply((config) => {
+      params = config.params ?? {};
+      return [200, {
+        code: 200, message: 'success',
+        data: {
+          items: [{ id: 1, alarm_type: 'offline', level: 'info', status: 'active', content: 'c' }],
+          total: 1, page: 2, page_size: 20,
+        },
+      }];
+    });
+    const resp = await stationApi.getAlarms(16, { page: 2, pageSize: 20 });
+    expect(params.page).toBe(2);
+    expect(params.page_size).toBe(20);
+    expect(resp.data.items[0].status).toBe('unhandled');
+    expect(resp.data.pageSize).toBe(20);
+  });
+});
+
+describe('deviceApi contract', () => {
+  it('getList passes params through untouched', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/devices').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 10 } }];
+    });
+    const resp = await deviceApi.getList({ stationId: 16, page: 1, pageSize: 10, status: 'online', search: 'CP' });
+    expect(params.stationId).toBe(16);
+    expect(params.pageSize).toBe(10);
+    expect(params.search).toBe('CP');
+    expect(resp.code).toBe(200);
   });
 });
 
