@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Added
+- `tianlian-edge-gateway.service`: systemd 单元（开机自启 + Restart=on-failure + StartLimitBurst=3/60s）
+- `.env.example`: 全量环境变量模板，18 个 key 与 `config.py` `os.getenv` 精确对齐
+- `Makefile`: venv/install/run/test/lint/check/clean/deploy 开发快捷命令
 - README.md：架构、环境变量、本地 API、测试与部署说明（自驱文档轮补全，此前仓库无 README）
 - 本 CHANGELOG
 - README 补充故障排查（troubleshooting）段和配置文件说明
