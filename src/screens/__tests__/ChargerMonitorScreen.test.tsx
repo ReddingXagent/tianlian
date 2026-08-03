@@ -169,6 +169,22 @@ describe('ChargerMonitorScreen', () => {
     expect(await findByText('平均功率 kW')).toBeTruthy();
   });
 
+  it('should format session duration with hours and minutes (>=60min)', async () => {
+    const longCharger = { ...MOCK_CHARGERS[0], sessionDuration: 90 };
+    (chargerApi.getMonitorList as jest.Mock).mockResolvedValue({ data: [longCharger] });
+
+    const { findByText } = render(<ChargerMonitorScreen />);
+    expect(await findByText(/1小时30分钟/)).toBeTruthy();
+  });
+
+  it('should format session duration with exact hours (no remainder)', async () => {
+    const longCharger = { ...MOCK_CHARGERS[0], sessionDuration: 120 };
+    (chargerApi.getMonitorList as jest.Mock).mockResolvedValue({ data: [longCharger] });
+
+    const { findByText } = render(<ChargerMonitorScreen />);
+    expect(await findByText(/2小时/)).toBeTruthy();
+  });
+
   it('should display fault information for faulty chargers', async () => {
     const { findByText } = render(<ChargerMonitorScreen />);
 

@@ -9,7 +9,17 @@ jest.mock('react-native-chart-kit', () => {
   const React = require('react');
   const { Text } = require('react-native');
   return {
-    LineChart: () => React.createElement(Text, { testID: 'line-chart' }, 'chart'),
+    // 调用 chart 回调以覆盖 datasets.color / chartConfig.color / labelColor / hexToRgb 路径
+    LineChart: (props: any) => {
+      const datasetColor = props.data.datasets[0].color();
+      const cfgColor = props.chartConfig.color(0.5);
+      const labelColor = props.chartConfig.labelColor();
+      return React.createElement(
+        Text,
+        { testID: 'line-chart' },
+        `chart:${datasetColor}:${cfgColor}:${labelColor}`
+      );
+    },
   };
 });
 
@@ -118,5 +128,32 @@ describe('ChargerTrendChart', () => {
 
     const { findByText } = render(<ChargerTrendChart deviceId={101} />);
     expect(await findByText('加载失败')).toBeTruthy();
+  });
+
+  it('should render chart with correct metric colors via chart callbacks', async () => {
+    const { findByTestId } = render(<ChargerTrendChart deviceId={101} />);
+
+    // 功率主色 #1a73e8 → rgb(26,115,232)
+    const chart = await findByTestId('line-chart');
+    const text = Array.isArray(chart.props.children)
+      ? chart.props.children.join('')
+      : String(chart.props.children);
+    expect(text).toContain('26,115,232');
+  });
+
+  it('should fall back to empty label when timestamp formatting fails', async () => {
+    const spy = jest
+      .spyOn(Date.prototype, 'toLocaleTimeString')
+      .mockImplementation(() => {
+        throw new Error('format failed');
+      });
+
+    try {
+      const { findByTestId } = render(<ChargerTrendChart deviceId={101} />);
+      // formatClock catch 分支: 标签为空但图表仍渲染
+      expect(await findByTestId('line-chart')).toBeTruthy();
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
