@@ -39,6 +39,13 @@
 #     旧schema库缺 cached_at/retry_count/synced 时迁移后仍不全, 运行时查询即
 #     "no such column" 崩; 实测对比(旧schema临时库两脚本各跑+幂等复跑)确认
 #     db_migration.py 全量补齐且幂等 → 切换 migrate_db.py→db_migration.py
+# v8 (2026-08-04 自驱部署轮):
+#   - fix: 步骤5迁移失败黑洞 — 旧写法 `2>/dev/null || echo` 吞掉真失败(db_migration.py
+#     失败exit 1), 带病继续 → 杀旧服务起新代码, 旧schema库运行时"no such column"崩
+#     → 迁移失败即中止部署(此时旧服务未停, 零影响)
+#   - 新增: 迁移前自动备份 data/gateway.db → data/backups/gateway.db.<时间戳>.bak
+#     (同秒重跑追加后缀不覆盖旧备份; 仅保留最近5份), 回滚/坏迁移后可用新子命令
+#     restore-db 恢复
 set -e
 
 # 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
@@ -103,6 +110,36 @@ if [ "$1" = "rollback" ]; then
     fi
     echo "重新部署验证: bash deploy.sh"
     echo "确认无误后: git commit -m 'rollback to $REV' && git push origin master"
+    exit 0
+fi
+
+# 子命令: restore-db (恢复迁移前备份; 默认用最新一份)
+if [ "$1" = "restore-db" ]; then
+    echo "=== 天链V3 边缘网关数据库恢复 ==="
+    cd "$REPO_DIR"
+    DB_FILE="data/gateway.db"
+    LATEST="$(ls -1t data/backups/gateway.db.*.bak 2>/dev/null | head -1 || true)"
+    BAK="${2:-$LATEST}"
+    if [ -z "$BAK" ]; then
+        echo "❌ data/backups/ 下无 gateway.db 备份"; exit 1
+    fi
+    if [ ! -f "$BAK" ]; then
+        echo "❌ 备份不存在: $BAK"; exit 1
+    fi
+    echo "恢复源: $BAK → $DB_FILE"
+    # 先停服务防止写库(sqlite写锁/覆盖)
+    OLD_PID=$(pgrep -f "$REPO_DIR/main.py" 2>/dev/null || true)
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        kill "$OLD_PID" 2>/dev/null || true
+        sleep 2
+        if kill -0 "$OLD_PID" 2>/dev/null; then
+            kill -9 "$OLD_PID" 2>/dev/null || true
+        fi
+        echo "已停止网关(PID $OLD_PID)"
+    fi
+    mkdir -p data
+    cp "$BAK" "$DB_FILE"
+    echo "✅ 已恢复数据库。重启服务: bash deploy.sh"
     exit 0
 fi
 
@@ -172,8 +209,32 @@ fi
 
 # 5. 数据库迁移(用 db_migration.py 全量schema对齐版; 旧 migrate_db.py 只补
 #    cloud_synced/priority 两列, 会漏 cached_at/retry_count/synced 致旧库运行时报错)
+#    v8: 迁移前自动备份(保留最近5份) + 失败即中止(此时旧服务未停, 零影响);
+#    db_migration.py 幂等, 成功恒exit 0, 真失败exit 1 — 不允许吞错
 echo "[5/7] 数据库迁移..."
-$PYTHON db_migration.py 2>/dev/null || echo "数据库已是最新或迁移跳过"
+DB_FILE="data/gateway.db"
+if [ -f "$DB_FILE" ]; then
+    mkdir -p data/backups
+    TS=$(date +%Y%m%d%H%M%S)
+    BAK="data/backups/gateway.db.$TS.bak"
+    # 同秒重跑防碰撞: 目标已存在则追加 -1/-2 后缀, 绝不覆盖旧备份
+    SUFFIX=1
+    while [ -f "$BAK" ]; do
+        BAK="data/backups/gateway.db.$TS-$SUFFIX.bak"
+        SUFFIX=$((SUFFIX + 1))
+    done
+    if cp "$DB_FILE" "$BAK"; then
+        echo "已备份: $BAK"
+    else
+        echo "❌ 数据库备份失败, 中止部署(宁可不部署不可无退路)"; exit 1
+    fi
+    # 只保留最近5份备份
+    ls -1t data/backups/gateway.db.*.bak 2>/dev/null | tail -n +6 | xargs -r rm -f
+fi
+if ! $PYTHON db_migration.py; then
+    echo "❌ 迁移失败, 中止部署(旧服务未受影响; 如需恢复: bash deploy.sh restore-db)"
+    exit 1
+fi
 
 # 6. 停止旧服务(精确匹配本目录 main.py)
 echo "[6/7] 停止旧服务..."

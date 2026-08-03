@@ -17,6 +17,7 @@ cd /home/tl/tianlian-edge-gateway-v3
 bash deploy.sh              # 一键部署(git同步→装依赖→杀旧→等端口→启动→健康轮询)
 bash deploy.sh status       # PID/健康检查/状态API/日志尾
 bash deploy.sh rollback <hash>   # 回滚到hash版本(revert其后全部提交)再重新部署
+bash deploy.sh restore-db        # 恢复最新一份迁移前DB备份(可指定备份文件)
 ```
 
 行为要点:
@@ -29,6 +30,7 @@ bash deploy.sh rollback <hash>   # 回滚到hash版本(revert其后全部提交)
 - 回滚前未提交改动自动 stash 保护：失败时自动 `git stash pop` 真正恢复现场；成功时保留在 `stash@{0}` 并提示（可手动 pop 找回）
 - 回滚范围含 merge commit 时 revert 会失败（需 `-m`）→ 自动中止并提示手动逐段 `git revert -m 1 <merge-hash>`
 - `make deploy-rollback REV=<hash>` 委托 `deploy.sh rollback`（单一源，防护一致）
+- 迁移前自动备份 `data/gateway.db` → `data/backups/`（保留最近5份），迁移失败即中止部署（旧服务未停，零影响）；坏迁移/回滚后用 `restore-db [备份文件]` 恢复（`make deploy-restore-db [BAK=...]` 委托单一源）
 - 日志: `gateway.log`（仓库根），PID: `.pid`
 
 ## 方式二: systemd

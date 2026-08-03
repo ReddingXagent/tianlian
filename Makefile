@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check clean deploy deploy-rollback systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -72,3 +72,7 @@ deploy-rollback:
 	@echo "⚠️ 回滚到指定版本: REV=目标好版本(revert其后所有提交, 非只撤REV一个)"
 	@if [ -z "$(REV)" ]; then echo "❌ 用法: make deploy-rollback REV=<commit-hash>"; git log --oneline -5; exit 1; fi
 	@bash deploy.sh rollback "$(REV)"
+
+deploy-restore-db:
+	@echo "恢复迁移前数据库备份: BAK=备份文件(缺省用最新一份)"
+	@bash deploy.sh restore-db $(BAK)
