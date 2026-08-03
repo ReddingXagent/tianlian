@@ -64,6 +64,15 @@ module.exports = [
       'no-const-assign': 'error',
       'no-this-before-super': 'error',
       'require-yield': 'error',
+      // 代码质量防回归规则 (2026-08-03 猴王自驱lint轮, 加入时全仓0违规)
+      'eqeqeq': 'error',                // 强制===, 防类型隐式转换bug
+      'no-var': 'error',                // 禁var, 统一let/const作用域
+      'prefer-const': 'error',          // 未重赋值变量用const
+      'no-fallthrough': 'error',        // 防switch穿透
+      'guard-for-in': 'error',          // for-in需hasOwnProperty防原型链污染
+      'radix': 'error',                 // parseInt必须带进制参数
+      'no-return-assign': 'error',      // 防return中误写=为==
+      'no-useless-return': 'error',     // 禁无意义return
     },
   },
   {
