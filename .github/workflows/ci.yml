@@ -32,3 +32,4 @@ jobs:
       - run: npm ci
       - run: npx expo export --platform android --output-dir /tmp/export
       - run: npx expo export --platform ios --output-dir /tmp/export-ios
+      - run: ./scripts/bundle-size.sh /tmp/export /tmp/export-ios

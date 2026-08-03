@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- scripts/bundle-size.sh: JS bundle 体积门控（WARN>2.75MB / FAIL>3.5MB；基线 android 2.19MB / ios 2.18MB hbc）
+- Makefile: 新增 bundle-size 目标并接入 ci-local；export 产物体积可门禁
+- GitHub Actions CI: export job 增加 bundle-size 门控步骤
 - Makefile: 本地构建/检查/导出快捷命令 (help/install/dev/build/test/lint/check/ci-local/clean)
 - GitHub Actions CI: .github/workflows/ci.yml 两阶段流水线 (check→export)
 - DEPLOYMENT.md: 环境变量使用说明 + Makefile/CI 文档 + OTA 更新步骤

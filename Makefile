@@ -1,7 +1,7 @@
 # 天链运维 App - Makefile
 # 本地构建与验证快捷命令
 
-.PHONY: help install dev build test lint check clean export-android export-ios ci-local
+.PHONY: help install dev build test lint check clean export-android export-ios bundle-size ci-local
 
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -22,6 +22,9 @@ export-android: ## 导出 Android JS Bundle
 export-ios: ## 导出 iOS JS Bundle
 	npx expo export --platform ios --output-dir /tmp/ops-export-ios
 
+bundle-size: ## JS Bundle 体积门控 (需先 export-android/export-ios)
+	./scripts/bundle-size.sh
+
 test: ## 运行单元测试
 	npx jest --coverage
 
@@ -30,7 +33,7 @@ lint: ## ESLint 检查
 
 check: build lint test ## 全量检查 (tsc + eslint + jest)
 
-ci-local: check export-android ## 模拟 CI 全流程 (检查 + Android 导出)
+ci-local: check export-android bundle-size ## 模拟 CI 全流程 (检查 + Android 导出 + 体积门控)
 
 clean: ## 清理构建产物
 	rm -rf /tmp/ops-export-android /tmp/ops-export-ios coverage
