@@ -28,6 +28,12 @@ jest.mock('@react-navigation/native', () => {
   return {
     NavigationContainer: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
+    // TabBackHandler 需要: 最小导航对象(无父栈, tab停在 index 0)
+    useNavigation: () => ({
+      getParent: () => undefined,
+      getState: () => ({ index: 0 }),
+      navigate: () => {},
+    }),
   };
 });
 

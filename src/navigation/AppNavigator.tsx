@@ -1,10 +1,11 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { useAndroidBackExit } from '../hooks/useAndroidBackExit';
 import { RootStackParamList, AuthStackParamList, MainTabParamList } from '../types';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -34,6 +35,13 @@ function AuthNavigator() {
       <AuthStack.Screen name="Login" component={LoginScreen} />
     </AuthStack.Navigator>
   );
+}
+
+// Android 硬件返回键治理: 非 Home tab 先回 Home, Home 双击退出, 详情页不拦截
+function TabBackHandler() {
+  const navigation = useNavigation();
+  useAndroidBackExit(navigation);
+  return null;
 }
 
 function MainTabs() {
@@ -96,6 +104,8 @@ function MainTabs() {
           tabBarIcon: ({ focused }) => <TabIcon label="👤" focused={focused} />,
         }}
       />
+      {/* 非 Screen 子元素, navigator 原样渲染 — 挂硬件返回键监听 */}
+      <TabBackHandler />
     </Tab.Navigator>
   );
 }
