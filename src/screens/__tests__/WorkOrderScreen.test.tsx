@@ -6,7 +6,7 @@ import { workOrderApi } from '../../services/api';
 import { Alert, FlatList, Modal, RefreshControl } from 'react-native';
 
 // Mock navigation and route
-const mockRouteParams = { stationId: 1 };
+const mockRouteParams: { stationId?: number } = { stationId: 1 };
 jest.mock('@react-navigation/native', () => ({
   useRoute: () => ({ params: mockRouteParams }),
   useNavigation: () => ({ navigate: jest.fn() }),
@@ -307,6 +307,46 @@ describe('WorkOrderScreen', () => {
     expect(workOrderApi.createWorkOrder).toHaveBeenCalledWith(
       expect.objectContaining({ title: '测试工单', stationId: 1 })
     );
+  });
+
+  it('should hide create FAB when stationId is missing', async () => {
+    mockRouteParams.stationId = undefined;
+    try {
+      const { findByText, queryByText } = render(<WorkOrderScreen />);
+
+      await findByText('充电桩A-01故障维修');
+
+      // 无站点上下文时创建入口不渲染(handleCreateWorkOrder的!stationId为纵深防御)
+      expect(queryByText('+')).toBeNull();
+    } finally {
+      mockRouteParams.stationId = 1;
+    }
+  });
+
+  it('should block create and prompt when stationId becomes missing', async () => {
+    const { findByText, getByText, getByPlaceholderText } = render(<WorkOrderScreen />);
+
+    await findByText('充电桩A-01故障维修');
+
+    // 打开modal后才失去站点上下文(如路由参数被上游改写)
+    await act(async () => {
+      fireEvent.press(await findByText('+'));
+    });
+
+    mockRouteParams.stationId = undefined;
+    try {
+      // changeText触发re-render → useRoute重读params → stationId变undefined
+      fireEvent.changeText(getByPlaceholderText('请输入工单标题'), '测试工单');
+
+      await act(async () => {
+        fireEvent.press(getByText('创建工单'));
+      });
+
+      expect(Alert.alert).toHaveBeenCalledWith('提示', '请先选择站点');
+      expect(workOrderApi.createWorkOrder).not.toHaveBeenCalled();
+    } finally {
+      mockRouteParams.stationId = 1;
+    }
   });
 
   it('should validate title required on create', async () => {

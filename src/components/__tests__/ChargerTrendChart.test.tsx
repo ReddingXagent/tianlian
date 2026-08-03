@@ -15,10 +15,12 @@ jest.mock('react-native-chart-kit', () => {
       const cfgColor = props.chartConfig.color(0.5);
       const cfgColorDefault = props.chartConfig.color(); // 默认参数分支(opacity=1)
       const labelColor = props.chartConfig.labelColor();
+      const labels: string[] = props.data.labels;
+      const emptyLabels = labels.filter((l) => l === '').length;
       return React.createElement(
         Text,
         { testID: 'line-chart' },
-        `chart:${datasetColor}:${cfgColor}:${cfgColorDefault}:${labelColor}`
+        `chart:${datasetColor}:${cfgColor}:${cfgColorDefault}:${labelColor}:labels=${labels.length},empty=${emptyLabels}`
       );
     },
   };
@@ -140,6 +142,27 @@ describe('ChargerTrendChart', () => {
       ? chart.props.children.join('')
       : String(chart.props.children);
     expect(text).toContain('26,115,232');
+  });
+
+  it('should thin labels when more than 6 points', async () => {
+    // 12 个点 → step=2, 半数标签被置空(buildLabels 抽稀分支 + Math.max 右侧)
+    const manyPoints = Array.from({ length: 12 }, (_, i) => ({
+      timestamp: `2024-01-15T10:${String(i * 5).padStart(2, '0')}:00Z`,
+      power: i,
+      voltage: 380,
+      current: 30,
+      soc: 20,
+    }));
+    (chargerApi.getTrend as jest.Mock).mockResolvedValue({
+      data: { deviceId: 101, points: manyPoints },
+    });
+
+    const { findByTestId } = render(<ChargerTrendChart deviceId={101} />);
+    const chart = await findByTestId('line-chart');
+    const text = Array.isArray(chart.props.children)
+      ? chart.props.children.join('')
+      : String(chart.props.children);
+    expect(text).toContain('labels=12,empty=6');
   });
 
   it('should fall back to empty label when timestamp formatting fails', async () => {
