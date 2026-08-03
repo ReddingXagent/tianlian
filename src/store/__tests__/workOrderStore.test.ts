@@ -233,6 +233,7 @@ describe('useWorkOrderStore', () => {
         await expect(useWorkOrderStore.getState().createOrder({
           stationId: 1,
           title: '',
+          description: '',
           type: 'repair',
           priority: 'normal',
         })).rejects.toThrow('Validation Error');
@@ -250,6 +251,7 @@ describe('useWorkOrderStore', () => {
         await expect(useWorkOrderStore.getState().createOrder({
           stationId: 1,
           title: 'x',
+          description: 'x',
           type: 'repair',
           priority: 'normal',
         })).rejects.toEqual({ status: 500 });

@@ -190,8 +190,8 @@ describe('useStationStore', () => {
 
   describe('fetchStationAlarms', () => {
     const MOCK_ALARMS: Alarm[] = [
-      { id: 1, stationId: 1, stationName: '充电站A', deviceId: 1, deviceName: '充电桩1', type: 'device_fault', level: 'critical', title: '过压告警', description: '电压超限', status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
-      { id: 2, stationId: 1, stationName: '充电站A', deviceId: 2, deviceName: '充电桩2', type: 'communication_loss', level: 'warning', title: '通讯中断', description: '设备离线', status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+      { id: 1, stationId: 1, stationName: '充电站A', deviceId: 1, deviceName: '充电桩1', type: 'device_fault', level: 'critical', title: '过压告警', description: '电压超限', status: 'unhandled', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+      { id: 2, stationId: 1, stationName: '充电站A', deviceId: 2, deviceName: '充电桩2', type: 'communication_loss', level: 'warning', title: '通讯中断', description: '设备离线', status: 'unhandled', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
     ];
 
     it('should fetch alarms successfully', async () => {
