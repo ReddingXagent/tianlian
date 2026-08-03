@@ -37,13 +37,14 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（155 用例全绿）
-npm run lint         # eslint（0 err / 16 warn）
+npm test             # jest 单测（243 用例全绿）
+npm run lint         # eslint（0 err / 0 warn）
 npx expo export --platform ios   # 产物构建验证
 ```
 
-- 测试覆盖：components / hooks / services / store 全覆盖；screens 层待补（F17）
+- 测试覆盖率：Statements 83.62% | Branches 71.65% | Functions 77.34% | Lines 85.39%
 - coverage 收集范围：`src/**`（排除 `*.d.ts` 与 `types/`）
+- components / store 层 100% 覆盖；screens 层 15 个页面均已补测试（F17 ✅ 已解决）
 
 ## 构建与部署
 
@@ -56,7 +57,7 @@ eas build --profile production       # 商店构建
 
 - `eas.json`：development / preview(内部 APK) / production 三档 profile
 - `assets/`：icon / adaptive-icon / splash / favicon 品牌占位图（蓝底白字 TL，待设计稿替换）
-- 已知缺口：web 导出缺 react-dom/react-native-web/@expo/metro-runtime（F24）；BASE_URL 硬编码生产 IP 无环境切换（F22）；EAS Update 通道未配（需账号，F25）
+- 已知缺口：web 导出不可用（纯移动端，无 react-dom，F85 ✅ 确认预期行为）；BASE_URL 硬编码生产 IP 无环境切换（F22）；EAS Update 通道未配（需账号，F25）
 
 ## 目录结构
 
@@ -75,8 +76,13 @@ src/
 
 - **F21**: ScanScreen 为手动输码，缺 expo-camera 真扫码能力
 - **F22**: `api.ts` BASE_URL 硬编码生产 IP，缺 dev/mock 环境切换
-- **F17**: 15 个 screens 零测试，诚实 coverage 35%，待补 screen 级测试
-- **F18**: 8 处 set-state-in-effect warn，待 screen 测试补齐后逐处收敛
+- **F25**: EAS Update 通道未配，需 Expo 账号
+- **F69**: InspectionDetailScreen 覆盖 57.4%、ScanScreen 65.62%、WorkOrderDetailScreen 65.45% 为薄弱 Screen
+- **F70**: AppNavigator 0% 覆盖（导航层，测试成本高）
+- **F74**: WorkOrderDetailScreen 测试有 act() 警告（不影响通过）
+- **F82**: LoginScreen Animated act() 警告（不影响测试通过）
+- **F86**: Branches 覆盖 71.65%，较上轮 64.19% 提升
+- **F92**: InspectionDetailScreen 为本仓覆盖最薄弱 Screen（57.4%）
 
 ## 领域边界
 

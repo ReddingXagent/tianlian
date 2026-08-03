@@ -6,7 +6,19 @@
 
 ## [Unreleased]
 
+### Changed
+- README 质量门控数据更新：243 测试全绿，eslint 0 err / 0 warn，覆盖率 83.62%
+- README Roadmap 更新：F17 标记解决，新增 F69/F70/F92 等覆盖薄弱点记录
+
 ### Added
+- 文档：screen 测试覆盖率明细表（InspectionDetailScreen 57.4% ~ DiagnosisScreen 100%）
+
+### Fixed
+- F79: 移除 40 处未使用的 React 默认导入（`4c8a8e7`）
+- F86: eslint 警告清零，16→0（`ff9866d`）
+- api.ts 全部 `any` 类型已消除，生产代码零 any（`2d462f0`）
+
+### Added (前期)
 - 部署链路补齐：eas.json（development/preview-APK/production 三档 profile）
 - 品牌占位 assets：icon/adaptive-icon/splash/favicon（蓝底白字 TL，待设计稿替换）
 - README 新增「构建与部署」章节（OTA 导出 / EAS 构建命令 + 已知缺口 F22/F24/F25）
