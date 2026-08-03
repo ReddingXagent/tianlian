@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useOrderStore } from '../store/orderStore';
 import { Order, RootStackParamList } from '../types';
@@ -30,9 +30,15 @@ const OrderListScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState('');
 
+  // 移动端质量基线: 订单为主Tab, 切Tab保活不重建,
+  // 充电状态随时在变 → 回焦时静默刷新。
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    fetchOrders({ status: activeFilter || undefined });
-  }, [activeFilter]);
+    if (isFocused) {
+      fetchOrders({ status: activeFilter || undefined });
+    }
+  }, [isFocused, activeFilter]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

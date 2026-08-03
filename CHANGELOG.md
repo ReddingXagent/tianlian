@@ -16,6 +16,7 @@
 - LoginScreen 测试补全（覆盖率 27%→73%）
 
 ### Fixed
+- 主Tab回焦静默刷新（移动端陈旧数据真缺口）: Home/订单Tab为底部Tab, 切走后组件保活不重建, 此前仅mount拉取一次 → 切回时站点空闲/占用状态与订单状态陈旧; HomeScreen/OrderListScreen 接入 useIsFocused 回焦重拉, 搜索态不重拉避免冲掉搜索结果; 补测 3 条（总测试 232→235）; ⚠️同类遗留: ProfileScreen仍为mount-only拉取(影响小, 留后续移动端轮)
 - ChargingScreen 轮询改用 useChargingPolling：后台/断网自动暂停、回前台/复网立即补拉（原裸 setInterval 3s 后台不停轮询费电耗流量）；单次请求失败不再永久停轮询致页面冻结，新增首帧失败错误页+重试按钮、轮询中失败黄条提示；补测 2 条（总测试 230→232）
 - F51: export 崩溃（metro/expo-asset 嵌套未提升顶层致 @expo/cli MODULE_NOT_FOUND）→ 显式声明 metro@0.81.5(devDep) + expo-asset@~11.0.5
 - eslint flat config 补 scripts/**/*.js node globals 豁免（新脚本 __dirname no-undef）

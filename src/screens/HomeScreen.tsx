@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useStationStore } from '../store/stationStore';
 import { RootStackParamList, Station } from '../types';
@@ -32,9 +32,20 @@ const HomeScreen: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
+  // 移动端质量基线: Home为主Tab, 切Tab后组件保活不重建,
+  // 此前仅mount时拉取一次 → 切走再切回时站点状态(空闲/占用)是陈旧的。
+  // useIsFocused回焦静默刷新; 搜索态不刷, 避免冲掉搜索结果。
+  const isFocused = useIsFocused();
+  const hasSearchRef = useRef(false);
   useEffect(() => {
-    fetchStations();
-  }, []);
+    hasSearchRef.current = searchText.trim().length > 0;
+  }, [searchText]);
+
+  useEffect(() => {
+    if (isFocused && !hasSearchRef.current) {
+      fetchStations();
+    }
+  }, [isFocused, fetchStations]);
 
   const handleSearch = useCallback(async () => {
     const keyword = searchText.trim();

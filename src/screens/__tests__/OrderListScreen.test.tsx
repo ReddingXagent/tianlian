@@ -49,8 +49,10 @@ jest.mock('../../store/orderStore', () => ({
 }));
 
 const mockNavigate = jest.fn();
+let mockFocused = true;
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate }),
+  useIsFocused: () => mockFocused,
 }));
 
 jest.mock('../../components/StatusBadge', () => 'StatusBadge');
@@ -60,6 +62,7 @@ jest.mock('../../components/EmptyState', () => 'EmptyState');
 describe('OrderListScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFocused = true;
   });
 
   const renderScreen = () =>
@@ -92,5 +95,26 @@ describe('OrderListScreen', () => {
   it('calls fetchOrders on mount', () => {
     renderScreen();
     expect(mockFetchOrders).toHaveBeenCalled();
+  });
+
+  it('refetches when tab regains focus (回焦刷新)', () => {
+    const utils = renderScreen();
+    expect(mockFetchOrders).toHaveBeenCalledTimes(1);
+
+    mockFocused = false;
+    utils.rerender(
+      <SafeAreaProvider>
+        <OrderListScreen />
+      </SafeAreaProvider>
+    );
+    expect(mockFetchOrders).toHaveBeenCalledTimes(1);
+
+    mockFocused = true;
+    utils.rerender(
+      <SafeAreaProvider>
+        <OrderListScreen />
+      </SafeAreaProvider>
+    );
+    expect(mockFetchOrders).toHaveBeenCalledTimes(2);
   });
 });
