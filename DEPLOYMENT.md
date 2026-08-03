@@ -40,7 +40,7 @@ make systemd-start|stop|restart|status|logs
 
 ⚠️ **踩坑记录（勿回退）**: unit 里 **禁止 `ProtectHome=read-only`** — SQLite DB (`data/gateway.db`) 在 `/home` 下，只读 /home 会导致 `attempt to write a readonly database` 全面写库失败。unit 已置 `ProtectHome=false` 并留注释。
 
-详见 `systemd/README.md`。注意根目录还有一份 `tianlian-edge-gateway.service`（旧版，journal+文件双写），以 `systemd/` 目录版本为准。
+详见 `systemd/README.md`。唯一 unit 源为 `systemd/tianlian-gateway.service`（根目录旧版 `tianlian-edge-gateway.service` 已移除 — 无安全加固且 Restart=on-failure+StartLimit 崩溃3次后不再拉起，误装会导致网关永久下线）。
 
 ## 方式三: Docker
 

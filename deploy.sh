@@ -34,6 +34,11 @@
 #     记录stash计数, 失败时自动 git stash pop 真正恢复现场, 成功时提示 stash@{0}
 #   - fix: revert失败提示只说"冲突", 实际范围含merge commit时(无-m)也会失败 →
 #     提示补merge commit场景与手动处理指引
+# v7 (2026-08-04 自驱部署轮):
+#   - fix: 步骤5迁移脚本真缺口 — migrate_db.py 只补 cloud_synced/priority 两列,
+#     旧schema库缺 cached_at/retry_count/synced 时迁移后仍不全, 运行时查询即
+#     "no such column" 崩; 实测对比(旧schema临时库两脚本各跑+幂等复跑)确认
+#     db_migration.py 全量补齐且幂等 → 切换 migrate_db.py→db_migration.py
 set -e
 
 # 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
@@ -165,9 +170,10 @@ ENVEOF
     echo "⚠️ 已生成 .env 模板, 启动前必须填写 CLOUD_TOKEN"
 fi
 
-# 5. 数据库迁移
+# 5. 数据库迁移(用 db_migration.py 全量schema对齐版; 旧 migrate_db.py 只补
+#    cloud_synced/priority 两列, 会漏 cached_at/retry_count/synced 致旧库运行时报错)
 echo "[5/7] 数据库迁移..."
-$PYTHON migrate_db.py 2>/dev/null || echo "数据库已是最新或迁移跳过"
+$PYTHON db_migration.py 2>/dev/null || echo "数据库已是最新或迁移跳过"
 
 # 6. 停止旧服务(精确匹配本目录 main.py)
 echo "[6/7] 停止旧服务..."

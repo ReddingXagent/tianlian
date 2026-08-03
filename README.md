@@ -115,13 +115,15 @@ crontab -e
 nohup bash scripts/watchdog.sh --loop > /dev/null 2>&1 &
 ```
 
+### 方式五: systemd（推荐, 开机自启+崩溃重启）
+
 ```bash
-# 在树莓派上:
-cp tianlian-edge-gateway.service /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable --now tianlian-edge-gateway
+# 在树莓派上(以 systemd/ 目录版为准, 含安全加固+ProtectHome=false写库保护):
+sudo cp systemd/tianlian-gateway.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now tianlian-gateway
 # 查看日志:
-journalctl -u tianlian-edge-gateway -f
+journalctl -u tianlian-gateway -f
 ```
 
 ### 环境配置
@@ -181,8 +183,7 @@ deploy.sh          树莓派一键部署（v3: 端口等待+重试+健康轮询�
 Dockerfile         多阶段容器构建（python:3.10-slim, 非 root, HEALTHCHECK）
 docker-compose.yml 一键容器化部署（restart + 日志轮转 + 持久化卷）
 scripts/watchdog.sh 看门狗（健康检查+自动重启, crontab/--loop 双模式）
-systemd/           systemd unit + logrotate + README
-tianlian-edge-gateway.service  systemd 单元（兼容旧路径，推荐用 systemd/ 目录）
+systemd/           systemd unit + logrotate + README（唯一 systemd 单元源）
 .env.example       环境变量模板（所有 key 与 config.py 精确对齐）
 Makefile           开发快捷命令 (install/run/test/lint/check/deploy/systemd-*)
 ```

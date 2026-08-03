@@ -5,6 +5,8 @@
 ## [Unreleased]
 
 ### Fixed
+- `deploy.sh` (v7): 步骤5迁移脚本真缺口 — 旧 `migrate_db.py` 只补 `cloud_synced`/`priority` 两列，旧schema库缺 `cached_at`/`retry_count`/`synced` 时迁移后 schema 仍不全，运行时查询即 "no such column" 崩；实测对比（旧schema临时库两脚本各跑+幂等复跑）确认 `db_migration.py` 全量补齐且幂等 → 切换 `migrate_db.py`→`db_migration.py`，旧脚本退役移除
+- systemd 单元双源漂移修复：移除根目录旧版 `tianlian-edge-gateway.service`（无安全加固、Restart=on-failure+StartLimitBurst=3 崩溃3次后不再拉起、日志双写），唯一源为 `systemd/tianlian-gateway.service`；README 原安装指引指向旧版（误装会导致网关崩溃后永久下线）→ 改为方式五指向 systemd/ 版；DEPLOYMENT.md 说明同步
 - `deploy.sh` (v6) + `Makefile deploy-rollback`: 回滚 stash 黑洞（F172遗留实测发现）— v5 先 stash 脏改动再 revert，但失败路径声称"恢复现场"却不 pop stash（用户未提交改动看似丢失），成功路径也不提 stash 去向 → 记录 stash 计数，失败自动 `git stash pop` 真正恢复现场，成功提示 `stash@{0}`；失败提示补 merge commit 场景（范围含 merge 时 revert 需 `-m`）与手动处理指引；Makefile deploy-rollback 从重复实现改为委托 `deploy.sh rollback`（单一源，防护一致）。临时仓库 5 用例实测：干净线性/脏树保留stash/merge+脏改动失败pop恢复/Makefile委托/无效commit与REV=HEAD防护 全过
 - `deploy.sh` (v5) + `Makefile deploy-rollback`: 回滚语义bug — `git revert $REV` 只撤销单个commit，与"回滚到REV"语义不符（落后N个commit时只撤1个，其余N-1个坏提交仍在）→ 改 `git revert ${REV}..HEAD` 撤销目标好版本之后全部提交，工作区即REV状态；新增 无效commit校验/REV即HEAD短路/revert冲突自动abort 三重防护
 
