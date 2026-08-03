@@ -6,6 +6,9 @@
 
 ## [Unreleased]
 
+### Changed
+- CI健壮性加固: ①两job补 `timeout-minutes`(check=15/export=20) — 此前无超时, 挂死的export最多吃满GitHub默认6h runner; ②export job补 `upload-artifact`(always, 保留7天) — bundle-size回归/导出异常时可直接下载双平台hbc+资产取证, 门控失败也留现场(if: always); ③YAML解析+结构断言校验通过(timeout/artifact字段实测确认)
+
 ### Fixed
 - bundle-size.sh 平台识别bug: `find | head -1` 不区分平台子目录, 同目录双平台(如 `dist/`)时 ios 误报 android 体积 → 改按 `_expo/static/js/<platform>/` 定位, 兼容旧布局单hbc兜底; 实测 `bundle-size.sh dist dist` android 2.19MB / ios 2.18MB 正确区分
 - F167: `npm run build` 实际必挂 — `expo export` 默认含 web 平台但项目无 react-native-web/react-dom 依赖；app.json 加 `platforms: ["android","ios"]` 并移除无用的 web.favicon 配置，实测 build 全绿（android 2.3MB / ios 2.29MB）
