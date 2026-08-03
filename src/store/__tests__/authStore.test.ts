@@ -185,6 +185,21 @@ describe('useAuthStore', () => {
       expect(state.user).toEqual(TEST_USER);
     });
 
+    it('should keep cached user when profile returns empty data', async () => {
+      (tokenStorage.getToken as jest.Mock).mockResolvedValue(TEST_TOKEN);
+      (authApi.getProfile as jest.Mock).mockResolvedValue({ data: null });
+      useAuthStore.setState({ user: TEST_USER });
+
+      await act(async () => {
+        await useAuthStore.getState().checkAuth();
+      });
+
+      const state = useAuthStore.getState();
+      expect(state.token).toBe(TEST_TOKEN);
+      expect(state.isAuthenticated).toBe(true);
+      expect(state.user).toEqual(TEST_USER);
+    });
+
     it('should clear auth when tokenStorage throws', async () => {
       (tokenStorage.getToken as jest.Mock).mockRejectedValue(new Error('Storage corrupt'));
 

@@ -241,4 +241,50 @@ describe('useStationStore', () => {
       expect(useStationStore.getState().selectedStation).toBeNull();
     });
   });
+
+  describe('non-Error rejection fallbacks (err instanceof Error false branch)', () => {
+    it('fetchStations should use fallback message for non-Error rejection', async () => {
+      (stationApi.getList as jest.Mock).mockRejectedValue('boom');
+
+      await act(async () => {
+        await useStationStore.getState().fetchStations();
+      });
+
+      const state = useStationStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('获取站点列表失败');
+    });
+
+    it('fetchStationDetail should use fallback message for non-Error rejection', async () => {
+      (stationApi.getDetail as jest.Mock).mockRejectedValue(null);
+
+      await act(async () => {
+        await useStationStore.getState().fetchStationDetail(1);
+      });
+
+      const state = useStationStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('获取站点详情失败');
+    });
+
+    it('fetchStationDevices should use fallback message for non-Error rejection', async () => {
+      (stationApi.getDevices as jest.Mock).mockRejectedValue(undefined);
+
+      await act(async () => {
+        await useStationStore.getState().fetchStationDevices(1);
+      });
+
+      expect(useStationStore.getState().error).toBe('获取设备列表失败');
+    });
+
+    it('fetchStationAlarms should use fallback message for non-Error rejection', async () => {
+      (stationApi.getAlarms as jest.Mock).mockRejectedValue({});
+
+      await act(async () => {
+        await useStationStore.getState().fetchStationAlarms(1);
+      });
+
+      expect(useStationStore.getState().error).toBe('获取告警列表失败');
+    });
+  });
 });
