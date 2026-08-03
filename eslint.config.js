@@ -111,6 +111,27 @@ module.exports = [
       'prefer-numeric-literals': 'error',       // parseInt('0x1a')等→数值字面量
       'no-proto': 'error',                      // 禁__proto__(原型链污染风险), 用Object.getPrototypeOf
       'no-new-func': 'error',                   // 禁new Function()动态构造(等同eval)
+      // 代码质量防回归规则第五批 (2026-08-04 猴王自驱lint轮, 候选池24条扫描实测, 0违规20条全收)
+      'no-labels': 'error',                 // 禁label语句, 防goto式控制流
+      'no-div-regex': 'error',              // 禁/=开头正则歧义, 用[=]
+      'accessor-pairs': 'error',            // setter须配套getter
+      'no-nested-ternary': 'error',         // 禁嵌套三元, 可读性
+      'no-new-require': 'error',            // 禁new require()歧义写法
+      'no-octal-escape': 'error',           // 禁八进制转义序列
+      'no-void': 'error',                   // 禁void运算符
+      'no-iterator': 'error',               // 禁__iterator__属性
+      'prefer-spread': 'error',             // fn.apply(null,args)→...args
+      'prefer-rest-params': 'error',        // arguments→...rest参数
+      'no-object-constructor': 'error',     // Object()→{}
+      'no-new-object': 'error',             // new Object()→{}
+      'dot-notation': 'error',              // obj['prop']→obj.prop(可点号访问时)
+      'no-extend-native': 'error',          // 禁扩展原生原型(Array.prototype.x=等)
+      'no-return-await': 'error',           // 禁多余return await(非catch场景无意义)
+      'symbol-description': 'error',        // Symbol()须带描述
+      'no-duplicate-imports': 'error',      // 禁重复import同一模块
+      'no-useless-constructor': 'error',    // 禁无意义默认构造函数
+      'no-bitwise': 'error',                // 禁位运算符(多为&/&&笔误), 需要处显式disable
+      'no-param-reassign': 'error',         // 禁对函数参数重新赋值, 防调用方意外
     },
     linterOptions: {
       reportUnusedDisableDirectives: 'error',   // 失效的eslint-disable注释报错, 防规则笔误/删除后静默失效

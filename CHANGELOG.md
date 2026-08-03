@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- eslint 新增 20 条质量防回归规则（第五批）：no-labels / no-div-regex / accessor-pairs / no-nested-ternary / no-new-require / no-octal-escape / no-void / no-iterator / prefer-spread / prefer-rest-params / no-object-constructor / no-new-object / dot-notation / no-extend-native / no-return-await / symbol-description / no-duplicate-imports / no-useless-constructor / no-bitwise / no-param-reassign；候选池 24 条先全仓扫描实测（camelcase 46 / prefer-template 6 / no-confusing-arrow 3 违规剔除，no-with 与 recommended 重复剔除），0 违规 20 条全收。累计质量规则 43→63
 - eslint 新增 11 条质量防回归规则（第二批）：no-implicit-coercion / no-empty-function / no-unneeded-ternary / no-lonely-if / prefer-object-spread / no-useless-computed-key / no-dupe-else-if / default-case / no-alert / no-multi-str / yoda；加入时全仓 0 违规（util.js padZero 隐式拼接顺手修复；notifications.js fire-and-forget catch 显式 disable+注释）
 - eslint 新增 12 条质量防回归规则（第三批）：no-template-curly-in-string / no-unmodified-loop-condition / array-callback-return / no-useless-call / no-useless-concat / no-else-return / no-promise-executor-return / no-unsafe-optional-chaining / no-case-declarations / no-sequences / no-new-wrappers / prefer-regex-literals；加入时全仓 0 违规（测试文件 4 处 executor-return 顺手修为块体）。累计质量规则 19→31
 - eslint 新增 12 条质量防回归规则（第四批）：no-throw-literal / no-irregular-whitespace / no-unreachable-loop / no-unused-expressions / require-await / no-multi-assign / no-extra-bind / no-useless-rename / no-array-constructor / prefer-numeric-literals / no-proto / no-new-func；加入时全仓 0 违规。累计质量规则 31→43
