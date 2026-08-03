@@ -17,7 +17,9 @@ StandardError=journal
 # 安全加固
 NoNewPrivileges=true
 ProtectSystem=full
-ProtectHome=read-only
+# 注意: 禁止 ProtectHome=read-only! SQLite DB(data/gateway.db)在 /home 下,
+# 只读 /home 会导致 "attempt to write a readonly database" 全面写库失败
+ProtectHome=false
 PrivateTmp=true
 
 [Install]

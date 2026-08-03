@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Fixed
+- `systemd/tianlian-gateway.service`: 移除 `ProtectHome=read-only`（SQLite DB 在 /home 下，只读会导致写库全面失败）
+- `scripts/watchdog.sh`: REPO_DIR 误指向 scripts/ → pgrep 永不匹配真实网关进程，看门狗形同虚设；改为仓库根
+
+### Added
+- `DEPLOYMENT.md`: 部署运行手册（deploy.sh/systemd/Docker 三方式 + watchdog + 踩坑记录 + 已知问题）
+
+
 ### Added
 - `docs/API_REFERENCE.md`: 完整 API 参考手册（8 端点，含请求/响应示例 + curl 快速验证）
 - `docs/DEVELOPMENT.md`: 开发贡献指南（环境搭建 / 项目结构 / 核心概念 / 扩展指南 / 测试规范）

@@ -159,6 +159,7 @@ YAML 字段与 `GatewayConfig` dataclass 一一对应（参见 `config.py`）。
 
 ## 更多文档
 
+- [部署运行手册](DEPLOYMENT.md) — deploy.sh/systemd/Docker 三方式 + 回滚 + 踩坑记录
 - [API 参考手册](docs/API_REFERENCE.md) — 全端点请求/响应示例 + curl 验证
 - [移动端集成指南](docs/MOBILE_INTEGRATION.md) — RN/微信小程序对接网关 API
 - [开发贡献指南](docs/DEVELOPMENT.md) — 环境搭建 / 项目结构 / 扩展指南

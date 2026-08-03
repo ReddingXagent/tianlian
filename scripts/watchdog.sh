@@ -13,7 +13,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$SCRIPT_DIR"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"  # scripts/ 的上一级=仓库根
+
 PORT="${PORT:-8080}"
 HEALTH_URL="http://localhost:${PORT}/health"
 PID_FILE="$REPO_DIR/.pid"
