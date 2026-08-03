@@ -132,7 +132,7 @@ describe('API Service', () => {
     });
 
     it('updateProfile puts to /auth/profile', async () => {
-      const data = { name: 'Updated' };
+      const data = { nickname: 'Updated' };
       await authApi.updateProfile(data);
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/auth/profile', data);
     });
@@ -143,8 +143,8 @@ describe('API Service', () => {
   // =====================
   describe('stationApi', () => {
     it('getList calls /stations/nearby with query params', async () => {
-      await stationApi.getList({ lat: 30, lng: 120 });
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/stations/nearby', { params: { lat: 30, lng: 120 } });
+      await stationApi.getList({ latitude: 30, longitude: 120 });
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/stations/nearby', { params: { latitude: 30, longitude: 120 } });
     });
 
     it('getList works without query', async () => {
@@ -277,8 +277,8 @@ describe('API Service', () => {
   // =====================
   describe('couponApi', () => {
     it('getList calls /coupons with params', async () => {
-      await couponApi.getList({ status: 'active', page: 1, pageSize: 10 });
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/coupons', { params: { status: 'active', page: 1, pageSize: 10 } });
+      await couponApi.getList({ status: 'unused', page: 1, pageSize: 10 });
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/coupons', { params: { status: 'unused', page: 1, pageSize: 10 } });
     });
 
     it('getList works without params', async () => {
