@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Added
+- ScanScreen 真扫码落地（F21 修复）— 新增 expo-camera ~16.0.18 + CameraScanner 组件（相机权限请求/拒绝后引导去设置、QR 取景框、同码 2.5s 冷却去重）+ parseScanPayload 解析器（裸编码/URL/URL 末段路径三形态）；扫码成功自动查询并收起相机，手动输入保留兜底；补测 24 条（241→265：CameraScanner 权限/扫描、scanCode 解析、ScanScreen 相机交互）
+
+### Fixed
+- lint:ci 警告阈值红盘修复（F170 遗留闭环）— 清理 6 条 unused-vars（ErrorBoundary/AppNavigator/api 测试未用导入），warnings 62→56 ≤ 阈值 60，`npm run lint:ci` 由红转绿
+
 ### Fixed
 - 回焦刷新收尾第三屏批次 — StationDetail/OrderDetail/Wallet 三屏此前仅 mount 拉取：桩位状态(空闲/占用/故障)、订单状态(充电中/完成/取消)、钱包余额+流水在离开页面期间变化后回屏陈旧；接入 useIsFocused 回焦静默重拉（Wallet 同拉 profile 同步余额，同 F170/F176 模式），补测 3 条（238→241）
 - ProfileScreen 回焦静默刷新 — Profile 底部 Tab 切走保活不重建，仅 mount 拉一次统计/余额；接入 useIsFocused 回焦重拉 stats + authApi.getProfile（钱包充值/扣费后余额实时同步），补测 3 条（235→238）；收尾 F170 遗留的 mount-only 缺口

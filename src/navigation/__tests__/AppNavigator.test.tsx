@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text, View } from 'react-native';
 import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -34,7 +33,6 @@ jest.mock('@react-navigation/native', () => {
 
 jest.mock('@react-navigation/native-stack', () => {
   const React = require('react');
-  const { Text, View } = require('react-native');
   return {
     createNativeStackNavigator: () => ({
       Navigator: ({ children }: { children: React.ReactNode }) =>

@@ -44,7 +44,6 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
 
 // Get the mocked instance
 const mockAxiosInstance = (axios as any).create();

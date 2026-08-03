@@ -15,6 +15,7 @@ import { chargingApi } from '../services/api';
 import { useOrderStore } from '../store/orderStore';
 import { ScanResult, RootStackParamList } from '../types';
 import StatusBadge from '../components/StatusBadge';
+import CameraScanner from '../components/CameraScanner';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -26,14 +27,9 @@ const ScanScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const startCharging = useOrderStore((s) => s.startCharging);
   const [starting, setStarting] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
 
-  const handleScan = useCallback(async () => {
-    const code = codeInput.trim();
-    if (!code) {
-      setError('请输入充电桩编码');
-      return;
-    }
-
+  const lookupCode = useCallback(async (code: string) => {
     setLoading(true);
     setError(null);
     setLastResult(null);
@@ -52,7 +48,25 @@ const ScanScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [codeInput]);
+  }, []);
+
+  const handleScan = useCallback(async () => {
+    const code = codeInput.trim();
+    if (!code) {
+      setError('请输入充电桩编码');
+      return;
+    }
+    await lookupCode(code);
+  }, [codeInput, lookupCode]);
+
+  const handleCameraScan = useCallback(
+    (code: string) => {
+      setCameraOpen(false);
+      setCodeInput(code);
+      void lookupCode(code);
+    },
+    [lookupCode]
+  );
 
   const handleStartCharging = useCallback(async () => {
     if (!lastResult) return;
@@ -89,15 +103,28 @@ const ScanScreen: React.FC = () => {
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      {/* 扫码区域示意 */}
+      {/* 扫码区域: 未开启时为入口, 开启后为相机取景框 */}
       <View style={styles.scannerFrame}>
-        <View style={styles.scannerBox}>
-          <Text style={styles.scannerIcon}>📷</Text>
-          <Text style={styles.scannerHint}>扫描充电桩二维码</Text>
-          <Text style={styles.scannerSubHint}>
-            也可手动输入充电桩编码进行充电
-          </Text>
-        </View>
+        {cameraOpen ? (
+          <CameraScanner
+            onScan={handleCameraScan}
+            onClose={() => setCameraOpen(false)}
+          />
+        ) : (
+          <TouchableOpacity
+            style={styles.scannerBox}
+            onPress={() => setCameraOpen(true)}
+            activeOpacity={0.8}
+            testID="open-camera-btn"
+          >
+            <Text style={styles.scannerIcon}>📷</Text>
+            <Text style={styles.scannerHint}>扫描充电桩二维码</Text>
+            <Text style={styles.scannerSubHint}>点此打开摄像头扫码</Text>
+            <Text style={styles.scannerSubHint}>
+              也可手动输入充电桩编码进行充电
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* 输入区域 */}
