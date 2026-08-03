@@ -28,13 +28,13 @@ bundle-size: ## JS Bundle 体积门控 (需先 export-android/export-ios)
 test: ## 运行单元测试
 	npx jest --coverage
 
-lint: ## ESLint 检查
-	npx eslint src/ --ext .ts,.tsx
+lint: ## ESLint 检查 (与 npm run lint/CI 一致, 全仓含配置文件)
+	npm run lint
 
 check: build lint test ## 全量检查 (tsc + eslint + jest)
 
-ci-local: check export-android bundle-size ## 模拟 CI 全流程 (检查 + Android 导出 + 体积门控)
+ci-local: check export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + 双平台导出 + 体积门控)
 
 clean: ## 清理构建产物
-	rm -rf /tmp/ops-export-android /tmp/ops-export-ios coverage
+	rm -rf /tmp/ops-export-android /tmp/ops-export-ios coverage dist
 	rm -f *.tsbuildinfo

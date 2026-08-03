@@ -2,7 +2,8 @@
 # bundle-size.sh — JS bundle 体积门控
 # 用法: ./scripts/bundle-size.sh [android导出目录] [ios导出目录]
 # 默认目录: /tmp/ops-export-android /tmp/ops-export-ios (见 Makefile export-* 目标)
-# 基线 (2026-08): android 2.29MB / ios 2.29MB (hbc)
+# 基线 (2026-08-04): android 2.19MB / ios 2.18MB (hbc, 实测)
+# 注: 按 <dir>/_expo/static/js/<platform>/ 定位平台子目录, 同目录双平台(如dist/)也能正确区分
 # 阈值: WARN_MB=2.75 (+20%), FAIL_MB=3.5; 超WARN警告, 超FAIL退出码1
 set -euo pipefail
 
@@ -18,10 +19,17 @@ check_one() {
     return 0
   fi
   local hbc
-  hbc=$(find "$dir/_expo/static/js" -name '*.hbc' 2>/dev/null | head -1)
+  hbc=$(find "$dir/_expo/static/js/$platform" -name '*.hbc' 2>/dev/null | head -1)
   if [ -z "$hbc" ]; then
-    echo "[$platform] 未找到 .hbc bundle, 导出可能不完整 → FAIL"
-    return 1
+    # 兼容旧导出布局(无平台子目录): 仅当目录内只有一个hbc时才允许兜底
+    local fallback
+    fallback=$(find "$dir/_expo/static/js" -name '*.hbc' 2>/dev/null)
+    if [ "$(echo "$fallback" | grep -c .)" = "1" ]; then
+      hbc=$fallback
+    else
+      echo "[$platform] 未在 $dir/_expo/static/js/$platform 找到 .hbc bundle, 导出可能不完整 → FAIL"
+      return 1
+    fi
   fi
   local bytes mb
   bytes=$(stat -c%s "$hbc")

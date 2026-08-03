@@ -7,7 +7,11 @@
 ## [Unreleased]
 
 ### Fixed
+- bundle-size.sh 平台识别bug: `find | head -1` 不区分平台子目录, 同目录双平台(如 `dist/`)时 ios 误报 android 体积 → 改按 `_expo/static/js/<platform>/` 定位, 兼容旧布局单hbc兜底; 实测 `bundle-size.sh dist dist` android 2.19MB / ios 2.18MB 正确区分
 - F167: `npm run build` 实际必挂 — `expo export` 默认含 web 平台但项目无 react-native-web/react-dom 依赖；app.json 加 `platforms: ["android","ios"]` 并移除无用的 web.favicon 配置，实测 build 全绿（android 2.3MB / ios 2.29MB）
+
+### Changed
+- Makefile ci-local 补 export-ios（原仅 android, 本地模拟CI漏掉iOS体积门控）; lint 目标改 `npm run lint` 与 CI 对齐（原 `eslint src/ --ext` 范围不一致）; clean 补删 `dist/`（npm run build 产物目录）
 
 ### Added
 - scripts/bundle-size.sh: JS bundle 体积门控（WARN>2.75MB / FAIL>3.5MB；基线 android 2.19MB / ios 2.18MB hbc）
