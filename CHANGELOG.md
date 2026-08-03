@@ -11,6 +11,7 @@
 - F167: `npm run build` 实际必挂 — `expo export` 默认含 web 平台但项目无 react-native-web/react-dom 依赖；app.json 加 `platforms: ["android","ios"]` 并移除无用的 web.favicon 配置，实测 build 全绿（android 2.3MB / ios 2.29MB）
 
 ### Changed
+- expo-doctor 接入门禁自动化: CI check job 增加 `npx expo-doctor` 步骤 + Makefile 新增 `make doctor` 目标并接入 ci-local（此前 doctor 仅手动体检, 版本漂移无回归防护）; bundle-size.sh 门控加固 — 双平台导出目录都缺失时由静默通过改 FAIL（门控无对象可测不应放行）; 实测 doctor 18/18 全绿 + bundle-size 正常路径 android 2.19MB / ios 2.18MB 不受影响
 - 构建依赖健康检查: 引入 `npx expo-doctor` 作为构建维度体检项 — 撞出 eslint-config-expo 与 SDK 版本漂移(doctor期望SDK52→~8.0.1); 实测8.0.1为legacy eslintrc配置(无 `/flat` 导出, 与本仓ESLint 9 flat config不兼容, require直接报错) → 保留57.0.1(flat原生, lint实测0 err/0 warn), package.json 钉 `expo.install.exclude: [eslint-config-expo]` 并向doctor声明该豁免, doctor复验18/18全绿
 - Makefile ci-local 补 export-ios（原仅 android, 本地模拟CI漏掉iOS体积门控）; lint 目标改 `npm run lint` 与 CI 对齐（原 `eslint src/ --ext` 范围不一致）; clean 补删 `dist/`（npm run build 产物目录）
 

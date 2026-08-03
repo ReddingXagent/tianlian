@@ -18,6 +18,7 @@ check_one() {
     echo "[$platform] 跳过: $dir 不存在 (先跑 make export-$platform)"
     return 0
   fi
+  found_any=1
   local hbc
   hbc=$(find "$dir/_expo/static/js/$platform" -name '*.hbc' 2>/dev/null | head -1)
   if [ -z "$hbc" ]; then
@@ -46,8 +47,13 @@ check_one() {
 }
 
 overall=0
+found_any=0
 check_one android "$ANDROID_DIR" || overall=1
 check_one ios "$IOS_DIR" || overall=1
+if [ $found_any -eq 0 ]; then
+  echo "两个导出目录都不存在 → 门控无对象可测, FAIL (先跑 make export-android export-ios)"
+  overall=1
+fi
 if [ $overall -eq 0 ]; then
   echo "bundle-size 门控通过 (WARN>${WARN_MB}MB, FAIL>${FAIL_MB}MB)"
 fi
