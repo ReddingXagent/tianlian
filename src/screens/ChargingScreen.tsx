@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useOrderStore } from '../store/orderStore';
-import { chargingApi } from '../services/api';
+import { useChargingPolling } from '../hooks/useChargingPolling';
 import { ChargingStatus, RootStackParamList } from '../types';
 
 type ChargingRouteProp = RouteProp<RootStackParamList, 'Charging'>;
@@ -20,36 +20,19 @@ const ChargingScreen: React.FC = () => {
   const route = useRoute<ChargingRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { orderId } = route.params;
-  const [status, setStatus] = useState<ChargingStatus | null>(null);
-  const [loading, setLoading] = useState(true);
   const [stopping, setStopping] = useState(false);
   const stopCharging = useOrderStore((s) => s.stopCharging);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchStatus = useCallback(async () => {
-    try {
-      const response = await chargingApi.getStatus(orderId);
-      const data = response.data;
-      setStatus(data);
-      if (data.status !== 'charging') {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        // 充电完成，跳转到支付页
-        navigation.replace('Payment', { orderId, amount: data.amount });
-      }
-    } catch {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    } finally {
-      setLoading(false);
-    }
-  }, [orderId, navigation]);
-
-  useEffect(() => {
-    fetchStatus();
-    intervalRef.current = setInterval(fetchStatus, 3000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
+  // 移动端质量基线: 此前本屏自起裸 setInterval(3s), 后台/离线不停轮询(费电耗流量),
+  // 且单次请求失败即永久停轮询(页面数据冻结)。改用 useChargingPolling:
+  // 后台/断网自动暂停, 回前台/复网立即补拉; 偶发失败不中断轮询, 可手动重试。
+  const { status, loading, error, paused, refresh } = useChargingPolling({
+    orderId,
+    onComplete: (data: ChargingStatus) => {
+      // 充电完成，跳转到支付页
+      navigation.replace('Payment', { orderId, amount: data.amount });
+    },
+  });
 
   const handleStop = () => {
     Alert.alert(
@@ -64,7 +47,6 @@ const ChargingScreen: React.FC = () => {
             setStopping(true);
             try {
               await stopCharging(orderId);
-              if (intervalRef.current) clearInterval(intervalRef.current);
               if (status) {
                 navigation.replace('Payment', { orderId, amount: status.amount });
               }
@@ -80,6 +62,17 @@ const ChargingScreen: React.FC = () => {
   };
 
   if (loading || !status) {
+    // 首帧失败(或持续失败): 给错误提示+手动重试, 不再静默转圈
+    if (!loading && error) {
+      return (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={() => refresh()}>
+            <Text style={styles.retryBtnText}>重试</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#1a73e8" />
@@ -143,6 +136,15 @@ const ChargingScreen: React.FC = () => {
           <Text style={styles.amountNum}>¥{amount}</Text>
         </Text>
       </View>
+
+      {/* 状态提示: 后台/离线暂停中 或 最近一次刷新失败 */}
+      {(paused || error) && (
+        <View style={styles.statusHint}>
+          <Text style={styles.statusHintText}>
+            {paused ? '实时刷新已暂停（后台/离线），回到前台自动恢复' : `刷新失败: ${error}，3秒后自动重试`}
+          </Text>
+        </View>
+      )}
 
       {/* 停止按钮 */}
       <TouchableOpacity
@@ -271,6 +273,35 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#c62828',
+    marginBottom: 16,
+    textAlign: 'center',
+    paddingHorizontal: 24,
+  },
+  retryBtn: {
+    backgroundColor: '#1a73e8',
+    borderRadius: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 10,
+  },
+  retryBtnText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  statusHint: {
+    backgroundColor: '#fff8e1',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+  },
+  statusHintText: {
+    fontSize: 12,
+    color: '#8d6e00',
+    textAlign: 'center',
   },
 });
 

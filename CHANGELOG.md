@@ -16,6 +16,7 @@
 - LoginScreen 测试补全（覆盖率 27%→73%）
 
 ### Fixed
+- ChargingScreen 轮询改用 useChargingPolling：后台/断网自动暂停、回前台/复网立即补拉（原裸 setInterval 3s 后台不停轮询费电耗流量）；单次请求失败不再永久停轮询致页面冻结，新增首帧失败错误页+重试按钮、轮询中失败黄条提示；补测 2 条（总测试 230→232）
 - F51: export 崩溃（metro/expo-asset 嵌套未提升顶层致 @expo/cli MODULE_NOT_FOUND）→ 显式声明 metro@0.81.5(devDep) + expo-asset@~11.0.5
 - eslint flat config 补 scripts/**/*.js node globals 豁免（新脚本 __dirname no-undef）
 
