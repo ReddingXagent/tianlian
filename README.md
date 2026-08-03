@@ -67,10 +67,34 @@ ruff check .                # lint 门控（配置见 pyproject.toml，债务以
 
 ## 部署（树莓派）
 
+### 方式一: deploy.sh 一键部署
+
 ```bash
 bash deploy.sh   # 目标机: tl@192.168.31.10, 仓库 /home/tl/tianlian-edge-gateway-v3, 端口 8080
                  # v3: 端口释放等待+启动重试+健康轮询；deploy.sh 自动 source .env
                  # v2: 自动探测仓库目录/全量装依赖/保留.env/git ff同步
+```
+
+### 方式二: systemd 服务（开机自启 + 崩溃重启）
+
+```bash
+# 在树莓派上:
+cp tianlian-edge-gateway.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now tianlian-edge-gateway
+# 查看日志:
+journalctl -u tianlian-edge-gateway -f
+```
+
+### 环境配置
+
+```bash
+cp .env.example .env  # 复制模板, 填入 CLOUD_TOKEN
+make install          # 创建 venv + 装依赖
+make run              # 启动网关
+make test             # 跑测试
+make lint             # ruff 检查
+make check            # lint + test 一键门控
 ```
 
 ## 配置文件
@@ -106,4 +130,7 @@ models/            device / telemetry 数据模型
 storage/           SQLite 遥测缓存（断网续传）
 tests/             pytest 套件 + mock_csms_server
 deploy.sh          树莓派一键部署
+tianlian-edge-gateway.service  systemd 单元（开机自启+崩溃重启）
+.env.example       环境变量模板（所有 key 与 config.py 精确对齐）
+Makefile           开发快捷命令 (install/run/test/lint/check/deploy)
 ```
