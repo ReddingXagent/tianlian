@@ -23,6 +23,8 @@ bash deploy.sh rollback <hash>   # revert 指定 commit 后重新部署
 - `.env` 存在即保留（不会覆盖真实 CLOUD_TOKEN），缺失才生成模板
 - Pi→NAS 无免密时 git fetch 自动降级为部署当前代码（不阻塞）
 - 杀旧进程后等待 8080 端口释放（最多 10s），启动后健康轮询最多 15s，失败自动重试 1 次
+- 进程启动/匹配统一用绝对路径（`$REPO_DIR/main.py`）：pgrep 精确命中本网关，`status` 不会误报其他目录的 main.py
+- Python 版本预检：低于 3.10 告警（不阻断，兼容老环境）
 - 日志: `gateway.log`（仓库根），PID: `.pid`
 
 ## 方式二: systemd

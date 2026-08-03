@@ -5,6 +5,14 @@
 ## [Unreleased]
 
 ### Fixed
+- `deploy.sh` (v4): `status` 子命令 `pgrep -f 'main.py'` 匹配过宽（会命中任意目录的 main.py）→ 改用 `$REPO_DIR/main.py` 精确匹配，REPO_DIR 探测提前到子命令之前
+- `deploy.sh` (v4): 启动用相对路径 `main.py` 导致 cmdline 不含路径，step6/watchdog 的精确 pgrep 永不命中（杀旧全靠 .pid/fuser 兑底）→ 改绝对路径启动
+- `scripts/watchdog.sh`: 同步改绝对路径启动，与 get_pid 匹配模式对齐
+
+### Added
+- `deploy.sh` (v4): Python 版本预检（<3.10 告警不阻断，兼容老环境）
+
+### Fixed
 - `systemd/tianlian-gateway.service`: 移除 `ProtectHome=read-only`（SQLite DB 在 /home 下，只读会导致写库全面失败）
 - `scripts/watchdog.sh`: REPO_DIR 误指向 scripts/ → pgrep 永不匹配真实网关进程，看门狗形同虚设；改为仓库根
 

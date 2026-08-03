@@ -59,7 +59,8 @@ start_gateway() {
     cd "$REPO_DIR"
     # 加载 .env
     if [ -f .env ]; then set -a; . .env; set +a; fi
-    nohup python3 main.py >> "$LOG_FILE" 2>&1 &
+    # 绝对路径启动: cmdline 含完整路径, get_pid 的 pgrep 才能精确匹配
+    nohup python3 "$REPO_DIR/main.py" >> "$LOG_FILE" 2>&1 &
     local new_pid=$!
     echo "$new_pid" > "$PID_FILE"
     log "已启动 PID $new_pid"

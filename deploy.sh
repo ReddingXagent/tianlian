@@ -17,7 +17,26 @@
 #     增加端口等待释放循环(最多10秒), 确保bind前端口可用
 #   - fix: 步骤7启动后只等3秒, 改为轮询健康检查(最多15秒)
 #   - fix: 首次启动失败时自动重试一次(等待2秒后)
+# v4 (2026-08-04 自驱部署轮):
+#   - fix: status子命令 pgrep -f 'main.py' 匹配过宽(会命中任意目录的main.py) →
+#     改用 "$REPO_DIR/main.py" 精确匹配; REPO_DIR探测提前到子命令之前
+#   - fix: 启动用相对路径 main.py → cmdline 不含路径, step6/watchdog 的
+#     pgrep "$REPO_DIR/main.py" 永不命中(杀旧靠.pid/fuser兑底) → 改绝对路径启动
+#   - 新增: Python 版本预检(<3.10 告警不阻断)
 set -e
+
+# 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
+# 注意: 必须在子命令前探测, status/rollback 依赖 REPO_DIR 做精确进程匹配
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/main.py" ]; then
+    REPO_DIR="$SCRIPT_DIR"
+elif [ -d /home/tl/tianlian-edge-gateway-v3 ]; then
+    REPO_DIR=/home/tl/tianlian-edge-gateway-v3
+else
+    echo "❌ 未找到仓库目录(需含 main.py)"; exit 1
+fi
+PYTHON="python3"
+PORT="${PORT:-8080}"
 
 # 子命令: rollback
 if [ "$1" = "rollback" ]; then
@@ -44,33 +63,25 @@ fi
 # 子命令: status
 if [ "$1" = "status" ]; then
     echo "=== 天链V3 边缘网关状态 ==="
-    PORT="${PORT:-8080}"
-    PID="$(pgrep -f 'main.py' 2>/dev/null || echo '未运行')"
+    PID="$(pgrep -f "$REPO_DIR/main.py" 2>/dev/null || echo '未运行')"
     echo "PID: $PID"
     curl -s -m 3 "http://localhost:$PORT/health" 2>/dev/null && echo "" || echo "健康检查: 不可达"
     curl -s -m 3 "http://localhost:$PORT/api/v1/status" 2>/dev/null | python3 -m json.tool 2>/dev/null || echo "状态API: 不可达"
     echo "日志最后10行:"
-    tail -10 gateway.log 2>/dev/null || echo "(无日志)"
+    tail -10 "$REPO_DIR/gateway.log" 2>/dev/null || echo "(无日志)"
     exit 0
 fi
-
-# 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [ -f "$SCRIPT_DIR/main.py" ]; then
-    REPO_DIR="$SCRIPT_DIR"
-elif [ -d /home/tl/tianlian-edge-gateway-v3 ]; then
-    REPO_DIR=/home/tl/tianlian-edge-gateway-v3
-else
-    echo "❌ 未找到仓库目录(需含 main.py)"; exit 1
-fi
-PYTHON="python3"
-PORT="${PORT:-8080}"
 
 echo "=== 天链V3 边缘网关部署 === ($REPO_DIR)"
 
 # 1. 检查 Python
 echo "[1/7] 检查环境..."
 $PYTHON --version || { echo "需要 Python 3.10+"; exit 1; }
+PY_VER=$($PYTHON -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || echo "0.0")
+PY_MAJOR=${PY_VER%%.*}; PY_MINOR=${PY_VER#*.}
+if [ "$PY_MAJOR" -lt 3 ] || { [ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -lt 10 ]; }; then
+    echo "⚠️ Python $PY_VER < 3.10 (README要求3.10+), 继续部署但可能有兼容问题"
+fi
 
 cd "$REPO_DIR"
 
@@ -157,7 +168,8 @@ if [ -f .env ]; then
     set +a
 fi
 start_gateway() {
-    nohup $PYTHON main.py > gateway.log 2>&1 &
+    # 绝对路径启动: 进程 cmdline 含完整路径, pgrep -f "$REPO_DIR/main.py" 才能精确匹配
+    nohup $PYTHON "$REPO_DIR/main.py" > gateway.log 2>&1 &
     NEW_PID=$!
     echo "$NEW_PID" > .pid
 }
