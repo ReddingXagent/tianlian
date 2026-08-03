@@ -8,7 +8,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --passWithNoTests",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build:android": "expo export --platform android",
+    "build:ios": "expo export --platform ios",
+    "build": "tsc --noEmit && expo export"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",
