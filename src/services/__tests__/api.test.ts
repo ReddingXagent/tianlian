@@ -593,3 +593,82 @@ describe('mapper helper edge branches (F180)', () => {
     expect(resp.data).toEqual([]);
   });
 });
+
+describe('data-less fallback branches (F187)', () => {
+  it('alarmApi.handleAlarm returns undefined data when payload has no data', async () => {
+    mockAxios.onPut('/alarms/9/ack').reply(200, { code: 200, message: 'success' });
+    const resp = await alarmApi.handleAlarm(9);
+    expect(resp.data).toBeUndefined();
+  });
+
+  it('workOrderApi.getDetail maps empty object when data missing', async () => {
+    mockAxios.onGet('/work-orders/WO-X').reply(200, { code: 200, message: 'success' });
+    const resp = await workOrderApi.getDetail('WO-X');
+    expect(resp.data.id).toBe(''); // mapWorkOrder({}) 默认值
+    expect(resp.data.status).toBe('pending');
+  });
+
+  it('workOrderApi.createWorkOrder returns undefined data when payload has no data', async () => {
+    mockAxios.onPost('/work-orders').reply(200, { code: 200, message: 'success' });
+    const resp = await workOrderApi.createWorkOrder({
+      stationId: 1,
+      title: 't',
+      description: 'd',
+      type: 'repair',
+      priority: 'high',
+    });
+    expect(resp.data).toBeUndefined();
+  });
+
+  it('workOrderApi.completeWorkOrder: no-solution omits params; missing data → undefined', async () => {
+    let seenParams: unknown = 'sentinel';
+    mockAxios.onPost('/work-orders/WO-Y/complete').reply((config) => {
+      seenParams = config.params;
+      return [200, { code: 200, message: 'success' }];
+    });
+    const resp = await workOrderApi.completeWorkOrder('WO-Y');
+    expect(seenParams).toBeUndefined(); // solution 缺省 → params undefined
+    expect(resp.data).toBeUndefined();
+  });
+
+  it('dashboardApi.getRecentAlarms uses default limit 5', async () => {
+    let seen: Record<string, unknown> = {};
+    mockAxios.onGet('/alarms').reply((config) => {
+      seen = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0 } }];
+    });
+    await dashboardApi.getRecentAlarms(); // 默认参数分支
+    expect(seen.page_size).toBe(5);
+  });
+
+  it('revenueApi.getSummary tolerates missing payloads (all fallbacks)', async () => {
+    mockAxios.onGet('/business/revenue/summary').reply(200, { code: 200, message: 'success' });
+    mockAxios.onGet('/business/revenue/daily').reply(200, { code: 200, message: 'success' });
+    const resp = await revenueApi.getSummary();
+    expect(resp.data).toEqual({ today: 0, week: 0, month: 0, total: 0 });
+  });
+
+  it('revenueApi.getRecords tolerates missing data', async () => {
+    mockAxios.onGet('/business/revenue/daily').reply(200, { code: 200, message: 'success' });
+    const resp = await revenueApi.getRecords({ type: 'day' });
+    expect(resp.data).toEqual([]);
+  });
+
+  it('num/numOrUndef zero-string and non-finite edges', () => {
+    const a = mapAlarm({
+      id: '0', // Number('0')=0 falsy → `|| d` 回退分支
+      station_id: Number.POSITIVE_INFINITY, // number非finite → 默认0
+      device_id: '0', // numOrUndef: Number('0')=0 → undefined
+      alarm_type: 'offline',
+      content: 'x',
+    });
+    expect(a.id).toBe(0);
+    expect(a.stationId).toBe(0);
+    expect(a.deviceId).toBeUndefined();
+  });
+
+  it('strOrUndef stringifies non-string non-null', () => {
+    const a = mapAlarm({ id: 1, device_name: 77, alarm_type: 'offline', content: 'x' });
+    expect(a.deviceName).toBe('77');
+  });
+});

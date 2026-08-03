@@ -440,4 +440,39 @@ describe('NotificationCenterScreen', () => {
     expect(notificationApi.getList).toHaveBeenCalledTimes(2);
     expect(await findByText('充电桩A-01温度异常告警')).toBeTruthy();
   });
+
+  it('should render relative time formats and fallback icon/label for unknown type', async () => {
+    const now = Date.now();
+    const mk = (id: number, minutesAgo: number, type: string = 'alarm') => ({
+      id,
+      type,
+      title: `通知${id}`,
+      message: `内容${id}`,
+      level: 'info' as const,
+      isRead: true,
+      createdAt: new Date(now - minutesAgo * 60000).toISOString(),
+    });
+    (notificationApi.getList as jest.Mock).mockResolvedValue({
+      data: {
+        items: [
+          mk(11, 0.2), // <1分钟 → 刚刚
+          mk(12, 30), // <60分钟 → N分钟前
+          mk(13, 60 * 5), // <24小时 → N小时前
+          mk(14, 60 * 24 * 3), // <7天 → N天前
+          mk(15, 10, 'unknown_type'), // 未知类型 → 📢兑底图标 + 原始type文本
+        ],
+        total: 5,
+        page: 1,
+        pageSize: 20,
+      },
+    });
+
+    const { findByText } = render(<NotificationCenterScreen />);
+    expect(await findByText('刚刚')).toBeTruthy();
+    expect(await findByText('30分钟前')).toBeTruthy();
+    expect(await findByText('5小时前')).toBeTruthy();
+    expect(await findByText('3天前')).toBeTruthy();
+    expect(await findByText('📢')).toBeTruthy();
+    expect(await findByText('unknown_type')).toBeTruthy();
+  });
 });

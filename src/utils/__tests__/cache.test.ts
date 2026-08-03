@@ -124,5 +124,17 @@ describe('API Cache', () => {
       expect(fn).toHaveBeenCalledWith('c');
       jest.useRealTimers();
     });
+
+    it('省略delayMs时使用默认300ms', () => {
+      jest.useFakeTimers();
+      const fn = jest.fn();
+      const debounced = debounce(fn);
+      debounced();
+      jest.advanceTimersByTime(299);
+      expect(fn).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(1);
+      expect(fn).toHaveBeenCalledTimes(1);
+      jest.useRealTimers();
+    });
   });
 });

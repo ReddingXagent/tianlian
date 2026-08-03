@@ -703,3 +703,112 @@ describe('chat', () => {
     expect(result.content).toContain('查询过于复杂');
   });
 });
+
+// =====================
+// F187: 残余分支补齐 — 流无body / tool call 参数跨chunk累积
+// =====================
+
+describe('streamChatMessage edge branches (F187)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
+  });
+
+  it('should throw "Streaming not supported" when response has no body', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, body: undefined });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: 'test', timestamp: Date.now() },
+    ];
+
+    await expect(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _ of streamChatMessage(messages)) {
+        // should throw before yielding
+      }
+    }).rejects.toThrow('Streaming not supported');
+  });
+});
+
+describe('chat tool-call accumulation edge branches (F187)', () => {
+  beforeEach(() => {
+    mockAxios.reset();
+    jest.clearAllMocks();
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
+  });
+
+  it('should accumulate split tool-call arguments across chunks', async () => {
+    // 同index多chunk: 首块带id+name(空arguments), 第二块补arguments → existing累积分支;
+    // 第三块existing但无arguments → 内层false分支
+    const reader1 = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"id":"call-acc","type":"function","function":{"name":"get_dashboard_summary","arguments":""}}]}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"function":{"arguments":"{}"}}]}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"function":{}}]}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('data: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+
+    const reader2 = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s2","choices":[{"delta":{"content":"汇总完成"}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('data: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader1 } })
+      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader2 } });
+
+    mockAxios.onGet('/dashboard/stats').reply(200, {
+      code: 0,
+      message: 'ok',
+      data: {
+        totalStations: 1,
+        onlineStations: 1,
+        offlineStations: 0,
+        totalAlarms: 0,
+        unhandledAlarms: 0,
+      },
+    });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: '概览', timestamp: Date.now() },
+    ];
+
+    const result = await chat(messages);
+    expect(result.content).toContain('汇总完成');
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+});

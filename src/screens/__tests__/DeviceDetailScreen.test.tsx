@@ -181,6 +181,36 @@ describe('DeviceDetailScreen', () => {
     expect(await findByText('成功')).toBeTruthy();
   });
 
+  it('formatLogTime falls back to raw dateStr when toLocaleString throws (F187)', async () => {
+    // 只对日志时间(当前时间)抛错; 心跳/遥测的固定2024 mock时间放行(它们在try/catch外渲染)
+    const original = Date.prototype.toLocaleString;
+    const spy = jest
+      .spyOn(Date.prototype, 'toLocaleString')
+      .mockImplementation(function (this: Date, ...args: Parameters<Date['toLocaleString']>) {
+        if (this.getUTCFullYear() === 2024) {
+          return original.call(this, ...args);
+        }
+        throw new Error('locale failed');
+      });
+
+    try {
+      const { findByText } = render(<DeviceDetailScreen />);
+
+      await findByText('远程控制');
+      fireEvent.press(await findByText('停止'));
+      fireEvent.press(await findByText('确认停止'));
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // catch分支: 时间格式化失败回退原始dateStr, 日志仍渲染不崩溃
+      expect(await findByText('停止指令已发送')).toBeTruthy();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it('should cancel the confirm dialog without calling the API', async () => {
     const { findByText, queryByText } = render(<DeviceDetailScreen />);
 
@@ -281,5 +311,53 @@ describe('DeviceDetailScreen', () => {
     fireEvent.press(await findByText('启动'));
     expect(await findByText('确定要启动设备「充电桩A-01」吗？')).toBeTruthy();
     expect(await findByText('确认启动')).toBeTruthy();
+  });
+
+  it('should render inverter icon, offline badge for undefined status, and - fallbacks for missing model/manufacturer', async () => {
+    (deviceApi.getDetail as jest.Mock).mockResolvedValue({
+      data: { ...MOCK_DEVICE, type: 'inverter', status: undefined, model: '', manufacturer: '' },
+    });
+
+    const { findByText, findAllByText } = render(<DeviceDetailScreen />);
+    // inverter图标分支 + status缺失回退offline + model/manufacturer空值回退'-'
+    expect(await findByText('⚡')).toBeTruthy();
+    expect(await findByText('offline')).toBeTruthy();
+    expect((await findAllByText('-')).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('should render satellite icon for unknown device type', async () => {
+    (deviceApi.getDetail as jest.Mock).mockResolvedValue({
+      data: { ...MOCK_DEVICE, type: 'other' },
+    });
+
+    const { findByText } = render(<DeviceDetailScreen />);
+    // 非charger/battery/inverter → 📡兜底图标分支
+    expect(await findByText('📡')).toBeTruthy();
+  });
+
+  it('should render medium temperature (45-60°C) warning color', async () => {
+    (deviceApi.getTelemetry as jest.Mock).mockResolvedValue({
+      data: { ...MOCK_TELEMETRY, temperature: 50 },
+    });
+
+    const { findByText } = render(<DeviceDetailScreen />);
+    // >45且<=60的中间档颜色分支(默认42覆盖<=45, 已有75覆盖>60)
+    expect(await findByText('50')).toBeTruthy();
+  });
+
+  it('should fall back to default message when control response has no message', async () => {
+    (deviceApi.controlDevice as jest.Mock).mockResolvedValue({ data: { success: true } });
+
+    const { findByText } = render(<DeviceDetailScreen />);
+    await findByText('远程控制');
+    fireEvent.press(await findByText('停止'));
+    fireEvent.press(await findByText('确认停止'));
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // response.data.message缺失 → `${label}指令已发送`回退分支
+    expect(await findByText('停止指令已发送')).toBeTruthy();
   });
 });

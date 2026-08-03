@@ -13,11 +13,12 @@ jest.mock('react-native-chart-kit', () => {
     LineChart: (props: any) => {
       const datasetColor = props.data.datasets[0].color();
       const cfgColor = props.chartConfig.color(0.5);
+      const cfgColorDefault = props.chartConfig.color(); // 默认参数分支(opacity=1)
       const labelColor = props.chartConfig.labelColor();
       return React.createElement(
         Text,
         { testID: 'line-chart' },
-        `chart:${datasetColor}:${cfgColor}:${labelColor}`
+        `chart:${datasetColor}:${cfgColor}:${cfgColorDefault}:${labelColor}`
       );
     },
   };
