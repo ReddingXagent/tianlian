@@ -39,36 +39,18 @@ module.exports = [
     rules: {
       // F19路线: warn→error 收窄 (2026-08-03 猴王自驱lint轮)
       // no-unused-vars: 0违规→升级error
+      // 注: recommended已error的规则(22条)不再重复声明(F189配置卫生轮去重), 仅保留带选项覆盖的
       'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrors: 'none' }],
-      'no-undef': 'error',
       'no-constant-condition': ['error', { checkLoops: false }],
-      // 基础安全规则
-      'no-redeclare': 'error',
-      'no-dupe-keys': 'error',
-      'no-debugger': 'error',
-      'no-duplicate-case': 'error',
-      // 安全防护规则 (F113, 2026-08-03 lint加固轮)
+      // 安全防护规则 (F113, 2026-08-03 lint加固轮; recommended未含部分)
       'no-eval': 'error',
       'no-implied-eval': 'error',
-      'no-prototype-builtins': 'error',
-      'no-self-assign': 'error',
       'no-self-compare': 'error',
-      'no-shadow-restricted-names': 'error',
-      'no-sparse-arrays': 'error',
-      'no-unreachable': 'error',
-      'no-useless-escape': 'error',
       'no-inner-declarations': 'error',
-      'no-misleading-character-class': 'error',
-      'no-async-promise-executor': 'error',
-      'no-class-assign': 'error',
-      'no-const-assign': 'error',
-      'no-this-before-super': 'error',
-      'require-yield': 'error',
       // 代码质量防回归规则 (2026-08-03 猴王自驱lint轮, 加入时全仓0违规)
       'eqeqeq': 'error',                // 强制===, 防类型隐式转换bug
       'no-var': 'error',                // 禁var, 统一let/const作用域
       'prefer-const': 'error',          // 未重赋值变量用const
-      'no-fallthrough': 'error',        // 防switch穿透
       'guard-for-in': 'error',          // for-in需hasOwnProperty防原型链污染
       'radix': 'error',                 // parseInt必须带进制参数
       'no-return-assign': 'error',      // 防return中误写=为==
@@ -80,7 +62,6 @@ module.exports = [
       'no-lonely-if': 'error',          // else中单独if应写else-if
       'prefer-object-spread': 'error',  // Object.assign({},x)→{...x}
       'no-useless-computed-key': 'error', // 禁无意义计算属性键
-      'no-dupe-else-if': 'error',       // 防if/else-if重复条件
       'default-case': 'error',          // switch必须有default
       'no-alert': 'error',              // 禁alert/confirm/prompt(小程序环境本无, 防误用)
       'no-multi-str': 'error',          // 禁反斜杠多行字符串
@@ -93,14 +74,11 @@ module.exports = [
       'no-useless-concat': 'error',             // 禁字面量' '+'b'拼接
       'no-else-return': 'error',                // return后的else冗余
       'no-promise-executor-return': 'error',    // executor返回值无意义, 防误以为resolve
-      'no-unsafe-optional-chaining': 'error',   // 防(undefined)?.x()类型错误
-      'no-case-declarations': 'error',          // switch case内声明需块级作用域
       'no-sequences': 'error',                  // 防逗号表达式歧义
       'no-new-wrappers': 'error',               // 禁new String/Number/Boolean包装对象
       'prefer-regex-literals': 'error',         // new RegExp('字面量')→正则字面量
       // 代码质量防回归规则第四批 (2026-08-04 猴王自驱lint轮, 加入时全仓0违规)
       'no-throw-literal': 'error',              // throw必须是Error对象, 禁throw字符串/字面量
-      'no-irregular-whitespace': 'error',       // 禁不规则空白(全角空格等), 防隐蔽语法错误
       'no-unreachable-loop': 'error',           // 循环体最多执行一次=死循环/逻辑错误
       'no-unused-expressions': 'error',         // 禁无副作用孤立表达式, 防漏写调用
       'require-await': 'error',                 // async函数必须含await, 防无意义异步包装

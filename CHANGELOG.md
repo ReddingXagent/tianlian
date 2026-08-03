@@ -13,6 +13,9 @@
 - eslint 启用 reportUnusedDisableDirectives=error：失效 disable 注释直接报错，防规则名笔误/规则删除后静默失效；加入时全仓 0 处失效
 - CHANGELOG 清理：移除 Unreleased 段重复的第二批条目（F163 补回时误留的重复行）
 
+### Changed
+- eslint 配置卫生去重（F189）：移除 22 条与 `js.configs.recommended` 完全重复的规则声明（no-undef / no-redeclare / no-dupe-keys / no-debugger / no-duplicate-case / no-prototype-builtins / no-self-assign / no-shadow-restricted-names / no-sparse-arrays / no-unreachable / no-useless-escape / no-misleading-character-class / no-async-promise-executor / no-class-assign / no-const-assign / no-this-before-super / require-yield / no-fallthrough / no-dupe-else-if / no-unsafe-optional-chaining / no-case-declarations / no-irregular-whitespace）；带选项覆盖的 no-unused-vars（argsIgnorePattern）/ no-constant-condition（checkLoops:false）保留；`--print-config` 前后逐条 diff = 零变化，eslint exit 0 + jest 230 绿 + lint:ci 全过复验
+
 ### Fixed
 - `scan.wxml` 引用缺失的 `/assets/icons/scan-big.png` → 替换为 emoji 占位图标（F87）
 - 6 处页面死链导航修复（F70：navigateBack/navigateTo 缺 fallback）
