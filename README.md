@@ -34,8 +34,8 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 135 全绿（18 suites）✅ |
-| 覆盖率棘轮 | jest coverageThreshold | statements 34 / branches 24 / functions 28 / lines 34（只升不降） |
+| 测试 | `npm run test:ci` | 190 全绿（24 suites）✅ |
+| 覆盖率棘轮 | jest coverageThreshold | statements 67.77 / branches 53.77 / functions 60.6 / lines 67.77（只升不降） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤21 警告（`--max-warnings=21`，只降不升） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（Expo账号/EAS/OTA 待丁哥，F25/F33） |
 
@@ -63,7 +63,7 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 
 - **生命周期感知轮询**：`useChargingPolling` 通过 `useAppLifecycle` 订阅 AppState 与 NetInfo，进入后台或确认离线时自动暂停轮询，回前台或复网立即补拉一次，避免无效请求与电量浪费（`pauseWhenInactive` 开关可控）。
 - **Jest 原生模块坑**：jest 自动 mock 会导致 `AppState.currentState` 变成 `jest.fn()` 而非字符串，`??` 兜底无效；`jest.setup.ts` 中已将其钉死为 `'active'`，NetInfo 同理。新增原生模块 mock 时注意同型问题。
-- **API 基址**：`src/services/api.ts` 中 `BASE_URL` 当前硬编码为生产云端 IP，尚无 dev/mock 环境切换（已知债，待改造）。
+- **API 基址**：`src/services/api.ts` 通过 `EXPO_PUBLIC_API_URL` 环境变量配置，回退到生产云端地址。开发时可在 `.env` 或启动命令中覆盖（如 `EXPO_PUBLIC_API_URL=http://localhost:8000/api/v1 npx expo start`）。
 
 ## 部署
 
@@ -71,11 +71,14 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 - **部署门控**：`npm run deploy:check`（`scripts/deploy-check.js`）四步检查 app.json → eas.json → expo-updates → 凭证；退出码 0=就绪 / 1=配置错误 / 2=外部依赖待就位（设计内拦截）。当前退2，就绪清单：Expo账号 → EXPO_TOKEN → `eas build:configure` → 装 expo-updates → 配 updates.url/channel。
 - **依赖坑（F51）**：`metro`/`expo-asset` 若只被嵌套安装（未提升顶层），`@expo/cli` 顶层解析会 MODULE_NOT_FOUND 致 export 崩；本仓已显式声明 `metro@0.81.5`(dev) + `expo-asset@~11.0.5` 钉死。
 
+- **全局错误边界**：`src/components/ErrorBoundary.tsx` 包裹根组件，捕获 React 渲染异常并展示友好降级 UI（c7cdd76）。
+- **AppNavigator 测试**：导航逻辑（登录态切换 + Tab 路由）已补测试，覆盖率从 0% 提升至 76.92%（709cd04）。
+
 ## 已知限制
 
 - Web 导出（`expo export --platform web`）未验证，web 部署待定（同 ops/station F24/F34）。
 - EAS Update 渠道与 Expo 账号未配置，OTA 升级通道待开通（deploy:check 门控跟踪）。
-- 12 个 screen 中 7 个有测试（Home/Login/Coupon/OrderList/Profile/StationDetail/Wallet），剩余 5 个（Scan/Charging/OrderDetail/Payment/Vehicle）为后续补强重点。
+- 12 个 screen 中 8 个有测试（Home/Login/Coupon/OrderList/Profile/StationDetail/Wallet + AppNavigator 导航），剩余 4 个（Scan/Charging/OrderDetail/Payment/Vehicle）为后续补强重点。
 
 ## 关联仓库
 
