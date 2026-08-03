@@ -8,6 +8,11 @@
 
 ### Added
 - 全局错误边界 `ErrorBoundary.tsx`：捕获子树渲染异常防白屏，DEV 模式显示堆栈（`e4dc934`）
+- Makefile 快捷命令 (install/dev/build/export/test/lint/check/ci-local/clean)
+- GitHub Actions CI 两阶段流水线 (check: tsc+eslint+jest → export: android+ios bundle)
+- DEPLOYMENT.md 部署指南 (环境变量/本地开发/CI/OTA/原生构建)
+- `.env.example` 环境变量模板
+- `build` / `export:android` / `export:ios` npm scripts
 - 网络状态横幅 `NetworkStatus.tsx`：AppState 监听前后台切换，回前台 ping API 检测连通性，离线显示红色横幅；无需额外依赖（`e4dc934`）
 - `App.tsx` 包裹 ErrorBoundary + NetworkStatus（`e4dc934`）
 - `eas.json` 三档构建 profile：development / preview(APK) / production（`e876fd8`，关闭 F33）

@@ -75,6 +75,26 @@ src/
 └── types/          # 类型定义
 ```
 
+## 部署
+
+详见 [DEPLOYMENT.md](./DEPLOYMENT.md)。快捷命令：
+
+```bash
+make help        # 查看所有命令
+make check       # tsc + eslint + jest
+make export      # android + ios bundle
+make ci-local    # 本地模拟 CI
+```
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) 两阶段流水线：
+
+1. **check**: tsc → eslint → jest (coverage)
+2. **export**: android + ios bundle
+
+push/PR → master 自动触发。
+
 ## Roadmap / 已知缺口
 
 - **F30**: react-native-chart-kit 已停更且 New Arch 未测（doctor 已 exclude）→ 待迁移 gifted-charts / victory
