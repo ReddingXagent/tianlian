@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { RootStackParamList, AuthStackParamList, MainTabParamList } from '../types';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -118,15 +119,17 @@ export const AppNavigator: React.FC = () => {
   }
 
   return (
-    <NavigationContainer>
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <RootStack.Screen name="Main" component={MainWithDetail} />
-        ) : (
-          <RootStack.Screen name="Auth" component={AuthNavigator} />
-        )}
-      </RootStack.Navigator>
-    </NavigationContainer>
+    <ErrorBoundary>
+      <NavigationContainer>
+        <RootStack.Navigator screenOptions={{ headerShown: false }}>
+          {isAuthenticated ? (
+            <RootStack.Screen name="Main" component={MainWithDetail} />
+          ) : (
+            <RootStack.Screen name="Auth" component={AuthNavigator} />
+          )}
+        </RootStack.Navigator>
+      </NavigationContainer>
+    </ErrorBoundary>
   );
 };
 

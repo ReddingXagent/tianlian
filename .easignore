@@ -1,0 +1,17 @@
+# EAS Build ignore - 排除开发/测试文件以加速构建
+coverage/
+__tests__/
+__mocks__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+.eslintignore
+.eslintrc*
+.prettierrc*
+jest.config.*
+jest.setup.*
+.github/
+docs/
+CHANGELOG.md
+DEPLOYMENT.md
