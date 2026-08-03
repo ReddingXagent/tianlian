@@ -12,6 +12,8 @@ const TIMEOUT = config.REQUEST_TIMEOUT;
  * @param {object} options - 请求选项 (form=true 时走 x-www-form-urlencoded)
  * @returns {Promise}
  */
+const MAX_RETRY = 1; // 网络层重试次数 (非幂等请求不重试)
+
 function request(url, options = {}) {
   const {
     method = 'GET',
@@ -36,57 +38,72 @@ function request(url, options = {}) {
       .join('&');
   }
 
-  return new Promise((resolve, reject) => {
-    if (showLoading) {
-      wx.showLoading({ title: loadingText, mask: true });
-    }
+  // 幂等方法才允许重试
+  const isIdempotent = method === 'GET' || method === 'HEAD';
 
-    wx.request({
-      url: `${BASE_URL}${url}`,
-      method,
-      data: payload,
-      timeout: TIMEOUT,
-      header: {
-        'Content-Type': contentType,
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...header
-      },
-      success(res) {
-        const { statusCode, data: resData } = res;
-
-        if (statusCode === 200) {
-          if (resData.code === 0 || resData.code === 200) {
-            resolve(resData);
-          } else if (resData.code === 401) {
-            // token过期
-            wx.removeStorageSync('token');
-            wx.showToast({ title: '登录已过期，请重新登录', icon: 'none' });
-            reject(new Error('TOKEN_EXPIRED'));
-          } else {
-            wx.showToast({ title: resData.message || '请求失败', icon: 'none' });
-            reject(new Error(resData.message || 'REQUEST_ERROR'));
-          }
-        } else if (statusCode === 401) {
-          wx.removeStorageSync('token');
-          wx.showToast({ title: '登录已过期', icon: 'none' });
-          reject(new Error('TOKEN_EXPIRED'));
-        } else {
-          wx.showToast({ title: `请求失败(${statusCode})`, icon: 'none' });
-          reject(new Error(`HTTP ${statusCode}`));
-        }
-      },
-      fail(err) {
-        const msg = err.errMsg.includes('timeout') ? '请求超时' : '网络异常';
-        wx.showToast({ title: msg, icon: 'none' });
-        reject(err);
-      },
-      complete() {
-        if (showLoading) {
-          wx.hideLoading();
-        }
+  function doRequest(attempt) {
+    return new Promise((resolve, reject) => {
+      if (showLoading) {
+        wx.showLoading({ title: loadingText, mask: true });
       }
+
+      wx.request({
+        url: `${BASE_URL}${url}`,
+        method,
+        data: payload,
+        timeout: TIMEOUT,
+        header: {
+          'Content-Type': contentType,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          ...header
+        },
+        success(res) {
+          const { statusCode, data: resData } = res;
+
+          if (statusCode === 200) {
+            if (resData.code === 0 || resData.code === 200) {
+              resolve(resData);
+            } else if (resData.code === 401) {
+              // token过期
+              wx.removeStorageSync('token');
+              wx.showToast({ title: '登录已过期，请重新登录', icon: 'none' });
+              reject(new Error('TOKEN_EXPIRED'));
+            } else {
+              wx.showToast({ title: resData.message || '请求失败', icon: 'none' });
+              reject(new Error(resData.message || 'REQUEST_ERROR'));
+            }
+          } else if (statusCode === 401) {
+            wx.removeStorageSync('token');
+            wx.showToast({ title: '登录已过期', icon: 'none' });
+            reject(new Error('TOKEN_EXPIRED'));
+          } else if (statusCode >= 500 && isIdempotent && attempt < MAX_RETRY) {
+            // 5xx 服务端错误, 幂等请求自动重试一次
+            setTimeout(() => doRequest(attempt + 1).then(resolve, reject), 1000);
+          } else {
+            wx.showToast({ title: `请求失败(${statusCode})`, icon: 'none' });
+            reject(new Error(`HTTP ${statusCode}`));
+          }
+        },
+        fail(err) {
+          if (isIdempotent && attempt < MAX_RETRY) {
+            // 网络层失败, 幂等请求自动重试一次
+            setTimeout(() => doRequest(attempt + 1).then(resolve, reject), 1000);
+          } else {
+            const msg = err.errMsg.includes('timeout') ? '请求超时' : '网络异常';
+            wx.showToast({ title: msg, icon: 'none' });
+            reject(err);
+          }
+        },
+        complete() {
+          if (showLoading) {
+            wx.hideLoading();
+          }
+        }
+      });
     });
-  });
+  }
+
+  return doRequest(0);
 }
 
 // ========== 归一化层 (后端snake_case → 前端camelCase) ==========

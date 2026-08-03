@@ -62,5 +62,21 @@
   ],
   "sitemapLocation": "sitemap.json",
   "style": "v2",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "networkTimeout": {
+    "request": 15000,
+    "uploadFile": 30000,
+    "downloadFile": 30000,
+    "connectSocket": 15000
+  },
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["__APP__"]
+    },
+    "pages/scan/scan": {
+      "network": "wifi",
+      "packages": ["__APP__"]
+    }
+  }
 }
