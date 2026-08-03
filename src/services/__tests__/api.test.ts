@@ -9,6 +9,7 @@ import {
   walletApi,
   statsApi,
   tokenStorage,
+  setUnauthorizedHandler,
 } from '../api';
 
 // Mock axios and SecureStore at module level
@@ -336,6 +337,50 @@ describe('API Service', () => {
       expect(mockAxiosInstance.interceptors).toBeDefined();
       expect(mockAxiosInstance.interceptors.request.use).toBeDefined();
       expect(mockAxiosInstance.interceptors.response.use).toBeDefined();
+    });
+  });
+
+  // =====================
+  // 401 处理器 (token 失效同步登出)
+  // =====================
+  describe('401 unauthorized handler', () => {
+    // 模块导入时注册的响应拦截器: [onFulfilled, onRejected]
+    const responseUse = mockAxiosInstance.interceptors.response.use as jest.Mock;
+    const errorHandler = responseUse.mock.calls[0][1];
+    const handler = jest.fn();
+
+    afterEach(() => {
+      setUnauthorizedHandler(null);
+      handler.mockClear();
+      mockDeleteItem.mockClear();
+    });
+
+    it('clears stored token and invokes registered handler on 401', async () => {
+      setUnauthorizedHandler(handler);
+      await expect(errorHandler(mockAxiosError(401))).rejects.toEqual(mockAxiosError(401));
+      expect(mockDeleteItem).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not invoke handler for non-401 errors', async () => {
+      setUnauthorizedHandler(handler);
+      await expect(errorHandler(mockAxiosError(500))).rejects.toEqual(mockAxiosError(500));
+      expect(mockDeleteItem).not.toHaveBeenCalled();
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('still rejects when no handler is registered', async () => {
+      setUnauthorizedHandler(null);
+      await expect(errorHandler(mockAxiosError(401))).rejects.toEqual(mockAxiosError(401));
+      expect(mockDeleteItem).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates rejection even if handler throws', async () => {
+      setUnauthorizedHandler(() => {
+        throw new Error('handler boom');
+      });
+      await expect(errorHandler(mockAxiosError(401))).rejects.toEqual(mockAxiosError(401));
+      expect(mockDeleteItem).toHaveBeenCalledTimes(1);
     });
   });
 });

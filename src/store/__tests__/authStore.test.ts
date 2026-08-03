@@ -1,4 +1,4 @@
-import { authApi, tokenStorage } from '../../services/api';
+import { authApi, setUnauthorizedHandler, tokenStorage } from '../../services/api';
 import { useAuthStore } from '../authStore';
 import { User } from '../../types';
 
@@ -17,6 +17,7 @@ jest.mock('../../services/api', () => ({
     setToken: jest.fn(),
     removeToken: jest.fn(),
   },
+  setUnauthorizedHandler: jest.fn(),
 }));
 
 const mockUser: User = {
@@ -169,6 +170,33 @@ describe('authStore', () => {
     it('should update user in store', () => {
       useAuthStore.getState().setUser(mockUser);
       expect(useAuthStore.getState().user).toEqual(mockUser);
+    });
+  });
+
+  describe('401 unauthorized sync (setUnauthorizedHandler)', () => {
+    // 模块加载时注册一次; 此处捕获(后续 beforeEach 的 clearAllMocks 会清调用记录)
+    const registeredHandler = (setUnauthorizedHandler as jest.Mock).mock.calls[0]?.[0];
+
+    it('registers a handler at module load', () => {
+      expect(registeredHandler).toBeInstanceOf(Function);
+    });
+
+    it('handler clears auth state (token过期时回到未登录态)', () => {
+      // 先置为已登录态
+      useAuthStore.setState({
+        token: 'some-token',
+        user: mockUser,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      registeredHandler();
+
+      const state = useAuthStore.getState();
+      expect(state.token).toBeNull();
+      expect(state.user).toBeNull();
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.isLoading).toBe(false);
     });
   });
 });

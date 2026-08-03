@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { User } from '../types';
-import { authApi, tokenStorage } from '../services/api';
+import { authApi, setUnauthorizedHandler, tokenStorage } from '../services/api';
 
 interface AuthState {
   token: string | null;
@@ -88,3 +88,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user });
   },
 }));
+
+// token 失效(401)时同步清空登录态; 用回调注册而非反向 import, 避免循环依赖
+setUnauthorizedHandler(() => {
+  useAuthStore.setState({
+    token: null,
+    user: null,
+    isAuthenticated: false,
+    isLoading: false,
+  });
+});

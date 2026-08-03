@@ -51,7 +51,23 @@ api.interceptors.request.use(
   (error: AxiosError) => Promise.reject(error)
 );
 
-// 401 响应拦截器 - token 过期自动清除
+// =====================
+// 401 全局回调（供 authStore 同步登出状态，避免 api↔store 循环依赖）
+// =====================
+type UnauthorizedHandler = () => void | Promise<void>;
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+
+/**
+ * 注册"token 失效(401)"处理器。
+ * 移动端质量基线补齐: 此前 401 仅清 SecureStore 中的 token,
+ * authStore 内存态仍是已登录, 用户停留在鉴权页面直到下次手动操作;
+ * 现由 authStore 注册回调, 401 时同步清空登录态回到登录页。
+ */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
+  unauthorizedHandler = handler;
+}
+
+// 401 响应拦截器 - token 过期自动清除 + 通知已注册处理器
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -60,6 +76,13 @@ api.interceptors.response.use(
         await SecureStore.deleteItemAsync(TOKEN_KEY);
       } catch {
         // 静默处理
+      }
+      if (unauthorizedHandler) {
+        try {
+          await unauthorizedHandler();
+        } catch {
+          // 处理器异常不影响错误传播
+        }
       }
     }
     return Promise.reject(error);
