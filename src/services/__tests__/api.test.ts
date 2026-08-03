@@ -458,3 +458,138 @@ describe('revenueApi contract (A3 /business domain)', () => {
     expect(params.days).toBe(7);
   });
 });
+
+// ── F180: 分支覆盖冲刺 — helper/mapper 边缘分支 ──
+describe('mapper helper edge branches (F180)', () => {
+  it('num accepts numeric strings, falls back on empty/invalid', () => {
+    const a = mapAlarm({
+      id: '12', // 数字字符串 → Number(v)
+      station_id: '', // 空串 → 默认 0
+      device_id: 'NaN-device', // 非法字符串 → numOrUndef undefined
+      alarm_type: 'offline',
+      content: 'x',
+    });
+    expect(a.id).toBe(12);
+    expect(a.stationId).toBe(0);
+    expect(a.deviceId).toBeUndefined();
+  });
+
+  it('num falls back on NaN number input; str stringifies non-string', () => {
+    const a = mapAlarm({
+      id: Number.NaN, // number 但非 finite → 默认 0
+      station_name: 42, // 非字符串 → String(v)
+      alarm_type: 'offline',
+      content: 'x',
+    });
+    expect(a.id).toBe(0);
+    expect(a.stationName).toBe('42');
+  });
+
+  it('mapStation status ternary branches + field fallbacks', () => {
+    expect(mapStation({ id: 1, status: 'online' }).status).toBe('online');
+    expect(mapStation({ id: 2, status: 'maintenance' }).status).toBe('maintenance');
+    expect(mapStation({ id: 3, status: 'broken' }).status).toBe('offline');
+    // 字段回退: latitude/longitude/device_count/created_at
+    const s = mapStation({
+      id: 4,
+      status: 'normal',
+      latitude: 31.2,
+      longitude: 121.4,
+      device_count: 8,
+      created_at: '2026-01-01T00:00:00Z',
+    });
+    expect(s.latitude).toBe(31.2);
+    expect(s.longitude).toBe(121.4);
+    expect(s.deviceCount).toBe(8);
+    expect(s.updatedAt).toBe('2026-01-01T00:00:00Z'); // updated_at ?? created_at
+  });
+
+  it('mapWorkOrder title/created/updated fallbacks', () => {
+    const wo = mapWorkOrder({
+      id: 'WO-1',
+      title: '来自title', // fault_desc 缺失 → title
+      description: '来自description', // fault_desc ?? description
+      level: 'unknown-level',
+      status: 'unknown-status',
+      created_at: '2026-02-02',
+    });
+    expect(wo.title).toBe('来自title');
+    expect(wo.priority).toBe('normal'); // 未知 level → 'normal'
+    expect(wo.status).toBe('pending'); // 未知 status → 'pending'
+    expect(wo.createdAt).toBe('2026-02-02'); // create_time ?? created_at
+    expect(wo.updatedAt).toBe(''); // finish_time/create_time 均缺 → ''
+    // create_time 路径: updatedAt 回退到 create_time
+    const wo2 = mapWorkOrder({ id: 'WO-2', create_time: '2026-03-03' });
+    expect(wo2.createdAt).toBe('2026-03-03');
+    expect(wo2.updatedAt).toBe('2026-03-03'); // finish_time ?? create_time
+  });
+
+  it('mapPagination empty/missing raw + pageSize alias', () => {
+    const p = mapPagination({}, mapAlarm);
+    expect(p.items).toEqual([]);
+    expect(p.total).toBe(0);
+    expect(p.page).toBe(1);
+    expect(p.pageSize).toBe(20);
+    const p2 = mapPagination({ items: [{ id: 1, alarm_type: 'offline', content: 'x' }], pageSize: 30 }, mapAlarm);
+    expect(p2.pageSize).toBe(30); // page_size ?? pageSize
+  });
+
+  it('alarmApi.getList unknown status passes through unchanged', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/alarms').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 20 } }];
+    });
+    await alarmApi.getList({ status: 'custom_raw_status' });
+    expect(params.status).toBe('custom_raw_status'); // REVERSE 未命中 → 原样透传
+  });
+
+  it('workOrderApi.getList unknown status passes through unchanged', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/work-orders').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 20 } }];
+    });
+    await workOrderApi.getList({ status: 'raw_wo_status' });
+    expect(params.status).toBe('raw_wo_status');
+  });
+
+  it('createWorkOrder unknown priority falls back to warning; deviceId defaults null', async () => {
+    let body: Record<string, unknown> = {};
+    mockAxios.onPost('/work-orders').reply((config) => {
+      body = JSON.parse(config.data ?? '{}');
+      return [200, { code: 200, message: 'success', data: { id: 'WO-9', fault_desc: 't', level: 'warning', status: 'pending' } }];
+    });
+    await workOrderApi.createWorkOrder({
+      stationId: 1,
+      title: 't',
+      description: 'd',
+      type: 'repair',
+      priority: 'weird' as never, // 未知优先级 → level 'warning'
+    });
+    expect(body.level).toBe('warning');
+    expect(body.device_id).toBeNull(); // deviceId 缺省 → null
+  });
+
+  it('dashboardApi.getStats tolerates empty data payloads (all fallbacks)', async () => {
+    mockAxios.onGet('/work-orders/stats').reply(200, { code: 200, message: 'success' });
+    mockAxios.onGet('/alarms').reply(200, { code: 200, message: 'success' });
+    mockAxios.onGet('/stations').reply(200, { code: 200, message: 'success' });
+    const resp = await dashboardApi.getStats();
+    expect(resp.data).toEqual({
+      totalStations: 0,
+      onlineStations: 0,
+      offlineStations: 0,
+      totalAlarms: 0,
+      unhandledAlarms: 0,
+      pendingWorkOrders: 0,
+      totalWorkOrders: 0,
+    });
+  });
+
+  it('getRecentAlarms tolerates missing items', async () => {
+    mockAxios.onGet('/alarms').reply(200, { code: 200, message: 'success' });
+    const resp = await dashboardApi.getRecentAlarms(5);
+    expect(resp.data).toEqual([]);
+  });
+});

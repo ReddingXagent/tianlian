@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- **分支覆盖冲刺（F180）**：branches 82.84%→**87.13%**（+4.29pp，569/653）、stmts 97.75%→**98.07%**、全仓 287→**302 tests** 全绿。补 api.ts helper/mapper 边缘分支（num/str/numOrUndef 数字串/空串/NaN/非串、mapStation 三态 status+字段回退、mapWorkOrder title/time 回退、mapPagination 空 raw+pageSize 别名、getList 未知 status 透传、createWorkOrder 未知 priority/deviceId 缺省、dashboardApi 空 payload 全兜底）+ usePolling 卸载竞态分支（无 options 默认值/非 Error 包装/卸载后 refresh/在途 resolve+reject 短路）；tsc + eslint --max-warnings 0 双门复验全过
 - RevenueScreen 补测3条交互路径（下拉刷新isRefresh分支/Share失败导出告警/图表数据与颜色回调），单文件覆盖 85.41%→97.91%，函数覆盖 75%→100%；全仓 275 tests / 95.18%；顺手清零 NotificationCenterScreen.test 预存 eslint warning；README 覆盖明细按实测修正
 - DeviceDetailScreen 补测6条路径（下拉刷新/遥测降级/错误重试/重启复位确认/在线禁启动/离线启动+电池图标+无心跳降级），单文件覆盖 87.32%→97.18%，函数覆盖 68%→100%；全仓 267 tests / 93.46%
 - 全局错误边界 `ErrorBoundary.tsx`：捕获子树渲染异常防白屏，DEV 模式显示堆栈（`e4dc934`）

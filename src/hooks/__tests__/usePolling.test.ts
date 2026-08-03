@@ -87,6 +87,54 @@ describe('usePolling', () => {
     await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
   });
 
+  it('无 options 时走全部默认值 (F180)', async () => {
+    const fetcher = jest.fn().mockResolvedValue('default-ok');
+    const { result } = renderHook(() => usePolling(fetcher));
+    await waitFor(() => expect(result.current.data).toBe('default-ok'));
+    expect(result.current.tickCount).toBe(1);
+  });
+
+  it('非 Error 拒绝应包装为 Error (F180)', async () => {
+    const fetcher = jest.fn().mockRejectedValue('boom-string');
+    const { result } = renderHook(() => usePolling(fetcher, { interval: 5000 }));
+    await waitFor(() => expect(result.current.error?.message).toBe('boom-string'));
+    expect(result.current.error).toBeInstanceOf(Error);
+  });
+
+  it('卸载后 refresh 不再执行 fetcher (F180)', async () => {
+    const fetcher = jest.fn().mockResolvedValue('x');
+    const { result, unmount } = renderHook(() => usePolling(fetcher, { interval: 5000 }));
+    await waitFor(() => expect(result.current.data).toBe('x'));
+    unmount();
+    act(() => { result.current.refresh(); });
+    await act(async () => { await Promise.resolve(); });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('在途请求时卸载: resolve 安全短路且不再调度 (F180)', async () => {
+    let resolveOk!: (v: string) => void;
+    const fetcher = jest.fn()
+      .mockResolvedValueOnce('first')
+      .mockImplementationOnce(() => new Promise<string>((r) => { resolveOk = r; }));
+    const { result, unmount } = renderHook(() => usePolling(fetcher, { interval: 1000 }));
+    await waitFor(() => expect(result.current.data).toBe('first'));
+    act(() => { jest.advanceTimersByTime(1000); }); // 第二次 execute 起飞(在途)
+    unmount();
+    await act(async () => { resolveOk('second'); await Promise.resolve(); });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    act(() => { jest.advanceTimersByTime(10000); });
+    expect(fetcher).toHaveBeenCalledTimes(2); // 卸载后不再调度
+  });
+
+  it('在途请求失败时卸载: catch 安全短路 (F180)', async () => {
+    let rejectFn!: (e: Error) => void;
+    const fetcher = jest.fn(() => new Promise<string>((_, rej) => { rejectFn = rej; }));
+    const { unmount } = renderHook(() => usePolling(fetcher, { interval: 5000 }));
+    unmount();
+    await act(async () => { rejectFn(new Error('late-fail')); await Promise.resolve(); });
+    expect(fetcher).toHaveBeenCalledTimes(1); // 仅 immediate 一次
+  });
+
   it('连续失败应触发重试退避', async () => {
     const fetcher = jest.fn()
       .mockRejectedValueOnce(new Error('fail1'))
