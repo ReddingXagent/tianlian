@@ -1,15 +1,21 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
-import { Share, Animated } from 'react-native';
+import { Share, Animated, Alert, RefreshControl } from 'react-native';
 import RevenueScreen from '../RevenueScreen';
 import { revenueApi } from '../../services/api';
+
+// 捕获 LineChart props, 便于测试中直接调用图表回调(color/labelColor/datasets.color)
+let mockChartProps: any = null;
 
 jest.mock('react-native-chart-kit', () => {
   const React = require('react');
   const { Text } = require('react-native');
   return {
-    LineChart: () => React.createElement(Text, { testID: 'line-chart' }, 'chart'),
+    LineChart: (props: any) => {
+      mockChartProps = props;
+      return React.createElement(Text, { testID: 'line-chart' }, 'chart');
+    },
   };
 });
 
@@ -59,6 +65,7 @@ const MOCK_SUMMARY = { today: 100, week: 700, month: 3000, total: 50000 };
 describe('RevenueScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockChartProps = null;
     jest.spyOn(Share, 'share').mockResolvedValue({ action: 'shared.action' } as any);
     // 让图表入场动画同步完成，避免 600ms 定时器泄漏到其它测试套件
     jest.spyOn(Animated, 'timing').mockReturnValue({ start: jest.fn() } as any);
@@ -130,5 +137,51 @@ describe('RevenueScreen', () => {
 
     const { findByText } = render(<RevenueScreen />);
     expect(await findByText('暂无营收明细')).toBeTruthy();
+  });
+
+  it('should refetch via pull-to-refresh without full-page loading spinner', async () => {
+    const { findByText, queryByText, UNSAFE_getByType } = render(<RevenueScreen />);
+    await findByText('2024-01-01');
+    expect(revenueApi.getRecords).toHaveBeenCalledTimes(1);
+
+    const rc = UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      rc.props.onRefresh();
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // 下拉刷新走 isRefresh 分支: 重新拉取且不显示整页加载态
+    expect(revenueApi.getRecords).toHaveBeenCalledTimes(2);
+    expect(revenueApi.getRecords).toHaveBeenLastCalledWith({ type: 'week' });
+    expect(queryByText('加载营收数据...')).toBeNull();
+    expect(rc.props.refreshing).toBe(false);
+  });
+
+  it('should alert 导出失败 when Share rejects', async () => {
+    (Share.share as jest.Mock).mockRejectedValue(new Error('share cancelled'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const { findByText } = render(<RevenueScreen />);
+
+    fireEvent.press(await findByText(/导出CSV/));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith('导出失败', '无法导出数据，请稍后重试');
+  });
+
+  it('should build chart data/callbacks from records', async () => {
+    const { findByText } = render(<RevenueScreen />);
+    await findByText('2024-01-01');
+
+    expect(mockChartProps).toBeTruthy();
+    // labels: date -> M/D
+    expect(mockChartProps.data.labels).toEqual(['1/1', '1/2']);
+    // datasets: 金额序列 + 曲线颜色回调
+    expect(mockChartProps.data.datasets[0].data).toEqual([123.45, 200]);
+    expect(mockChartProps.data.datasets[0].color()).toBe('#1a73e8');
+    // chartConfig 颜色回调
+    expect(mockChartProps.chartConfig.color(0.5)).toBe('rgba(26, 115, 232, 0.5)');
+    expect(mockChartProps.chartConfig.labelColor()).toBe('#999');
   });
 });

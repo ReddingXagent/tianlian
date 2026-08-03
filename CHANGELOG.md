@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- RevenueScreen 补测3条交互路径（下拉刷新isRefresh分支/Share失败导出告警/图表数据与颜色回调），单文件覆盖 85.41%→97.91%，函数覆盖 75%→100%；全仓 275 tests / 95.18%；顺手清零 NotificationCenterScreen.test 预存 eslint warning；README 覆盖明细按实测修正
 - DeviceDetailScreen 补测6条路径（下拉刷新/遥测降级/错误重试/重启复位确认/在线禁启动/离线启动+电池图标+无心跳降级），单文件覆盖 87.32%→97.18%，函数覆盖 68%→100%；全仓 267 tests / 93.46%
 - 全局错误边界 `ErrorBoundary.tsx`：捕获子树渲染异常防白屏，DEV 模式显示堆栈（`e4dc934`）
 - Makefile 10 targets (install/dev/build/export/test/lint/check/ci-local/clean/help)（F136）

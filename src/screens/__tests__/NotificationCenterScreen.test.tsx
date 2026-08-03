@@ -239,7 +239,7 @@ describe('NotificationCenterScreen', () => {
     );
 
     // Execute the onPress callback manually
-    const buttons = AlertSpy.mock.calls[0][2] as Array<{ text: string; onPress?: () => Promise<void> }>;
+    const buttons = AlertSpy.mock.calls[0][2] as { text: string; onPress?: () => Promise<void> }[];
     const markReadBtn = buttons.find((b) => b.text === '标记已读')!;
     await act(async () => {
       await markReadBtn?.onPress?.();
