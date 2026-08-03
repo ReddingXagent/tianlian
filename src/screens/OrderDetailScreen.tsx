@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useOrderStore } from '../store/orderStore';
 import { RootStackParamList } from '../types';
@@ -24,9 +24,14 @@ const OrderDetailScreen: React.FC = () => {
   const { orderId } = route.params;
   const { selectedOrder, loading, error, fetchOrderDetail, cancelOrder } = useOrderStore();
 
+  // 移动端质量基线(F170/F176同型收尾): 订单状态(充电中/已完成/已取消)
+  // 会在离开页面期间变化 → 回焦静默重拉。
+  const isFocused = useIsFocused();
   useEffect(() => {
-    fetchOrderDetail(orderId);
-  }, [orderId]);
+    if (isFocused) {
+      fetchOrderDetail(orderId);
+    }
+  }, [isFocused, orderId, fetchOrderDetail]);
 
   const handleCancelOrder = () => {
     Alert.alert(

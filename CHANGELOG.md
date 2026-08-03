@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Fixed
+- 回焦刷新收尾第三屏批次 — StationDetail/OrderDetail/Wallet 三屏此前仅 mount 拉取：桩位状态(空闲/占用/故障)、订单状态(充电中/完成/取消)、钱包余额+流水在离开页面期间变化后回屏陈旧；接入 useIsFocused 回焦静默重拉（Wallet 同拉 profile 同步余额，同 F170/F176 模式），补测 3 条（238→241）
 - ProfileScreen 回焦静默刷新 — Profile 底部 Tab 切走保活不重建，仅 mount 拉一次统计/余额；接入 useIsFocused 回焦重拉 stats + authApi.getProfile（钱包充值/扣费后余额实时同步），补测 3 条（235→238）；收尾 F170 遗留的 mount-only 缺口
 
 ### Added

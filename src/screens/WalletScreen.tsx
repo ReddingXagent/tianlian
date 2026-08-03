@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
-import { walletApi } from '../services/api';
+import { authApi, walletApi } from '../services/api';
 import { WalletRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -38,9 +39,24 @@ const WalletScreen: React.FC = () => {
     }
   }, []);
 
+  // 余额显示取自authStore.user.balance: 充电扣费/他处充值后回钱包页会陈旧
+  // (F170/F176同型收尾) → 回焦静默重拉流水 + 拉最新profile同步余额。
+  const isFocused = useIsFocused();
+  const refreshProfile = useCallback(async () => {
+    try {
+      const response = await authApi.getProfile();
+      setUser(response.data);
+    } catch {
+      // 静默处理
+    }
+  }, [setUser]);
+
   useEffect(() => {
-    loadRecords();
-  }, []);
+    if (isFocused) {
+      loadRecords();
+      refreshProfile();
+    }
+  }, [isFocused, loadRecords, refreshProfile]);
 
   const handleRecharge = () => {
     const amounts = [10, 50, 100, 200];

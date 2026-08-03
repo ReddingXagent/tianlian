@@ -10,7 +10,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
-import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useStationStore } from '../store/stationStore';
 import { RootStackParamList, Charger } from '../types';
@@ -44,9 +44,14 @@ const StationDetailScreen: React.FC = () => {
     if (isRefresh) setRefreshing(false);
   }, [stationId, fetchStationDetail, fetchChargers]);
 
+  // 移动端质量基线(F170/F176同型收尾): 详情页保活不重建,
+  // 去充电/导航回来时桩位状态(空闲/占用/故障)可能已变 → 回焦静默重拉。
+  const isFocused = useIsFocused();
   useEffect(() => {
-    loadData();
-  }, [stationId]);
+    if (isFocused) {
+      loadData();
+    }
+  }, [isFocused, loadData]);
 
   const handleNavigate = () => {
     if (!selectedStation) return;

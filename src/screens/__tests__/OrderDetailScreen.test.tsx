@@ -4,9 +4,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import OrderDetailScreen from '../OrderDetailScreen';
 
 const mockNavigate = jest.fn();
+let mockFocused = true;
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate }),
   useRoute: () => ({ params: { orderId: 99 } }),
+  useIsFocused: () => mockFocused,
 }));
 
 // Store factory — return same ref so require() matches component's reference
@@ -44,7 +46,7 @@ jest.mock('../../components/EmptyState', () => {
 });
 
 describe('OrderDetailScreen', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => { jest.clearAllMocks(); mockFocused = true; });
 
   const renderScreen = () =>
     render(<SafeAreaProvider><OrderDetailScreen /></SafeAreaProvider>);
@@ -95,5 +97,18 @@ describe('OrderDetailScreen', () => {
     await waitFor(() => expect(getByText('去支付')).toBeTruthy());
     fireEvent.press(getByText('去支付'));
     expect(mockNavigate).toHaveBeenCalledWith('Payment', { orderId: 99, amount: 18.6 });
+  });
+
+  it('refetches order detail when screen regains focus (回焦刷新)', () => {
+    const utils = renderScreen();
+    expect(mockFetchOrderDetail).toHaveBeenCalledTimes(1);
+
+    mockFocused = false;
+    utils.rerender(<SafeAreaProvider><OrderDetailScreen /></SafeAreaProvider>);
+    expect(mockFetchOrderDetail).toHaveBeenCalledTimes(1);
+
+    mockFocused = true;
+    utils.rerender(<SafeAreaProvider><OrderDetailScreen /></SafeAreaProvider>);
+    expect(mockFetchOrderDetail).toHaveBeenCalledTimes(2);
   });
 });

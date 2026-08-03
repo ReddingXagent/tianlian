@@ -61,11 +61,14 @@ jest.mock('../../store/stationStore', () => ({
   }),
 }));
 
+let mockFocused = true;
+
 jest.mock('@react-navigation/native', () => ({
   useRoute: () => ({ params: { stationId: 1 } }),
   useNavigation: () => ({
     navigate: jest.fn(),
   }),
+  useIsFocused: () => mockFocused,
 }));
 
 jest.mock('../../components/StationCard', () => 'StationCard');
@@ -74,6 +77,7 @@ jest.mock('../../components/MapView', () => 'MapView');
 describe('StationDetailScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFocused = true;
   });
 
   const renderScreen = () =>
@@ -122,5 +126,20 @@ describe('StationDetailScreen', () => {
   it('renders charger count from chargers array', () => {
     const { getByText } = renderScreen();
     expect(getByText('总枪数')).toBeTruthy();
+  });
+
+  it('refetches station + chargers when screen regains focus (回焦刷新)', () => {
+    const utils = renderScreen();
+    expect(mockFetchStationDetail).toHaveBeenCalledTimes(1);
+    expect(mockFetchChargers).toHaveBeenCalledTimes(1);
+
+    mockFocused = false;
+    utils.rerender(<SafeAreaProvider><StationDetailScreen /></SafeAreaProvider>);
+    expect(mockFetchStationDetail).toHaveBeenCalledTimes(1);
+
+    mockFocused = true;
+    utils.rerender(<SafeAreaProvider><StationDetailScreen /></SafeAreaProvider>);
+    expect(mockFetchStationDetail).toHaveBeenCalledTimes(2);
+    expect(mockFetchChargers).toHaveBeenCalledTimes(2);
   });
 });

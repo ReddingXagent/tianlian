@@ -33,9 +33,15 @@ jest.mock('../../store/authStore', () => ({
   }),
 }));
 
+let mockFocused = true;
+jest.mock('@react-navigation/native', () => ({
+  useIsFocused: () => mockFocused,
+}));
+
 describe('WalletScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFocused = true;
   });
 
   const renderScreen = () =>
@@ -92,5 +98,22 @@ describe('WalletScreen', () => {
     });
     const { getByText } = renderScreen();
     await waitFor(() => expect(getByText('充电消费')).toBeTruthy());
+  });
+
+  it('refetches records + profile when screen regains focus (回焦刷新余额/流水)', async () => {
+    mockGetRecords.mockResolvedValue({ data: { items: [] } });
+    const utils = renderScreen();
+    await waitFor(() => expect(mockGetRecords).toHaveBeenCalledTimes(1));
+
+    mockFocused = false;
+    utils.rerender(<SafeAreaProvider><WalletScreen /></SafeAreaProvider>);
+    expect(mockGetRecords).toHaveBeenCalledTimes(1);
+
+    mockFocused = true;
+    utils.rerender(<SafeAreaProvider><WalletScreen /></SafeAreaProvider>);
+    await waitFor(() => expect(mockGetRecords).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(mockSetUser).toHaveBeenCalledWith({ id: 1, phone: '138', nickname: 'u', balance: 200 })
+    );
   });
 });
