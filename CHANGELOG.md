@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `deploy.sh` (v5) + `Makefile deploy-rollback`: 回滚语义bug — `git revert $REV` 只撤销单个commit，与"回滚到REV"语义不符（落后N个commit时只撤1个，其余N-1个坏提交仍在）→ 改 `git revert ${REV}..HEAD` 撤销目标好版本之后全部提交，工作区即REV状态；新增 无效commit校验/REV即HEAD短路/revert冲突自动abort 三重防护
+
 ### Added
 - CI: 新增 `docker` job（与 quality 并行）— buildx 构建镜像(GHA缓存, 不推送) + 容器内无环境变量 `import main` 冒烟，Dockerfile/依赖损坏在 push 阶段即被拦截
 - `.dockerignore`: 补 tests/docs/.github/systemd/*.log/coverage.xml → 运行时镜像瘦身

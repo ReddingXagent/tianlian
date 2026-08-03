@@ -16,7 +16,7 @@
 cd /home/tl/tianlian-edge-gateway-v3
 bash deploy.sh              # 一键部署(git同步→装依赖→杀旧→等端口→启动→健康轮询)
 bash deploy.sh status       # PID/健康检查/状态API/日志尾
-bash deploy.sh rollback <hash>   # revert 指定 commit 后重新部署
+bash deploy.sh rollback <hash>   # 回滚到hash版本(revert其后全部提交)再重新部署
 ```
 
 行为要点:
@@ -25,6 +25,7 @@ bash deploy.sh rollback <hash>   # revert 指定 commit 后重新部署
 - 杀旧进程后等待 8080 端口释放（最多 10s），启动后健康轮询最多 15s，失败自动重试 1 次
 - 进程启动/匹配统一用绝对路径（`$REPO_DIR/main.py`）：pgrep 精确命中本网关，`status` 不会误报其他目录的 main.py
 - Python 版本预检：低于 3.10 告警（不阻断，兼容老环境）
+- `rollback <hash>` = 回滚到 hash 这个好版本：revert 其后全部提交（非只撤 hash 一个），工作区即 hash 状态；无效commit/REV即HEAD/revert冲突（自动abort）均有防护
 - 日志: `gateway.log`（仓库根），PID: `.pid`
 
 ## 方式二: systemd

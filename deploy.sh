@@ -23,6 +23,11 @@
 #   - fix: 启动用相对路径 main.py → cmdline 不含路径, step6/watchdog 的
 #     pgrep "$REPO_DIR/main.py" 永不命中(杀旧靠.pid/fuser兑底) → 改绝对路径启动
 #   - 新增: Python 版本预检(<3.10 告警不阻断)
+# v5 (2026-08-04 自驱部署轮):
+#   - fix: rollback 语义bug — `git revert $REV` 只撤销单个commit, 与"回滚到REV"
+#     语义不符(落后N个commit时只撤1个, 其余N-1个坏提交仍在) → 改
+#     `git revert ${REV}..HEAD` 撤销目标好版本之后的全部提交, 工作区=REV状态;
+#     增加 无效commit/REV即HEAD/revert冲突(自动abort) 三重防护
 set -e
 
 # 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
@@ -51,12 +56,25 @@ if [ "$1" = "rollback" ]; then
         exit 0
     fi
     REV="$2"
-    echo "回滚到: $REV"
+    if ! git rev-parse --verify "$REV^{commit}" >/dev/null 2>&1; then
+        echo "❌ 无效commit: $REV"; exit 1
+    fi
+    RANGE="${REV}..HEAD"
+    N=$(git rev-list --count "$RANGE" 2>/dev/null || echo 0)
+    if [ "$N" -eq 0 ]; then
+        echo "ℹ️ $REV 就是当前HEAD, 无需回滚"; exit 0
+    fi
+    echo "回滚到: $REV (revert其后 $N 个提交)"
+    git rev-list --oneline "$RANGE" | sed 's/^/  revert: /'
     git stash --include-untracked 2>/dev/null || true
-    git revert --no-commit "$REV"
-    echo "已 revert $REV"
-    echo "重新部署: bash deploy.sh"
-    echo "推送远程: git push origin master"
+    if ! git revert --no-commit "$RANGE"; then
+        echo "❌ revert冲突, 已自动中止恢复现场(如需手动处理: 先 git revert --abort)"
+        git revert --abort 2>/dev/null || true
+        exit 1
+    fi
+    echo "已 revert $REV 之后的 $N 个提交, 工作区已等于 $REV 状态(改动已暂存未提交)"
+    echo "重新部署验证: bash deploy.sh"
+    echo "确认无误后: git commit -m 'rollback to $REV' && git push origin master"
     exit 0
 fi
 
