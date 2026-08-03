@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
+import { FlatList, RefreshControl } from 'react-native';
 import { render, act, fireEvent } from '@testing-library/react-native';
 import NotificationCenterScreen from '../NotificationCenterScreen';
 import { notificationApi } from '../../services/api';
@@ -330,5 +331,113 @@ describe('NotificationCenterScreen', () => {
     // (onEndReached is hard to simulate in tests, but the footer renders
     // when notifications.length < total)
     expect(notificationApi.getList).toHaveBeenCalledTimes(1);
+  });
+
+  it('should mark notification as read when tapping unread card', async () => {
+    (notificationApi.markAsRead as jest.Mock).mockResolvedValue({ data: null });
+
+    const { findByText } = render(<NotificationCenterScreen />);
+    await findByText('充电桩A-01温度异常告警');
+
+    // 点击未读卡片标题，触发 onPress → handleMarkAsRead
+    await act(async () => {
+      fireEvent.press(await findByText('充电桩A-01温度异常告警'));
+    });
+
+    expect(notificationApi.markAsRead).toHaveBeenCalledWith(1);
+    // 未读数 3 → 2
+    expect(await findByText('2 条未读')).toBeTruthy();
+  });
+
+  it('should not call markAsRead when tapping already-read card', async () => {
+    const { findByText } = render(<NotificationCenterScreen />);
+    await findByText('系统维护通知');
+
+    await act(async () => {
+      fireEvent.press(await findByText('系统维护通知'));
+    });
+
+    expect(notificationApi.markAsRead).not.toHaveBeenCalled();
+  });
+
+  it('should refetch page 1 via pull-to-refresh onRefresh', async () => {
+    const { findByText, UNSAFE_getByType } = render(<NotificationCenterScreen />);
+    await findByText('充电桩A-01温度异常告警');
+    expect(notificationApi.getList).toHaveBeenCalledTimes(1);
+
+    const refreshControl = UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      refreshControl.props.onRefresh();
+      await Promise.resolve();
+    });
+
+    // 刷新重新拉取第 1 页
+    expect(notificationApi.getList).toHaveBeenCalledTimes(2);
+    expect(notificationApi.getList).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 });
+  });
+
+  it('should append page 2 items when onEndReached fires', async () => {
+    const page1Items = Array.from({ length: 20 }, (_, i) => ({
+      id: i + 1,
+      type: 'system' as const,
+      title: `通知P1-${i + 1}`,
+      message: `消息${i + 1}`,
+      level: 'info' as const,
+      isRead: true,
+      createdAt: '2024-01-15T10:30:00Z',
+    }));
+    const page2Items = [
+      {
+        id: 21,
+        type: 'alarm' as const,
+        title: '通知P2-21',
+        message: '第二页消息',
+        level: 'warning' as const,
+        isRead: false,
+        createdAt: '2024-01-15T10:30:00Z',
+      },
+    ];
+
+    (notificationApi.getList as jest.Mock).mockImplementation(({ page }: { page: number }) =>
+      Promise.resolve({
+        data: {
+          items: page === 1 ? page1Items : page2Items,
+          total: 21,
+          page,
+          pageSize: 20,
+        },
+      })
+    );
+
+    const { findByText, UNSAFE_getByType } = render(<NotificationCenterScreen />);
+    await findByText('通知P1-1');
+
+    const flatList = UNSAFE_getByType(FlatList);
+    await act(async () => {
+      flatList.props.onEndReached();
+      await Promise.resolve();
+    });
+
+    expect(notificationApi.getList).toHaveBeenLastCalledWith({ page: 2, pageSize: 20 });
+    // 追加后 21 条全部加载完毕，footer 显示已显示全部（避开 FlatList 虚拟化窗口）
+    expect(await findByText('已显示全部 21 条通知')).toBeTruthy();
+  });
+
+  it('should reload data when pressing retry in error state', async () => {
+    (notificationApi.getList as jest.Mock)
+      .mockRejectedValueOnce(new Error('API Error'))
+      .mockResolvedValue({
+        data: { items: MOCK_NOTIFICATIONS, total: 4, page: 1, pageSize: 20 },
+      });
+
+    const { findByText } = render(<NotificationCenterScreen />);
+    const retryBtn = await findByText('重新加载');
+
+    await act(async () => {
+      fireEvent.press(retryBtn);
+    });
+
+    expect(notificationApi.getList).toHaveBeenCalledTimes(2);
+    expect(await findByText('充电桩A-01温度异常告警')).toBeTruthy();
   });
 });
