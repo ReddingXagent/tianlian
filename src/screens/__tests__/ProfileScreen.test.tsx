@@ -5,10 +5,14 @@ import ProfileScreen from '../ProfileScreen';
 
 // --- mocks ---
 const mockGetUserStats = jest.fn();
+const mockGetProfile = jest.fn();
 
 jest.mock('../../services/api', () => ({
   statsApi: {
     getUserStats: (...args: unknown[]) => mockGetUserStats(...args),
+  },
+  authApi: {
+    getProfile: (...args: unknown[]) => mockGetProfile(...args),
   },
 }));
 
@@ -20,23 +24,29 @@ const mockUser = {
 };
 
 const mockLogout = jest.fn().mockResolvedValue(undefined);
+const mockSetUser = jest.fn();
 
 jest.mock('../../store/authStore', () => ({
   useAuthStore: () => ({
     user: mockUser,
     logout: mockLogout,
+    setUser: mockSetUser,
   }),
 }));
+
+let mockFocused = true;
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
     navigate: jest.fn(),
   }),
+  useIsFocused: () => mockFocused,
 }));
 
 describe('ProfileScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFocused = true;
   });
 
   const renderScreen = () =>
@@ -94,5 +104,44 @@ describe('ProfileScreen', () => {
     const { getByText } = renderScreen();
     expect(getByText('消息通知')).toBeTruthy();
     expect(getByText('关于我们')).toBeTruthy();
+  });
+
+  it('refetches stats when tab regains focus (回焦刷新)', () => {
+    mockGetUserStats.mockResolvedValue({ data: {} });
+    const utils = renderScreen();
+    expect(mockGetUserStats).toHaveBeenCalledTimes(1);
+
+    mockFocused = false;
+    utils.rerender(
+      <SafeAreaProvider>
+        <ProfileScreen />
+      </SafeAreaProvider>
+    );
+    expect(mockGetUserStats).toHaveBeenCalledTimes(1);
+
+    mockFocused = true;
+    utils.rerender(
+      <SafeAreaProvider>
+        <ProfileScreen />
+      </SafeAreaProvider>
+    );
+    expect(mockGetUserStats).toHaveBeenCalledTimes(2);
+  });
+
+  it('silently refreshes profile (余额) on focus', async () => {
+    mockGetUserStats.mockResolvedValue({ data: {} });
+    mockGetProfile.mockResolvedValue({ data: { ...mockUser, balance: 100 } });
+    renderScreen();
+    await waitFor(() => expect(mockGetProfile).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(mockSetUser).toHaveBeenCalledWith({ ...mockUser, balance: 100 })
+    );
+  });
+
+  it('profile refresh failure does not break stats', async () => {
+    mockGetUserStats.mockResolvedValue({ data: { totalOrders: 5, totalEnergy: 0, couponCount: 0 } });
+    mockGetProfile.mockRejectedValue(new Error('network'));
+    const { getByText } = renderScreen();
+    await waitFor(() => expect(getByText('5')).toBeTruthy());
   });
 });

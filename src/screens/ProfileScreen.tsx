@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
-import { statsApi } from '../services/api';
+import { authApi, statsApi } from '../services/api';
 import { RootStackParamList, UserStats } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -23,7 +23,7 @@ const MENU_ITEMS = [
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { user, logout } = useAuthStore();
+  const { user, logout, setUser } = useAuthStore();
   const [stats, setStats] = useState<UserStats | null>(null);
 
   const loadStats = async () => {
@@ -35,9 +35,26 @@ const ProfileScreen: React.FC = () => {
     }
   };
 
+  // 余额可能已在钱包页充值/扣费, 静默拉最新profile
+  const refreshProfile = async () => {
+    try {
+      const response = await authApi.getProfile();
+      setUser(response.data);
+    } catch {
+      // 静默处理
+    }
+  };
+
+  // 移动端质量基线: Profile为底部Tab, 切走保活不重建,
+  // 统计/余额随订单与充值随时在变 → 回焦时静默重拉。
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    loadStats();
-  }, []);
+    if (isFocused) {
+      loadStats();
+      refreshProfile();
+    }
+  }, [isFocused]);
 
   const handleLogout = () => {
     Alert.alert(

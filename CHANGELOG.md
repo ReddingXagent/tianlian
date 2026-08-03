@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- ProfileScreen 回焦静默刷新 — Profile 底部 Tab 切走保活不重建，仅 mount 拉一次统计/余额；接入 useIsFocused 回焦重拉 stats + authApi.getProfile（钱包充值/扣费后余额实时同步），补测 3 条（235→238）；收尾 F170 遗留的 mount-only 缺口
+
 ### Added
 - 部署门控 `scripts/deploy-check.js` + `npm run deploy:check`：app.json/eas.json/expo-updates/凭证四步检查，退2设计内拦截待Expo账号（对齐user-mp deploy:check模式）
 - 验证 `expo export --platform android` 产物管线可出 Hermes bundle（2.24MB）
