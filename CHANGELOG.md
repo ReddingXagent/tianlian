@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Added
+- `docs/API_REFERENCE.md`: 完整 API 参考手册（8 端点，含请求/响应示例 + curl 快速验证）
+- `docs/DEVELOPMENT.md`: 开发贡献指南（环境搭建 / 项目结构 / 核心概念 / 扩展指南 / 测试规范）
+- README: 新增「更多文档」导航段 + 目录结构补 docs/
 - deploy.sh: `rollback` 子命令（`bash deploy.sh rollback <commit-hash>` 安全回滚）
 - deploy.sh: `status` 子命令（快速查看 PID/健康检查/状态API/日志尾部）
 - Dockerfile: `$BUILDPLATFORM`/`TARGETPLATFORM` 多架构支持（ARM64 Pi + AMD64 开发机）
