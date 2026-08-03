@@ -1,0 +1,34 @@
+# 天链V3 边缘网关 — Docker Compose
+# 使用: docker compose up -d
+# 停止: docker compose down
+# 日志: docker compose logs -f
+# 重建: docker compose up -d --build
+
+services:
+  gateway:
+    build: .
+    image: tianlian-edge-gateway:latest
+    container_name: tianlian-gateway
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8080:8080"
+    volumes:
+      # 持久化 SQLite 数据库
+      - gateway-data:/app/data
+      # 时间正确（容器默认 UTC，树莓派是 Asia/Shanghai）
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - tianlian-net
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  gateway-data:
+
+networks:
+  tianlian-net:
+    driver: bridge

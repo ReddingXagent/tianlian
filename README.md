@@ -77,6 +77,44 @@ bash deploy.sh   # 目标机: tl@192.168.31.10, 仓库 /home/tl/tianlian-edge-ga
 
 ### 方式二: systemd 服务（开机自启 + 崩溃重启）
 
+详见 `systemd/README.md`，或使用 Makefile 快捷命令：
+
+```bash
+make systemd-install   # 安装 unit + logrotate
+make systemd-start     # 启动
+make systemd-status    # 状态
+make systemd-logs      # 实时日志
+```
+
+### 方式三: Docker 容器化部署
+
+```bash
+# 构建并启动
+docker compose up -d
+
+# 查看日志
+docker compose logs -f
+
+# 重建（代码更新后）
+docker compose up -d --build
+
+# 停止
+docker compose down
+```
+
+容器特性：非 root 运行、HEALTHCHECK 每 30s 检查、日志轮转 10m×3、数据卷持久化、时区同步。
+
+### 方式四: 看门狗（无 systemd/Docker 场景）
+
+```bash
+# crontab 每 2 分钟检查
+crontab -e
+# */2 * * * * /path/to/scripts/watchdog.sh
+
+# 或常驻后台
+nohup bash scripts/watchdog.sh --loop > /dev/null 2>&1 &
+```
+
 ```bash
 # 在树莓派上:
 cp tianlian-edge-gateway.service /etc/systemd/system/
@@ -129,8 +167,12 @@ api/server.py      FastAPI 调试 API
 models/            device / telemetry 数据模型
 storage/           SQLite 遥测缓存（断网续传）
 tests/             pytest 套件 + mock_csms_server
-deploy.sh          树莓派一键部署
-tianlian-edge-gateway.service  systemd 单元（开机自启+崩溃重启）
+deploy.sh          树莓派一键部署（v3: 端口等待+重试+健康轮询）
+Dockerfile         多阶段容器构建（python:3.10-slim, 非 root, HEALTHCHECK）
+docker-compose.yml 一键容器化部署（restart + 日志轮转 + 持久化卷）
+scripts/watchdog.sh 看门狗（健康检查+自动重启, crontab/--loop 双模式）
+systemd/           systemd unit + logrotate + README
+tianlian-edge-gateway.service  systemd 单元（兼容旧路径，推荐用 systemd/ 目录）
 .env.example       环境变量模板（所有 key 与 config.py 精确对齐）
-Makefile           开发快捷命令 (install/run/test/lint/check/deploy)
+Makefile           开发快捷命令 (install/run/test/lint/check/deploy/systemd-*)
 ```

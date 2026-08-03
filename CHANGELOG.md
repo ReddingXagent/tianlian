@@ -5,6 +5,10 @@
 ## [Unreleased]
 
 ### Added
+- `Dockerfile`: 多阶段构建（python:3.10-slim + 非 root 运行 + HEALTHCHECK 健康检查 + 数据卷持久化）
+- `docker-compose.yml`: 一键容器化部署（restart:unless-stopped + 日志轮转 + 时区同步 + 持久化卷）
+- `.dockerignore`: 排除 .venv/.git/data 等，优化构建上下文
+- `scripts/watchdog.sh`: 看门狗脚本（健康检查 + 自动重启 + 连续3次失败告警；支持 crontab 单次模式和 --loop 常驻模式）
 - `systemd/tianlian-gateway.service`: systemd unit（Restart=always + RestartSec=5 + 安全加固 NoNewPrivileges/ProtectSystem/PrivateTmp）
 - `systemd/README.md`: systemd 安装/管理/从 deploy.sh 迁移指南
 - `systemd/logrotate.conf`: gateway.log 日志轮转（daily/rotate7/compress/copytruncate）

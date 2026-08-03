@@ -1,0 +1,12 @@
+.venv/
+.venv-build/
+__pycache__/
+*.pyc
+.coverage
+.pytest_cache/
+.ruff_cache/
+data/
+*.db
+.env
+.git/
+node_modules/
