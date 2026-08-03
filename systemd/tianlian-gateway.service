@@ -1,0 +1,24 @@
+[Unit]
+Description=TianLian V3 Edge Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tl
+WorkingDirectory=/home/tl/tianlian-edge-gateway-v3
+EnvironmentFile=/home/tl/tianlian-edge-gateway-v3/.env
+ExecStart=/usr/bin/python3 main.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# 安全加固
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

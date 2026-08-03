@@ -1,0 +1,53 @@
+# TianLian Edge Gateway — systemd 部署
+
+## 安装 systemd 服务（树莓派上执行）
+
+```bash
+# 1. 复制 unit 文件
+sudo cp systemd/tianlian-gateway.service /etc/systemd/system/
+
+# 2. 根据实际路径修改 WorkingDirectory/EnvironmentFile/ExecStart
+#    （默认路径: /home/tl/tianlian-edge-gateway-v3）
+sudo nano /etc/systemd/system/tianlian-gateway.service
+
+# 3. 重载 systemd
+sudo systemctl daemon-reload
+
+# 4. 启用开机自启
+sudo systemctl enable tianlian-gateway
+
+# 5. 启动服务
+sudo systemctl start tianlian-gateway
+
+# 6. 查看状态
+sudo systemctl status tianlian-gateway
+```
+
+## 常用命令
+
+| 操作 | 命令 |
+|------|------|
+| 启动 | `sudo systemctl start tianlian-gateway` |
+| 停止 | `sudo systemctl stop tianlian-gateway` |
+| 重启 | `sudo systemctl restart tianlian-gateway` |
+| 状态 | `sudo systemctl status tianlian-gateway` |
+| 日志 | `sudo journalctl -u tianlian-gateway -f` |
+| 最近100行 | `sudo journalctl -u tianlian-gateway -n 100` |
+
+## 配置说明
+
+- **Type=simple**: main.py 是前台进程，符合 simple 类型
+- **Restart=always + RestartSec=5**: 崩溃后 5 秒自动重启
+- **EnvironmentFile**: 从 .env 加载环境变量（CLOUD_TOKEN 等）
+- **NoNewPrivileges + ProtectSystem**: 安全加固，限制写权限
+- **network-online.target**: 确保网络就绪后再启动
+
+## 从 deploy.sh 迁移
+
+如果之前用 deploy.sh 部署：
+1. 先停旧进程: `kill $(cat .pid)` 或 `pkill -f main.py`
+2. 确认端口释放: `ss -tlnp | grep 8080`
+3. 按上面步骤安装 systemd 服务
+4. 验证: `curl http://localhost:8080/health`
+
+deploy.sh 仍保留，适合首次部署和调试使用。systemd 适合日常稳定运行。

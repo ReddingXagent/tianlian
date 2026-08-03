@@ -5,7 +5,12 @@
 ## [Unreleased]
 
 ### Added
-- `tianlian-edge-gateway.service`: systemd 单元（开机自启 + Restart=on-failure + StartLimitBurst=3/60s）
+- `systemd/tianlian-gateway.service`: systemd unit（Restart=always + RestartSec=5 + 安全加固 NoNewPrivileges/ProtectSystem/PrivateTmp）
+- `systemd/README.md`: systemd 安装/管理/从 deploy.sh 迁移指南
+- `systemd/logrotate.conf`: gateway.log 日志轮转（daily/rotate7/compress/copytruncate）
+- deploy.sh: systemd 检测+迁移建议 / 日志轮转提示
+- Makefile: systemd-install/start/stop/restart/status/logs 快捷命令
+- `tianlian-edge-gateway.service`（旧记录）: systemd 单元初版
 - `.env.example`: 全量环境变量模板，18 个 key 与 `config.py` `os.getenv` 精确对齐
 - `Makefile`: venv/install/run/test/lint/check/clean/deploy 开发快捷命令
 - README.md：架构、环境变量、本地 API、测试与部署说明（自驱文档轮补全，此前仓库无 README）

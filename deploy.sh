@@ -158,6 +158,28 @@ if [ "$HEALTH_OK" = true ] && kill -0 "$NEW_PID" 2>/dev/null; then
     echo "   日志: $REPO_DIR/gateway.log"
     sleep 1
     curl -s -m 5 "http://localhost:$PORT/health" 2>/dev/null && echo "" || echo "⚠️ 健康检查失败, 请查看日志"
+
+    # 检测 systemd 可用性并给出迁移建议
+    if systemctl is-system-running >/dev/null 2>&1; then
+        if [ ! -f /etc/systemd/system/tianlian-gateway.service ]; then
+            echo ""
+            echo "💡 建议: 安装 systemd 服务实现开机自启+崩溃重启"
+            echo "   sudo cp systemd/tianlian-gateway.service /etc/systemd/system/"
+            echo "   sudo systemctl daemon-reload && sudo systemctl enable tianlian-gateway"
+            echo "   详见: systemd/README.md"
+        else
+            echo ""
+            echo "ℹ️ systemd 服务已安装, 建议用 systemctl 管理:"
+            echo "   sudo systemctl restart tianlian-gateway"
+        fi
+    fi
+
+    # 日志轮转提示
+    if [ ! -f /etc/logrotate.d/tianlian-gateway ]; then
+        echo ""
+        echo "💡 建议: 安装日志轮转防磁盘占满"
+        echo "   sudo cp systemd/logrotate.conf /etc/logrotate.d/tianlian-gateway"
+    fi
 else
     echo "❌ 启动失败, 日志最后20行:"
     tail -20 gateway.log

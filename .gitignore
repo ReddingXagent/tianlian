@@ -5,3 +5,4 @@ data/
 .env
 node_modules/
 .venv*/
+.coverage

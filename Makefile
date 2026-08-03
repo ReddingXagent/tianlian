@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check clean deploy
+.PHONY: venv install run test lint check clean deploy systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -29,3 +29,24 @@ clean:
 
 deploy:
 	bash deploy.sh
+
+systemd-install:
+	sudo cp systemd/tianlian-gateway.service /etc/systemd/system/
+	sudo cp systemd/logrotate.conf /etc/logrotate.d/tianlian-gateway
+	sudo systemctl daemon-reload
+	sudo systemctl enable tianlian-gateway
+
+systemd-start:
+	sudo systemctl start tianlian-gateway
+
+systemd-stop:
+	sudo systemctl stop tianlian-gateway
+
+systemd-restart:
+	sudo systemctl restart tianlian-gateway
+
+systemd-status:
+	sudo systemctl status tianlian-gateway
+
+systemd-logs:
+	sudo journalctl -u tianlian-gateway -f -n 100
