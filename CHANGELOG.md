@@ -6,6 +6,11 @@
 
 ## [Unreleased]
 
+### Added
+- Makefile: 本地构建/检查/导出快捷命令 (help/install/dev/build/test/lint/check/ci-local/clean)
+- GitHub Actions CI: .github/workflows/ci.yml 两阶段流水线 (check→export)
+- DEPLOYMENT.md: 环境变量使用说明 + Makefile/CI 文档 + OTA 更新步骤
+
 ### Changed
 - README 质量门控数据更新：243 测试全绿，eslint 0 err / 0 warn，覆盖率 83.62%
 - README Roadmap 更新：F17 标记解决，新增 F69/F70/F92 等覆盖薄弱点记录

@@ -114,21 +114,48 @@ npm test
 
 | ID | 问题 | 影响 | 状态 |
 |----|------|------|------|
-| F22 | BASE_URL 硬编码生产 IP，无环境切换 | 开发/测试直连生产API | 🔧 待修复 |
+| ~~F22~~ | ~~BASE_URL 硬编码生产 IP~~ | ~~已修复~~ | ✅ F130 已修复 (EXPO_PUBLIC_API_URL) |
 | F25 | 无 Expo 账号，EAS 通道全不可用 | 无法云端构建/分发 | ⏳ 待丁哥 |
 | F89 | (user-mp) 生产 HTTP 非 HTTPS | 微信正式版强制 HTTPS | 📋 跨仓项 |
 | — | 无 iOS Apple Developer 账号 | 无法 iOS 商店发布 | ⏳ 待丁哥 |
 
-## 环境变量规划 (待实现)
+## 环境变量 (已实现 F130)
 
-```typescript
-// 计划在 api.ts 中实现:
-const ENVIRONMENTS = {
-  development: 'http://192.168.31.10:8000/api/v1',  // 本地开发
-  staging: 'http://8.134.106.166/api/v1',            // 预发布
-  production: 'https://api.tianlian.com/api/v1',     // 生产 (需HTTPS域名)
-};
+`src/services/api.ts` 使用 `EXPO_PUBLIC_API_URL` 环境变量，fallback 到生产 API：
+
+```bash
+# .env.example
+EXPO_PUBLIC_API_URL=http://8.134.106.166/api/v1
+
+# 本地开发指向边缘网关
+EXPO_PUBLIC_API_URL=http://192.168.31.10:8000/api/v1
 ```
+
+### OTA 更新配置
+
+app.json 已配置 `runtimeVersion.policy: sdkVersion` 和 `updates.url`，
+关联 Expo 项目后即可推送 OTA：
+
+```bash
+eas update:configure  # 首次关联
+eas update --branch production --message "修复xxx"
+```
+
+### Makefile 快捷命令
+
+```bash
+make help          # 显示所有命令
+make check         # tsc + eslint + jest
+make ci-local      # check + Android 导出 (模拟 CI)
+make export-android # 仅导出 Android bundle
+make export-ios     # 仅导出 iOS bundle
+```
+
+### GitHub Actions CI
+
+`.github/workflows/ci.yml` 配置了 push/PR 触发的两阶段流水线：
+1. **check**: tsc + eslint + jest (含 coverage)
+2. **export**: Android + iOS bundle 导出验证
 
 ## 品牌资源
 
