@@ -353,4 +353,86 @@ describe('API Service (B3 真契约)', () => {
       expect((await api.markAllNotificationsRead()).code).toBe(200);
     });
   });
+
+  // F125: 补覆盖 api.js 残留行 (HTTP 401 / 非幂等网络失败 / getUserInfo无用户)
+  describe('覆盖补全 F125', () => {
+    it('HTTP 401 (非业务码): 清token + TOKEN_EXPIRED + toast', async () => {
+      useStore({ token: 'old' });
+      mockWxRequest.mockImplementation((opts) => {
+        opts.success({ statusCode: 401, data: {} });
+      });
+      await expect(api.request('/x')).rejects.toThrow('TOKEN_EXPIRED');
+      expect(mockRemoveStorageSync).toHaveBeenCalledWith('token');
+      expect(mockShowToast).toHaveBeenCalledWith({ title: '登录已过期', icon: 'none' });
+    });
+
+    it('非幂等GET 5xx 不重试, 直接reject', async () => {
+      // POST 默认非幂等, 5xx 不重试
+      mockWxRequest.mockImplementation((opts) => {
+        opts.success({ statusCode: 502, data: {} });
+      });
+      await expect(api.request('/x', { method: 'POST' })).rejects.toThrow('HTTP 502');
+    });
+
+    it('网络失败+非幂等 不重试, 显示网络异常', async () => {
+      mockWxRequest.mockImplementation((opts) => {
+        opts.fail({ errMsg: 'request:fail net' });
+      });
+      await expect(api.request('/x', { method: 'POST' })).rejects.toMatchObject({ errMsg: expect.stringContaining('net') });
+      expect(mockShowToast.mock.calls[0][0].title).toBe('网络异常');
+    });
+
+    it('getUserInfo: 无登录用户 reject 未登录', async () => {
+      useStore({});
+      await expect(api.getUserInfo()).rejects.toThrow('未登录');
+    });
+
+    it('getUserInfo: 有登录用户 返回200+data', async () => {
+      useStore({ userInfo: { id: 5, username: 'tester' } });
+      const res = await api.getUserInfo();
+      expect(res.code).toBe(200);
+      expect(res.data).toEqual({ id: 5, username: 'tester' });
+    });
+
+    it('幂等GET 5xx 自动重试一次后成功', async () => {
+      let calls = 0;
+      mockWxRequest.mockImplementation((opts) => {
+        calls++;
+        if (calls === 1) {
+          opts.success({ statusCode: 503, data: {} });
+        } else {
+          opts.success({ statusCode: 200, data: { code: 200, data: { ok: true } } });
+        }
+      });
+      // GET 默认幂等
+      const res = await api.request('/retry-test', { method: 'GET' });
+      expect(calls).toBe(2);
+      expect(res.data).toEqual({ ok: true });
+    });
+
+    it('幂等GET 网络失败 自动重试一次后成功', async () => {
+      let calls = 0;
+      mockWxRequest.mockImplementation((opts) => {
+        calls++;
+        if (calls === 1) {
+          opts.fail({ errMsg: 'request:fail net' });
+        } else {
+          opts.success({ statusCode: 200, data: { code: 200, data: { retried: true } } });
+        }
+      });
+      const res = await api.request('/retry-net', { method: 'GET' });
+      expect(calls).toBe(2);
+      expect(res.data).toEqual({ retried: true });
+    });
+
+    it('showLoading:true 请求完成调用hideLoading', async () => {
+      mockWxRequest.mockImplementation((opts) => {
+        opts.success({ statusCode: 200, data: { code: 200, data: { ok: 1 } } });
+        if (opts.complete) opts.complete();
+      });
+      await api.request('/loading-test', { showLoading: true });
+      expect(mockShowLoading).toHaveBeenCalled();
+      expect(mockHideLoading).toHaveBeenCalled();
+    });
+  });
 });
