@@ -114,6 +114,7 @@ Page({
   onNotificationTap(e) {
     const { id, status } = e.currentTarget.dataset;
     if (status === 'unread') {
+      // eslint-disable-next-line no-empty-function -- fire-and-forget: 标记已读失败不阻塞本地状态更新
       api.markNotificationRead(id).catch(() => {});
       const notifications = this.data.notifications.map(n =>
         n.id === id ? { ...n, isUnread: false, status: 'read' } : n

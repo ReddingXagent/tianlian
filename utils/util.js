@@ -143,7 +143,7 @@ function throttle(fn, interval = 300) {
 
 // 内部辅助
 function padZero(n) {
-  return n < 10 ? '0' + n : '' + n;
+  return n < 10 ? '0' + n : String(n);
 }
 
 function toRad(deg) {

@@ -73,6 +73,18 @@ module.exports = [
       'radix': 'error',                 // parseInt必须带进制参数
       'no-return-assign': 'error',      // 防return中误写=为==
       'no-useless-return': 'error',     // 禁无意义return
+      // 代码质量防回归规则第二批 (2026-08-04 猴王自驱lint轮, 加入时全仓0违规)
+      'no-implicit-coercion': 'error',  // 禁''+x等隐式转换, 用String()/Number() (util.js padZero已顺手修复)
+      'no-empty-function': 'error',     // 禁空函数, 防静默吞错 (fire-and-forget需显式disable+注释)
+      'no-unneeded-ternary': 'error',   // 禁cond?true:false冗余三元
+      'no-lonely-if': 'error',          // else中单独if应写else-if
+      'prefer-object-spread': 'error',  // Object.assign({},x)→{...x}
+      'no-useless-computed-key': 'error', // 禁无意义计算属性键
+      'no-dupe-else-if': 'error',       // 防if/else-if重复条件
+      'default-case': 'error',          // switch必须有default
+      'no-alert': 'error',              // 禁alert/confirm/prompt(小程序环境本无, 防误用)
+      'no-multi-str': 'error',          // 禁反斜杠多行字符串
+      'yoda': 'error',                  // 禁尤达条件(1===x)
     },
   },
   {
