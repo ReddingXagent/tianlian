@@ -10,3 +10,12 @@ data/
 .env
 .git/
 node_modules/
+# 镜像瘦身: 测试/文档/CI/systemd 不进运行时镜像
+tests/
+docs/
+.github/
+systemd/
+*.log
+coverage.xml
+.pytest_cache/
+.ruff_cache/

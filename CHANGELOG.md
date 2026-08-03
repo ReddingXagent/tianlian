@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Added
+- CI: 新增 `docker` job（与 quality 并行）— buildx 构建镜像(GHA缓存, 不推送) + 容器内无环境变量 `import main` 冒烟，Dockerfile/依赖损坏在 push 阶段即被拦截
+- `.dockerignore`: 补 tests/docs/.github/systemd/*.log/coverage.xml → 运行时镜像瘦身
+- `DEPLOYMENT.md`: 部署前门禁说明同步 CI docker 构建门
+
 ### Fixed
 - `deploy.sh` (v4): `status` 子命令 `pgrep -f 'main.py'` 匹配过宽（会命中任意目录的 main.py）→ 改用 `$REPO_DIR/main.py` 精确匹配，REPO_DIR 探测提前到子命令之前
 - `deploy.sh` (v4): 启动用相对路径 `main.py` 导致 cmdline 不含路径，step6/watchdog 的精确 pgrep 永不命中（杀旧全靠 .pid/fuser 兑底）→ 改绝对路径启动

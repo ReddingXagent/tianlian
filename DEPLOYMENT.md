@@ -62,7 +62,7 @@ make docker-logs / docker-down / docker-shell
 ```bash
 make check                  # ruff lint + pytest(本地)
 ```
-GitHub Actions CI（lint+compile+test+coverage）对每次 push 把关。
+GitHub Actions CI 对每次 push 把关: lint+compile+test+coverage ‖ **Docker镜像构建+容器内import冒烟**（docker job，验证Dockerfile/依赖可成镜像，不推送）。
 
 ## 已知问题 / 备忘
 

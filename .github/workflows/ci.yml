@@ -1,6 +1,6 @@
 # 天链V3 边缘网关 — GitHub Actions CI
 # 触发: push(main) + PR
-# 阶段: lint → test(cov)
+# 阶段: lint → test(cov) ‖ docker镜像构建+import smoke
 # 运行时: Python 3.10 (匹配Pi生产环境)
 
 name: CI
@@ -55,3 +55,27 @@ jobs:
           name: coverage-report
           path: coverage.xml
           retention-days: 7
+
+  docker:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 只构建不推送：验证 Dockerfile/依赖可成功成镜像（GHA缓存加速）
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: tianlian-edge-gateway:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 冒烟: 容器内无环境变量纯 import（main.py 有 __main__ 守卫，不启服务）
+      - name: Smoke test (import in container)
+        run: docker run --rm tianlian-edge-gateway:ci python3 -c "import main"
