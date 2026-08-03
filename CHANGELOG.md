@@ -8,23 +8,27 @@
 
 ### Added
 - 全局错误边界 `ErrorBoundary.tsx`：捕获子树渲染异常防白屏，DEV 模式显示堆栈（`e4dc934`）
-- Makefile 快捷命令 (install/dev/build/export/test/lint/check/ci-local/clean)
-- GitHub Actions CI 两阶段流水线 (check: tsc+eslint+jest → export: android+ios bundle)
-- DEPLOYMENT.md 部署指南 (环境变量/本地开发/CI/OTA/原生构建)
-- `.env.example` 环境变量模板
-- `build` / `export:android` / `export:ios` npm scripts
+- Makefile 10 targets (install/dev/build/export/test/lint/check/ci-local/clean/help)（F136）
+- GitHub Actions CI 两阶段流水线 (check: tsc+eslint+jest → export: android+ios bundle)（F137）
+- DEPLOYMENT.md 完整部署指南 (环境变量/本地开发/CI/OTA/原生构建)（F138）
+- `.env.example` 环境变量模板（F139）
+- `build` / `export:android` / `export:ios` npm scripts（F140）
 - 网络状态横幅 `NetworkStatus.tsx`：AppState 监听前后台切换，回前台 ping API 检测连通性，离线显示红色横幅；无需额外依赖（`e4dc934`）
 - `App.tsx` 包裹 ErrorBoundary + NetworkStatus（`e4dc934`）
 - `eas.json` 三档构建 profile：development / preview(APK) / production（`e876fd8`，关闭 F33）
+- store 层覆盖率全面提升：authStore 45.8%→100% / stationStore 57.7%→100% / workOrderStore 65.7%→100%（F27/F75 已修复）
+- api.ts 覆盖率提升：73.3%→91.4%（F75 已修复）
 
 ### Changed
 - eslint 警告清零：84 → 0（`474492b`）
-- README 同步最新质量指标（coverage 80.9%、eslint 0 warn、eas.json 就位、F80 已修复）
+- README 同步最新质量指标（coverage 91.1%、256 tests、eslint 0 warn）
 
 ### Fixed
 - F32: 无 AppState / 网络状态检测 → ErrorBoundary + NetworkStatus 已接入 ✅
 - F33: 缺 eas.json → 三档 profile 已配置 ✅
+- F75: store/screen 覆盖率偏低 → authStore/stationStore/workOrderStore 均 100%，api.ts 91.4% ✅
 - F80: eslint 84 warn → 全部清零 ✅
+- F136-F140: 缺 Makefile/CI/DEPLOYMENT.md/.env.example/build script → 全部补齐 ✅
 
 ## [1.0.0] - 2026-07-31
 

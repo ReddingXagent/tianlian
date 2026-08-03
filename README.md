@@ -40,15 +40,15 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（200 用例全绿，coverage 80.9%）
+npm test             # jest 单测（256 用例全绿，coverage 91.1%）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）
 ```
 
-- 测试覆盖：screens / components / hooks / services / store / utils 六层全覆盖（总体 80.9%）
-- 覆盖薄弱点（F75）：authStore 45.8%（branch 0%）/ stationStore 57.7%（branch 25%）/ workOrderStore 65.7%（branch 25%）/ WorkOrderScreen 59.6% / NotificationCenter 69.7% / api.ts 73.3%
-- warn 分布（F29）：require-imports×48 + unused-vars×23 + set-state-in-effect×10 + 其他×3
+- 测试覆盖：screens / components / hooks / services / store / utils 六层全覆盖（总体 **91.1%**）
+- 覆盖率明细：components 100% / hooks 94.6% / screens 86.9% / services 92.9% / store 100% / utils 100%
+- eslint **0 err / 0 warn**（`474492b` 全部清零）
 
 ## 构建与部署
 
@@ -100,6 +100,6 @@ push/PR → master 自动触发。
 - **F30**: react-native-chart-kit 已停更且 New Arch 未测（doctor 已 exclude）→ 待迁移 gifted-charts / victory
 - **F31**: `api.ts` BASE_URL 硬编码生产 IP，缺 dev/mock 环境切换（同 ops-app F22）
 - **F32**: ✅ 已修复 — ErrorBoundary + NetworkStatus（AppState 监听）已接入 App.tsx（`e4dc934`）
-- **F27/F75**: 覆盖率薄弱点见「质量门控」章节
-- **F28**: set-state-in-effect warn，待 screen 测试补齐后逐处收敛
+- **F27/F75**: ✅ 已修复 — authStore/stationStore/workOrderStore 均达 100%，api.ts 提升至 91.4%
+- **F28**: ✅ eslint warn 全部清零（0 warn）
 - **F33**: ✅ eas.json 三档 profile 已就位（`e876fd8`）
