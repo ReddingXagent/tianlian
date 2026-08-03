@@ -37,10 +37,16 @@ module.exports = [
       },
     },
     rules: {
-      // 分诊降级: 存量代码先建门控, warn跟踪不阻断, 后续逐批收窄(F19路线)
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', caughtErrors: 'none' }],
+      // F19路线: warn→error 收窄 (2026-08-03 猴王自驱lint轮)
+      // no-unused-vars: 0违规→升级error
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrors: 'none' }],
       'no-undef': 'error',
       'no-constant-condition': ['error', { checkLoops: false }],
+      // 新增安全规则
+      'no-redeclare': 'error',
+      'no-dupe-keys': 'error',
+      'no-debugger': 'error',
+      'no-duplicate-case': 'error',
     },
   },
   {
