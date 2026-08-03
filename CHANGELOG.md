@@ -6,6 +6,8 @@
 
 ### Added
 - eslint 新增 11 条质量防回归规则（第二批）：no-implicit-coercion / no-empty-function / no-unneeded-ternary / no-lonely-if / prefer-object-spread / no-useless-computed-key / no-dupe-else-if / default-case / no-alert / no-multi-str / yoda；加入时全仓 0 违规（util.js padZero 隐式拼接顺手修复；notifications.js fire-and-forget catch 显式 disable+注释）
+- eslint 新增 12 条质量防回归规则（第三批）：no-template-curly-in-string / no-unmodified-loop-condition / array-callback-return / no-useless-call / no-useless-concat / no-else-return / no-promise-executor-return / no-unsafe-optional-chaining / no-case-declarations / no-sequences / no-new-wrappers / prefer-regex-literals；加入时全仓 0 违规（测试文件 4 处 executor-return 顺手修为块体）。累计质量规则 19→31
+- eslint 新增 11 条质量防回归规则（第二批）：no-implicit-coercion / no-empty-function / no-unneeded-ternary / no-lonely-if / prefer-object-spread / no-useless-computed-key / no-dupe-else-if / default-case / no-alert / no-multi-str / yoda；加入时全仓 0 违规（util.js padZero 隐式拼接顺手修复；notifications.js fire-and-forget catch 显式 disable+注释）
 
 ### Fixed
 - `scan.wxml` 引用缺失的 `/assets/icons/scan-big.png` → 替换为 emoji 占位图标（F87）
@@ -15,7 +17,7 @@
 - 真 appid 替换（当前占位符，待丁哥）
 - 腾讯地图 MAP_KEY 配置
 - 头像昵称 `<button open-type="chooseAvatar">` 采集方案
-- api.js 错误路径分支覆盖补强（当前 branch 69.6%）
+- api.js 错误路径分支覆盖补强（当前 branch 78.57%，实测 2026-08-04；旧记录 69.6% 已过期）
 - scan-big.png 正式图标替换（当前 emoji 占位）
 
 ## [1.1.0] - 2026-07-31

@@ -156,7 +156,7 @@ describe('T-1202-Batch3: 智能轮询', () => {
     );
 
     polling.start();
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => { setTimeout(r, 100); });
     polling.stop();
     // Should still be active since it succeeded
     // (not stopped by retries)

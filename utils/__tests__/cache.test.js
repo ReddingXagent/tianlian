@@ -132,7 +132,7 @@ describe('cachedRequest', () => {
 
   test('请求去重 - 相同 cacheKey 复用', async () => {
     const mockFn = jest.fn().mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ data: 'dedup' }), 50))
+      () => new Promise(resolve => { setTimeout(() => resolve({ data: 'dedup' }), 50); })
     );
 
     // 同时发两个相同 cacheKey 的请求
@@ -169,7 +169,7 @@ describe('cachedRequest', () => {
 
     await cachedRequest(mockFn, [], { cacheKey: 'exp', ttl: 50 });
 
-    await new Promise(resolve => setTimeout(resolve, 80));
+    await new Promise(resolve => { setTimeout(resolve, 80); });
 
     await cachedRequest(mockFn, [], { cacheKey: 'exp', ttl: 50 });
 

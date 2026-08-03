@@ -85,6 +85,19 @@ module.exports = [
       'no-alert': 'error',              // 禁alert/confirm/prompt(小程序环境本无, 防误用)
       'no-multi-str': 'error',          // 禁反斜杠多行字符串
       'yoda': 'error',                  // 禁尤达条件(1===x)
+      // 代码质量防回归规则第三批 (2026-08-04 猴王自驱lint轮, 加入时全仓0违规)
+      'no-template-curly-in-string': 'error',   // 普通字符串里写${}必是笔误
+      'no-unmodified-loop-condition': 'error',  // 循环条件永不变更=死循环隐患
+      'array-callback-return': 'error',         // map/filter/reduce回调必须有return
+      'no-useless-call': 'error',               // 无意义call/apply
+      'no-useless-concat': 'error',             // 禁字面量' '+'b'拼接
+      'no-else-return': 'error',                // return后的else冗余
+      'no-promise-executor-return': 'error',    // executor返回值无意义, 防误以为resolve
+      'no-unsafe-optional-chaining': 'error',   // 防(undefined)?.x()类型错误
+      'no-case-declarations': 'error',          // switch case内声明需块级作用域
+      'no-sequences': 'error',                  // 防逗号表达式歧义
+      'no-new-wrappers': 'error',               // 禁new String/Number/Boolean包装对象
+      'prefer-regex-literals': 'error',         // new RegExp('字面量')→正则字面量
     },
   },
   {

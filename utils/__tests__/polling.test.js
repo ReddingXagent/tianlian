@@ -7,7 +7,7 @@ const { createPolling } = require('../polling');
  * await fn() 会创建 microtask，需要额外 flush 才能让后续的 setTimeout 注册。
  */
 function tick() {
-  return new Promise(resolve => jest.requireActual('timers').setTimeout(resolve, 0));
+  return new Promise(resolve => { jest.requireActual('timers').setTimeout(resolve, 0); });
 }
 
 describe('createPolling', () => {
