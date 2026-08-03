@@ -168,6 +168,120 @@ describe('useWorkOrderStore', () => {
     });
   });
 
+  describe('completeOrder', () => {
+    it('should complete order successfully and refresh list', async () => {
+      (workOrderApi.completeWorkOrder as jest.Mock).mockResolvedValue({});
+      (workOrderApi.getList as jest.Mock).mockResolvedValue({
+        data: { items: MOCK_ORDERS, total: 2, page: 1, pageSize: 20 },
+      });
+
+      await act(async () => {
+        await useWorkOrderStore.getState().completeOrder('WO-1', '已修复');
+      });
+
+      expect(workOrderApi.completeWorkOrder).toHaveBeenCalledWith('WO-1', '已修复');
+      expect(workOrderApi.getList).toHaveBeenCalled();
+      const state = useWorkOrderStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBeNull();
+    });
+
+    it('should complete order without solution', async () => {
+      (workOrderApi.completeWorkOrder as jest.Mock).mockResolvedValue({});
+      (workOrderApi.getList as jest.Mock).mockResolvedValue({
+        data: { items: [], total: 0, page: 1, pageSize: 20 },
+      });
+
+      await act(async () => {
+        await useWorkOrderStore.getState().completeOrder('WO-2');
+      });
+
+      expect(workOrderApi.completeWorkOrder).toHaveBeenCalledWith('WO-2', undefined);
+    });
+
+    it('should handle complete order failure', async () => {
+      const error = new Error('Server Error');
+      (workOrderApi.completeWorkOrder as jest.Mock).mockRejectedValue(error);
+
+      await act(async () => {
+        await expect(useWorkOrderStore.getState().completeOrder('WO-999')).rejects.toThrow('Server Error');
+      });
+
+      const state = useWorkOrderStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('Server Error');
+    });
+
+    it('should handle non-Error exception in completeOrder', async () => {
+      (workOrderApi.completeWorkOrder as jest.Mock).mockRejectedValue('string error');
+
+      await act(async () => {
+        await expect(useWorkOrderStore.getState().completeOrder('WO-X')).rejects.toBe('string error');
+      });
+
+      const state = useWorkOrderStore.getState();
+      expect(state.error).toBe('完成工单失败');
+    });
+  });
+
+  describe('createOrder error paths', () => {
+    it('should handle create order failure with Error', async () => {
+      const error = new Error('Validation Error');
+      (workOrderApi.createWorkOrder as jest.Mock).mockRejectedValue(error);
+
+      await act(async () => {
+        await expect(useWorkOrderStore.getState().createOrder({
+          stationId: 1,
+          title: '',
+          type: 'repair',
+          priority: 'normal',
+        })).rejects.toThrow('Validation Error');
+      });
+
+      const state = useWorkOrderStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('Validation Error');
+    });
+
+    it('should handle create order non-Error exception', async () => {
+      (workOrderApi.createWorkOrder as jest.Mock).mockRejectedValue({ status: 500 });
+
+      await act(async () => {
+        await expect(useWorkOrderStore.getState().createOrder({
+          stationId: 1,
+          title: 'x',
+          type: 'repair',
+          priority: 'normal',
+        })).rejects.toEqual({ status: 500 });
+      });
+
+      const state = useWorkOrderStore.getState();
+      expect(state.error).toBe('创建工单失败');
+    });
+  });
+
+  describe('non-Error exception handling', () => {
+    it('should handle non-Error in fetchOrders', async () => {
+      (workOrderApi.getList as jest.Mock).mockRejectedValue('network down');
+
+      await act(async () => {
+        await useWorkOrderStore.getState().fetchOrders();
+      });
+
+      expect(useWorkOrderStore.getState().error).toBe('获取工单列表失败');
+    });
+
+    it('should handle non-Error in fetchOrderDetail', async () => {
+      (workOrderApi.getDetail as jest.Mock).mockRejectedValue(404);
+
+      await act(async () => {
+        await useWorkOrderStore.getState().fetchOrderDetail('WO-X');
+      });
+
+      expect(useWorkOrderStore.getState().error).toBe('获取工单详情失败');
+    });
+  });
+
   describe('setSelectedOrder', () => {
     it('should set selected order', () => {
       useWorkOrderStore.getState().setSelectedOrder(MOCK_ORDERS[0]);
