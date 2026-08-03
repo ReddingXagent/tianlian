@@ -1,0 +1,14 @@
+# EAS Build ignore - excludes non-essential files from cloud builds
+__tests__/
+__mocks__/
+*.test.*
+*.mock.*
+coverage/
+.env.example
+.gitignore
+.eslintrc.js
+.prettierrc
+jest.config.js
+jest.setup.ts
+DEPLOYMENT.md
+WORK_LOG.md
