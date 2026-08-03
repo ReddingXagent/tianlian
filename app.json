@@ -31,7 +31,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "用于扫描充电桩二维码完成充电"
+        }
+      ]
     ]
   }
 }
