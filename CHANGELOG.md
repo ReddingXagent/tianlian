@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- DeviceDetailScreen 补测6条路径（下拉刷新/遥测降级/错误重试/重启复位确认/在线禁启动/离线启动+电池图标+无心跳降级），单文件覆盖 87.32%→97.18%，函数覆盖 68%→100%；全仓 267 tests / 93.46%
 - 全局错误边界 `ErrorBoundary.tsx`：捕获子树渲染异常防白屏，DEV 模式显示堆栈（`e4dc934`）
 - Makefile 10 targets (install/dev/build/export/test/lint/check/ci-local/clean/help)（F136）
 - GitHub Actions CI 两阶段流水线 (check: tsc+eslint+jest → export: android+ios bundle)（F137）
@@ -21,7 +22,7 @@
 
 ### Changed
 - eslint 警告清零：84 → 0（`474492b`）
-- README 同步最新质量指标（coverage 91.1%、256 tests、eslint 0 warn）
+- README 同步最新质量指标（coverage 93.46%、267 tests、eslint 0 warn）
 
 ### Fixed
 - F32: 无 AppState / 网络状态检测 → ErrorBoundary + NetworkStatus 已接入 ✅

@@ -208,4 +208,78 @@ describe('DeviceDetailScreen', () => {
     expect(await findByText('失败')).toBeTruthy();
     expect(await findByText('发送停止指令失败')).toBeTruthy();
   });
+
+  it('pull-to-refresh should re-fetch device detail', async () => {
+    const { RefreshControl } = require('react-native');
+    const { findByText, UNSAFE_getByType } = render(<DeviceDetailScreen />);
+    await findByText('充电桩A-01');
+
+    const rc = UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      rc.props.onRefresh();
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // 初始加载1次 + 下拉刷新1次
+    expect(deviceApi.getDetail).toHaveBeenCalledTimes(2);
+  });
+
+  it('should degrade gracefully when telemetry API fails', async () => {
+    (deviceApi.getTelemetry as jest.Mock).mockRejectedValue(new Error('no telemetry'));
+
+    const { findByText, queryByText } = render(<DeviceDetailScreen />);
+    expect(await findByText('充电桩A-01')).toBeTruthy();
+    // 遥测失败不影响设备详情, 遥测区隐藏
+    expect(queryByText('实时遥测')).toBeNull();
+  });
+
+  it('should recover after pressing retry on error state', async () => {
+    (deviceApi.getDetail as jest.Mock)
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValue({ data: MOCK_DEVICE });
+
+    const { findByText } = render(<DeviceDetailScreen />);
+    expect(await findByText('加载设备详情失败')).toBeTruthy();
+
+    fireEvent.press(await findByText('重试'));
+    expect(await findByText('充电桩A-01')).toBeTruthy();
+  });
+
+  it('should open confirm dialogs for restart and reset buttons', async () => {
+    const { findByText, queryByText } = render(<DeviceDetailScreen />);
+    await findByText('远程控制');
+
+    fireEvent.press(await findByText('重启'));
+    expect(await findByText('确认重启')).toBeTruthy();
+
+    fireEvent.press(await findByText('取消'));
+    expect(queryByText('确认重启')).toBeNull();
+
+    fireEvent.press(await findByText('复位'));
+    expect(await findByText('确认复位')).toBeTruthy();
+  });
+
+  it('should disable start button when device is online', async () => {
+    const { findByText, queryByText } = render(<DeviceDetailScreen />);
+    await findByText('远程控制');
+
+    // 在线设备禁止启动
+    fireEvent.press(await findByText('启动'));
+    expect(queryByText('确认启动')).toBeNull();
+  });
+
+  it('should allow start for offline battery device and show fallback heartbeat', async () => {
+    (deviceApi.getDetail as jest.Mock).mockResolvedValue({
+      data: { ...MOCK_DEVICE, status: 'offline', type: 'battery', lastHeartbeat: null },
+    });
+
+    const { findByText } = render(<DeviceDetailScreen />);
+    // 离线电池设备: 🔋图标 + 无心跳降级
+    expect(await findByText('🔋')).toBeTruthy();
+    expect(await findByText('无数据')).toBeTruthy();
+
+    fireEvent.press(await findByText('启动'));
+    expect(await findByText('确定要启动设备「充电桩A-01」吗？')).toBeTruthy();
+    expect(await findByText('确认启动')).toBeTruthy();
+  });
 });

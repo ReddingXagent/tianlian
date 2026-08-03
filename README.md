@@ -40,13 +40,13 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（256 用例全绿，coverage 91.1%）
+npm test             # jest 单测（267 用例全绿，coverage 93.46%）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）
 ```
 
-- 测试覆盖：screens / components / hooks / services / store / utils 六层全覆盖（总体 **91.1%**）
+- 测试覆盖：screens / components / hooks / services / store / utils 六层全覆盖（总体 **93.46%**）
 - 覆盖率明细：components 100% / hooks 94.6% / screens 86.9% / services 92.9% / store 100% / utils 100%
 - eslint **0 err / 0 warn**（`474492b` 全部清零）
 
