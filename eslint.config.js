@@ -132,6 +132,38 @@ module.exports = [
       'no-useless-constructor': 'error',    // 禁无意义默认构造函数
       'no-bitwise': 'error',                // 禁位运算符(多为&/&&笔误), 需要处显式disable
       'no-param-reassign': 'error',         // 禁对函数参数重新赋值, 防调用方意外
+      // 代码质量防回归规则第六批 (2026-08-04 猴王自驱lint轮, 全量核心规则扫描: builtin 292条去掉recommended/已启用后166候选,
+      // 一次性临时入config实测, 95条0违规; 剔除7条已废弃(no-catch-shadow/no-native-reassign/no-negated-in-lhs/
+      // no-new-symbol/no-spaced-func/lines-around-directive/id-blacklist)、9条无选项即空转(no-restricted-*×6/id-denylist/
+      // id-match/jsx-quotes无JSX)、no-warning-comments(防TODO摩擦), 收78条)
+      'array-bracket-spacing': 'error', 'arrow-body-style': 'error', 'arrow-spacing': 'error',
+      'block-scoped-var': 'error', 'block-spacing': 'error', 'comma-spacing': 'error',
+      'comma-style': 'error', 'complexity': 'error', 'computed-property-spacing': 'error',
+      'consistent-this': 'error', 'default-case-last': 'error', 'default-param-last': 'error',
+      'func-call-spacing': 'error', 'func-name-matching': 'error', 'generator-star-spacing': 'error',
+      'grouped-accessor-pairs': 'error', 'handle-callback-err': 'error', 'key-spacing': 'error',
+      'keyword-spacing': 'error', 'linebreak-style': 'error', 'lines-between-class-members': 'error',
+      'logical-assignment-operators': 'error', 'max-classes-per-file': 'error', 'max-depth': 'error',
+      'max-nested-callbacks': 'error', 'new-parens': 'error', 'no-await-in-loop': 'error',
+      'no-buffer-constructor': 'error', 'no-caller': 'error', 'no-constructor-return': 'error',
+      'no-eq-null': 'error', 'no-extra-label': 'error', 'no-extra-semi': 'error',
+      'no-floating-decimal': 'error', 'no-implicit-globals': 'error', 'no-invalid-this': 'error',
+      'no-label-var': 'error', 'no-lone-blocks': 'error', 'no-loop-func': 'error',
+      'no-mixed-requires': 'error', 'no-mixed-spaces-and-tabs': 'error', 'no-multiple-empty-lines': 'error',
+      'no-new': 'error', 'no-path-concat': 'error', 'no-script-url': 'error',
+      'no-shadow': 'error', 'no-tabs': 'error', 'no-trailing-spaces': 'error',
+      'no-undef-init': 'error', 'no-whitespace-before-property': 'error',
+      'nonblock-statement-body-position': 'error', 'object-curly-newline': 'error',
+      'one-var-declaration-per-line': 'error', 'operator-assignment': 'error',
+      'operator-linebreak': 'error', 'padding-line-between-statements': 'error',
+      'prefer-exponentiation-operator': 'error', 'prefer-object-has-own': 'error',
+      'prefer-promise-reject-errors': 'error', 'rest-spread-spacing': 'error',
+      'semi': 'error', 'semi-spacing': 'error', 'semi-style': 'error',
+      'sort-imports': 'error', 'sort-vars': 'error', 'space-before-blocks': 'error',
+      'space-in-parens': 'error', 'space-infix-ops': 'error', 'space-unary-ops': 'error',
+      'spaced-comment': 'error', 'switch-colon-spacing': 'error', 'template-curly-spacing': 'error',
+      'template-tag-spacing': 'error', 'unicode-bom': 'error', 'vars-on-top': 'error',
+      'yield-star-spacing': 'error', 'callback-return': 'error', 'class-methods-use-this': 'error',
     },
     linterOptions: {
       reportUnusedDisableDirectives: 'error',   // 失效的eslint-disable注释报错, 防规则笔误/删除后静默失效
