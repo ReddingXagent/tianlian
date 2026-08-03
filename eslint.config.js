@@ -17,8 +17,14 @@ module.exports = defineConfig([
     },
   },
   {
-    // 测试文件放开 jest 全局
+    // 测试文件放开 jest 全局 + jest惯用法豁免
     files: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+    rules: {
+      // mock组件(箭头函数)无需displayName
+      'react/display-name': 'off',
+      // jest.mock会被babel提升到imports之前, import写在mock之后是jest惯用法
+      'import/first': 'off',
+    },
     languageOptions: {
       globals: {
         describe: 'readonly',

@@ -59,5 +59,8 @@
       "!src/types/**"
     ]
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
 }
