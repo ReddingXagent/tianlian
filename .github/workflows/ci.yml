@@ -16,7 +16,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx eslint . --max-warnings 0
+      - run: npm run lint
       - run: npm test -- --coverage --passWithNoTests
 
   structure:

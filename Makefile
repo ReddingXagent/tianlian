@@ -15,8 +15,8 @@ build: ## 结构检查 (微信小程序无需tsc)
 test: ## 运行测试
 	npm test -- --coverage
 
-lint: ## ESLint 检查
-	npx eslint . --max-warnings 0
+lint: ## ESLint 检查 (委托 npm run lint, 单一源)
+	npm run lint
 
 check: lint test ## 完整质量检查 (eslint + jest)
 

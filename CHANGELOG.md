@@ -14,6 +14,7 @@
 - CHANGELOG 清理：移除 Unreleased 段重复的第二批条目（F163 补回时误留的重复行）
 
 ### Changed
+- lint 调用点单一源收敛（F195）：实测撞出 `npm run lint` 缺 `--max-warnings 0`（本地过 CI 红的门限漂移）→ package.json lint 补齐阈值，Makefile lint / scripts/lint-ci.js / CI ci.yml 三处全部委托 `npm run lint`（四处调用点归一）；变异测试实证门限有效（临时注入 no-var/no-unused-vars 违规 → exit 1 正确拦截，清理后 exit 0），lint:ci 全过 + jest 230 绿复验
 - eslint 配置卫生去重（F189）：移除 22 条与 `js.configs.recommended` 完全重复的规则声明（no-undef / no-redeclare / no-dupe-keys / no-debugger / no-duplicate-case / no-prototype-builtins / no-self-assign / no-shadow-restricted-names / no-sparse-arrays / no-unreachable / no-useless-escape / no-misleading-character-class / no-async-promise-executor / no-class-assign / no-const-assign / no-this-before-super / require-yield / no-fallthrough / no-dupe-else-if / no-unsafe-optional-chaining / no-case-declarations / no-irregular-whitespace）；带选项覆盖的 no-unused-vars（argsIgnorePattern）/ no-constant-condition（checkLoops:false）保留；`--print-config` 前后逐条 diff = 零变化，eslint exit 0 + jest 230 绿 + lint:ci 全过复验
 
 ### Fixed

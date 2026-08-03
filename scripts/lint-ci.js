@@ -7,7 +7,7 @@
 const { execSync } = require('child_process');
 
 const steps = [
-  { name: 'eslint', cmd: 'npx eslint . --max-warnings=0' },
+  { name: 'eslint', cmd: 'npm run lint' },
   { name: 'structure', cmd: 'node scripts/check-mp-structure.js' },
 ];
 
