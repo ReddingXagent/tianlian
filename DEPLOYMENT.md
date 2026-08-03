@@ -26,6 +26,9 @@ bash deploy.sh rollback <hash>   # 回滚到hash版本(revert其后全部提交)
 - 进程启动/匹配统一用绝对路径（`$REPO_DIR/main.py`）：pgrep 精确命中本网关，`status` 不会误报其他目录的 main.py
 - Python 版本预检：低于 3.10 告警（不阻断，兼容老环境）
 - `rollback <hash>` = 回滚到 hash 这个好版本：revert 其后全部提交（非只撤 hash 一个），工作区即 hash 状态；无效commit/REV即HEAD/revert冲突（自动abort）均有防护
+- 回滚前未提交改动自动 stash 保护：失败时自动 `git stash pop` 真正恢复现场；成功时保留在 `stash@{0}` 并提示（可手动 pop 找回）
+- 回滚范围含 merge commit 时 revert 会失败（需 `-m`）→ 自动中止并提示手动逐段 `git revert -m 1 <merge-hash>`
+- `make deploy-rollback REV=<hash>` 委托 `deploy.sh rollback`（单一源，防护一致）
 - 日志: `gateway.log`（仓库根），PID: `.pid`
 
 ## 方式二: systemd

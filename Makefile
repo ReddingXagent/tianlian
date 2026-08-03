@@ -67,16 +67,8 @@ docker-logs:
 docker-shell:
 	docker exec -it tianlian-gateway bash
 
-# --- 回滚 ---
+# --- 回滚（委托 deploy.sh rollback，单一源，含 stash 保护） ---
 deploy-rollback:
 	@echo "⚠️ 回滚到指定版本: REV=目标好版本(revert其后所有提交, 非只撤REV一个)"
-	@git log --oneline -5
-	@echo ""
-	@echo "指定回滚目标: make deploy-rollback REV=<commit-hash>"
-	@if [ -z "$(REV)" ]; then echo "❌ 用法: make deploy-rollback REV=<commit-hash>"; exit 1; fi
-	@git rev-parse --verify "$(REV)^{commit}" >/dev/null 2>&1 || { echo "❌ 无效commit: $(REV)"; exit 1; }
-	@N=$$(git rev-list --count $(REV)..HEAD); \
-	if [ "$$N" -eq 0 ]; then echo "ℹ️ REV就是当前HEAD, 无需回滚"; exit 0; fi; \
-	echo "revert其后 $$N 个提交:"; git rev-list --oneline $(REV)..HEAD; \
-	git revert --no-commit $(REV)..HEAD || { echo "❌ revert冲突, 已自动中止"; git revert --abort; exit 1; }; \
-	echo "已revert, 工作区=REV状态; bash deploy.sh 验证后 git commit 并 push"
+	@if [ -z "$(REV)" ]; then echo "❌ 用法: make deploy-rollback REV=<commit-hash>"; git log --oneline -5; exit 1; fi
+	@bash deploy.sh rollback "$(REV)"

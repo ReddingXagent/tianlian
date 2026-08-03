@@ -28,6 +28,12 @@
 #     语义不符(落后N个commit时只撤1个, 其余N-1个坏提交仍在) → 改
 #     `git revert ${REV}..HEAD` 撤销目标好版本之后的全部提交, 工作区=REV状态;
 #     增加 无效commit/REV即HEAD/revert冲突(自动abort) 三重防护
+# v6 (2026-08-04 自驱部署轮, 冲突路径实测):
+#   - fix: rollback stash黑洞 — v5先 stash 脏改动再revert, 但失败路径声称"恢复现场"
+#     却不pop stash(用户未提交改动看似丢失), 成功路径也不提stash去向 →
+#     记录stash计数, 失败时自动 git stash pop 真正恢复现场, 成功时提示 stash@{0}
+#   - fix: revert失败提示只说"冲突", 实际范围含merge commit时(无-m)也会失败 →
+#     提示补merge commit场景与手动处理指引
 set -e
 
 # 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
@@ -66,13 +72,30 @@ if [ "$1" = "rollback" ]; then
     fi
     echo "回滚到: $REV (revert其后 $N 个提交)"
     git rev-list --oneline "$RANGE" | sed 's/^/  revert: /'
+    # 脏工作区先stash(revert需干净树); 记录计数以判断是否真的产生了stash
+    STASH_CNT_BEFORE=$(git stash list | wc -l)
     git stash --include-untracked 2>/dev/null || true
+    STASH_CNT_AFTER=$(git stash list | wc -l)
+    STASHED=false
+    if [ "$STASH_CNT_AFTER" -gt "$STASH_CNT_BEFORE" ]; then STASHED=true; fi
     if ! git revert --no-commit "$RANGE"; then
-        echo "❌ revert冲突, 已自动中止恢复现场(如需手动处理: 先 git revert --abort)"
         git revert --abort 2>/dev/null || true
+        if [ "$STASHED" = true ]; then
+            if git stash pop 2>/dev/null; then
+                echo "ℹ️ 回滚前的未提交改动已恢复(stash pop)"
+            else
+                echo "⚠️ stash恢复失败, 请手动: git stash pop"
+            fi
+        fi
+        echo "❌ revert失败(冲突, 或范围含merge commit需-m), 已自动中止并恢复现场"
+        echo "   如范围含merge commit, 需手动逐段: git revert -m 1 <merge-hash> ..."
         exit 1
     fi
     echo "已 revert $REV 之后的 $N 个提交, 工作区已等于 $REV 状态(改动已暂存未提交)"
+    if [ "$STASHED" = true ]; then
+        echo "ℹ️ 回滚前的未提交改动保存在 stash@{0}(回滚需干净工作区)"
+        echo "   如需找回: git stash pop (注意: 可能与回滚后状态冲突)"
+    fi
     echo "重新部署验证: bash deploy.sh"
     echo "确认无误后: git commit -m 'rollback to $REV' && git push origin master"
     exit 0
