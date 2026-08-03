@@ -5,6 +5,17 @@
 ## [Unreleased]
 
 ### Added
+- deploy.sh: `rollback` 子命令（`bash deploy.sh rollback <commit-hash>` 安全回滚）
+- deploy.sh: `status` 子命令（快速查看 PID/健康检查/状态API/日志尾部）
+- Dockerfile: `$BUILDPLATFORM`/`TARGETPLATFORM` 多架构支持（ARM64 Pi + AMD64 开发机）
+- Makefile: `docker-build`/`docker-up`/`docker-down`/`docker-logs`/`docker-shell` Docker 快捷命令
+- Makefile: `deploy-rollback` 目标（`make deploy-rollback REV=<hash>`）
+
+### Changed
+- Dockerfile: `FROM --platform=$BUILDPLATFORM` 支持多架构构建（buildx 多平台镜像）
+- Makefile: `.PHONY` 补全 Docker + rollback 目标
+
+### Added (历史)
 - `Dockerfile`: 多阶段构建（python:3.10-slim + 非 root 运行 + HEALTHCHECK 健康检查 + 数据卷持久化）
 - `docker-compose.yml`: 一键容器化部署（restart:unless-stopped + 日志轮转 + 时区同步 + 持久化卷）
 - `.dockerignore`: 排除 .venv/.git/data 等，优化构建上下文

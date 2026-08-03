@@ -3,12 +3,17 @@
 # 运行: docker run -d --name gateway --env-file .env -p 8080:8080 tianlian-edge-gateway
 # compose: docker compose up -d
 
-FROM python:3.10-slim AS base
+FROM --platform=$BUILDPLATFORM python:3.10-slim AS base
 
 # 元信息
 LABEL org.opencontainers.image.title="TianLian Edge Gateway"
 LABEL org.opencontainers.image.description="天链V3 边缘网关 — Modbus/OCPP/MQTT 适配 + 云端同步"
 LABEL org.opencontainers.image.source="https://192.168.31.100:2222/volume1/homes/MonkeyKing/repos/tianlian-edge-gateway.git"
+LABEL org.opencontainers.image.licenses="Proprietary"
+
+# 构建参数（支持多架构: docker buildx build --platform linux/arm64,linux/amd64）
+ARG TARGETPLATFORM
+RUN echo "Building for $TARGETPLATFORM"
 
 # 系统依赖（ss/fuser 用于 deploy.sh 端口检测；curl 用于健康检查）
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -19,6 +19,41 @@
 #   - fix: 首次启动失败时自动重试一次(等待2秒后)
 set -e
 
+# 子命令: rollback
+if [ "$1" = "rollback" ]; then
+    echo "=== 天链V3 边缘网关回滚 ==="
+    cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    echo "最近5次提交:"
+    git log --oneline -5
+    echo ""
+    if [ -z "$2" ]; then
+        echo "用法: bash deploy.sh rollback <commit-hash>"
+        echo "例如: bash deploy.sh rollback abc1234"
+        exit 0
+    fi
+    REV="$2"
+    echo "回滚到: $REV"
+    git stash --include-untracked 2>/dev/null || true
+    git revert --no-commit "$REV"
+    echo "已 revert $REV"
+    echo "重新部署: bash deploy.sh"
+    echo "推送远程: git push origin master"
+    exit 0
+fi
+
+# 子命令: status
+if [ "$1" = "status" ]; then
+    echo "=== 天链V3 边缘网关状态 ==="
+    PORT="${PORT:-8080}"
+    PID="$(pgrep -f 'main.py' 2>/dev/null || echo '未运行')"
+    echo "PID: $PID"
+    curl -s -m 3 "http://localhost:$PORT/health" 2>/dev/null && echo "" || echo "健康检查: 不可达"
+    curl -s -m 3 "http://localhost:$PORT/api/v1/status" 2>/dev/null | python3 -m json.tool 2>/dev/null || echo "状态API: 不可达"
+    echo "日志最后10行:"
+    tail -10 gateway.log 2>/dev/null || echo "(无日志)"
+    exit 0
+fi
+
 # 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SCRIPT_DIR/main.py" ]; then
