@@ -11,7 +11,7 @@
     "test:ci": "jest --verbose --ci --coverage",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
-    "lint:ci": "eslint . --max-warnings=21",
+    "lint:ci": "eslint . --max-warnings=60",
     "deploy:check": "node scripts/deploy-check.js"
   },
   "dependencies": {

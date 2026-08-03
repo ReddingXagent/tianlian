@@ -13,12 +13,14 @@ jest.mock('../../services/api', () => {
 
 jest.mock('../../components/LoadingSpinner', () => {
   const { Text } = require('react-native');
-  return ({ text }: { text: string }) => <Text>{text}</Text>;
+  const Spinner = ({ text }: { text: string }) => <Text>{text}</Text>;
+  Spinner.displayName = 'LoadingSpinner';
+  return Spinner;
 });
 
 jest.mock('../../components/EmptyState', () => {
   const { Text, TouchableOpacity } = require('react-native');
-  return ({ icon, title, message, actionLabel, onAction }: any) => (
+  const Empty = ({ icon, title, message, actionLabel, onAction }: any) => (
     <>
       <Text>{title}</Text>
       <Text>{message}</Text>
@@ -27,6 +29,8 @@ jest.mock('../../components/EmptyState', () => {
       )}
     </>
   );
+  Empty.displayName = 'EmptyState';
+  return Empty;
 });
 
 const mockVehicles = [

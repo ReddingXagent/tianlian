@@ -31,12 +31,16 @@ jest.mock('../../store/orderStore', () => ({
 
 jest.mock('../../components/LoadingSpinner', () => {
   const { Text } = require('react-native');
-  return ({ text }: { text: string }) => <Text>{text}</Text>;
+  const Spinner = ({ text }: { text: string }) => <Text>{text}</Text>;
+  Spinner.displayName = 'LoadingSpinner';
+  return Spinner;
 });
 jest.mock('../../components/StatusBadge', () => 'StatusBadge');
 jest.mock('../../components/EmptyState', () => {
   const { Text } = require('react-native');
-  return ({ title, message }: any) => (<><Text>{title}</Text><Text>{message}</Text></>);
+  const Empty = ({ title, message }: any) => (<><Text>{title}</Text><Text>{message}</Text></>);
+  Empty.displayName = 'EmptyState';
+  return Empty;
 });
 
 describe('OrderDetailScreen', () => {

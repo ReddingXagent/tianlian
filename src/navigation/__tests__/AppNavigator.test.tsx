@@ -65,12 +65,16 @@ jest.mock('@react-navigation/bottom-tabs', () => {
 jest.mock('../../screens/LoginScreen', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return () => React.createElement(Text, null, 'LoginScreen');
+  const LoginScreenStub = () => React.createElement(Text, null, 'LoginScreen');
+  LoginScreenStub.displayName = 'LoginScreen';
+  return LoginScreenStub;
 });
 jest.mock('../../screens/HomeScreen', () => {
   const React = require('react');
   const { Text } = require('react-native');
-  return () => React.createElement(Text, null, 'HomeScreen');
+  const HomeScreenStub = () => React.createElement(Text, null, 'HomeScreen');
+  HomeScreenStub.displayName = 'HomeScreen';
+  return HomeScreenStub;
 });
 jest.mock('../../screens/StationDetailScreen', () => () => null);
 jest.mock('../../screens/OrderListScreen', () => () => null);

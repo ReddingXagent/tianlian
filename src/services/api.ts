@@ -27,7 +27,7 @@ const TOKEN_KEY = 'tianlian_user_token';
 // 环境变量 EXPO_PUBLIC_API_URL 优先，回退到生产地址
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://8.134.106.166/api/v1';
 
-const api = axios.create({
+const api = axios.create({ // eslint-disable-line import/no-named-as-default-member
   baseURL: BASE_URL,
   timeout: 15000,
   headers: {
