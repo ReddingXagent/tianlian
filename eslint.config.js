@@ -98,6 +98,22 @@ module.exports = [
       'no-sequences': 'error',                  // 防逗号表达式歧义
       'no-new-wrappers': 'error',               // 禁new String/Number/Boolean包装对象
       'prefer-regex-literals': 'error',         // new RegExp('字面量')→正则字面量
+      // 代码质量防回归规则第四批 (2026-08-04 猴王自驱lint轮, 加入时全仓0违规)
+      'no-throw-literal': 'error',              // throw必须是Error对象, 禁throw字符串/字面量
+      'no-irregular-whitespace': 'error',       // 禁不规则空白(全角空格等), 防隐蔽语法错误
+      'no-unreachable-loop': 'error',           // 循环体最多执行一次=死循环/逻辑错误
+      'no-unused-expressions': 'error',         // 禁无副作用孤立表达式, 防漏写调用
+      'require-await': 'error',                 // async函数必须含await, 防无意义异步包装
+      'no-multi-assign': 'error',               // 禁a=b=c链式赋值, 防作用域意外
+      'no-extra-bind': 'error',                 // 禁无this引用的多余.bind()
+      'no-useless-rename': 'error',             // 禁解构/import同名无意义重命名
+      'no-array-constructor': 'error',          // 禁new Array()歧义构造, 用字面量
+      'prefer-numeric-literals': 'error',       // parseInt('0x1a')等→数值字面量
+      'no-proto': 'error',                      // 禁__proto__(原型链污染风险), 用Object.getPrototypeOf
+      'no-new-func': 'error',                   // 禁new Function()动态构造(等同eval)
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',   // 失效的eslint-disable注释报错, 防规则笔误/删除后静默失效
     },
   },
   {
