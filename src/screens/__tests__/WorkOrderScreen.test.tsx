@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import WorkOrderScreen from '../WorkOrderScreen';
 import { workOrderApi } from '../../services/api';
-import { Alert } from 'react-native';
+import { Alert, FlatList, Modal, RefreshControl } from 'react-native';
 
 // Mock navigation and route
 const mockRouteParams = { stationId: 1 };
@@ -492,5 +492,118 @@ describe('WorkOrderScreen', () => {
     });
 
     expect(queryByText('新建工单')).toBeNull();
+  });
+
+  // === 补测: 筛选chip真实触发 / 真实分页追加 / 下拉刷新 / onRequestClose / 优先级picker ===
+
+  it('should refetch with status param when filter chip pressed', async () => {
+    const { findByText } = render(<WorkOrderScreen />);
+    await findByText('充电桩A-01故障维修');
+    (workOrderApi.getList as jest.Mock).mockClear();
+
+    const chip = await findByText('待处理');
+    await act(async () => {
+      fireEvent.press(chip);
+      await new Promise((r) => setTimeout(r, 200));
+    });
+
+    expect(workOrderApi.getList).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'pending', page: 1 })
+    );
+  });
+
+  it('should load and append next page when reaching end of list', async () => {
+    const page1 = Array.from({ length: 2 }, (_, i) => ({
+      ...MOCK_ORDERS[0],
+      id: i + 1,
+      title: `一页工单${i + 1}`,
+    }));
+    const page2 = [{ ...MOCK_ORDERS[0], id: 3, title: '二页工单3' }];
+
+    (workOrderApi.getList as jest.Mock)
+      .mockResolvedValueOnce({ data: { items: page1, total: 3, page: 1, pageSize: 20 } })
+      .mockResolvedValueOnce({ data: { items: page2, total: 3, page: 2, pageSize: 20 } });
+
+    const { findByText, UNSAFE_getByType } = render(<WorkOrderScreen />);
+    await findByText('一页工单1');
+
+    const flatList = UNSAFE_getByType(FlatList);
+    await act(async () => {
+      flatList.props.onEndReached();
+      await new Promise((r) => setTimeout(r, 200));
+    });
+
+    expect(workOrderApi.getList).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 2 })
+    );
+    // 追加而非替换: 两页数据共存
+    expect(await findByText('二页工单3')).toBeTruthy();
+    expect(await findByText('一页工单1')).toBeTruthy();
+    // 全部加载完毕 → 底部提示
+    expect(await findByText(/已显示全部 3 条工单/)).toBeTruthy();
+  });
+
+  it('should refetch via pull-to-refresh (RefreshControl onRefresh)', async () => {
+    const { findByText, UNSAFE_getByType } = render(<WorkOrderScreen />);
+    await findByText('充电桩A-01故障维修');
+    (workOrderApi.getList as jest.Mock).mockClear();
+
+    const rc = UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      rc.props.onRefresh();
+      await new Promise((r) => setTimeout(r, 200));
+    });
+
+    expect(workOrderApi.getList).toHaveBeenCalledTimes(1);
+    expect(workOrderApi.getList).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1 })
+    );
+  });
+
+  it('should close create modal via Modal onRequestClose (Android back)', async () => {
+    const { findByText, getByText, queryByText, UNSAFE_getByType } = render(<WorkOrderScreen />);
+    await findByText('充电桩A-01故障维修');
+
+    await act(async () => {
+      fireEvent.press(await findByText('+'));
+    });
+    expect(getByText('新建工单')).toBeTruthy();
+
+    const modal = UNSAFE_getByType(Modal);
+    await act(async () => {
+      modal.props.onRequestClose();
+      await new Promise((r) => setTimeout(r, 100));
+    });
+
+    expect(queryByText('新建工单')).toBeNull();
+  });
+
+  it('should create work order with selected priority from picker', async () => {
+    (workOrderApi.createWorkOrder as jest.Mock).mockResolvedValue({ data: {} });
+
+    const { findByText, getAllByText, getByPlaceholderText, getByText } = render(<WorkOrderScreen />);
+    await findByText('充电桩A-01故障维修');
+
+    await act(async () => {
+      fireEvent.press(await findByText('+'));
+    });
+
+    // '低' 只存在于优先级picker(列表优先级为高/中/紧急), 必中picker项
+    await act(async () => {
+      fireEvent.press(getAllByText('低')[0]);
+    });
+
+    await act(async () => {
+      fireEvent.changeText(getByPlaceholderText('请输入工单标题'), '低优先级工单');
+    });
+
+    await act(async () => {
+      fireEvent.press(getByText('创建工单'));
+      await new Promise((r) => setTimeout(r, 100));
+    });
+
+    expect(workOrderApi.createWorkOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ priority: 'low', title: '低优先级工单' })
+    );
   });
 });

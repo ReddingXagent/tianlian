@@ -22,7 +22,8 @@
 
 ### Changed
 - eslint 警告清零：84 → 0（`474492b`）
-- README 同步最新质量指标（coverage 93.46%、267 tests、eslint 0 warn）
+- WorkOrderScreen 补测5条真实交互路径（筛选chip带参重取/真实分页追加/下拉刷新/Modal onRequestClose安卓返回/优先级picker选中创建），单文件覆盖 86.86%→96.96%，函数覆盖 73.91%→100%；全仓 272 tests / 94.53%
+- README 同步最新质量指标（coverage 94.53%、272 tests、eslint 0 warn）
 
 ### Fixed
 - F32: 无 AppState / 网络状态检测 → ErrorBoundary + NetworkStatus 已接入 ✅
