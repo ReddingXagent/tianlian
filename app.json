@@ -3,6 +3,7 @@
     "name": "天链运维",
     "slug": "tianlian-ops",
     "version": "1.0.0",
+    "platforms": ["android", "ios"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -22,9 +23,6 @@
         "backgroundColor": "#1a73e8"
       },
       "package": "com.tianlian.operator"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "runtimeVersion": {
       "policy": "sdkVersion"

@@ -6,6 +6,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- F167: `npm run build` 实际必挂 — `expo export` 默认含 web 平台但项目无 react-native-web/react-dom 依赖；app.json 加 `platforms: ["android","ios"]` 并移除无用的 web.favicon 配置，实测 build 全绿（android 2.3MB / ios 2.29MB）
+
 ### Added
 - scripts/bundle-size.sh: JS bundle 体积门控（WARN>2.75MB / FAIL>3.5MB；基线 android 2.19MB / ios 2.18MB hbc）
 - Makefile: 新增 bundle-size 目标并接入 ci-local；export 产物体积可门禁
