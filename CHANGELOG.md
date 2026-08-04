@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Changed
+- lint门限补齐: `npm run lint` 补 `--max-warnings 0`(此前为裸 `eslint .`, 新增warning会无声通过 — F195同型门限漂移); Makefile lint与CI均已委托 `npm run lint`, 单点修改即全链路生效(调用点单一源); 变异测试实证: 纯warning探针(未用局部变量)无门限exit 0放行 → 加门限exit 1拦截, 清理后exit 0; bundle-size门控同轮变异实测: 4MB→FAIL(exit 1)/3MB→WARN(exit 0)/2MB→OK 三档全对
 - CI健壮性加固: ①两job补 `timeout-minutes`(check=15/export=20) — 此前无超时, 挂死的export最多吃满GitHub默认6h runner; ②export job补 `upload-artifact`(always, 保留7天) — bundle-size回归/导出异常时可直接下载双平台hbc+资产取证, 门控失败也留现场(if: always); ③YAML解析+结构断言校验通过(timeout/artifact字段实测确认)
 
 ### Fixed
