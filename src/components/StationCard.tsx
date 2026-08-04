@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Station } from '../types';
+import { formatDistance } from '../utils/format';
 import StatusBadge from './StatusBadge';
 
 interface StationCardProps {
@@ -10,9 +11,7 @@ interface StationCardProps {
 
 const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
   const distanceText = station.distance
-    ? station.distance < 1000
-      ? `${station.distance}米`
-      : `${(station.distance / 1000).toFixed(1)}公里`
+    ? formatDistance(station.distance)
     : null;
 
   const availableText = `${station.availableConnectors}/${station.totalConnectors}`;

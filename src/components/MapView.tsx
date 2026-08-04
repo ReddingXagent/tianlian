@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Station } from '../types';
+import { formatDistance } from '../utils/format';
 
 interface MapViewProps {
   stations: Station[];
@@ -112,9 +113,7 @@ const MapView: React.FC<MapViewProps> = ({
               </Text>
               {station.distance !== undefined && (
                 <Text style={styles.markerDistance}>
-                  {station.distance < 1000
-                    ? `${station.distance}m`
-                    : `${(station.distance / 1000).toFixed(1)}km`}
+                  {formatDistance(station.distance)}
                 </Text>
               )}
             </TouchableOpacity>

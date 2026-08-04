@@ -45,3 +45,19 @@ export function formatDate(input: DateInput): string {
   const d = toDate(input);
   return d ? d.toLocaleDateString(LOCALE) : '-';
 }
+
+/**
+ * 距离显示单一源(F253)。
+ *
+ * 此前 StationCard 内联 `${distance}米`/`${(distance/1000).toFixed(1)}公里`,
+ * MapView marker 内联 `${distance}m`/`${(distance/1000).toFixed(1)}km`——
+ * 同一屏幕(Home列表卡片+顶部地图)对同一 station.distance 两种形态分叉。
+ * 收敛规则: 渲染侧一律走本函数; 单位跟随 zh-CN 产品口径(米/公里)。
+ * 调用侧保留各自的空值守卫(StationCard falsy / MapView undefined)。
+ */
+export function formatDistance(meters: number): string {
+  if (meters < 1000) {
+    return `${meters}米`;
+  }
+  return `${(meters / 1000).toFixed(1)}公里`;
+}

@@ -1,4 +1,9 @@
-import { formatDate, formatDateTime, formatShortDateTime } from '../format';
+import {
+  formatDate,
+  formatDateTime,
+  formatDistance,
+  formatShortDateTime,
+} from '../format';
 
 /**
  * 日期格式单一源守卫(F241): locale 钉 zh-CN + 形态三档 + 无效输入兜底 '-'。
@@ -50,5 +55,25 @@ describe('无效输入兜底', () => {
   it('NaN 时间戳/无效 Date → "-"', () => {
     expect(formatDateTime(NaN)).toBe('-');
     expect(formatDateTime(new Date('invalid'))).toBe('-');
+  });
+});
+
+describe('formatDistance(F253距离单一源)', () => {
+  it('<1000 米原值直显', () => {
+    expect(formatDistance(0)).toBe('0米');
+    expect(formatDistance(500)).toBe('500米');
+    expect(formatDistance(999)).toBe('999米');
+  });
+
+  it('>=1000 公里一位小数', () => {
+    expect(formatDistance(1000)).toBe('1.0公里');
+    expect(formatDistance(1500)).toBe('1.5公里');
+    expect(formatDistance(2500)).toBe('2.5公里');
+    expect(formatDistance(9999)).toBe('10.0公里');
+  });
+
+  it('边界1000精确切换单位', () => {
+    expect(formatDistance(999.9)).toBe('999.9米');
+    expect(formatDistance(1000.4)).toBe('1.0公里');
   });
 });

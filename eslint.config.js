@@ -30,6 +30,12 @@ module.exports = defineConfig([
           message:
             '日期显示一律走src/utils/format.ts(locale钉zh-CN), 禁止内联toLocale*(F241单一源守卫)',
         },
+        {
+          selector:
+            "BinaryExpression[operator='/'] > MemberExpression[property.name='distance']",
+          message:
+            '距离显示一律走src/utils/format.ts的formatDistance, 禁止内联distance/1000(F253单一源守卫)',
+        },
       ],
     },
   },

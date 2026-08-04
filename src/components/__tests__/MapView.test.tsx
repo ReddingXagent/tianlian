@@ -56,8 +56,8 @@ describe('MapView', () => {
 
   it('renders distance labels on markers', () => {
     const { getByText } = render(<MapView stations={mockStations} />);
-    expect(getByText('500m')).toBeTruthy();
-    expect(getByText('2.5km')).toBeTruthy();
+    expect(getByText('500米')).toBeTruthy();
+    expect(getByText('2.5公里')).toBeTruthy();
   });
 
   it('renders legend with station count', () => {
