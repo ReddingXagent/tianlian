@@ -15,6 +15,7 @@ import { authApi, walletApi } from '../services/api';
 import { WalletRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import { formatDateTime } from '../utils/format';
 
 const RECORD_TYPE_LABELS: Record<string, string> = {
   recharge: '充值',
@@ -136,7 +137,7 @@ const WalletScreen: React.FC = () => {
         </Text>
         <Text style={styles.recordDesc} numberOfLines={1}>{item.description}</Text>
         <Text style={styles.recordTime}>
-          {new Date(item.createdAt).toLocaleString('zh-CN')}
+          {formatDateTime(item.createdAt)}
         </Text>
       </View>
       <View style={styles.recordRight}>

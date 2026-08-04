@@ -34,8 +34,8 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 297 全绿（30 suites）✅ |
-| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 34 / branches 24 / functions 28 / lines 34（只升不降）；实测 78.38 / 68.91 / 76.64 / 78.17（297 tests，2026-08-04） |
+| 测试 | `npm run test:ci` | 306 全绿（31 suites）✅ |
+| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 78 / branches 70 / functions 77 / lines 78（只升不降）；实测 78.72 / 70.16 / 77.33 / 78.52（306 tests，2026-08-04） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤60 警告（`--max-warnings=60`，只降不升；当前 54） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（Expo账号/EAS/OTA 待丁哥，F25/F33） |
 

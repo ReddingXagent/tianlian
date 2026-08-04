@@ -14,6 +14,7 @@ import { RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
+import { formatDateTime } from '../utils/format';
 
 type OrderDetailRouteProp = RouteProp<RootStackParamList, 'OrderDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -80,12 +81,8 @@ const OrderDetailScreen: React.FC = () => {
   const order = selectedOrder;
   if (!order) return null;
 
-  const startTime = order.startTime
-    ? new Date(order.startTime).toLocaleString('zh-CN')
-    : '-';
-  const endTime = order.endTime
-    ? new Date(order.endTime).toLocaleString('zh-CN')
-    : '-';
+  const startTime = formatDateTime(order.startTime);
+  const endTime = formatDateTime(order.endTime);
 
   const statusMap: Record<string, string> = {
     charging: 'charging',

@@ -15,6 +15,7 @@ import { Order, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
+import { formatShortDateTime } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -59,14 +60,7 @@ const OrderListScreen: React.FC = () => {
   };
 
   const renderOrderItem = ({ item }: { item: Order }) => {
-    const timeText = item.startTime
-      ? new Date(item.startTime).toLocaleString('zh-CN', {
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-      : '-';
+    const timeText = formatShortDateTime(item.startTime);
 
     return (
       <TouchableOpacity

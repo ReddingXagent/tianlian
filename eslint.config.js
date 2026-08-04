@@ -17,6 +17,23 @@ module.exports = defineConfig([
     },
   },
   {
+    // F241续打: 日期格式单一源守卫 — 新增日期显示点禁止内联toLocale*(设备locale漂移/参数双源),
+    // 渲染侧一律走src/utils/format.ts(locale钉zh-CN); format.ts自身与测试豁免(预防式门控F220: 基线零违规)
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/utils/format.ts', '**/__tests__/**', '**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.property.name=/^toLocale(String|DateString|TimeString)$/]",
+          message:
+            '日期显示一律走src/utils/format.ts(locale钉zh-CN), 禁止内联toLocale*(F241单一源守卫)',
+        },
+      ],
+    },
+  },
+  {
     // Node脚本(部署门控等)放开node全局
     files: ['scripts/**/*.js'],
     languageOptions: {
