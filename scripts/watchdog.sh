@@ -1,6 +1,7 @@
 #!/bin/bash
 # 天链V3 边缘网关 — 看门狗脚本
 # 用途: 在无 systemd 的环境下（如裸跑 nohup），定时检测网关存活并自动重启
+#       (systemd unit已装时自动退位, 恢复交给Restart=always, 见F230)
 # 使用: crontab -e → */2 * * * * /path/to/watchdog.sh
 # 或:   nohup ./watchdog.sh --loop > /dev/null 2>&1 &
 #
@@ -14,6 +15,17 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"  # scripts/ 的上一级=仓库根
+
+# F230: systemd模式退位守卫(F217同族漏网点) — unit已装=systemd接管进程生死(Restart=always),
+# watchdog此时再kill+nohup重启: ①杀卡死进程后unit 5秒内复活, 与nohup第二实例撞端口(重启风暴);
+# ②.pid被改指向nohup实例, systemd实例失联 → 探测方式与deploy.sh一致(unit文件存在,
+# TIANLIAN_UNIT_FILE可覆盖测试钩子)。systemd模式下watchdog整体退位, 绝不启动第二进程,
+# 恢复交给Restart=always, 排查走 systemctl status/journalctl。
+UNIT_FILE="${TIANLIAN_UNIT_FILE:-/etc/systemd/system/tianlian-gateway.service}"
+if [ -f "$UNIT_FILE" ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [watchdog] 检测到systemd unit($UNIT_FILE), watchdog退位(Restart=always已接管恢复)" >> "$REPO_DIR/gateway.log" 2>/dev/null || true
+    exit 0
+fi
 
 # F205: flock互斥 — cron单次模式下恢复窗口(~75s=3次×健康等待+RESTART_DELAY)可能跨cron触发周期,
 # 无锁时两个实例并发重启: 双启gateway, 后启者覆盖.pid致先启进程成孤儿(占着端口但pid失联),

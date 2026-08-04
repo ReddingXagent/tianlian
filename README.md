@@ -115,6 +115,9 @@ crontab -e
 nohup bash scripts/watchdog.sh --loop > /dev/null 2>&1 &
 ```
 
+> F230: 已装 systemd unit 时 watchdog 自动退位（恢复交给 Restart=always），
+> 避免 kill+nohup 双启与 unit 复活进程撞端口。本方式仅用于无 systemd/Docker 场景。
+
 ### 方式五: systemd（推荐, 开机自启+崩溃重启）
 
 ```bash

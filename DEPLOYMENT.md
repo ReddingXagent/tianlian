@@ -60,6 +60,8 @@ make docker-logs / docker-down / docker-shell
 - **watchdog**（无 systemd 时）: `crontab -e` → `*/2 * * * * /home/tl/tianlian-edge-gateway-v3/scripts/watchdog.sh`
   健康检查失败→进程死则重启，卡死则 kill 重启，连续 3 次失败告警放弃本轮。
   （修复记录: REPO_DIR 曾误指向 scripts/ 导致 pgrep 永不匹配，已改为仓库根）
+  F230: systemd unit 已装时 watchdog 自动退位（exit 0 并记日志），恢复交给 Restart=always——
+  否则 kill 后 unit 5 秒内复活与 nohup 第二实例撞端口（重启风暴，同 F217 族）。
 - **健康检查**: `curl http://<pi>:8080/health` → 200
 - **状态 API**: `curl http://<pi>:8080/api/v1/status`
 

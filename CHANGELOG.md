@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Fixed
+- `scripts/watchdog.sh` (F230): systemd模式退位守卫 — F217同族漏网点: unit已装时systemd接管进程生死(Restart=always), watchdog仍按cron/loop定时kill+nohup重启: ①杀卡死进程后unit 5秒内复活, 与nohup第二实例撞端口(重启风暴); ②.pid被改写指向nohup实例, systemd实例失联 → 与deploy.sh一致的SYSTEMD_MODE探测(unit文件存在, `TIANLIAN_UNIT_FILE`可覆盖测试钩子), 命中即记日志+exit 0整体退位, 绝不启动第二进程, 恢复交给Restart=always; 变异三档实测(unit存在→exit 0+退位日志+未进flock/unit不存在+健康→过守卫正常exit 0零退位日志/bash -n通过); README+DEPLOYMENT.md同步说明
+
+### Fixed
 - `deploy.sh` rollback (F223): 迁移盲区守卫 — rollback只revert代码, 若回滚范围内含 db_migration.py 变更, 数据库schema已被新版本前移, revert后直接 `bash deploy.sh` 重部署会让旧代码跑在新schema上(“no such column”崩/数据错乱)且全程零提示 → revert前探测范围内迁移commit(`git log RANGE -- db_migration.py`), 命中即醒目警告+引导 `restore-db` 恢复迁移前备份并列出可用备份; 变异三档实测(范围含迁移commit→精确警告含commit清单/范围无迁移commit→零警告行为不变/ bash -n 语法通过); pytest 232绿
 
 ### Fixed
