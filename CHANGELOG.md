@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- **app.json 构建配置回归守卫（F245，F244 跨仓移植）**：app.json 是构建/导出的配置声明源，四类零断言补齐 — ①platforms 限定 android+ios（防误挂 web，F179 同型）②plugins↔deps 双向对账（每 plugin 必有已装 dep，缺则 export/prebuild 直接炸；expo-secure-store/expo-asset 等已知原生模块必声明 plugin，F196 反向静默缺口）③android.package↔ios.bundleIdentifier 应用标识同语义双源一致（同文件内双源形态，单侧改名=双平台 OTA/商店归属漂移，F224 同族）④icon/splash/adaptiveIcon 资产文件存在断言（缺=导出后程失败提前 FAIL）；新增 `src/__tests__/appConfig.test.ts`（ops-app F244 模板结构同构零改复用，F238 移植模式），jest 全量跑自动接入 CI check job 零额外接线；变异三档实证（platforms 加 web / android.package 单侧改名 / 移除 expo-asset plugin，均精确拦截 1 failed，sed 反向还原后基线 5/5 + git diff 零残留，变异档保持 JSON 合法性，F244 花絮教训）；全门复验 tsc 0err + eslint 0err/0warn + jest 400→**405 tests** 全绿（33 suites，coverageThreshold 99/91/98/99 棘轮不受影响，测试文件不入覆盖率口径）；README 质量门控章节测试数同步 400→405；RN 三仓 app.json 配置自洽守卫至此全覆盖（user-app F196 / ops-app F244 / station-app 本条）
+
+### Added
 - **路径别名双源漂移守卫（F238）**：tsconfig.compilerOptions.paths（tsc 侧）与 package.json jest.moduleNameMapper（测试侧）同语义双源零断言，只改一侧即 tsc/jest 解析分叉（F231 双源模式 ops-app→station-app 移植）；修法：`scripts/check-alias-config.sh`（node 归一化两侧别名集合+目标目录双向断言，精确别名不处理）+ `npm run check:alias` 接入 CI check job 与 Makefile check 链（alias-check target，委托单一源）；变异三档实证（jest 目标漂移 src2 / tsconfig 单侧新增 @components / jest 侧 moduleNameMapper 缺失，均 exit 1 精确拦截，恢复后 exit 0）；顺带补齐 CI 双 job timeout-minutes（check 15 / export 20，F193 模式）；全门复验 tsc 0err + eslint 0err/0warn + jest **400 tests** 全绿（coverageThreshold 99/91/98/99 棘轮下 exit 0）；README 质量门控章节同步
 
 ### Added
