@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- `scripts/check-api-port.sh` (F249): API端口多源一致性守卫 — 声明侧 config.py LocalAPIConfig.port(api/server.py 实际 listen 端口), 探测/发布侧 deploy.sh PORT 默认值/docker-compose ports 映射/Dockerfile EXPOSE/Dockerfile HEALTHCHECK 探测端口, 多源同名零断言: 任一侧单独改端口→deploy.sh 健康探测旧端口永不亮(健康服务被报部署失败)/Docker HEALTHCHECK 探测旧端口=容器反复判不健康 → 脚本以声明侧默认值对账四源, 缺输入/提取空/不等均 exit 1(F212不放行); 接入 `make check`(api-port-check target, check链委托单一源) + CI check job; 变异四档实测(config.py声明侧改名精确拦 exit 1 / deploy.sh探测侧改名精确拦 exit 1 / Dockerfile HEALTHCHECK 改名精确拦 exit 1 / mv走 docker-compose.yml 缺输入拦 exit 1, 每档 sed 反向还原后基线 exit 0); bash -n + YAML解析 + make -n OK; pytest 232绿
 - `scripts/check-deploy-endpoints.sh` (F243): 部署探测端点一致性守卫 — deploy.sh 部署成功判定(HEALTH_OK循环)+status子命令探测 `http://localhost:$PORT/health` 与 `/api/v1/status`, 路由声明在 api/server.py(@app.get装饰器), 两侧独立维护零断言: 服务端路由单独改名→部署成功判定循环永远不亮(健康服务被报部署失败)/status"不可达"; 探测侧单独改错→同果 → 脚本提取deploy.sh探测路径集合(排除$(hostname)展示行), 断言全部∈server.py声明路由集合, 任一侧缺输入/提取空/不一致均exit 1(F212不放行); 接入 `make check`(deploy-endpoints-check target, check链委托单一源) + CI check job; 变异三档实测(服务端/health→/healthz精确拦exit 1 / 探测侧/health→/healthcheck精确拦exit 1 / mv走server.py缺输入拦exit 1, 每档sed反向还原后基线exit 0); bash -n + YAML解析 + make -n OK; pytest 232绿
 
 ### Added

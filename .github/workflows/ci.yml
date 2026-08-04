@@ -50,6 +50,9 @@ jobs:
       - name: Deploy endpoints guard (F243)
         run: bash scripts/check-deploy-endpoints.sh
 
+      - name: API port guard (F249)
+        run: bash scripts/check-api-port.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov
