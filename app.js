@@ -95,5 +95,12 @@ App({
   // 获取全局token
   getToken() {
     return this.globalData.token || wx.getStorageSync('token');
+  },
+
+  // 获取全局用户信息(F239: 与getToken同构的storage兜底本地访问器;
+  // 冷启动onLaunch走api.getUserInfo()异步回填, 请求未回/失败时globalData为空,
+  // 页面直读globalData.userInfo=空态, 兜底storage保证登录态本地可读)
+  getUserInfo() {
+    return this.globalData.userInfo || wx.getStorageSync('userInfo');
   }
 });

@@ -26,7 +26,7 @@ Page({
 
   // 加载用户信息
   loadUserInfo() {
-    const userInfo = app.globalData.userInfo;
+    const userInfo = app.getUserInfo(); // F239: 登录态走认证层访问器(globalData+storage兜底), 不直读globalData裸字段
     if (userInfo) {
       this.setData({ userInfo });
     }

@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Added
+- userInfo 本地访问器补齐 + globalData.userInfo 裸字段守卫扩展（F239）：token 侧有 app.getToken()（globalData+storage 兜底）而 userInfo 侧无同构访问器=同型半边缺口——冷启动 onLaunch 走 api.getUserInfo() 异步回填，请求未回/失败时 globalData.userInfo 为空，页面直读=空态。修法：app.js 补 app.getUserInfo()（与 getToken 同构：globalData || getStorageSync('userInfo')）；迁移全仓唯一直读点 pages/profile/profile.js（loadUserInfo）；eslint 守卫③ selector 由 property.name='token' 扩为 /^(token|userInfo)$/（与既有守卫同块声明，F214 flat config 教训）；前置核验迁移后 pages/components/utils 零违规、ignores 并集未变=零行为变化；变异探针实证（globalData.userInfo+token 双注入 exit 1 精确报错 / 清理后 exit 0）；eslint 0err/0warn + jest 230 绿复验
+
+### Added
 - eslint 登录入口单一源架构守卫（F233）：no-restricted-syntax 新增 selector（wx.login 精确匹配 property.name）——登录必须走 app.login() 统一入口（token 落盘 setStorageSync+globalData 双写 + code 兑换 api.login），页面直调绕过统一落盘=半登录态漂移（F208/F214 架构守卫同族第⑤条）；与既有守卫**同块声明**（flat config 同 rule id 后块覆盖不合并）；摸底全仓仅 app.js:47 一处且 app.js 已在 ignores 并集内=零行为变化（F220 预防式门控：零违规先行）；变异三档实证（profile 页注入 wx.login exit 1 精确报错 / 清理后全仓 exit 0 / 基线 0）；eslint 0err/0warn + jest 230 绿复验
 
 ### Added

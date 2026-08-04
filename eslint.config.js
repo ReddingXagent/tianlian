@@ -157,7 +157,10 @@ module.exports = [
     // ②F214: 敏感凭据storage键('token'/'userInfo')仅认证层(app.js+services/api.js)可读写,
     //   页面直读绕过401登出/统一注入且硬编码键有改名漂移风险; 不误伤页面私有键
     //   (scanHistory/station_filter)。
-    // ③F214: 登录态禁直读 globalData.token 裸字段, 须走 app.getToken()(绕过storage兜底逻辑)。
+    // ③F214+F239: 登录态禁直读 globalData.token/userInfo 裸字段, 须走 app.getToken()/
+    //   app.getUserInfo()(绕过storage兜底逻辑); F239补userInfo半边: token有兜底访问器而
+    //   userInfo无=同型缺口, 补app.getUserInfo()(与getToken同构)+迁移唯一直读点profile.js,
+    //   selector扩userInfo, 前置核验迁移后pages/components/utils零违规=零行为变化。
     // ④F227: 端点地址单一源 — http(s) URL字面量仅允许 config/index.js(环境切换唯一声明点),
     //   运行时代码硬编码端点=绕过环境切换/灰度对照失真(F224双源漂移同族)。ignores并集新增
     //   config/**(权威源)+测试(jest断言config值/样例URL为合法用途, F220同款豁免);
@@ -184,8 +187,8 @@ module.exports = [
           message: "敏感凭据键('token'/'userInfo')仅认证层(app.js/services/api.js)可读写, 登录态请用 app.getToken()/api.getUserInfo() (架构守卫 F214)",
         },
         {
-          selector: "MemberExpression[object.type='MemberExpression'][object.property.name='globalData'][property.name='token']",
-          message: '登录态请走 app.getToken(), 禁直读 globalData.token 裸字段 (架构守卫 F214)',
+          selector: "MemberExpression[object.type='MemberExpression'][object.property.name='globalData'][property.name=/^(token|userInfo)$/]",
+          message: '登录态请走 app.getToken()/app.getUserInfo(), 禁直读 globalData.token/userInfo 裸字段 (架构守卫 F214/F239)',
         },
         {
           selector: "Literal[value=/^https?:\\/\\//]",
