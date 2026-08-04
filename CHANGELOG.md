@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Fixed
+- `deploy.sh` (F217): 双模式冲突守卫 — unit已安装(make systemd-install)时, 主流程仍pgrep+kill停进程+nohup启新实例: `Restart=always`在kill后5秒内复活systemd进程, 与nohup第二实例撞端口(一者无限重启风暴/新代码未生效假部署); `restore-db`同型(kill后复活进程立即写回刚恢复的库) → 新增SYSTEMD_MODE探测(unit文件存在即systemd模式), 步骤6/7与restore-db停启全部委托`systemctl stop/start`(start后取MainPID接健康检查轮询), systemd模式下不写.pid/不nohup/日志提示切journalctl; stop失败即中止(exit 1, 不碰库); 变异三档实测(systemd模式stop+start调用链精确/直跑模式零systemctl调用行为不变/stop失败exit 1库不动); systemd/README.md新增自动探测章节
+
+### Fixed
 - `Makefile` systemd-install (F211): 路径漂移守卫 — unit/logrotate 模板硬编码 `/home/tl/tianlian-edge-gateway-v3`(Pi默认路径), 旧安装裸 `sudo cp`, 仓库位于其他目录时(deploy.sh REPO_DIR 自动探测支持任意含 main.py 目录)装出的 unit WorkingDirectory/EnvironmentFile 与 logrotate 路径指向不存在目录 → 服务起不来/日志轮转静默失效(missingok) → 安装时 sed 渲染为 $(CURDIR)；三档实测(非默认路径替换3处精确/默认路径 no-op diff零/ make -n CURDIR展开正确)；deploy.sh 两处提示+systemd/README.md 手动步骤同步收敛到 `make systemd-install`(F195单一源模式)
 
 ### Changed

@@ -37,12 +37,21 @@ sudo systemctl status tianlian-gateway
 - **NoNewPrivileges + ProtectSystem**: 安全加固，限制写权限
 - **network-online.target**: 确保网络就绪后再启动
 
+## deploy.sh 自动探测 systemd 模式（F217）
+
+unit 安装后（`/etc/systemd/system/tianlian-gateway.service` 存在），`bash deploy.sh` 与
+`bash deploy.sh restore-db` 会自动切换为 systemd 模式：停/启全部委托 `systemctl stop/start`，
+不再 nohup 双启。否则 `Restart=always` 会在 kill 后 5 秒内复活进程，与 nohup 新实例撞端口
+（双实例/重启风暴），restore-db 的恢复也会被复活进程写回。
+
+> 直跑模式（未装 unit）行为不变：nohup + .pid + gateway.log。
+
 ## 从 deploy.sh 迁移
 
-如果之前用 deploy.sh 部署：
+如果之前用 deploy.sh 直跑部署：
 1. 先停旧进程: `kill $(cat .pid)` 或 `pkill -f main.py`
 2. 确认端口释放: `ss -tlnp | grep 8080`
 3. 按上面步骤安装 systemd 服务
 4. 验证: `curl http://localhost:8080/health`
 
-deploy.sh 仍保留，适合首次部署和调试使用。systemd 适合日常稳定运行。
+安装 unit 后 deploy.sh 仍可用（自动切 systemd 模式，见上节），适合升级部署与调试。

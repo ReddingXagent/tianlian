@@ -61,6 +61,16 @@ fi
 PYTHON="python3"
 PORT="${PORT:-8080}"
 
+# F217: systemd模式探测 — unit已安装(make systemd-install)时, 停/启必须走systemctl:
+# pgrep+kill后Restart=always会在5秒内复活进程, 再nohup双启→端口竞争/重启风暴;
+# restore-db同理须停unit, 否则复活进程立即写回刚恢复的库。
+# TIANLIAN_UNIT_FILE可环境变量覆盖(测试钩子, 生产默认Pi路径)。
+UNIT_FILE="${TIANLIAN_UNIT_FILE:-/etc/systemd/system/tianlian-gateway.service}"
+SYSTEMD_MODE=false
+if [ -f "$UNIT_FILE" ]; then
+    SYSTEMD_MODE=true
+fi
+
 # 子命令: rollback
 if [ "$1" = "rollback" ]; then
     echo "=== 天链V3 边缘网关回滚 ==="
@@ -128,18 +138,32 @@ if [ "$1" = "restore-db" ]; then
     fi
     echo "恢复源: $BAK → $DB_FILE"
     # 先停服务防止写库(sqlite写锁/覆盖)
-    OLD_PID=$(pgrep -f "$REPO_DIR/main.py" 2>/dev/null || true)
-    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
-        kill "$OLD_PID" 2>/dev/null || true
-        sleep 2
-        if kill -0 "$OLD_PID" 2>/dev/null; then
-            kill -9 "$OLD_PID" 2>/dev/null || true
+    if [ "$SYSTEMD_MODE" = true ]; then
+        # F217: systemd下必须停unit — pgrep+kill会被Restart=always在5秒内复活,
+        # 与cp恢复竞速, 复活进程立即写回旧连接致恢复无效
+        if ! sudo systemctl stop tianlian-gateway; then
+            echo "❌ systemd服务停止失败(需sudo权限操作systemctl)"; exit 1
         fi
-        echo "已停止网关(PID $OLD_PID)"
+        echo "已停止网关(systemd unit)"
+    else
+        OLD_PID=$(pgrep -f "$REPO_DIR/main.py" 2>/dev/null || true)
+        if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+            kill "$OLD_PID" 2>/dev/null || true
+            sleep 2
+            if kill -0 "$OLD_PID" 2>/dev/null; then
+                kill -9 "$OLD_PID" 2>/dev/null || true
+            fi
+            echo "已停止网关(PID $OLD_PID)"
+        fi
     fi
     mkdir -p data
     cp "$BAK" "$DB_FILE"
-    echo "✅ 已恢复数据库。重启服务: bash deploy.sh"
+    if [ "$SYSTEMD_MODE" = true ]; then
+        sudo systemctl start tianlian-gateway
+        echo "✅ 已恢复数据库并重启服务(systemd模式, 日志: journalctl -u tianlian-gateway)"
+    else
+        echo "✅ 已恢复数据库。重启服务: bash deploy.sh"
+    fi
     exit 0
 fi
 
@@ -236,19 +260,26 @@ if ! $PYTHON db_migration.py; then
     exit 1
 fi
 
-# 6. 停止旧服务(精确匹配本目录 main.py)
+# 6. 停止旧服务(systemd模式停unit; 直跑模式精确匹配本目录 main.py)
 echo "[6/7] 停止旧服务..."
-OLD_PID=$(pgrep -f "$REPO_DIR/main.py" 2>/dev/null || true)
-if [ -z "$OLD_PID" ] && [ -f .pid ]; then
-    OLD_PID="$(cat .pid 2>/dev/null || true)"
-fi
-if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
-    kill "$OLD_PID" 2>/dev/null || true
-    sleep 2
-    # 确保进程终止
-    if kill -0 "$OLD_PID" 2>/dev/null; then
-        kill -9 "$OLD_PID" 2>/dev/null || true
-        sleep 1
+if [ "$SYSTEMD_MODE" = true ]; then
+    # F217: pgrep+kill会被Restart=always在5秒内复活, 与步骤7 nohup双启撞端口
+    if ! sudo systemctl stop tianlian-gateway; then
+        echo "❌ systemd服务停止失败"; exit 1
+    fi
+else
+    OLD_PID=$(pgrep -f "$REPO_DIR/main.py" 2>/dev/null || true)
+    if [ -z "$OLD_PID" ] && [ -f .pid ]; then
+        OLD_PID="$(cat .pid 2>/dev/null || true)"
+    fi
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        kill "$OLD_PID" 2>/dev/null || true
+        sleep 2
+        # 确保进程终止
+        if kill -0 "$OLD_PID" 2>/dev/null; then
+            kill -9 "$OLD_PID" 2>/dev/null || true
+            sleep 1
+        fi
     fi
 fi
 
@@ -268,18 +299,26 @@ if [ $WAIT_CNT -ge 10 ]; then
     sleep 2
 fi
 
-# 7. 启动服务(加载.env到环境变量)
+# 7. 启动服务(systemd模式委托unit, EnvironmentFile自载.env; 直跑模式加载.env到环境变量)
 echo "[7/7] 启动边缘网关..."
-if [ -f .env ]; then
+if [ "$SYSTEMD_MODE" != true ] && [ -f .env ]; then
     set -a
     . .env
     set +a
 fi
 start_gateway() {
-    # 绝对路径启动: 进程 cmdline 含完整路径, pgrep -f "$REPO_DIR/main.py" 才能精确匹配
-    nohup $PYTHON "$REPO_DIR/main.py" > gateway.log 2>&1 &
-    NEW_PID=$!
-    echo "$NEW_PID" > .pid
+    if [ "$SYSTEMD_MODE" = true ]; then
+        # F217: systemd模式绝不nohup双启(端口竞争/重启风暴)
+        if ! sudo systemctl start tianlian-gateway; then
+            echo "❌ systemd启动失败(systemctl start)"; exit 1
+        fi
+        NEW_PID="$(systemctl show -p MainPID --value tianlian-gateway 2>/dev/null || echo 0)"
+    else
+        # 绝对路径启动: 进程 cmdline 含完整路径, pgrep -f "$REPO_DIR/main.py" 才能精确匹配
+        nohup $PYTHON "$REPO_DIR/main.py" > gateway.log 2>&1 &
+        NEW_PID=$!
+        echo "$NEW_PID" > .pid
+    fi
 }
 
 start_gateway
@@ -310,21 +349,21 @@ if [ "$HEALTH_OK" = true ] && kill -0 "$NEW_PID" 2>/dev/null; then
     echo "✅ 部署成功! PID: $NEW_PID"
     echo "   健康检查: http://$(hostname -I | awk '{print $1}'):$PORT/health"
     echo "   运行状态: http://localhost:$PORT/api/v1/status"
-    echo "   日志: $REPO_DIR/gateway.log"
+    if [ "$SYSTEMD_MODE" = true ]; then
+        echo "   日志: journalctl -u tianlian-gateway -f (systemd模式, 无gateway.log)"
+    else
+        echo "   日志: $REPO_DIR/gateway.log"
+    fi
     sleep 1
     curl -s -m 5 "http://localhost:$PORT/health" 2>/dev/null && echo "" || echo "⚠️ 健康检查失败, 请查看日志"
 
-    # 检测 systemd 可用性并给出迁移建议
-    if systemctl is-system-running >/dev/null 2>&1; then
-        if [ ! -f /etc/systemd/system/tianlian-gateway.service ]; then
+    # 检测 systemd 可用性并给出迁移建议(已在systemd模式则无需提示)
+    if [ "$SYSTEMD_MODE" != true ] && systemctl is-system-running >/dev/null 2>&1; then
+        if [ ! -f "$UNIT_FILE" ]; then
             echo ""
             echo "💡 建议: 安装 systemd 服务实现开机自启+崩溃重启"
             echo "   make systemd-install   # 路径自动适配当前仓库目录(F211)"
             echo "   详见: systemd/README.md"
-        else
-            echo ""
-            echo "ℹ️ systemd 服务已安装, 建议用 systemctl 管理:"
-            echo "   sudo systemctl restart tianlian-gateway"
         fi
     fi
 
