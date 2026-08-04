@@ -27,6 +27,8 @@ jobs:
       - run: npm run check:guard-wiring
       # 环境变量双源漂移守卫(F256): 运行时代码读取键 ↔ .env.example模板键 双向对账 + fallback值==模板值, 防漏配静默吃默认值/死键误导
       - run: npm run check:env-defaults
+      # 未使用依赖守卫(F262): 生产依赖必须满足 代码import/app.json plugins配置插件/运行时隐式原生桥白名单 三形态之一, 防死依赖增大构建面与audit攻击面
+      - run: npm run check:unused-deps
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint

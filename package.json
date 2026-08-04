@@ -18,7 +18,8 @@
     "check:alias": "bash scripts/check-alias-config.sh",
     "check:node": "bash scripts/check-node-version.sh",
     "check:guard-wiring": "bash scripts/check-guard-wiring.sh",
-    "check:env-defaults": "bash scripts/check-env-defaults.sh"
+    "check:env-defaults": "bash scripts/check-env-defaults.sh",
+    "check:unused-deps": "bash scripts/check-unused-deps.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",

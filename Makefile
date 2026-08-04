@@ -1,7 +1,7 @@
 # 天链运维 App - Makefile
 # 本地构建与验证快捷命令
 
-.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check check clean export-android export-ios bundle-size ci-local
+.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check check clean export-android export-ios bundle-size ci-local
 
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -49,7 +49,10 @@ guard-wiring-check: ## 守卫接线三源一致性守卫 (package.json check:* v
 
 env-defaults-check: ## 环境变量双源漂移守卫 (代码读取键↔.env.example模板键+fallback值对账, 委托 npm run check:env-defaults, F256)
 	npm run check:env-defaults
-check: version-check alias-check node-check guard-wiring-check env-defaults-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + tsc + eslint + jest)
+
+unused-deps-check: ## 未使用依赖守卫 (生产依赖import/plugins/隐式白名单三形态, 委托 npm run check:unused-deps, F262)
+	npm run check:unused-deps
+check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 
