@@ -1,7 +1,7 @@
 # 天链运维 App - Makefile
 # 本地构建与验证快捷命令
 
-.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check check clean export-android export-ios bundle-size ci-local
+.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check check clean export-android export-ios bundle-size ci-local
 
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -46,7 +46,10 @@ node-check: ## node版本双源漂移守卫 (engines.node vs CI node-version, �
 guard-wiring-check: ## 守卫接线三源一致性守卫 (package.json check:* vs Makefile check链 vs CI, 委托 npm run check:guard-wiring, F250)
 	npm run check:guard-wiring
 
-check: version-check alias-check node-check guard-wiring-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + tsc + eslint + jest)
+
+env-defaults-check: ## 环境变量双源漂移守卫 (代码读取键↔.env.example模板键+fallback值对账, 委托 npm run check:env-defaults, F256)
+	npm run check:env-defaults
+check: version-check alias-check node-check guard-wiring-check env-defaults-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 

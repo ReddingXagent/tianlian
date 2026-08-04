@@ -25,6 +25,8 @@ jobs:
       - run: npm run check:node
       # 守卫接线三源一致性守卫(F250): check:* 守卫的 package.json声明 ↔ Makefile check链 ↔ CI步骤 三源必须一致, 防新增守卫漏接线=假门控
       - run: npm run check:guard-wiring
+      # 环境变量双源漂移守卫(F256): 运行时代码读取键 ↔ .env.example模板键 双向对账 + fallback值==模板值, 防漏配静默吃默认值/死键误导
+      - run: npm run check:env-defaults
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint
