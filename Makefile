@@ -1,4 +1,4 @@
-.PHONY: help install dev build test lint check auth-keys-check ci-local clean deploy deploy-check
+.PHONY: help install dev build test lint check auth-keys-check nav-targets-check ci-local clean deploy deploy-check
 
 help: ## 显示所有命令
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -21,7 +21,10 @@ lint: ## ESLint 检查 (委托 npm run lint, 单一源)
 auth-keys-check: ## auth存储键双源对账 (app.js↔services/api.js, F240; 委托 npm run check:auth-keys)
 	npm run check:auth-keys
 
-check: lint auth-keys-check test ## 完整质量检查 (eslint + auth键对账 + jest)
+nav-targets-check: ## 导航目标↔页面注册双源对账 (跳转url字面量↔app.json pages, F246; 委托 npm run check:nav-targets)
+	npm run check:nav-targets
+
+check: lint auth-keys-check nav-targets-check test ## 完整质量检查 (eslint + auth键对账 + 导航对账 + jest)
 
 ci-local: check ## 本地模拟 CI 流程 (check)
 

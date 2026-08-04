@@ -23,6 +23,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run check:auth-keys
+      - run: npm run check:nav-targets
       - run: npm test -- --coverage --passWithNoTests
 
   structure:

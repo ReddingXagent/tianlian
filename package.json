@@ -9,7 +9,8 @@
     "lint:ci": "node scripts/lint-ci.js",
     "deploy": "node scripts/deploy.js",
     "deploy:check": "node scripts/deploy.js --check",
-    "check:auth-keys": "node scripts/check-auth-keys.js"
+    "check:auth-keys": "node scripts/check-auth-keys.js",
+    "check:nav-targets": "node scripts/check-nav-targets.js"
   },
   "jest": {
     "testEnvironment": "node",

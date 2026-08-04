@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Added
+- 导航目标↔页面注册双源对账守卫（F246）：运行时 wx.navigateTo/redirectTo/switchTab/reLaunch 的 url 字面量（调用侧，散布各页面）与 app.json pages 数组（声明侧，唯一注册源）双源零断言，任一侧单独变更即漂移——页面改名/移除注册→跳转运行时 "navigateTo:fail page is not found"；tabBar 页用 navigateTo/redirectTo 或非 tabBar 页用 switchTab→运行时 fail（F243 探测集↔声明集同族）。不变量（单向子集，F240/F243 同向）：静态导航目标集 ⊆ 注册页集；switchTab 目标 ∈ tabBar 页集、navigateTo/redirectTo 目标 ∉ tabBar 页集（reLaunch 只查子集）；check-mp-structure.js 只挡注册四件套齐全/tabBar 引用已注册页，调用侧字面量是它的盲区。提取含模板字符串，query/插值截断取静态前缀，纯动态 url 计数不拦；缺输入/注册集空/目标集空/断言败均 exit 1（F212 不放行）；npm run check:nav-targets 接入 CI check job + Makefile check 链（nav-targets-check，委托单一源）；变异四档实证（app.json 移除 coupons 注册 exit 1 双调用点精确拦 / profile.js 跳转目标改名 exit 1 / mv 走 app.json 缺输入 exit 1 / switchTab→navigateTo 撞 tabBar 页 exit 1，sed 反向还原后基线 exit 0，F231/F238 铁律禁 git checkout）；接手花絮：并发轮脚本撞 eslint 4 errors（generator-star-spacing×2 + max-depth 嵌套5>4×2）→提取逻辑抽 helper 函数降深+星号位置修正，重构后基线+变异复验全中；eslint 0err/0warn + jest 230 绿复验；基线实测 18 个静态跳转目标 ⊆ 11 个注册页
+
+### Added
 - auth 存储键双源对账守卫（F240）：scripts/check-auth-keys.js — 'token'/'userInfo' 存储键名在 app.js（boot 恢复读侧）与 services/api.js（登录写入侧）双源硬编码字面量且零断言，任一侧整侧改名→ boot 恢复读旧键静默落空→用户持有有效 token 却被静默登出（F224 双源漂移同族；eslint 守卫 F214 只挡认证层外直读写，层内双源漂移不设防；app.js 无测试文件，往返路径零覆盖）。不变量：keys(app.js) ⊆ keys(api.js)，提取 wx.get/set/removeStorage(Sync) 首参字面量+异步对象形态 key 属性（与 F214 selector 双形态对齐）；npm run check:auth-keys 接入 CI check job + Makefile check 链（auth-keys-check，委托单一源）；变异三档实证（api.js 整侧 token 改名 exit 1 / app.js 整侧 userInfo 改名 exit 1 / api.js 缺输入 exit 1，sed 反向还原后基线 exit 0；F231/F238 铁律：变异还原禁 git checkout）；eslint 0err/0warn + jest 230 绿复验；花絮：首版变异档只改 api.js 单处未拦住——单边部分改名=文件内部自相矛盾（api.test.js 领地），整侧改名才是双源漂移语义，变异档设计须对齐守卫的真实漂移场景
 
 ### Added
