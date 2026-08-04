@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- **路径别名双源漂移守卫（F238）**：tsconfig.compilerOptions.paths（tsc 侧）与 package.json jest.moduleNameMapper（测试侧）同语义双源零断言，只改一侧即 tsc/jest 解析分叉（F231 双源模式 ops-app→station-app 移植）；修法：`scripts/check-alias-config.sh`（node 归一化两侧别名集合+目标目录双向断言，精确别名不处理）+ `npm run check:alias` 接入 CI check job 与 Makefile check 链（alias-check target，委托单一源）；变异三档实证（jest 目标漂移 src2 / tsconfig 单侧新增 @components / jest 侧 moduleNameMapper 缺失，均 exit 1 精确拦截，恢复后 exit 0）；顺带补齐 CI 双 job timeout-minutes（check 15 / export 20，F193 模式）；全门复验 tsc 0err + eslint 0err/0warn + jest **400 tests** 全绿（coverageThreshold 99/91/98/99 棘轮下 exit 0）；README 质量门控章节同步
+
+### Added
 - **AIChatPanel 强化补测第六批（F232，接手并发轮改动复验落盘）**：接手并发轮未提交改动 — AIChatPanel 4 条强化补测（Markdown 渲染 h2/h3标题+有序列表+行内粗体/斜体/代码与前置普通文本不丢 / 流式渲染 onToken 逐 token 占位消息增量更新 / 打字指示器 400ms 点动画循环与 scroll 定时回调安全触发 / 快捷提问 chip 填值+仪表盘概览 focus 分支双验证）；全仓 396→**400 tests** 全绿，全量覆盖 stmts 96.65→**99.02%** / branches 90.28→**91.92%** / funcs 96.57→**98.28%** / lines 97.13→**99.64%**；coverageThreshold棘轮上调 96/90/96/97→**99/91/98/99**（实测下沿取整，上调后 jest --coverage 复验 exit 0）；接手复验规矩全走：tsc 0err → jest 400绿 → coverage 逐项比对吻合 → eslint 全门复验；README 质量门控章节同步新数
 
 ### Added

@@ -9,6 +9,7 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,11 +19,13 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx eslint . --max-warnings 0
+      - run: npm run check:alias
       - run: npm test -- --coverage
 
   export:
     needs: check
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

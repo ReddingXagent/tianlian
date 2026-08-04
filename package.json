@@ -10,6 +10,7 @@
     "test": "jest --passWithNoTests",
     "lint": "eslint .",
     "build": "tsc --noEmit",
+    "check:alias": "bash scripts/check-alias-config.sh",
     "export:android": "expo export --platform android",
     "export:ios": "expo export --platform ios"
   },
