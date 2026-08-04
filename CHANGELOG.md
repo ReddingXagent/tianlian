@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- CI 健壮性补齐（F193/F199 模式例行体检落地本仓）：ci.yml 两 job 补 timeout-minutes（check=15 / structure=10，此前挂死最多吃满 GitHub 默认 6h runner）+ 新增 concurrency（cancel-in-progress，push/PR 并发跑批自动取消旧跑）；YAML 解析+结构断言校验（timeout/concurrency/原有 steps 全实测确认）；同轮摸底发现 jest 有 collectCoverageFrom 但无 coverageThreshold（覆盖率回退无声通过，F201 同型缺口），留测试维度轮按 F201 协议处理
+
 ### Added
 - eslint 新增 78 条防回归规则（第六批，累计质量规则 63→141）：ESLint 核心规则全量扫描 — builtin 292 条去掉 recommended/已启用后 166 候选一次性临时入 config 实测，95 条 0 违规；剔除 7 条已废弃（no-catch-shadow / no-native-reassign / no-negated-in-lhs / no-new-symbol / no-spaced-func / lines-around-directive / id-blacklist）、9 条无选项即空转（no-restricted-* ×6 / id-denylist / id-match / jsx-quotes 无 JSX）、no-warning-comments（防 TODO 摩擦）、no-undefined（实测 34 违规），收 78 条：no-shadow / no-await-in-loop / complexity / max-depth / default-param-last / logical-assignment-operators / prefer-object-has-own / prefer-promise-reject-errors / semi / linebreak-style / unicode-bom 等；eslint exit 0 + jest 230 绿复验
 - eslint 新增 20 条质量防回归规则（第五批）：no-labels / no-div-regex / accessor-pairs / no-nested-ternary / no-new-require / no-octal-escape / no-void / no-iterator / prefer-spread / prefer-rest-params / no-object-constructor / no-new-object / dot-notation / no-extend-native / no-return-await / symbol-description / no-duplicate-imports / no-useless-constructor / no-bitwise / no-param-reassign；候选池 24 条先全仓扫描实测（camelcase 46 / prefer-template 6 / no-confusing-arrow 3 违规剔除，no-with 与 recommended 重复剔除），0 违规 20 条全收。累计质量规则 43→63
