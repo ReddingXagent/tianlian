@@ -96,6 +96,10 @@ describe('orderStore', () => {
       activeCharging: null,
       total: 0,
       page: 1,
+      pageSize: 20,
+      hasMore: false,
+      loadingMore: false,
+      statusFilter: undefined,
       loading: false,
       error: null,
     });
@@ -121,6 +125,70 @@ describe('orderStore', () => {
 
       expect(useOrderStore.getState().error).toBe('获取失败');
       expect(useOrderStore.getState().loading).toBe(false);
+    });
+
+    it('should set hasMore=true when items less than total', async () => {
+      (orderApi.getList as jest.Mock).mockResolvedValue({
+        data: { items: mockOrders, total: 5, page: 1, pageSize: 2 } as PaginatedData<Order>,
+      });
+
+      await useOrderStore.getState().fetchOrders({ status: 'completed' });
+
+      const state = useOrderStore.getState();
+      expect(state.hasMore).toBe(true);
+      expect(state.statusFilter).toBe('completed');
+    });
+  });
+
+  describe('loadMoreOrders (无限滚动分页)', () => {
+    it('should append next page with same filter and dedupe by id', async () => {
+      // 首页: total=3 已拉 2 条 → hasMore
+      (orderApi.getList as jest.Mock).mockResolvedValueOnce({
+        data: { items: mockOrders, total: 3, page: 1, pageSize: 2 } as PaginatedData<Order>,
+      });
+      await useOrderStore.getState().fetchOrders({ status: 'completed' });
+      expect(useOrderStore.getState().hasMore).toBe(true);
+
+      // 第二页: 含 1 条重复(id=2) + 1 条新(id=3)
+      const nextOrder: Order = { ...mockOrders[0], id: 3, orderNo: 'TL20260603002' };
+      (orderApi.getList as jest.Mock).mockResolvedValueOnce({
+        data: { items: [mockOrders[1], nextOrder], total: 3, page: 2, pageSize: 2 } as PaginatedData<Order>,
+      });
+
+      await useOrderStore.getState().loadMoreOrders();
+
+      expect(orderApi.getList).toHaveBeenLastCalledWith({ status: 'completed', page: 2, pageSize: 2 });
+      const state = useOrderStore.getState();
+      expect(state.orders.map((o) => o.id)).toEqual([1, 2, 3]);
+      expect(state.hasMore).toBe(false);
+      expect(state.loadingMore).toBe(false);
+    });
+
+    it('should no-op when hasMore=false', async () => {
+      (orderApi.getList as jest.Mock).mockResolvedValue(mockPaginatedResponse);
+      await useOrderStore.getState().fetchOrders();
+      expect(useOrderStore.getState().hasMore).toBe(false);
+
+      await useOrderStore.getState().loadMoreOrders();
+
+      // 只有首页那一次调用
+      expect(orderApi.getList).toHaveBeenCalledTimes(1);
+    });
+
+    it('should fail silently and allow retry', async () => {
+      (orderApi.getList as jest.Mock).mockResolvedValueOnce({
+        data: { items: mockOrders, total: 5, page: 1, pageSize: 2 } as PaginatedData<Order>,
+      });
+      await useOrderStore.getState().fetchOrders();
+
+      (orderApi.getList as jest.Mock).mockRejectedValueOnce(new Error('网络异常'));
+      await useOrderStore.getState().loadMoreOrders();
+
+      const state = useOrderStore.getState();
+      expect(state.loadingMore).toBe(false);
+      expect(state.orders).toHaveLength(2);
+      expect(state.error).toBeNull();
+      expect(state.hasMore).toBe(true);
     });
   });
 

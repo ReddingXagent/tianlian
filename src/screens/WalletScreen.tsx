@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
@@ -21,23 +22,49 @@ const RECORD_TYPE_LABELS: Record<string, string> = {
   withdraw: '提现',
 };
 
+const PAGE_SIZE = 20;
+
 const WalletScreen: React.FC = () => {
   const { user, setUser } = useAuthStore();
   const [records, setRecords] = useState<WalletRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [recharging, setRecharging] = useState(false);
+  // 无限滚动分页状态(API本就分页, 此前UI只拉第一页——流水超出即不可见)
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const loadRecords = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await walletApi.getRecords();
+      const response = await walletApi.getRecords({ page: 1, pageSize: PAGE_SIZE });
       setRecords(response.data.items);
+      setPage(response.data.page);
+      setHasMore(response.data.items.length < response.data.total);
     } catch {
       // 静默处理
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const loadMoreRecords = useCallback(async () => {
+    if (!hasMore || loadingMore || loading) return;
+    setLoadingMore(true);
+    try {
+      const response = await walletApi.getRecords({ page: page + 1, pageSize: PAGE_SIZE });
+      const data = response.data;
+      const seen = new Set(records.map((r) => r.id));
+      const merged = [...records, ...data.items.filter((r) => !seen.has(r.id))];
+      setRecords(merged);
+      setPage(data.page);
+      setHasMore(merged.length < data.total);
+    } catch {
+      // 静默处理, 下次触边可重试
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, loading, page, records]);
 
   // 余额显示取自authStore.user.balance: 充电扣费/他处充值后回钱包页会陈旧
   // (F170/F176同型收尾) → 回焦静默重拉流水 + 拉最新profile同步余额。
@@ -148,6 +175,15 @@ const WalletScreen: React.FC = () => {
           keyExtractor={(item) => String(item.id)}
           renderItem={renderRecordItem}
           contentContainerStyle={styles.listContent}
+          onEndReached={loadMoreRecords}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator color="#1a73e8" style={styles.footer} />
+            ) : !hasMore && records.length > 0 ? (
+              <Text style={styles.footerText}>没有更多了</Text>
+            ) : null
+          }
         />
       )}
     </View>
@@ -243,6 +279,15 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#bbb',
     marginTop: 2,
+  },
+  footer: {
+    marginVertical: 12,
+  },
+  footerText: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#bbb',
+    marginVertical: 12,
   },
 });
 

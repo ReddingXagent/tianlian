@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -26,7 +27,7 @@ const ORDER_STATUS_FILTERS = [
 
 const OrderListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { orders, loading, fetchOrders } = useOrderStore();
+  const { orders, loading, fetchOrders, loadMoreOrders, hasMore, loadingMore } = useOrderStore();
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState('');
 
@@ -138,6 +139,15 @@ const OrderListScreen: React.FC = () => {
           keyExtractor={(item) => String(item.id)}
           renderItem={renderOrderItem}
           contentContainerStyle={styles.listContent}
+          onEndReached={loadMoreOrders}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator color="#1a73e8" style={styles.footer} />
+            ) : !hasMore && orders.length > 0 ? (
+              <Text style={styles.footerText}>没有更多了</Text>
+            ) : null
+          }
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -240,6 +250,15 @@ const styles = StyleSheet.create({
   orderTime: {
     fontSize: 12,
     color: '#bbb',
+  },
+  footer: {
+    marginVertical: 12,
+  },
+  footerText: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#bbb',
+    marginVertical: 12,
   },
 });
 

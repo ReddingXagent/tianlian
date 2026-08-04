@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- 分页列表无限滚动补齐（移动端真缺口）— 订单/钱包流水/优惠券三屏的 API 本就分页（PaginatedData），但 UI 只拉第一页：历史记录超出首页即永久不可见。修复：orderStore 新增 hasMore/loadingMore/loadMoreOrders（追加+按 id 去重+加载更多失败静默可重试+筛选条件随 loadMore 保持），OrderList/Wallet/Coupon 三屏 FlatList 接 onEndReached 触边加载下一页（加载中 footer spinner/到底显示「没有更多了」）；补测 4 条（275→279：hasMore 判定/追加+去重+筛选保持/no-op 门控/失败静默可重试）
 - expo-camera 权限声明补齐 + 配置回归防护（移动端真缺口）— b3eb03c 装了 expo-camera 但 app.json plugins 漏配：iOS 缺 NSCameraUsageDescription（真机权限请求直接失败）/Android 缺 CAMERA 权限声明；补 `["expo-camera", {"cameraPermission": ...}]`，`expo config --type introspect` 实测两端声明均生效；新增 src/__tests__/appConfig.test.ts 接入 jest 门禁（camera 权限文案 + expo-secure-store 保留 + platforms 限定 android+ios 三项回归防护，F179 一并锁住），补测 3 条（272→275）
 - Android 硬件返回键治理（移动端真缺口）— 新增 useAndroidBackExit hook：此前任意 root tab 按硬件返回直接 exitApp（React Navigation 默认，充电中误退尤甚）；治理后：详情页盖住 tabs 不拦截（原生 back 弹栈）、非 Home tab 先跳 Home、Home tab 首按 toast「再按一次退出」+ 2s 内再按才 exitApp；iOS BackHandler 天然 no-op 无需分支；补测 7 条（265→272：拦截/不拦截/双击窗口/reset/state 未知 + AppNavigator mock 补 useNavigation）
 - ScanScreen 真扫码落地（F21 修复）— 新增 expo-camera ~16.0.18 + CameraScanner 组件（相机权限请求/拒绝后引导去设置、QR 取景框、同码 2.5s 冷却去重）+ parseScanPayload 解析器（裸编码/URL/URL 末段路径三形态）；扫码成功自动查询并收起相机，手动输入保留兜底；补测 24 条（241→265：CameraScanner 权限/扫描、scanCode 解析、ScanScreen 相机交互）
