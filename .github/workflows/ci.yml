@@ -47,6 +47,9 @@ jobs:
       - name: Deploy names guard (F236)
         run: bash scripts/check-deploy-names.sh
 
+      - name: Deploy endpoints guard (F243)
+        run: bash scripts/check-deploy-endpoints.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov
