@@ -22,6 +22,7 @@ jobs:
   quality:
     name: Lint + Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15   # F193模式: 挂死不吃满GitHub默认6h runner
 
     steps:
       - uses: actions/checkout@v4
@@ -59,6 +60,7 @@ jobs:
   docker:
     name: Docker image build
     runs-on: ubuntu-latest
+    timeout-minutes: 20   # F193模式: 冷缓存docker build留足余量
     steps:
       - uses: actions/checkout@v4
 

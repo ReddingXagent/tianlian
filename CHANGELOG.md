@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- CI (ci.yml): 两 job 补 `timeout-minutes`（quality=15 / docker=20）— F193模式例行体检撞出：此前均无超时，挂死最多吃满 GitHub 默认 6h runner；YAML 解析+结构断言校验（timeout/concurrency/coverage产物 if:always 均实测确认）。本地无 act 环境，结构化校验替代
+
 ### Fixed
 - `deploy.sh` (v8): 步骤5迁移失败黑洞 — 旧写法 `2>/dev/null || echo` 吞掉真失败（`db_migration.py` 幂等成功恒 exit 0，真失败 exit 1），带病继续会杀旧服务起新代码，旧schema库运行时即 "no such column" 崩 → 迁移失败即中止部署（此时旧服务未停，零影响）；实测坏库场景确认中止（exit 1）
 - `deploy.sh` (v8): 备份同秒碰撞覆盖 — 时间戳备份名同秒重跑会静默覆盖上一份备份（实测复现：好备份被坏库内容覆盖）→ 目标已存在时追加 `-1/-2` 后缀，绝不覆盖旧备份
