@@ -7,6 +7,10 @@
 ## [Unreleased]
 
 ### Added
+- **零测试文件补测第二批（F213）**：补齐 LoginScreen（资金/认证敏感页，7条：表单渲染/用户名空拦截/密码空白拦截/trim用户名+原始密码透传/Error失败弹服务端文案并复位按钮/非Error失败兜底文案/加载中spinner+按钮禁用挂起探针验证复位）+ MainTabNavigator（2条：五Tab中文标签齐备getAllByText容忍header/title双匹配/默认落首页）；全仓 342→**351 tests** 全绿，全量覆盖 stmts 78.87→**80.34%** / branches 73.77→**75.05%** / funcs 78.28→**79.14%** / lines 78.33→**79.94%**；coverageThreshold棘轮上调 78/73/78/78→**80/75/79/79**（上调后 jest --coverage --ci 复验通过）；剩余 6 个零测试文件（AppNavigator/Dashboard/Profile/StationDetail/StationList/types）待后续测试轮；tsc 0err + eslint 0err/0warn（--max-warnings 0）+ jest --coverage --ci 全门复验通过；README质量门控章节同步新数
+- 测试工程要点：jest.mock工厂被hoisting，工厂内引用顶层import会TDZ，须工厂内require（文件级加 eslint-disable no-require-imports，与既有测试模式一致）；mock组件用命名函数避免 react/display-name；加载态断言用 UNSAFE_getAllByType(TouchableOpacity) 取稳定容器引用（文本子节点会卸载致旧引用失效）
+
+### Added
 - **零测试文件补测第一批（F207）**：补齐 F201 撞出的 12 个零测试文件中 3 个小组件 — ①LoadingSpinner 4条（默认/自定义文案/空文案隐藏/size+color透传）②ErrorBoundary 4条（正常透传/抛错fallback😵+重试按钮/componentDidCatch日志/重试后恢复渲染，模块级flag确定性控制抛错时机）③NetworkStatus 6条（在线null/网络错误横幅/401视为在线/回前台重新ping/非active态不检查/卸载移除AppState订阅，api.get全mock）；全仓 328→**342 tests** 全绿，全量覆盖 stmts 75.53→**78.87%** / branches 71.54→**73.77%** / funcs 75.14→**78.28%** / lines 74.93→**78.33%**；coverageThreshold棘轮上调 75/71/74.5/74.5→**78/73/78/78**（实测下沿留小缓冲，防回退无声通过）；剩余 8 个零测试文件（AppNavigator/MainTabNavigator/Dashboard/Login/Profile/StationDetail/StationList/types）待后续测试轮；tsc 0err + eslint 0err/0warn（--max-warnings 0）+ jest --coverage --ci 全门复验通过；README质量门控章节同步新数
 
 ### Added
