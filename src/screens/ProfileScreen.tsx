@@ -12,7 +12,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { authApi, statsApi } from '../services/api';
 import { RootStackParamList, UserStats } from '../types';
-import { formatMoney } from '../utils/format';
+import { formatMoney, formatEnergy } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -103,7 +103,7 @@ const ProfileScreen: React.FC = () => {
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNum}>{stats?.totalEnergy ? stats.totalEnergy.toFixed(1) : 0}</Text>
+          <Text style={styles.statNum}>{stats?.totalEnergy ? formatEnergy(stats.totalEnergy) : 0}</Text>
           <Text style={styles.statLabel}>充电(kWh)</Text>
         </View>
         <View style={styles.statDivider} />

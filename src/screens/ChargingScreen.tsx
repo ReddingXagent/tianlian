@@ -12,7 +12,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useOrderStore } from '../store/orderStore';
 import { useChargingPolling } from '../hooks/useChargingPolling';
 import { ChargingStatus, RootStackParamList } from '../types';
-import { formatMoney } from '../utils/format';
+import { formatMoney, formatEnergy } from '../utils/format';
 
 type ChargingRouteProp = RouteProp<RootStackParamList, 'Charging'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -83,7 +83,7 @@ const ChargingScreen: React.FC = () => {
   }
 
   const power = status.power.toFixed(1);
-  const energy = status.energy.toFixed(2);
+  const energy = formatEnergy(status.energy);
   const duration = status.duration;
   const amount = formatMoney(status.amount);
   const minutes = Math.floor(duration);

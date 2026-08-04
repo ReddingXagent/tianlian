@@ -14,7 +14,7 @@ import { RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
-import { formatDateTime, formatMoney } from '../utils/format';
+import { formatDateTime, formatMoney, formatEnergy } from '../utils/format';
 
 type OrderDetailRouteProp = RouteProp<RootStackParamList, 'OrderDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -118,7 +118,7 @@ const OrderDetailScreen: React.FC = () => {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>充电量</Text>
-            <Text style={styles.infoValue}>{order.energy.toFixed(2)} kWh</Text>
+            <Text style={styles.infoValue}>{formatEnergy(order.energy)} kWh</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>充电时长</Text>

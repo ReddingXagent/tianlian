@@ -42,6 +42,12 @@ module.exports = defineConfig([
           message:
             '金额显示一律走src/utils/format.ts的formatMoney, 禁止内联金额类属性.toFixed(2)(F259单一源守卫)',
         },
+        {
+          selector:
+            "CallExpression[callee.property.name='toFixed'][callee.object.property.name=/^(energy|totalEnergy)$/]",
+          message:
+            '电量显示一律走src/utils/format.ts的formatEnergy, 禁止内联energy/totalEnergy.toFixed(F265单一源守卫)',
+        },
       ],
     },
   },

@@ -2,6 +2,7 @@ import {
   formatDate,
   formatDateTime,
   formatDistance,
+  formatEnergy,
   formatMoney,
   formatShortDateTime,
 } from '../format';
@@ -76,6 +77,20 @@ describe('formatDistance(F253距离单一源)', () => {
   it('边界1000精确切换单位', () => {
     expect(formatDistance(999.9)).toBe('999.9米');
     expect(formatDistance(1000.4)).toBe('1.0公里');
+  });
+});
+
+describe('formatEnergy(F265电量单一源)', () => {
+  it('两位小数口径(与订单/充电/个人页统一)', () => {
+    expect(formatEnergy(340.5)).toBe('340.50');
+    expect(formatEnergy(12.345)).toBe('12.35');
+  });
+  it('整数补零', () => {
+    expect(formatEnergy(0)).toBe('0.00');
+    expect(formatEnergy(30)).toBe('30.00');
+  });
+  it('单位由调用侧附加, 函数只格式化数值', () => {
+    expect(`${formatEnergy(12.5)} kWh`).toBe('12.50 kWh');
   });
 });
 

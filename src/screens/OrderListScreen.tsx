@@ -15,7 +15,7 @@ import { Order, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
-import { formatShortDateTime, formatMoney } from '../utils/format';
+import { formatShortDateTime, formatMoney, formatEnergy } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -76,7 +76,7 @@ const OrderListScreen: React.FC = () => {
         <View style={styles.orderMeta}>
           <View style={styles.metaItem}>
             <Text style={styles.metaLabel}>充电量</Text>
-            <Text style={styles.metaValue}>{item.energy.toFixed(2)} kWh</Text>
+            <Text style={styles.metaValue}>{formatEnergy(item.energy)} kWh</Text>
           </View>
           <View style={styles.metaItem}>
             <Text style={styles.metaLabel}>时长</Text>

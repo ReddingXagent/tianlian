@@ -74,3 +74,18 @@ export function formatDistance(meters: number): string {
 export function formatMoney(value: number): string {
   return value.toFixed(2);
 }
+
+/**
+ * 电量显示单一源(F265)。
+ *
+ * 此前能量精度口径双源散布: OrderList/OrderDetail/Charging 均内联
+ * `.toFixed(2)`, 而 ProfileScreen 累计电量内联 `.toFixed(1)`——同一物理量
+ * (充电电量 kWh)两种精度口径并存(340.5 在订单显 340.50, 个人页显 340.5),
+ * 未来任一处单独再改即静默漂移。
+ * 收敛规则: 渲染侧电量数值一律走本函数(两位小数, 与金额同精度口径);
+ * 单位(kWh)由调用侧按既有排版附加, 本函数只负责数值→两位小数字符串。
+ * 调用侧保留各自的空值守卫(ProfileScreen falsy 三元)。
+ */
+export function formatEnergy(value: number): string {
+  return value.toFixed(2);
+}
