@@ -16,11 +16,11 @@ dev: ## 启动开发服务器
 build: ## TypeScript 编译检查 (委托 npm run typecheck, 调用点单一源 F206)
 	npm run typecheck
 
-export-android: ## 导出 Android JS Bundle
-	npx expo export --platform android --output-dir /tmp/ops-export-android
+export-android: ## 导出 Android JS Bundle (委托 npm run build:android, 调用点单一源 F212/F206)
+	npm run build:android -- --output-dir /tmp/ops-export-android
 
-export-ios: ## 导出 iOS JS Bundle
-	npx expo export --platform ios --output-dir /tmp/ops-export-ios
+export-ios: ## 导出 iOS JS Bundle (委托 npm run build:ios, 调用点单一源 F212/F206)
+	npm run build:ios -- --output-dir /tmp/ops-export-ios
 
 bundle-size: ## JS Bundle 体积门控 (需先 export-android/export-ios)
 	./scripts/bundle-size.sh

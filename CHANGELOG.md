@@ -6,6 +6,10 @@
 
 ## [Unreleased]
 
+### Fixed
+- bundle-size门控单平台静默漏测(F212): 原逻辑导出目录缺失即"跳过"返回0 — 只导出android没导ios时门控照样通过, ios bundle超限无声放行 → 改为缺目录返回2, 单平台缺失/双缺均FAIL(门控要求双平台齐验); 变异三档实测: 双平台齐在exit 0 / 单缺exit 1(新拦截) / 双缺exit 1
+- F206遗留清零: CI export job与Makefile export-android/export-ios仍为裸 `npx expo export` → 全部委托 `npm run build:android/build:ios -- --output-dir ...`(参数透传); 验证: YAML结构断言(新调用点在位/裸npx清零/timeout与artifact保留) + make -n委托确认 + 真实android导出实测2.19MB与基线一致
+
 ### Changed
 - 构建/测试/体检调用点单一源收敛(F206, F195模式): CI check job原为裸 `npx tsc`/`npx jest`/`npx expo-doctor` 绕过 package.json scripts(参数漂移: npm test无--coverage、Makefile与CI各一套) → 全部委托 npm scripts(`npm run typecheck` / `npm test -- --coverage --ci` / `npm run doctor`, 新增doctor script); Makefile build/test/doctor同步改委托; 附带修复门禁非确定性: expo-doctor原靠npx隐式下载无版本钉住(每次可能拉不同版本) → 钉为devDependency ^1.20.1, lockfile可复现; 验证: YAML解析+结构断言(新调用点在位/旧npx调用点清零/timeout保留) + tsc 0err + jest 263绿(经新路径, coverage实测stmts84.24%/branches70.93%/funcs79.6%/lines85.91%) + lint 0err/0warn + doctor 18/18 + make -n委托确认
 

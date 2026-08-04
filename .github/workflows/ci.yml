@@ -34,8 +34,9 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx expo export --platform android --output-dir /tmp/export
-      - run: npx expo export --platform ios --output-dir /tmp/export-ios
+      # 调用点单一源(F212/F206): export 同样委托 package.json scripts(build:android/build:ios), 参数透传
+      - run: npm run build:android -- --output-dir /tmp/export
+      - run: npm run build:ios -- --output-dir /tmp/export-ios
       - run: ./scripts/bundle-size.sh /tmp/export /tmp/export-ios
       # 产物留档: bundle-size回归/导出异常时可下载hbc与资产排查 (always: 门控失败也要能取证)
       - uses: actions/upload-artifact@v4
