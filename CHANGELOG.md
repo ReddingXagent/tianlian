@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- **AIChatPanel 定向补测接手 + 空回复缺陷修复 + branches 棘轮 92→93（F263）**：接手并发轮未提交改动（AIChatPanel.test.tsx +3：非 Error 异常走未知错误兜底 / 空内容消息 / 打字指示器 dots 逐 400ms 推进中间态），复验撞出 1 failed（空内容用例断言“正在查询数据…”消失但永不成立）→ 追根因撞出真实组件缺陷：最终回复 content='' 时气泡渲染走 `message.content ?` 空分支，占位文案“正在查询数据…”**永久滞留**（请求已结束但 UI 仍显示查询中，静默误导）；修法：handleSend 结果替换处空回复（含纯空白 trim）兜底为“(暂无回复内容)”；用例改断言新行为 + 补纯空白变体，并发轮另 2 条原样复验通过；全仓 418→**422 tests** 全绿（33 suites），branches 791/854→**795/854** = 92.62→**93.12%**（jest 控制台口径；F257 留的“距 93 差 4 分支”恰好补齐）；coverageThreshold 棘轮上调 branches 92→**93**（实测下沿取整 F207）；变异验证：门限临时抬 94→exit 1 精确拦（"threshold for branches (94%) not met: 93.12%"），还原 93→exit 0；花絮：coverage-summary.json 为 05:37 陈旧产物与 jest 控制台 93.09 vs 93.12 微差，权威口径以控制台为准（F254）；**方法固化：补测用例复验失败不是改断言迁就现状，先追根因分清“测试写错”还是“组件缺陷”——本例是后者，修组件同 commit 落盘（F252 同型：守卫/补测撞出存量缺陷=最高价值形态）**；全门复验 tsc 0err + eslint 0err/0warn
+
+### Added
 - **services 层兜底分支定向补测（F257）**：json-summary 洼地排序摸底（全仓 67 未覆盖分支，top：AIChatPanel 15 / ai.ts 8 / api.ts 8）→ 选 api.ts + ai.ts 双 services 文件定向补 10 条守卫用例：api 侧 4 条（mapAlarm numOrUndef 数字字符串/空白字符串双分支 + workOrderApi.getList status 不在反向映射表的 ?? 原值穿透 + dashboardApi.getStats 全数据源缺失 ?? 兜底归零 + revenueApi.getSummary data 缺失 ?? 兜底/daily 空数组 today 归零）；ai 侧 6 条（executeToolCall API 报错 response.data.message 透传 + 网络错误无 response 的 err.message 兜底 + sendChatMessage 响应缺 id 的 generateId 兜底 + chat 流式异常非 Error 抛出的未知错误文案 + 流式零内容未理解兜底文案 + tool call arguments 分片到达的 existing 累积合并执行全链路）；全仓 408→**418 tests** 全绿（33 suites），branches 787/854→**791/854** = 92.15→**92.62%**（取整下沿仍 92，门限不上调，距 93 还差 4 分支留待下轮）；花絮：revenue 档首版 mock 用 `data:{}` 非 nullish 不走 `?? []` 撞 reduce 崩 → 改 data 缺失形态（`??` 只对 null/undefined 生效，空对象不是缺失）
 
 ### Added

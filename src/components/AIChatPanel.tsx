@@ -423,12 +423,17 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
         }
       );
 
-      // 替换占位消息为最终结果
+      // 替换占位消息为最终结果; 空回复兜底占位文案——否则气泡渲染走content空分支,
+      // "正在查询数据…"永久滞留误导用户(请求已结束但UI仍显示查询中)
+      const finalResult =
+        result.content && result.content.trim() !== ''
+          ? result
+          : { ...result, content: '(暂无回复内容)' };
       setMessages((prev) => {
         const updated = [...prev];
         const lastIdx = updated.length - 1;
         if (updated[lastIdx]?.id === assistantMsgId) {
-          updated[lastIdx] = result;
+          updated[lastIdx] = finalResult;
         }
         return updated;
       });

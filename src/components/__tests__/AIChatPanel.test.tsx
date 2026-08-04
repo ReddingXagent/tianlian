@@ -207,4 +207,65 @@ describe('AIChatPanel', () => {
       jest.useRealTimers();
     }
   });
+
+  it('请求失败为非Error异常: 走未知错误兜底分支', async () => {
+    mockChat.mockRejectedValueOnce('裸字符串异常');
+    const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '随便问');
+    fireEvent.press(getByText('↑'));
+
+    await waitFor(() => {
+      expect(getByText(/抱歉，出错了：未知错误/)).toBeTruthy();
+    });
+  });
+
+  it('助手空内容消息: 气泡fallback文案替代查询中占位, 不永久滞留loading态', async () => {
+    mockChat.mockResolvedValueOnce(assistantMsg(''));
+    const { getByPlaceholderText, getByText, queryByText } = render(<AIChatPanel />);
+
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '随便问');
+    fireEvent.press(getByText('↑'));
+
+    await waitFor(() => {
+      expect(getByText('(暂无回复内容)')).toBeTruthy();
+    });
+    // 请求已结束: footer指示器与气泡占位文案都不应再存在
+    expect(queryByText('正在查询数据…')).toBeNull();
+    expect(getByText('AI 助手')).toBeTruthy();
+  });
+
+  it('助手纯空白内容消息: trim后同走空回复兜底', async () => {
+    mockChat.mockResolvedValueOnce(assistantMsg('   \n  '));
+    const { getByPlaceholderText, getByText, queryByText } = render(<AIChatPanel />);
+
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '随便问');
+    fireEvent.press(getByText('↑'));
+
+    await waitFor(() => {
+      expect(getByText('(暂无回复内容)')).toBeTruthy();
+    });
+    expect(queryByText('正在查询数据…')).toBeNull();
+  });
+
+  it('打字指示器逐步推进: dots 1/2/3中间态逐次提交, opacity真分支覆盖', () => {
+    jest.useFakeTimers();
+    try {
+      mockChat.mockReturnValueOnce(new Promise(() => {}));
+      const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+      fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '测试');
+      fireEvent.press(getByText('↑'));
+      expect(getByText('正在查询数据…')).toBeTruthy();
+      // 一次推进1700ms会被React批处理成末态''(真分支永不提交);
+      // 逐400ms单独act推进, 让'.'/ '..'/'...'三个中间态各自提交渲染
+      for (let i = 0; i < 3; i++) {
+        act(() => {
+          jest.advanceTimersByTime(400);
+        });
+        expect(getByText('正在查询数据…')).toBeTruthy();
+      }
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
