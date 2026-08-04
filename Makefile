@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -40,6 +40,10 @@ env-keys-check:
 # F261: 日志路径双源漂移守卫(logrotate轮转目标↔deploy.sh/watchdog.sh写侧文件名对账)
 log-paths-check:
 	@bash scripts/check-log-paths.sh
+
+# F267: 数据持久化路径多源一致性守卫(config.py db_path声明↔Dockerfile VOLUME/compose挂载/deploy.sh备份glob对账)
+data-paths-check:
+	@bash scripts/check-data-paths.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
