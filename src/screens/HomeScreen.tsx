@@ -15,6 +15,7 @@ import { RootStackParamList, Station } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import StationCard from '../components/StationCard';
+import MapView from '../components/MapView';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -139,13 +140,13 @@ const HomeScreen: React.FC = () => {
             />
           }
         >
-          {/* 地图占位提示 */}
-          <View style={styles.mapPlaceholder}>
-            <Text style={styles.mapPlaceholderIcon}>🗺️</Text>
-            <Text style={styles.mapPlaceholderText}>
-              共找到 {stations.length} 个充电站
-            </Text>
-          </View>
+          {/* 站点地图(模拟): MapView自组件落地起零挂载(F228同款死代码),
+              此前此处仅静态占位文案——挂载后可视化站点分布/可用状态, 点marker直达详情 */}
+          <MapView
+            stations={stations}
+            onStationPress={handleStationPress}
+            height={220}
+          />
 
           {stations.map((station) => (
             <StationCard
@@ -211,22 +212,6 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 16,
     paddingBottom: 32,
-  },
-  mapPlaceholder: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e3f2fd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-  },
-  mapPlaceholderIcon: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  mapPlaceholderText: {
-    fontSize: 13,
-    color: '#1565c0',
   },
 });
 
