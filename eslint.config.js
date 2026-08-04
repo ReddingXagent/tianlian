@@ -163,6 +163,9 @@ module.exports = [
     //   config/**(权威源)+测试(jest断言config值/样例URL为合法用途, F220同款豁免);
     //   前置核验: config/index.js与测试对①②③零违规, 并集扩豁免零行为变化。
     //   覆盖Literal与模板字符串首段(TemplateElement.cooked), 注释不参与AST不受影响。
+    // ⑤F233: 登录入口单一源 — wx.login仅认证层(app.js)可调, 页面直调绕过统一token落盘
+    //   (setStorageSync+globalData双写)与api.login(code)兑换, 半登录态漂移; 摸底全仓仅
+    //   app.js:47一处(F220预防式门控: 零违规先行), app.js已在ignores并集内, 零行为变化。
     files: ['**/*.js'],
     ignores: ['app.js', '**/services/api.js', 'config/**', '**/__tests__/**', '**/*.test.js'],
     rules: {
@@ -191,6 +194,10 @@ module.exports = [
         {
           selector: "TemplateElement[value.cooked=/^https?:\\/\\//]",
           message: '端点地址必须在 config/index.js 统一声明(环境切换单一源), 运行时代码禁硬编码 http(s) URL (架构守卫 F227)',
+        },
+        {
+          selector: "CallExpression[callee.object.name='wx'][callee.property.name='login']",
+          message: '登录必须走 app.login() 统一入口(token落盘+code兑换), 页面禁直调 wx.login (架构守卫 F233)',
         },
       ],
     },

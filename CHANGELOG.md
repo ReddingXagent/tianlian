@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Added
+- eslint 登录入口单一源架构守卫（F233）：no-restricted-syntax 新增 selector（wx.login 精确匹配 property.name）——登录必须走 app.login() 统一入口（token 落盘 setStorageSync+globalData 双写 + code 兑换 api.login），页面直调绕过统一落盘=半登录态漂移（F208/F214 架构守卫同族第⑤条）；与既有守卫**同块声明**（flat config 同 rule id 后块覆盖不合并）；摸底全仓仅 app.js:47 一处且 app.js 已在 ignores 并集内=零行为变化（F220 预防式门控：零违规先行）；变异三档实证（profile 页注入 wx.login exit 1 精确报错 / 清理后全仓 exit 0 / 基线 0）；eslint 0err/0warn + jest 230 绿复验
+
+### Added
 - eslint 端点地址单一源架构守卫（F227）：no-restricted-syntax 新增 2 条 selector（Literal + TemplateElement 首段）——运行时代码禁硬编码 http(s) URL 字面量，端点地址仅允许在 config/index.js 声明（环境切换单一源，F224 双源漂移同族缺口）；与 F208/F214 守卫**同块声明**（flat config 同 rule id 后块覆盖不合并）；ignores 并集新增 config/**（权威源）+ 测试文件（jest 断言 config 值/样例 URL 为合法用途，前置核验对既有①②③守卫零行为变化）；scan.js 注释内 URL 不参与 AST 零误伤；变异三档实证（Literal 注入 exit 1 精确报错 / 模板字符串注入 exit 1 / 清理后全仓 exit 0）；eslint 0err/0warn + jest 230 绿复验
 
 ### Added
