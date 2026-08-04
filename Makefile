@@ -1,7 +1,7 @@
 # 天链运维 App - Makefile
 # 本地构建与验证快捷命令
 
-.PHONY: help install dev build test lint doctor version-check check clean export-android export-ios bundle-size ci-local
+.PHONY: help install dev build test lint doctor version-check alias-check check clean export-android export-ios bundle-size ci-local
 
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -37,7 +37,10 @@ lint: ## ESLint 检查 (与 npm run lint/CI 一致, 全仓含配置文件)
 version-check: ## 版本双源漂移守卫 (package.json vs app.json, 委托 npm run check:version, F224)
 	npm run check:version
 
-check: version-check build lint test ## 全量检查 (版本同步 + tsc + eslint + jest)
+alias-check: ## 路径别名双源漂移守卫 (tsconfig.paths vs jest.moduleNameMapper, 委托 npm run check:alias, F231)
+	npm run check:alias
+
+check: version-check alias-check build lint test ## 全量检查 (版本同步 + 别名同步 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 

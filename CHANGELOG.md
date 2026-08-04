@@ -7,6 +7,7 @@
 ## [Unreleased]
 
 ### Added
+- 路径别名双源漂移守卫(F231): tsconfig.compilerOptions.paths 与 package.json jest.moduleNameMapper 是同一语义的双源(tsc侧 vs 测试侧解析源), 只改一侧即漂移(tsc与jest解析分叉: 一侧通过一侧报错) → 新增 `scripts/check-alias-config.sh` 断言两侧别名集合+目标目录一致, `npm run check:alias` 接入 CI check job + Makefile alias-check target(并入 check 链, 委托单一源); 变异四档实测: ①基线一致 exit 0 ②jest目标漂移src2 exit 1精确报漂移 ③tsconfig单侧新增别名 exit 1精确报缺失 ④恢复 exit 0; YAML解析断言通过; 全门复验: tsc 0err + lint 0/0 + jest 263绿
 - 版本双源漂移守卫(F224): package.json.version 与 app.json.expo.version 同语义双源, 发布 bundle 以 app.json 为准 — 发版只改一处即漂移(线上版本与仓内声明不符, 排障/灰度对照失真), 原无任何门控 → 新增 `scripts/check-app-version.sh` 断言两侧一致, `npm run check:version` 接入 CI check job + Makefile version-check target(并入 check/ci-local 链, 委托单一源); 变异三档实测: ①基线一致 exit 0 ②app.json 版本变异 9.9.9 exit 1精确报漂移 ③恢复 exit 0; bash -n + YAML解析断言通过; 全门复验: tsc 0err + lint 0/0 + jest 263绿
 - engines门控强制(F218): package.json `engines.node>=20` 原仅为声明 — npm默认对EBADENGINE只警告不拦截, Node 18/16本地`npm ci/install`+构建无声通过(声明的门控=假门控, F206同族) → 新增 `.npmrc` 设 `engine-strict=true`, npm ci/install在低版本Node直接失败; CI两job的npm ci读项目.npmrc自动生效, 零调用点改动(F206单一源模式); 变异实测四档: ①正常engines exit 0 ②变异`>=99`+engine-strict exit 1(EBADENGINE精确报错) ③恢复后exit 0 ④对照移除.npmrc+变异engines exit 0无声放行(证明缺口真实); 全门复验: tsc 0err + lint 0err/0warn + jest 263绿
 
