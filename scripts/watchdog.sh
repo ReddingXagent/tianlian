@@ -15,6 +15,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"  # scripts/ 的上一级=仓库根
 
+# F205: flock互斥 — cron单次模式下恢复窗口(~75s=3次×健康等待+RESTART_DELAY)可能跨cron触发周期,
+# 无锁时两个实例并发重启: 双启gateway, 后启者覆盖.pid致先启进程成孤儿(占着端口但pid失联),
+# 且后来者端口冲突反复失败. 拿不到锁=另一实例正在恢复, 直接跳过本轮.
+exec 9>"$REPO_DIR/.watchdog.lock"
+if ! flock -n 9; then
+    exit 0
+fi
+
 PORT="${PORT:-8080}"
 HEALTH_URL="http://localhost:${PORT}/health"
 PID_FILE="$REPO_DIR/.pid"

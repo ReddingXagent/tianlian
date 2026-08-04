@@ -8,6 +8,8 @@
 - CI (ci.yml): 两 job 补 `timeout-minutes`（quality=15 / docker=20）— F193模式例行体检撞出：此前均无超时，挂死最多吃满 GitHub 默认 6h runner；YAML 解析+结构断言校验（timeout/concurrency/coverage产物 if:always 均实测确认）。本地无 act 环境，结构化校验替代
 
 ### Fixed
+- `scripts/watchdog.sh` (F205): cron单次模式补 flock 互斥 — 恢复窗口(~75s: 3轮启动健康等待+RESTART_DELAY)可跨cron触发周期，此前两实例并发恢复会双启gateway、后启者覆盖`.pid`致先启进程成孤儿(占端口但pid失联)、后来者端口冲突反复失败 → `exec 9>lock + flock -n`拿不到锁即跳过本轮；变异实测双向(有锁: 并发实例13ms exit 0零日志贡献 / 无锁对照: 两实例同时进恢复, 探针有效)
+- `.gitignore`: 补运行时产物 `.pid`/`.watchdog.lock`/`gateway.log`(deploy.sh/watchdog.sh在部署目录生成, F10同型噪音)
 - `deploy.sh` (v8): 步骤5迁移失败黑洞 — 旧写法 `2>/dev/null || echo` 吞掉真失败（`db_migration.py` 幂等成功恒 exit 0，真失败 exit 1），带病继续会杀旧服务起新代码，旧schema库运行时即 "no such column" 崩 → 迁移失败即中止部署（此时旧服务未停，零影响）；实测坏库场景确认中止（exit 1）
 - `deploy.sh` (v8): 备份同秒碰撞覆盖 — 时间戳备份名同秒重跑会静默覆盖上一份备份（实测复现：好备份被坏库内容覆盖）→ 目标已存在时追加 `-1/-2` 后缀，绝不覆盖旧备份
 
