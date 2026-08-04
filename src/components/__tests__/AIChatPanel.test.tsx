@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { AIChatPanel } from '../AIChatPanel';
 import type { ChatMessage } from '../../services/ai';
@@ -266,6 +267,67 @@ describe('AIChatPanel', () => {
       }
     } finally {
       jest.useRealTimers();
+    }
+  });
+
+  it('onSubmitEditing直发: 空白输入/loading中handleSend守卫拦截不触发chat', async () => {
+    // 场景1: 未loading但纯空白——按钮disabled挡press, 回车onSubmitEditing直发handleSend, 靠text守卫拦
+    const r1 = render(<AIChatPanel />);
+    fireEvent.changeText(r1.getByPlaceholderText('输入你的问题…'), '   ');
+    fireEvent(r1.getByPlaceholderText('输入你的问题…'), 'submitEditing');
+    expect(mockChat).not.toHaveBeenCalled();
+
+    // 场景2: loading中非空输入——UI层editable=false/disabled已挡, 但handleSend的loading守卫是最后防线
+    // (原生键盘submit等路径可能绕过UI门控); 注意fireEvent.submitEditing会被editable=false拦在
+    // handleSend之前(RNTL尊重editable, 实测探针证实), 故直调onSubmitEditing prop绕过UI门控打守卫本体
+    mockChat.mockReturnValueOnce(new Promise(() => {}));
+    const r2 = render(<AIChatPanel />);
+    fireEvent.changeText(r2.getByPlaceholderText('输入你的问题…'), '第一问');
+    fireEvent.press(r2.getByText('↑'));
+    await waitFor(() => {
+      expect(mockChat).toHaveBeenCalledTimes(1);
+    });
+    const inputLoading = r2.getByPlaceholderText('输入你的问题…');
+    // RNTL的fireEvent.changeText同样被editable=false拦(实测探针证实), 直调onChangeText prop绕门控填文本
+    inputLoading.props.onChangeText('插队第二问');
+    // 重查拿重渲染后的新闭包handler, 直调onSubmitEditing打loading守卫本体
+    r2.getByPlaceholderText('输入你的问题…').props.onSubmitEditing();
+    expect(mockChat).toHaveBeenCalledTimes(1); // loading守卫拦下, 无第二发
+  });
+
+  it('Markdown边界: 行首即粗体(match.index===lastIndex)+行尾即粗体(lastIndex===text.length)', async () => {
+    const md = '**粗体**开头语\n收尾是 **粗体二**';
+    mockChat.mockResolvedValueOnce(assistantMsg(md));
+    const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '边界');
+    fireEvent.press(getByText('↑'));
+    await waitFor(() => {
+      expect(getByText('粗体')).toBeTruthy();
+    });
+    expect(getByText(/开头语/)).toBeTruthy();
+    expect(getByText(/收尾是/)).toBeTruthy();
+    expect(getByText('粗体二')).toBeTruthy();
+  });
+
+  it('Markdown边界: 纯符号标题行(# 后无内容)renderInlineMarkdown空串走[text]回退不崩', async () => {
+    mockChat.mockResolvedValueOnce(assistantMsg('# \n正文内容'));
+    const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '空标题');
+    fireEvent.press(getByText('↑'));
+    await waitFor(() => {
+      expect(getByText('正文内容')).toBeTruthy();
+    });
+  });
+
+  it('Android平台: KeyboardAvoidingView behavior走height分支渲染不崩', () => {
+    const original = Platform.OS;
+    try {
+      Platform.OS = 'android';
+      const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+      expect(getByPlaceholderText('输入你的问题…')).toBeTruthy();
+      expect(getByText('AI 助手')).toBeTruthy();
+    } finally {
+      Platform.OS = original;
     }
   });
 });
