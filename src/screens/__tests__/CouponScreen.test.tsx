@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, waitFor, fireEvent } from '@testing-library/react-native';
+import { RefreshControl } from 'react-native';
+import { render, waitFor, fireEvent, act } from '@testing-library/react-native';
 import CouponScreen from '../CouponScreen';
 
 const mockGetList = jest.fn();
@@ -65,5 +66,41 @@ describe('CouponScreen', () => {
     mockGetList.mockRejectedValue('boom');
     const { getByText } = render(<CouponScreen />);
     await waitFor(() => expect(getByText('获取优惠券失败')).toBeTruthy());
+  });
+
+  it('下拉刷新重拉时列表保持可见(不切整屏spinner)', async () => {
+    mockGetList
+      .mockResolvedValueOnce({
+        data: { items: [makeCoupon()], total: 1, page: 1, pageSize: 20 },
+      })
+      .mockImplementationOnce(() => new Promise(() => {})); // 第二刷挂起
+    const utils = render(<CouponScreen />);
+    await waitFor(() => expect(utils.getByText('满10减5券')).toBeTruthy());
+    const rc = utils.UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      void rc.props.onRefresh();
+    });
+    // 刷新中: 列表仍在, 不切整屏spinner
+    expect(utils.getByText('满10减5券')).toBeTruthy();
+    expect(utils.queryByText('加载优惠券...')).toBeNull();
+  });
+
+  it('刷新失败时保留已有列表(不切错误页)', async () => {
+    mockGetList
+      .mockResolvedValueOnce({
+        data: { items: [makeCoupon()], total: 1, page: 1, pageSize: 20 },
+      })
+      .mockRejectedValueOnce(new Error('网络异常'));
+    const utils = render(<CouponScreen />);
+    await waitFor(() => expect(utils.getByText('满10减5券')).toBeTruthy());
+    const rc = utils.UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      await rc.props.onRefresh();
+    });
+    // 刷新失败: 列表仍在, 不切错误页, refreshing复位
+    expect(utils.getByText('满10减5券')).toBeTruthy();
+    expect(utils.queryByText('加载失败')).toBeNull();
+    const rcAfter = utils.UNSAFE_getByType(RefreshControl);
+    expect(rcAfter.props.refreshing).toBe(false);
   });
 });

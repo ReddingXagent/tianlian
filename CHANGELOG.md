@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- 优惠券页刷新守卫纠偏（F209 模式续打，渲染守卫一致性对账）— 撞出 CouponScreen 与钱包页修复前同族缺口：`if (loading)` / `if (error)` 无条件整屏切换，下拉刷新重拉时已有列表整屏切 spinner（FlatList 卸载连 RefreshControl 指示器一起消失），刷新失败时已有列表整屏切错误页（用户丢失已加载数据）。修复：两守卫均改 `&& coupons.length === 0`（仅首屏无数据才切整屏态，与 WalletScreen/OrderListScreen 对齐）；补测 2 条（281→283：刷新中列表保持可见——挂起第二刷探针 / 刷新失败保留列表+refreshing 复位）；变异双探针实证（loading/error 守卫分别回退→对应测试精确失败）
 - 钱包页下拉刷新补齐 + 刷新不闪屏（移动端一致性缺口 F209）— 订单/优惠券/首页/站点详情四屏均有下拉刷新，唯独钱包（资金敏感页：余额+流水）缺失，用户只能靠回焦静默重拉，无手动刷新手段。修复：WalletScreen FlatList 接 RefreshControl（下拉同时重拉流水+profile 同步最新余额，refreshing 复位）；连带修渲染守卫 `loading && records.length===0` 才切整屏 spinner（此前回焦/下拉重拉时列表整屏闪 spinner，资金页体验断裂），补测 2 条（279→281：下拉双拉+复位/刷新中列表保持可见）
 - 分页列表无限滚动补齐（移动端真缺口）— 订单/钱包流水/优惠券三屏的 API 本就分页（PaginatedData），但 UI 只拉第一页：历史记录超出首页即永久不可见。修复：orderStore 新增 hasMore/loadingMore/loadMoreOrders（追加+按 id 去重+加载更多失败静默可重试+筛选条件随 loadMore 保持），OrderList/Wallet/Coupon 三屏 FlatList 接 onEndReached 触边加载下一页（加载中 footer spinner/到底显示「没有更多了」）；补测 4 条（275→279：hasMore 判定/追加+去重+筛选保持/no-op 门控/失败静默可重试）
 - expo-camera 权限声明补齐 + 配置回归防护（移动端真缺口）— b3eb03c 装了 expo-camera 但 app.json plugins 漏配：iOS 缺 NSCameraUsageDescription（真机权限请求直接失败）/Android 缺 CAMERA 权限声明；补 `["expo-camera", {"cameraPermission": ...}]`，`expo config --type introspect` 实测两端声明均生效；新增 src/__tests__/appConfig.test.ts 接入 jest 门禁（camera 权限文案 + expo-secure-store 保留 + platforms 限定 android+ios 三项回归防护，F179 一并锁住），补测 3 条（272→275）

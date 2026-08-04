@@ -86,11 +86,12 @@ const CouponScreen: React.FC = () => {
     </View>
   );
 
-  if (loading) {
+  // 仅首屏(无数据)才切整屏spinner/错误页; 下拉重拉/刷新失败时保留已有列表不闪屏(F209模式)
+  if (loading && coupons.length === 0) {
     return <LoadingSpinner text="加载优惠券..." />;
   }
 
-  if (error) {
+  if (error && coupons.length === 0) {
     return (
       <EmptyState
         icon="⚠️"
