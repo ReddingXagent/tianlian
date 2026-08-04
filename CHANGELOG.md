@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- `Makefile` systemd-install (F211): 路径漂移守卫 — unit/logrotate 模板硬编码 `/home/tl/tianlian-edge-gateway-v3`(Pi默认路径), 旧安装裸 `sudo cp`, 仓库位于其他目录时(deploy.sh REPO_DIR 自动探测支持任意含 main.py 目录)装出的 unit WorkingDirectory/EnvironmentFile 与 logrotate 路径指向不存在目录 → 服务起不来/日志轮转静默失效(missingok) → 安装时 sed 渲染为 $(CURDIR)；三档实测(非默认路径替换3处精确/默认路径 no-op diff零/ make -n CURDIR展开正确)；deploy.sh 两处提示+systemd/README.md 手动步骤同步收敛到 `make systemd-install`(F195单一源模式)
+
 ### Changed
 - CI (ci.yml): 两 job 补 `timeout-minutes`（quality=15 / docker=20）— F193模式例行体检撞出：此前均无超时，挂死最多吃满 GitHub 默认 6h runner；YAML 解析+结构断言校验（timeout/concurrency/coverage产物 if:always 均实测确认）。本地无 act 环境，结构化校验替代
 

@@ -31,8 +31,12 @@ deploy:
 	bash deploy.sh
 
 systemd-install:
-	sudo cp systemd/tianlian-gateway.service /etc/systemd/system/
-	sudo cp systemd/logrotate.conf /etc/logrotate.d/tianlian-gateway
+	@# unit/logrotate模板内路径为Pi默认值, 安装时渲染为当前仓库目录, 防非默认部署路径静默失配(F211)
+	@sed "s|/home/tl/tianlian-edge-gateway-v3|$(CURDIR)|g" systemd/tianlian-gateway.service > .tianlian-gateway.service.rendered
+	@sed "s|/home/tl/tianlian-edge-gateway-v3|$(CURDIR)|g" systemd/logrotate.conf > .tianlian-gateway.logrotate.rendered
+	sudo cp .tianlian-gateway.service.rendered /etc/systemd/system/tianlian-gateway.service
+	sudo cp .tianlian-gateway.logrotate.rendered /etc/logrotate.d/tianlian-gateway
+	@rm -f .tianlian-gateway.service.rendered .tianlian-gateway.logrotate.rendered
 	sudo systemctl daemon-reload
 	sudo systemctl enable tianlian-gateway
 

@@ -4,6 +4,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+# 路径为Pi默认值; make systemd-install 安装时sed渲染为当前仓库目录(F211)
 Type=simple
 User=tl
 WorkingDirectory=/home/tl/tianlian-edge-gateway-v3

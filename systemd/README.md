@@ -3,25 +3,20 @@
 ## 安装 systemd 服务（树莓派上执行）
 
 ```bash
-# 1. 复制 unit 文件
-sudo cp systemd/tianlian-gateway.service /etc/systemd/system/
+# 推荐: 一条命令安装 unit + logrotate, 路径自动渲染为当前仓库目录(F211)
+make systemd-install
 
-# 2. 根据实际路径修改 WorkingDirectory/EnvironmentFile/ExecStart
-#    （默认路径: /home/tl/tianlian-edge-gateway-v3）
-sudo nano /etc/systemd/system/tianlian-gateway.service
-
-# 3. 重载 systemd
-sudo systemctl daemon-reload
-
-# 4. 启用开机自启
-sudo systemctl enable tianlian-gateway
-
-# 5. 启动服务
+# 启动服务
 sudo systemctl start tianlian-gateway
 
-# 6. 查看状态
+# 查看状态
 sudo systemctl status tianlian-gateway
 ```
+
+> 模板文件内的 `/home/tl/tianlian-edge-gateway-v3` 是 Pi 默认路径；
+> `make systemd-install` 安装时会 sed 渲染为当前仓库目录，无需手改。
+> 手动安装（不推荐，需自行改路径）: `sudo cp systemd/tianlian-gateway.service /etc/systemd/system/`
+> 后 `sudo nano` 修改 WorkingDirectory/EnvironmentFile 为实际路径，再 daemon-reload + enable。
 
 ## 常用命令
 

@@ -319,8 +319,7 @@ if [ "$HEALTH_OK" = true ] && kill -0 "$NEW_PID" 2>/dev/null; then
         if [ ! -f /etc/systemd/system/tianlian-gateway.service ]; then
             echo ""
             echo "💡 建议: 安装 systemd 服务实现开机自启+崩溃重启"
-            echo "   sudo cp systemd/tianlian-gateway.service /etc/systemd/system/"
-            echo "   sudo systemctl daemon-reload && sudo systemctl enable tianlian-gateway"
+            echo "   make systemd-install   # 路径自动适配当前仓库目录(F211)"
             echo "   详见: systemd/README.md"
         else
             echo ""
@@ -333,7 +332,7 @@ if [ "$HEALTH_OK" = true ] && kill -0 "$NEW_PID" 2>/dev/null; then
     if [ ! -f /etc/logrotate.d/tianlian-gateway ]; then
         echo ""
         echo "💡 建议: 安装日志轮转防磁盘占满"
-        echo "   sudo cp systemd/logrotate.conf /etc/logrotate.d/tianlian-gateway"
+        echo "   make systemd-install   # 一并安装logrotate配置, 路径自动适配(F211)"
     fi
 else
     echo "❌ 启动失败, 日志最后20行:"
