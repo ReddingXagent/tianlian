@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import OrderListScreen from '../OrderListScreen';
 
@@ -40,11 +40,19 @@ const mockOrders = [
 
 const mockFetchOrders = jest.fn().mockResolvedValue(undefined);
 
+// 动态store态: 错误路径测试需切换 orders/error (F221)
+let mockOrdersState = mockOrders;
+let mockErrorState: string | null = null;
+
 jest.mock('../../store/orderStore', () => ({
   useOrderStore: () => ({
-    orders: mockOrders,
+    orders: mockOrdersState,
     loading: false,
+    error: mockErrorState,
     fetchOrders: mockFetchOrders,
+    loadMoreOrders: jest.fn(),
+    hasMore: false,
+    loadingMore: false,
   }),
 }));
 
@@ -57,12 +65,14 @@ jest.mock('@react-navigation/native', () => ({
 
 jest.mock('../../components/StatusBadge', () => 'StatusBadge');
 jest.mock('../../components/LoadingSpinner', () => 'LoadingSpinner');
-jest.mock('../../components/EmptyState', () => 'EmptyState');
+// EmptyState用真组件: F221错误路径需断言title/重试按钮文案与点击
 
 describe('OrderListScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFocused = true;
+    mockOrdersState = mockOrders;
+    mockErrorState = null;
   });
 
   const renderScreen = () =>
@@ -116,5 +126,35 @@ describe('OrderListScreen', () => {
       </SafeAreaProvider>
     );
     expect(mockFetchOrders).toHaveBeenCalledTimes(2);
+  });
+
+  // --- F221: 首屏拉取失败不能伪装成"暂无订单" ---
+  it('首屏拉取失败且无订单时显示加载失败+重试(而非"暂无订单")', () => {
+    mockOrdersState = [];
+    mockErrorState = '网络异常';
+    const { getByText, queryByText } = renderScreen();
+    expect(getByText('加载失败')).toBeTruthy();
+    expect(getByText('网络异常')).toBeTruthy();
+    expect(getByText('重试')).toBeTruthy();
+    expect(queryByText('暂无订单')).toBeNull();
+  });
+
+  it('点击重试重新拉取订单列表', () => {
+    mockOrdersState = [];
+    mockErrorState = '网络异常';
+    const { getByText } = renderScreen();
+    expect(mockFetchOrders).toHaveBeenCalledTimes(1);
+
+    fireEvent.press(getByText('重试'));
+    expect(mockFetchOrders).toHaveBeenCalledTimes(2);
+    expect(mockFetchOrders).toHaveBeenLastCalledWith({ status: undefined });
+  });
+
+  it('有订单时拉取失败保留列表可见(不整屏切错误页)', () => {
+    mockErrorState = '刷新失败';
+    const { getByText, queryByText } = renderScreen();
+    expect(getByText('订单号: ORD-001')).toBeTruthy();
+    expect(getByText('订单号: ORD-002')).toBeTruthy();
+    expect(queryByText('加载失败')).toBeNull();
   });
 });

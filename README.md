@@ -34,7 +34,7 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 190 全绿（24 suites）✅ |
+| 测试 | `npm run test:ci` | 293 全绿（30 suites）✅ |
 | 覆盖率棘轮 | jest coverageThreshold | statements 67.77 / branches 53.77 / functions 60.6 / lines 67.77（只升不降） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤21 警告（`--max-warnings=21`，只降不升） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（Expo账号/EAS/OTA 待丁哥，F25/F33） |

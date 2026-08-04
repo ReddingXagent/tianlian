@@ -29,6 +29,8 @@ const WalletScreen: React.FC = () => {
   const { user, setUser } = useAuthStore();
   const [records, setRecords] = useState<WalletRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  // 首屏拉取失败不再静默(F221): 此前失败伪装成"暂无记录", 资金页误导更甚
+  const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [recharging, setRecharging] = useState(false);
   // 无限滚动分页状态(API本就分页, 此前UI只拉第一页——流水超出即不可见)
@@ -38,13 +40,15 @@ const WalletScreen: React.FC = () => {
 
   const loadRecords = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await walletApi.getRecords({ page: 1, pageSize: PAGE_SIZE });
       setRecords(response.data.items);
       setPage(response.data.page);
       setHasMore(response.data.items.length < response.data.total);
-    } catch {
-      // 静默处理
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '获取交易记录失败';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -174,6 +178,15 @@ const WalletScreen: React.FC = () => {
       <Text style={styles.sectionTitle}>交易记录</Text>
       {loading && records.length === 0 ? (
         <LoadingSpinner text="加载记录..." />
+      ) : error && records.length === 0 ? (
+        // 仅无数据时切错误页; 回焦/下拉重拉失败保留已有流水不闪屏(F209模式)
+        <EmptyState
+          icon="⚠️"
+          title="加载失败"
+          message={error}
+          actionLabel="重试"
+          onAction={loadRecords}
+        />
       ) : records.length === 0 ? (
         <EmptyState
           icon="💰"

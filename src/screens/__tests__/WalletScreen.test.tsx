@@ -1,6 +1,6 @@
 import React from 'react';
 import { RefreshControl } from 'react-native';
-import { render, waitFor, act } from '@testing-library/react-native';
+import { render, waitFor, act, fireEvent } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import WalletScreen from '../WalletScreen';
 
@@ -169,5 +169,50 @@ describe('WalletScreen', () => {
     const rcRefreshing = utils.UNSAFE_getByType(RefreshControl);
     expect(rcRefreshing.props.refreshing).toBe(true);
     expect(utils.getByText('充电消费')).toBeTruthy();
+  });
+
+  // --- F221: 首屏拉取失败不能伪装成"暂无记录" ---
+  it('首屏拉取失败显示加载失败+重试(而非"暂无记录")', async () => {
+    mockGetRecords.mockRejectedValue(new Error('网络异常'));
+    const { getByText, queryByText } = renderScreen();
+    await waitFor(() => expect(getByText('加载失败')).toBeTruthy());
+    expect(getByText('网络异常')).toBeTruthy();
+    expect(getByText('重试')).toBeTruthy();
+    expect(queryByText('暂无记录')).toBeNull();
+  });
+
+  it('点击重试重新拉取并恢复流水列表', async () => {
+    let call = 0;
+    mockGetRecords.mockImplementation(() => {
+      call += 1;
+      if (call === 1) return Promise.reject(new Error('网络异常'));
+      return Promise.resolve({ data: { items: [recordFixture], page: 1, total: 1 } });
+    });
+    const { getByText } = renderScreen();
+    await waitFor(() => expect(getByText('加载失败')).toBeTruthy());
+
+    fireEvent.press(getByText('重试'));
+    await waitFor(() => expect(getByText('充电消费')).toBeTruthy());
+    expect(mockGetRecords).toHaveBeenCalledTimes(2);
+  });
+
+  it('有流水时回焦重拉失败保留列表可见(不整屏切错误页)', async () => {
+    let call = 0;
+    mockGetRecords.mockImplementation(() => {
+      call += 1;
+      if (call === 1) return Promise.resolve({ data: { items: [recordFixture], page: 1, total: 1 } });
+      return Promise.reject(new Error('回焦失败'));
+    });
+    const utils = renderScreen();
+    await waitFor(() => expect(utils.getByText('充电消费')).toBeTruthy());
+
+    mockFocused = false;
+    utils.rerender(<SafeAreaProvider><WalletScreen /></SafeAreaProvider>);
+    mockFocused = true;
+    utils.rerender(<SafeAreaProvider><WalletScreen /></SafeAreaProvider>);
+
+    await waitFor(() => expect(mockGetRecords).toHaveBeenCalledTimes(2));
+    expect(utils.getByText('充电消费')).toBeTruthy();
+    expect(utils.queryByText('加载失败')).toBeNull();
   });
 });

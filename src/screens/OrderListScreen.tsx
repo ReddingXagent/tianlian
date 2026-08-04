@@ -27,7 +27,8 @@ const ORDER_STATUS_FILTERS = [
 
 const OrderListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { orders, loading, fetchOrders, loadMoreOrders, hasMore, loadingMore } = useOrderStore();
+  const { orders, loading, error, fetchOrders, loadMoreOrders, hasMore, loadingMore } =
+    useOrderStore();
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState('');
 
@@ -101,6 +102,20 @@ const OrderListScreen: React.FC = () => {
 
   if (loading && orders.length === 0) {
     return <LoadingSpinner text="加载订单..." />;
+  }
+
+  // 首屏拉取失败不能伪装成"暂无订单"(F221): store已有error态但此前未渲染,
+  // 网络失败时用户被误导点"去充电"。仅无数据时切错误页, 刷新失败保留已有列表(F209模式)。
+  if (error && orders.length === 0) {
+    return (
+      <EmptyState
+        icon="⚠️"
+        title="加载失败"
+        message={error}
+        actionLabel="重试"
+        onAction={() => fetchOrders({ status: activeFilter || undefined })}
+      />
+    );
   }
 
   return (
