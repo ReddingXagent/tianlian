@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- **AIChatPanel 强化补测第六批（F232，接手并发轮改动复验落盘）**：接手并发轮未提交改动 — AIChatPanel 4 条强化补测（Markdown 渲染 h2/h3标题+有序列表+行内粗体/斜体/代码与前置普通文本不丢 / 流式渲染 onToken 逐 token 占位消息增量更新 / 打字指示器 400ms 点动画循环与 scroll 定时回调安全触发 / 快捷提问 chip 填值+仪表盘概览 focus 分支双验证）；全仓 396→**400 tests** 全绿，全量覆盖 stmts 96.65→**99.02%** / branches 90.28→**91.92%** / funcs 96.57→**98.28%** / lines 97.13→**99.64%**；coverageThreshold棘轮上调 96/90/96/97→**99/91/98/99**（实测下沿取整，上调后 jest --coverage 复验 exit 0）；接手复验规矩全走：tsc 0err → jest 400绿 → coverage 逐项比对吻合 → eslint 全门复验；README 质量门控章节同步新数
+
+### Added
 - **零测试文件补测第五批（F226，接手并发轮改动复验落盘）**：补齐 AIChatPanel（头部/欢迎语/快捷提问/发送走ai.chat/流式渲染/错误兑底）+ AppNavigator（挂载checkAuth/isLoading加载态/未认证入Auth栈渲染LoginScreen/已认证入Main栈四Tab标签齐备默认Dashboard）；全仓 385→**396 tests** 全绿，全量覆盖 stmts 87.03→**96.65%** / branches 83.37→**90.28%** / funcs 88→**96.57%** / lines 87.19→**97.13%**；coverageThreshold棘轮上调 87/83/88/87→**96/90/96/97**（实测下沿留小缓冲）；剩余零测试文件仅 types/index.ts（纯类型定义无可执行逻辑，有效盲区清零）；接手时清理25条lint warning（AppNavigator缺文件级 eslint-disable no-require-imports 头×24 + AIChatPanel改named import消no-named-as-default×1，与既有8个测试文件模式一致）；同步补 F225 遗漏的 README/CHANGELOG 文档账；tsc 0err + eslint 0err/0warn + jest --coverage 全门复验通过；README质量门控章节同步新数
 - **零测试文件补测第四批（F225）**：补齐 ProfileScreen（用户卡片/角色映射/空user兑底/设置菜单/退出登录确认+取消+异常静默）+ DashboardScreen（三源拉取/统计API值优先/API失败回退本地口径/营收两位小数/快捷导航/空态/下拉刷新）；全仓 368→**385 tests** 全绿，覆盖 83.6→**87.03%**；coverageThreshold棘轮 83/78/83/83→**87/83/88/87**（文档账由 F226 轮补记）
 

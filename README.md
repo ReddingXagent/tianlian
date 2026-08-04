@@ -40,14 +40,14 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（396 用例全绿；加 --coverage 触发覆盖率门限）
+npm test             # jest 单测（400 用例全绿；加 --coverage 触发覆盖率门限）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）
 ```
 
-- 测试覆盖：396 用例全绿，全量统计（collectCoverageFrom 计入全部源文件）总体 **stmts 96.65% / branches 90.28% / funcs 96.57% / lines 97.13%**（F225/F226 补测 Dashboard/Profile/AIChatPanel/AppNavigator 后棘轮上调门限 96/90/96/97；F219 补测 StationList/StationDetail；F213 补测 LoginScreen/MainTabNavigator；F207 第一批补测三组件；F201 修复口径：此前 95.18% 仅统计被测试加载的文件，12 个零测试文件被隐形排除，现已全部补齐）
-- 覆盖率门限：jest coverageThreshold global（stmts≥96 / branches≥90 / funcs≥96 / lines≥97），CI 与 Makefile 均经 `--coverage` 强制执行，变异测试实证（新增无测试文件→exit 1 拦截）
+- 测试覆盖：400 用例全绿，全量统计（collectCoverageFrom 计入全部源文件）总体 **stmts 99.02% / branches 91.92% / funcs 98.28% / lines 99.64%**（F232 接手并发轮 AIChatPanel 强化补测 Markdown/流式/打字动画/快捷提问后棘轮上调门限 99/91/98/99；F225/F226 补测 Dashboard/Profile/AIChatPanel/AppNavigator 后棘轮上调门限 96/90/96/97；F219 补测 StationList/StationDetail；F213 补测 LoginScreen/MainTabNavigator；F207 第一批补测三组件；F201 修复口径：此前 95.18% 仅统计被测试加载的文件，12 个零测试文件被隐形排除，现已全部补齐）
+- 覆盖率门限：jest coverageThreshold global（stmts≥99 / branches≥91 / funcs≥98 / lines≥99），CI 与 Makefile 均经 `--coverage` 强制执行，变异测试实证（新增无测试文件→exit 1 拦截）
 - 零测试盲区（仅剩 types/index.ts：纯类型定义无可执行逻辑，有效盲区已清零）
 - eslint **0 err / 0 warn**（`474492b` 全部清零）
 

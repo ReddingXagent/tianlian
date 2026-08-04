@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { AIChatPanel } from '../AIChatPanel';
 import type { ChatMessage } from '../../services/ai';
 
@@ -114,5 +114,97 @@ describe('AIChatPanel', () => {
     });
     expect(getByText('快充: 80元')).toBeTruthy();
     expect(getByText('SELECT 1')).toBeTruthy();
+  });
+
+  it('Markdown补全分支: h2/h3标题+有序列表+行内粗体/斜体/代码与前置普通文本', async () => {
+    const md =
+      '## 二级标题\n### 三级标题\n1. 第一步\n2. 第二步\n前文 **粗体** 中间 *斜体* 尾部 `code9` 收尾';
+    mockChat.mockResolvedValueOnce(assistantMsg(md));
+    const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '格式');
+    fireEvent.press(getByText('↑'));
+
+    await waitFor(() => {
+      expect(getByText('二级标题')).toBeTruthy();
+    });
+    expect(getByText('三级标题')).toBeTruthy();
+    expect(getByText('第一步')).toBeTruthy();
+    expect(getByText('第二步')).toBeTruthy();
+    // 行内标记各自独立成节点, 前置普通文本不丢
+    expect(getByText('粗体')).toBeTruthy();
+    expect(getByText('斜体')).toBeTruthy();
+    expect(getByText('code9')).toBeTruthy();
+    expect(getByText(/前文/)).toBeTruthy();
+    expect(getByText(/收尾/)).toBeTruthy();
+  });
+
+  it('流式渲染: onToken逐token驱动占位消息增量更新', () => {
+    let onTokenCb: ((token: string) => void) | undefined;
+    mockChat.mockImplementationOnce((_msgs: unknown, onToken: (t: string) => void) => {
+      onTokenCb = onToken;
+      return new Promise(() => {}); // 挂起, 只验流式增量
+    });
+    const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '有多少充电站');
+    fireEvent.press(getByText('↑'));
+    // 占位消息先入列
+    expect(getByText('正在查询数据…')).toBeTruthy();
+
+    act(() => {
+      (onTokenCb as (t: string) => void)('共有');
+    });
+    expect(getByText('共有')).toBeTruthy();
+
+    act(() => {
+      (onTokenCb as (t: string) => void)('12个充电站');
+    });
+    expect(getByText('共有12个充电站')).toBeTruthy();
+  });
+
+  it('打字指示器: 400ms步进点动画循环不崩, scroll定时器安全触发', () => {
+    jest.useFakeTimers();
+    try {
+      mockChat.mockReturnValueOnce(new Promise(() => {}));
+      const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+      fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '测试');
+      fireEvent.press(getByText('↑'));
+      // 占位消息同步入列(handleSend在await前同步执行)
+      expect(getByText('正在查询数据…')).toBeTruthy();
+      // 推进4个动画步进+1个scrollToBottom(100ms)定时, 覆盖interval回调与scroll回调
+      act(() => {
+        jest.advanceTimersByTime(1700);
+      });
+      expect(getByText('正在查询数据…')).toBeTruthy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('快捷提问: 点击填入输入框; 仪表盘概览走focus分支; 其他chip不触发focus分支', () => {
+    jest.useFakeTimers();
+    try {
+      const { getByText, getByPlaceholderText } = render(<AIChatPanel />);
+      const input = () => getByPlaceholderText('输入你的问题…');
+
+      // 非仪表盘概览chip: 立即填值, setTimeout内条件分支为假
+      fireEvent.press(getByText('未处理的告警'));
+      expect(input().props.value).toBe('未处理的告警');
+      act(() => {
+        jest.advanceTimersByTime(60);
+      });
+      expect(input().props.value).toBe('未处理的告警');
+
+      // 仪表盘概览chip: 填值+50ms后再次setInputText并走inputRef.focus()
+      fireEvent.press(getByText('仪表盘概览'));
+      expect(input().props.value).toBe('仪表盘概览');
+      act(() => {
+        jest.advanceTimersByTime(60);
+      });
+      expect(input().props.value).toBe('仪表盘概览');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
