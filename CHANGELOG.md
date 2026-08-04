@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- 钱包页下拉刷新补齐 + 刷新不闪屏（移动端一致性缺口 F209）— 订单/优惠券/首页/站点详情四屏均有下拉刷新，唯独钱包（资金敏感页：余额+流水）缺失，用户只能靠回焦静默重拉，无手动刷新手段。修复：WalletScreen FlatList 接 RefreshControl（下拉同时重拉流水+profile 同步最新余额，refreshing 复位）；连带修渲染守卫 `loading && records.length===0` 才切整屏 spinner（此前回焦/下拉重拉时列表整屏闪 spinner，资金页体验断裂），补测 2 条（279→281：下拉双拉+复位/刷新中列表保持可见）
 - 分页列表无限滚动补齐（移动端真缺口）— 订单/钱包流水/优惠券三屏的 API 本就分页（PaginatedData），但 UI 只拉第一页：历史记录超出首页即永久不可见。修复：orderStore 新增 hasMore/loadingMore/loadMoreOrders（追加+按 id 去重+加载更多失败静默可重试+筛选条件随 loadMore 保持），OrderList/Wallet/Coupon 三屏 FlatList 接 onEndReached 触边加载下一页（加载中 footer spinner/到底显示「没有更多了」）；补测 4 条（275→279：hasMore 判定/追加+去重+筛选保持/no-op 门控/失败静默可重试）
 - expo-camera 权限声明补齐 + 配置回归防护（移动端真缺口）— b3eb03c 装了 expo-camera 但 app.json plugins 漏配：iOS 缺 NSCameraUsageDescription（真机权限请求直接失败）/Android 缺 CAMERA 权限声明；补 `["expo-camera", {"cameraPermission": ...}]`，`expo config --type introspect` 实测两端声明均生效；新增 src/__tests__/appConfig.test.ts 接入 jest 门禁（camera 权限文案 + expo-secure-store 保留 + platforms 限定 android+ios 三项回归防护，F179 一并锁住），补测 3 条（272→275）
 - Android 硬件返回键治理（移动端真缺口）— 新增 useAndroidBackExit hook：此前任意 root tab 按硬件返回直接 exitApp（React Navigation 默认，充电中误退尤甚）；治理后：详情页盖住 tabs 不拦截（原生 back 弹栈）、非 Home tab 先跳 Home、Home tab 首按 toast「再按一次退出」+ 2s 内再按才 exitApp；iOS BackHandler 天然 no-op 无需分支；补测 7 条（265→272：拦截/不拦截/双击窗口/reset/state 未知 + AppNavigator mock 补 useNavigation）

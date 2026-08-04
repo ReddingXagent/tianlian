@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
@@ -28,6 +29,7 @@ const WalletScreen: React.FC = () => {
   const { user, setUser } = useAuthStore();
   const [records, setRecords] = useState<WalletRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [recharging, setRecharging] = useState(false);
   // 无限滚动分页状态(API本就分页, 此前UI只拉第一页——流水超出即不可见)
   const [page, setPage] = useState(1);
@@ -84,6 +86,15 @@ const WalletScreen: React.FC = () => {
       refreshProfile();
     }
   }, [isFocused, loadRecords, refreshProfile]);
+
+  // 下拉刷新: 与订单/优惠券/首页/站点详情对齐(F209)。
+  // 钱包是资金敏感页——余额/流水陈旧时用户需有手动刷新手段,
+  // 不能只靠回焦静默重拉; 同时重拉profile同步最新余额。
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([loadRecords(), refreshProfile()]);
+    setRefreshing(false);
+  }, [loadRecords, refreshProfile]);
 
   const handleRecharge = () => {
     const amounts = [10, 50, 100, 200];
@@ -161,7 +172,7 @@ const WalletScreen: React.FC = () => {
 
       {/* 交易记录 */}
       <Text style={styles.sectionTitle}>交易记录</Text>
-      {loading ? (
+      {loading && records.length === 0 ? (
         <LoadingSpinner text="加载记录..." />
       ) : records.length === 0 ? (
         <EmptyState
@@ -177,6 +188,14 @@ const WalletScreen: React.FC = () => {
           contentContainerStyle={styles.listContent}
           onEndReached={loadMoreRecords}
           onEndReachedThreshold={0.3}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={['#1a73e8']}
+              tintColor="#1a73e8"
+            />
+          }
           ListFooterComponent={
             loadingMore ? (
               <ActivityIndicator color="#1a73e8" style={styles.footer} />
