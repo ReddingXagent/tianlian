@@ -56,7 +56,7 @@ Page({
   // 继续上行会污染服务端用户资料，故移除(F41)。
   // 头像/昵称采集需改用 <button open-type="chooseAvatar"> + <input type="nickname"> 组件方案(待UI排期)。
   onLogin() {
-    if (app.globalData.token) return;
+    if (app.getToken()) return; // F214: 登录态走认证层方法, 不直读 globalData.token
 
     app.login()
       .then(() => {

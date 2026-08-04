@@ -148,17 +148,38 @@ module.exports = [
     },
   },
   {
-    // 架构守卫 (F208, 2026-08-04 猴王自驱lint轮): HTTP请求必须走 services/api.js 统一封装,
-    // 禁页面/组件直连 wx.request(绕过 baseURL/token注入/统一错误处理/401登出)。
-    // AST级精确匹配 property.name='request': wx.requestPayment/wx.uploadFile 等不误伤
-    // (grep前缀匹配会误报——payment.js 的 wx.requestPayment 即实例)。
+    // 架构守卫块 (F208 2026-08-04 + F214 2026-08-04 猴王自驱lint轮)
+    // ⚠️ flat config 同rule id后块覆盖前块(不合并), no-restricted-syntax 多守卫必须同块声明,
+    // 否则前条静默失效(F214调试实测)。ignores取各守卫豁免并集: app.js(F214认证层)+api.js;
+    // 前置核验: app.js零wx.request / api.js零globalData访问, 并集豁免零行为变化。
+    // ①F208: HTTP必须走 services/api.js 统一封装, 禁直连 wx.request(绕过baseURL/token注入/
+    //   统一错误处理/401登出); AST精确匹配property.name='request', wx.requestPayment不误伤。
+    // ②F214: 敏感凭据storage键('token'/'userInfo')仅认证层(app.js+services/api.js)可读写,
+    //   页面直读绕过401登出/统一注入且硬编码键有改名漂移风险; 不误伤页面私有键
+    //   (scanHistory/station_filter)。
+    // ③F214: 登录态禁直读 globalData.token 裸字段, 须走 app.getToken()(绕过storage兜底逻辑)。
     files: ['**/*.js'],
-    ignores: ['**/services/api.js'],
+    ignores: ['app.js', '**/services/api.js'],
     rules: {
-      'no-restricted-syntax': ['error', {
-        selector: "CallExpression[callee.object.name='wx'][callee.property.name='request']",
-        message: 'HTTP请求必须走 services/api.js 统一封装, 禁止直连 wx.request (架构守卫 F208)',
-      }],
+      'no-restricted-syntax': ['error',
+        {
+          selector: "CallExpression[callee.object.name='wx'][callee.property.name='request']",
+          message: 'HTTP请求必须走 services/api.js 统一封装, 禁止直连 wx.request (架构守卫 F208)',
+        },
+        {
+          selector: "CallExpression[callee.object.name='wx'][callee.property.name=/^(set|get|remove)Storage(Sync)?$/] > Literal[value=/^(token|userInfo)$/]",
+          message: "敏感凭据键('token'/'userInfo')仅认证层(app.js/services/api.js)可读写, 登录态请用 app.getToken()/api.getUserInfo() (架构守卫 F214)",
+        },
+        {
+          // 异步storage对象参数形态: wx.getStorage({key:'token'})
+          selector: "CallExpression[callee.object.name='wx'][callee.property.name=/^(set|get|remove)Storage$/] > ObjectExpression > Property[key.name='key'] > Literal[value=/^(token|userInfo)$/]",
+          message: "敏感凭据键('token'/'userInfo')仅认证层(app.js/services/api.js)可读写, 登录态请用 app.getToken()/api.getUserInfo() (架构守卫 F214)",
+        },
+        {
+          selector: "MemberExpression[object.type='MemberExpression'][object.property.name='globalData'][property.name='token']",
+          message: '登录态请走 app.getToken(), 禁直读 globalData.token 裸字段 (架构守卫 F214)',
+        },
+      ],
     },
   },
   {
