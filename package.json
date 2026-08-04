@@ -10,7 +10,8 @@
     "deploy": "node scripts/deploy.js",
     "deploy:check": "node scripts/deploy.js --check",
     "check:auth-keys": "node scripts/check-auth-keys.js",
-    "check:nav-targets": "node scripts/check-nav-targets.js"
+    "check:nav-targets": "node scripts/check-nav-targets.js",
+    "check:wxml-handlers": "node scripts/check-wxml-handlers.js"
   },
   "jest": {
     "testEnvironment": "node",

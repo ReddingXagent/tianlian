@@ -66,7 +66,6 @@
       markers="{{markers}}"
       show-location="{{true}}"
       bindmarkertap="onMarkerTap"
-      bindupdated="onMapUpdated"
     >
     </map>
     <!-- 定位按钮 -->

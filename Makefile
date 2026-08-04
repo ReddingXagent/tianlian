@@ -1,4 +1,4 @@
-.PHONY: help install dev build test lint check auth-keys-check nav-targets-check ci-local clean deploy deploy-check
+.PHONY: help install dev build test lint check auth-keys-check nav-targets-check wxml-handlers-check ci-local clean deploy deploy-check
 
 help: ## 显示所有命令
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -24,7 +24,10 @@ auth-keys-check: ## auth存储键双源对账 (app.js↔services/api.js, F240; �
 nav-targets-check: ## 导航目标↔页面注册双源对账 (跳转url字面量↔app.json pages, F246; 委托 npm run check:nav-targets)
 	npm run check:nav-targets
 
-check: lint auth-keys-check nav-targets-check test ## 完整质量检查 (eslint + auth键对账 + 导航对账 + jest)
+wxml-handlers-check: ## WXML事件绑定↔JS方法双源对账 (绑定名↔Page/Component methods, F252; 委托 npm run check:wxml-handlers)
+	npm run check:wxml-handlers
+
+check: lint auth-keys-check nav-targets-check wxml-handlers-check test ## 完整质量检查 (eslint + auth键对账 + 导航对账 + 绑定对账 + jest)
 
 ci-local: check ## 本地模拟 CI 流程 (check)
 

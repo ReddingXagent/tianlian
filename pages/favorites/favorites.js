@@ -84,6 +84,11 @@ Page({
     });
   },
 
+  // 空态引导: 回首页发现站点 (F252: wxml绑定 onGoHome 此前无方法体=死按钮)
+  onGoHome() {
+    wx.switchTab({ url: '/pages/index/index' });
+  },
+
   // 下拉刷新
   onPullDownRefresh() {
     this.loadFavorites(true).then(() => wx.stopPullDownRefresh()).catch(() => wx.stopPullDownRefresh());
