@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Changed
+- 构建/测试/体检调用点单一源收敛(F206, F195模式): CI check job原为裸 `npx tsc`/`npx jest`/`npx expo-doctor` 绕过 package.json scripts(参数漂移: npm test无--coverage、Makefile与CI各一套) → 全部委托 npm scripts(`npm run typecheck` / `npm test -- --coverage --ci` / `npm run doctor`, 新增doctor script); Makefile build/test/doctor同步改委托; 附带修复门禁非确定性: expo-doctor原靠npx隐式下载无版本钉住(每次可能拉不同版本) → 钉为devDependency ^1.20.1, lockfile可复现; 验证: YAML解析+结构断言(新调用点在位/旧npx调用点清零/timeout保留) + tsc 0err + jest 263绿(经新路径, coverage实测stmts84.24%/branches70.93%/funcs79.6%/lines85.91%) + lint 0err/0warn + doctor 18/18 + make -n委托确认
+
+### Changed
 - lint门限补齐: `npm run lint` 补 `--max-warnings 0`(此前为裸 `eslint .`, 新增warning会无声通过 — F195同型门限漂移); Makefile lint与CI均已委托 `npm run lint`, 单点修改即全链路生效(调用点单一源); 变异测试实证: 纯warning探针(未用局部变量)无门限exit 0放行 → 加门限exit 1拦截, 清理后exit 0; bundle-size门控同轮变异实测: 4MB→FAIL(exit 1)/3MB→WARN(exit 0)/2MB→OK 三档全对
 - CI健壮性加固: ①两job补 `timeout-minutes`(check=15/export=20) — 此前无超时, 挂死的export最多吃满GitHub默认6h runner; ②export job补 `upload-artifact`(always, 保留7天) — bundle-size回归/导出异常时可直接下载双平台hbc+资产取证, 门控失败也留现场(if: always); ③YAML解析+结构断言校验通过(timeout/artifact字段实测确认)
 

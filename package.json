@@ -10,6 +10,7 @@
     "test": "jest --passWithNoTests",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
+    "doctor": "expo-doctor",
     "build:android": "expo export --platform android",
     "build:ios": "expo export --platform ios",
     "build": "tsc --noEmit && expo export"
@@ -38,6 +39,7 @@
     "axios-mock-adapter": "^2.1.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "^57.0.1",
+    "expo-doctor": "^1.20.1",
     "jest": "^29.7.0",
     "react-test-renderer": "^18.3.1",
     "typescript": "^5.3.0"

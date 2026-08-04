@@ -13,8 +13,8 @@ install: ## 安装依赖
 dev: ## 启动开发服务器
 	npx expo start
 
-build: ## TypeScript 编译检查
-	npx tsc --noEmit
+build: ## TypeScript 编译检查 (委托 npm run typecheck, 调用点单一源 F206)
+	npm run typecheck
 
 export-android: ## 导出 Android JS Bundle
 	npx expo export --platform android --output-dir /tmp/ops-export-android
@@ -26,10 +26,10 @@ bundle-size: ## JS Bundle 体积门控 (需先 export-android/export-ios)
 	./scripts/bundle-size.sh
 
 doctor: ## Expo 项目体检 (依赖版本/配置一致性, 与CI一致)
-	npx expo-doctor
+	npm run doctor
 
-test: ## 运行单元测试
-	npx jest --coverage
+test: ## 运行单元测试 (委托 npm test, 调用点单一源 F206)
+	npm test -- --coverage
 
 lint: ## ESLint 检查 (与 npm run lint/CI 一致, 全仓含配置文件)
 	npm run lint
