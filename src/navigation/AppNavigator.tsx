@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import OfflineBanner from '../components/OfflineBanner';
 import { useAndroidBackExit } from '../hooks/useAndroidBackExit';
 import { RootStackParamList, AuthStackParamList, MainTabParamList } from '../types';
 import LoginScreen from '../screens/LoginScreen';
@@ -128,17 +129,22 @@ export const AppNavigator: React.FC = () => {
     );
   }
 
+  // F228: OfflineBanner此前有实现有测试但零挂载=死代码, 离线时用户看陈旧数据无视觉告知。
+  // 挂根级(flex容器顶部)覆盖Auth(登录需网)与Main全部页面。
   return (
     <ErrorBoundary>
-      <NavigationContainer>
-        <RootStack.Navigator screenOptions={{ headerShown: false }}>
-          {isAuthenticated ? (
-            <RootStack.Screen name="Main" component={MainWithDetail} />
-          ) : (
-            <RootStack.Screen name="Auth" component={AuthNavigator} />
-          )}
-        </RootStack.Navigator>
-      </NavigationContainer>
+      <View style={styles.appRoot}>
+        <OfflineBanner />
+        <NavigationContainer>
+          <RootStack.Navigator screenOptions={{ headerShown: false }}>
+            {isAuthenticated ? (
+              <RootStack.Screen name="Main" component={MainWithDetail} />
+            ) : (
+              <RootStack.Screen name="Auth" component={AuthNavigator} />
+            )}
+          </RootStack.Navigator>
+        </NavigationContainer>
+      </View>
     </ErrorBoundary>
   );
 };
@@ -225,6 +231,9 @@ function MainWithDetail() {
 }
 
 const styles = StyleSheet.create({
+  appRoot: {
+    flex: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

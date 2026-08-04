@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import NetInfo from '@react-native-community/netinfo';
 
 // ── Mock auth store (must be self-contained in factory) ──────
 const mockAuthState = {
@@ -146,5 +147,32 @@ describe('AppNavigator', () => {
     expect(getByText('Orders')).toBeTruthy();
     expect(getByText('Scan')).toBeTruthy();
     expect(getByText('Profile')).toBeTruthy();
+  });
+});
+
+// F228: OfflineBanner根级挂载实证 — 组件此前有实现有单测但零挂载(死代码)。
+// 挂载守卫: 离线时AppNavigator渲染树必含offline-banner, 在线时零干扰。
+// NetInfo走jest.setup.ts全局mock, 此处覆写addEventListener的首帧回值。
+type NetInfoCb = (state: { isConnected: boolean; isInternetReachable: boolean }) => void;
+
+function mockNetInfoFirstFrame(firstFrame: { isConnected: boolean; isInternetReachable: boolean } | null) {
+  (NetInfo.addEventListener as jest.Mock).mockImplementation((cb: NetInfoCb) => {
+    if (firstFrame) cb(firstFrame);
+    return () => {};
+  });
+}
+
+describe('AppNavigator OfflineBanner mount (F228)', () => {
+  it('在线时不展示离线横幅(挂载零干扰)', () => {
+    mockNetInfoFirstFrame({ isConnected: true, isInternetReachable: true });
+    const { queryByTestId } = renderNavigator();
+    expect(queryByTestId('offline-banner')).toBeNull();
+  });
+
+  it('确认离线时展示离线横幅(Auth态同样覆盖)', () => {
+    mockNetInfoFirstFrame({ isConnected: false, isInternetReachable: false });
+    const { getByTestId, getByText } = renderNavigator();
+    expect(getByTestId('offline-banner')).toBeTruthy();
+    expect(getByText('网络已断开 · 显示缓存数据')).toBeTruthy();
   });
 });
