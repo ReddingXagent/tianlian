@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -36,6 +36,10 @@ api-port-check:
 # F255: 环境变量键名双源一致性守卫(config.py os.getenv读取侧↔.env.example模板侧对账)
 env-keys-check:
 	@bash scripts/check-env-keys.sh
+
+# F261: 日志路径双源漂移守卫(logrotate轮转目标↔deploy.sh/watchdog.sh写侧文件名对账)
+log-paths-check:
+	@bash scripts/check-log-paths.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \

@@ -14,7 +14,6 @@ from api.server import create_app
 from config import StorageConfig
 from storage.cache import TelemetryCache
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 
@@ -335,7 +334,7 @@ class TestSimulateTelemetryEndpoint:
     def test_default_values(self, cache):
         """Test that default values from the schema work."""
         mock_ocpp = MagicMock()
-        mock_ocpp.inject_telemetry.return_value = MagicMock(to_dict=lambda: {})
+        mock_ocpp.inject_telemetry.return_value = MagicMock(to_dict=dict)
         app = create_app(
             cache=cache, start_time=time.monotonic(), ocpp_adapter=mock_ocpp
         )

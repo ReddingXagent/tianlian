@@ -56,6 +56,9 @@ jobs:
       - name: Env keys guard (F255)
         run: bash scripts/check-env-keys.sh
 
+      - name: Log paths guard (F261)
+        run: bash scripts/check-log-paths.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov

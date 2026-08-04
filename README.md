@@ -137,7 +137,7 @@ make install          # 创建 venv + 装依赖
 make run              # 启动网关
 make test             # 跑测试
 make lint             # ruff 检查
-make check            # lint + test 一键门控
+make check            # 部署守卫五项(同名源/探测端点/API端口/env键/日志路径) + lint + test 一键门控
 ```
 
 ## 配置文件
