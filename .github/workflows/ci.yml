@@ -23,6 +23,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run check:auth-keys
+      - run: npm run check:dead-handlers
       - run: npm run check:nav-targets
       - run: npm run check:orphan-pages
       - run: npm run check:wxml-handlers

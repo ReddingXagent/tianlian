@@ -67,25 +67,55 @@ function rootObjectIndex(src) {
   return m.index + m[0].length - 1;
 }
 
+// 在 i 处读一个候选键(字符串字面量或标识符); async 是修饰符不算键
+// 非键字符(空白/冒号/括号等)返回 next=i: 调用侧回落主循环常规扫描,
+// 不得因此清 wantKey, 否则键名前任意空白即致整块键集提取失效(接手轮复验撞出并修复)
+function readKeyAt(src, i) {
+  const c = src[i];
+  if (c === "'" || c === '"') {
+    const j = skipStr(src, i);
+    return { key: src.slice(i + 1, j - 1), next: j };
+  }
+  const m = /^[A-Za-z_$][\w$]*/.exec(src.slice(i));
+  if (!m) return { key: null, next: i };
+  if (m[0] === 'async') return { key: null, next: i + m[0].length };
+  return { key: m[0], next: i + m[0].length };
+}
+
 // 收集 openIdx 处对象字面量的深度1键集(跳过字符串/注释), 顺带计 spread 数
+// parens 跟踪括号深度: 方法简写 key(a, b) {} 与箭头值 key: (a) => {} 的
+// 参数列表在括号内, 其逗号/标识符不得当作键(F264撞出, F252同源修复)
 function collectKeys(src, openIdx) {
   const keys = new Set();
   let spreads = 0;
   let depth = 0;
+  let parens = 0;
   let wantKey = true;
   let i = openIdx;
   while (i < src.length) {
     const c = src[i];
-    if (depth === 1 && wantKey && (c === "'" || c === '"')) {
-      const j = skipStr(src, i);
-      keys.add(src.slice(i + 1, j - 1));
-      wantKey = false;
-      i = j;
-      continue;
+    // 键位统一走 readKeyAt(字符串字面量键/标识符键单入口):
+    // async 返回 next>i 且 key=null, 保持 wantKey 等真键;
+    // 非键字符 next=i 回落主循环常规扫描(不吞逗号/花括号/spread)
+    if (depth === 1 && wantKey && parens === 0) {
+      const r = readKeyAt(src, i);
+      if (r.next > i) {
+        if (r.key !== null) {
+          keys.add(r.key);
+          wantKey = false;
+        }
+        i = r.next;
+        continue;
+      }
     }
     const j = skipNonCode(src, i);
     if (j !== i) {
       i = j;
+      continue;
+    }
+    if (c === '(' || c === ')') {
+      parens += c === '(' ? 1 : -1;
+      i += 1;
       continue;
     }
     if (c === '{') {
@@ -103,8 +133,12 @@ function collectKeys(src, openIdx) {
       i += 1;
       continue;
     }
-    if (c === ',') {
+    if (c === ',' && parens === 0) {
       wantKey = true;
+      i += 1;
+      continue;
+    }
+    if (parens !== 0 || !wantKey) {
       i += 1;
       continue;
     }
@@ -112,22 +146,6 @@ function collectKeys(src, openIdx) {
       spreads += 1;
       wantKey = false;
       i += 3;
-      continue;
-    }
-    const m = /^[A-Za-z_$][\w$]*/.exec(src.slice(i));
-    if (m && wantKey && m[0] === 'async') {
-      // async 是方法修饰符不是键, 保持 wantKey 等真键名
-      i += m[0].length;
-      continue;
-    }
-    if (m && wantKey) {
-      keys.add(m[0]);
-      wantKey = false;
-      i += m[0].length;
-      continue;
-    }
-    if (m) {
-      i += m[0].length;
       continue;
     }
     i += 1;
