@@ -812,3 +812,121 @@ describe('chat tool-call accumulation edge branches (F187)', () => {
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 });
+// =====================
+// F257: 兜底分支定向补测（catch链 / id生成兜底 / 非Error异常 / 空内容 / tool call分片累积）
+// =====================
+describe('F257 fallback branches', () => {
+  beforeEach(() => {
+    mockAxios.reset();
+    jest.clearAllMocks();
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
+  });
+
+  it('executeToolCall API报错带 response.data.message → 消息透传', async () => {
+    mockAxios.onPost('/devices/1/control').reply(400, { message: '设备离线' });
+    const result = await executeToolCall('control_device', { device_id: 1, action: 'start' });
+    expect(result).toContain('设备离线');
+    expect(result).toContain('Failed to execute control_device');
+  });
+
+  it('executeToolCall 网络错误无 response → err.message 兜底', async () => {
+    mockAxios.onPost('/devices/1/control').networkError();
+    const result = await executeToolCall('control_device', { device_id: 1, action: 'start' });
+    expect(result).toContain('Failed to execute control_device');
+  });
+
+  it('sendChatMessage 响应缺 id → generateId 兜底', async () => {
+    mockAxios.onPost('/ai/chat').reply(200, {
+      choices: [{ message: { content: '你好' } }],
+    });
+    const result = await sendChatMessage([
+      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
+    ]);
+    expect(result.id).toBeTruthy();
+    expect(result.content).toBe('你好');
+  });
+
+  it('chat 流式异常为非Error抛出 → 未知错误文案', async () => {
+    global.fetch = jest.fn().mockRejectedValue('boom');
+    const result = await chat([
+      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
+    ]);
+    expect(result.content).toContain('未知错误');
+  });
+
+  it('chat 流式零内容 → 未理解兜底文案', async () => {
+    const mockReader = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('data: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    });
+    const result = await chat([
+      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
+    ]);
+    expect(result.content).toContain('没有理解您的问题');
+  });
+
+  it('chat tool call arguments 分片到达 → existing 累积合并执行', async () => {
+    const toolReader = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"choices":[{"delta":{"toolCalls":[{"index":0,"id":"tc1","function":{"name":"control_device","arguments":"{\\"de"}}]}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"choices":[{"delta":{"toolCalls":[{"index":0,"function":{"arguments":"vice_id\\":1,\\"action\\":\\"start\\"}"}}]}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('data: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+    const textReader = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"choices":[{"delta":{"content":"执行完成"}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('data: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: true, body: { getReader: () => toolReader } })
+      .mockResolvedValueOnce({ ok: true, body: { getReader: () => textReader } });
+    mockAxios
+      .onPost('/devices/1/control')
+      .reply(200, { code: 200, message: 'success', data: { success: true, message: 'ok' } });
+
+    const result = await chat([
+      { id: '1', role: 'user', content: '启动1号桩', timestamp: Date.now() },
+    ]);
+    expect(result.content).toBe('执行完成');
+    expect(mockAxios.history.post.length).toBe(1);
+    expect(JSON.parse(mockAxios.history.post[0].data)).toEqual({ command: 'start' });
+  });
+});

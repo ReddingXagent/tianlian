@@ -672,3 +672,48 @@ describe('data-less fallback branches (F187)', () => {
     expect(a.deviceName).toBe('77');
   });
 });
+
+// =====================
+// F257: 兜底分支定向补测（?? fallback / 反向映射穿透 / 数字字符串解析）
+// =====================
+describe('F257 fallback branches', () => {
+  it('mapAlarm numOrUndef 数字字符串→数值 / 空白字符串→undefined', () => {
+    const a = mapAlarm({ id: 1, device_id: '5', alarm_type: 'offline', content: 'x' });
+    expect(a.deviceId).toBe(5);
+    const b = mapAlarm({ id: 2, device_id: '   ', alarm_type: 'offline', content: 'x' });
+    expect(b.deviceId).toBeUndefined();
+  });
+
+  it('workOrderApi.getList status 不在反向映射表 → ?? 原值穿透', async () => {
+    mockAxios.onGet('/work-orders').reply(200, {
+      code: 200,
+      message: 'success',
+      data: { items: [], total: 0, page: 1, page_size: 10 },
+    });
+    await workOrderApi.getList({ status: 'closed' });
+    expect(mockAxios.history.get[0].params.status).toBe('closed');
+  });
+
+  it('dashboardApi.getStats 全部数据源缺失 → 全 ?? 兜底归零', async () => {
+    mockAxios.onGet('/work-orders/stats').reply(200, { code: 200, message: 'success', data: {} });
+    mockAxios.onGet('/alarms').reply(200, { code: 200, message: 'success', data: {} });
+    mockAxios.onGet('/stations').reply(200, { code: 200, message: 'success', data: {} });
+    const res = await dashboardApi.getStats();
+    expect(res.data).toEqual({
+      totalStations: 0,
+      onlineStations: 0,
+      offlineStations: 0,
+      totalAlarms: 0,
+      unhandledAlarms: 0,
+      pendingWorkOrders: 0,
+      totalWorkOrders: 0,
+    });
+  });
+
+  it('revenueApi.getSummary data缺失 → ?? 兜底 + daily空数组 today 归零', async () => {
+    mockAxios.onGet('/business/revenue/summary').reply(200, { code: 200, message: 'success' });
+    mockAxios.onGet('/business/revenue/daily').reply(200, { code: 200, message: 'success' });
+    const res = await revenueApi.getSummary();
+    expect(res.data).toEqual({ today: 0, week: 0, month: 0, total: 0 });
+  });
+});
