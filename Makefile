@@ -1,4 +1,4 @@
-.PHONY: help install dev build test lint check auth-keys-check dead-handlers-check nav-targets-check orphan-pages-check wxml-handlers-check ci-local clean deploy deploy-check
+.PHONY: help install dev build test lint check auth-keys-check dead-handlers-check nav-targets-check orphan-pages-check storage-keys-check wxml-handlers-check ci-local clean deploy deploy-check
 
 help: ## 显示所有命令
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -29,11 +29,13 @@ nav-targets-check: ## 导航目标↔页面注册双源对账 (跳转url字面�
 
 orphan-pages-check: ## 孤儿页面反向可达性对账 (注册页⊆静态导航目标∪tabBar页, F258; 委托 npm run check:orphan-pages)
 	npm run check:orphan-pages
+storage-keys-check: ## storage键生命周期双向对账 (get键⊆set键⊆get键全仓, F270; 委托 npm run check:storage-keys)
+	npm run check:storage-keys
 
 wxml-handlers-check: ## WXML事件绑定↔JS方法双源对账 (绑定名↔Page/Component methods, F252; 委托 npm run check:wxml-handlers)
 	npm run check:wxml-handlers
 
-check: lint auth-keys-check dead-handlers-check nav-targets-check orphan-pages-check wxml-handlers-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + 导航对账 + 孤儿页对账 + 绑定对账 + jest)
+check: lint auth-keys-check dead-handlers-check nav-targets-check orphan-pages-check storage-keys-check wxml-handlers-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + 导航对账 + 孤儿页对账 + storage键对账 + 绑定对账 + jest)
 
 ci-local: check ## 本地模拟 CI 流程 (check)
 

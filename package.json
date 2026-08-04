@@ -13,6 +13,7 @@
     "check:dead-handlers": "node scripts/check-dead-handlers.js",
     "check:nav-targets": "node scripts/check-nav-targets.js",
     "check:orphan-pages": "node scripts/check-orphan-pages.js",
+    "check:storage-keys": "node scripts/check-storage-keys.js",
     "check:wxml-handlers": "node scripts/check-wxml-handlers.js"
   },
   "jest": {

@@ -26,6 +26,7 @@ jobs:
       - run: npm run check:dead-handlers
       - run: npm run check:nav-targets
       - run: npm run check:orphan-pages
+      - run: npm run check:storage-keys
       - run: npm run check:wxml-handlers
       - run: npm test -- --coverage --passWithNoTests
 
