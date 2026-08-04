@@ -53,7 +53,20 @@
     },
     "setupFilesAfterEnv": [
       "@testing-library/jest-native/extend-expect"
-    ]
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/__tests__/**",
+      "!src/**/*.d.ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 75,
+        "branches": 71,
+        "functions": 74.5,
+        "lines": 74.5
+      }
+    }
   },
   "private": true,
   "expo": {

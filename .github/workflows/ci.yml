@@ -18,7 +18,7 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx eslint . --max-warnings 0
-      - run: npx jest --coverage --passWithNoTests
+      - run: npm test -- --coverage
 
   export:
     needs: check

@@ -40,14 +40,15 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（275 用例全绿，coverage 95.18%）
+npm test             # jest 单测（328 用例全绿；加 --coverage 触发覆盖率门限）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）
 ```
 
-- 测试覆盖：screens / components / hooks / services / store / utils 六层全覆盖（总体 **95.18%**）
-- 覆盖率明细：components 83.1% / hooks 94.6% / screens 96.5% / services 92.9% / store 100% / utils 100%
+- 测试覆盖：328 用例全绿，全量统计（collectCoverageFrom 计入全部源文件）总体 **stmts 75.53% / branches 71.54% / funcs 75.14% / lines 74.93%**（F201 修复口径：此前 95.18% 仅统计被测试加载的文件，12 个零测试文件被隐形排除）
+- 覆盖率门限：jest coverageThreshold global（stmts≥75 / branches≥71 / funcs≥74.5 / lines≥74.5），CI 与 Makefile 均经 `--coverage` 强制执行，变异测试实证（新增无测试文件→exit 1 拦截）
+- 零测试盲区（12 文件，待补测）：AIChatPanel / ErrorBoundary / LoadingSpinner / NetworkStatus / AppNavigator / MainTabNavigator / Dashboard / Login / Profile / StationDetail / StationList / types
 - eslint **0 err / 0 warn**（`474492b` 全部清零）
 
 ## 构建与部署
