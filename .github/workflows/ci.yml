@@ -23,6 +23,8 @@ jobs:
       - run: npm run check:alias
       # node版本双源漂移守卫(F237): engines.node 与 CI setup-node node-version 必须兼容, 防本地门限与CI运行版本分叉
       - run: npm run check:node
+      # 守卫接线三源一致性守卫(F250): check:* 守卫的 package.json声明 ↔ Makefile check链 ↔ CI步骤 三源必须一致, 防新增守卫漏接线=假门控
+      - run: npm run check:guard-wiring
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint
