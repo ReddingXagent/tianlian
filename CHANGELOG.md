@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Added
+- auth 存储键双源对账守卫（F240）：scripts/check-auth-keys.js — 'token'/'userInfo' 存储键名在 app.js（boot 恢复读侧）与 services/api.js（登录写入侧）双源硬编码字面量且零断言，任一侧整侧改名→ boot 恢复读旧键静默落空→用户持有有效 token 却被静默登出（F224 双源漂移同族；eslint 守卫 F214 只挡认证层外直读写，层内双源漂移不设防；app.js 无测试文件，往返路径零覆盖）。不变量：keys(app.js) ⊆ keys(api.js)，提取 wx.get/set/removeStorage(Sync) 首参字面量+异步对象形态 key 属性（与 F214 selector 双形态对齐）；npm run check:auth-keys 接入 CI check job + Makefile check 链（auth-keys-check，委托单一源）；变异三档实证（api.js 整侧 token 改名 exit 1 / app.js 整侧 userInfo 改名 exit 1 / api.js 缺输入 exit 1，sed 反向还原后基线 exit 0；F231/F238 铁律：变异还原禁 git checkout）；eslint 0err/0warn + jest 230 绿复验；花絮：首版变异档只改 api.js 单处未拦住——单边部分改名=文件内部自相矛盾（api.test.js 领地），整侧改名才是双源漂移语义，变异档设计须对齐守卫的真实漂移场景
+
+### Added
 - userInfo 本地访问器补齐 + globalData.userInfo 裸字段守卫扩展（F239）：token 侧有 app.getToken()（globalData+storage 兜底）而 userInfo 侧无同构访问器=同型半边缺口——冷启动 onLaunch 走 api.getUserInfo() 异步回填，请求未回/失败时 globalData.userInfo 为空，页面直读=空态。修法：app.js 补 app.getUserInfo()（与 getToken 同构：globalData || getStorageSync('userInfo')）；迁移全仓唯一直读点 pages/profile/profile.js（loadUserInfo）；eslint 守卫③ selector 由 property.name='token' 扩为 /^(token|userInfo)$/（与既有守卫同块声明，F214 flat config 教训）；前置核验迁移后 pages/components/utils 零违规、ignores 并集未变=零行为变化；变异探针实证（globalData.userInfo+token 双注入 exit 1 精确报错 / 清理后 exit 0）；eslint 0err/0warn + jest 230 绿复验
 
 ### Added

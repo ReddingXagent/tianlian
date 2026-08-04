@@ -8,7 +8,8 @@
     "lint": "eslint . --max-warnings 0",
     "lint:ci": "node scripts/lint-ci.js",
     "deploy": "node scripts/deploy.js",
-    "deploy:check": "node scripts/deploy.js --check"
+    "deploy:check": "node scripts/deploy.js --check",
+    "check:auth-keys": "node scripts/check-auth-keys.js"
   },
   "jest": {
     "testEnvironment": "node",
