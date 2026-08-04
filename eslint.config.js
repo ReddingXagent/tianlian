@@ -158,8 +158,13 @@ module.exports = [
     //   页面直读绕过401登出/统一注入且硬编码键有改名漂移风险; 不误伤页面私有键
     //   (scanHistory/station_filter)。
     // ③F214: 登录态禁直读 globalData.token 裸字段, 须走 app.getToken()(绕过storage兜底逻辑)。
+    // ④F227: 端点地址单一源 — http(s) URL字面量仅允许 config/index.js(环境切换唯一声明点),
+    //   运行时代码硬编码端点=绕过环境切换/灰度对照失真(F224双源漂移同族)。ignores并集新增
+    //   config/**(权威源)+测试(jest断言config值/样例URL为合法用途, F220同款豁免);
+    //   前置核验: config/index.js与测试对①②③零违规, 并集扩豁免零行为变化。
+    //   覆盖Literal与模板字符串首段(TemplateElement.cooked), 注释不参与AST不受影响。
     files: ['**/*.js'],
-    ignores: ['app.js', '**/services/api.js'],
+    ignores: ['app.js', '**/services/api.js', 'config/**', '**/__tests__/**', '**/*.test.js'],
     rules: {
       'no-restricted-syntax': ['error',
         {
@@ -178,6 +183,14 @@ module.exports = [
         {
           selector: "MemberExpression[object.type='MemberExpression'][object.property.name='globalData'][property.name='token']",
           message: '登录态请走 app.getToken(), 禁直读 globalData.token 裸字段 (架构守卫 F214)',
+        },
+        {
+          selector: "Literal[value=/^https?:\\/\\//]",
+          message: '端点地址必须在 config/index.js 统一声明(环境切换单一源), 运行时代码禁硬编码 http(s) URL (架构守卫 F227)',
+        },
+        {
+          selector: "TemplateElement[value.cooked=/^https?:\\/\\//]",
+          message: '端点地址必须在 config/index.js 统一声明(环境切换单一源), 运行时代码禁硬编码 http(s) URL (架构守卫 F227)',
         },
       ],
     },
