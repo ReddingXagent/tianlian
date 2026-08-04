@@ -40,15 +40,15 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（351 用例全绿；加 --coverage 触发覆盖率门限）
+npm test             # jest 单测（368 用例全绿；加 --coverage 触发覆盖率门限）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）
 ```
 
-- 测试覆盖：351 用例全绿，全量统计（collectCoverageFrom 计入全部源文件）总体 **stmts 80.34% / branches 75.05% / funcs 79.14% / lines 79.94%**（F213 补测 LoginScreen/MainTabNavigator 后棘轮上调门限 80/75/79/79；F207 第一批补测三组件；F201 修复口径：此前 95.18% 仅统计被测试加载的文件，12 个零测试文件被隐形排除，现剩 6 个待补）
-- 覆盖率门限：jest coverageThreshold global（stmts≥80 / branches≥75 / funcs≥79 / lines≥79），CI 与 Makefile 均经 `--coverage` 强制执行，变异测试实证（新增无测试文件→exit 1 拦截）
-- 零测试盲区（剩 6 文件，待补测）：AppNavigator / Dashboard / Profile / StationDetail / StationList / types（原 12 文件，F207 补 3 组件 + F213 补 LoginScreen/MainTabNavigator 后剩 6；types 为纯类型定义无可执行逻辑，实际有效目标 5 个）
+- 测试覆盖：368 用例全绿，全量统计（collectCoverageFrom 计入全部源文件）总体 **stmts 83.6% / branches 78.8% / funcs 83.71% / lines 83.52%**（F219 补测 StationList/StationDetail 后棘轮上调门限 83/78/83/83；F213 补测 LoginScreen/MainTabNavigator；F207 第一批补测三组件；F201 修复口径：此前 95.18% 仅统计被测试加载的文件，12 个零测试文件被隐形排除，现剩 4 个待补）
+- 覆盖率门限：jest coverageThreshold global（stmts≥83 / branches≥78 / funcs≥83 / lines≥83），CI 与 Makefile 均经 `--coverage` 强制执行，变异测试实证（新增无测试文件→exit 1 拦截）
+- 零测试盲区（剩 4 文件，待补测）：AppNavigator / Dashboard / Profile / types（原 12 文件，F207 补 3 组件 + F213 补 LoginScreen/MainTabNavigator + F219 补 StationList/StationDetail 后剩 4；types 为纯类型定义无可执行逻辑，实际有效目标 3 个）
 - eslint **0 err / 0 warn**（`474492b` 全部清零）
 
 ## 构建与部署

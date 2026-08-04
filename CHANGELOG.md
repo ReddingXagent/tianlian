@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- **零测试文件补测第三批（F219，接手并发轮改动复验落盘）**：补齐 StationListScreen（8条：挂载拉取默认参数/卡片三态徽章渲染/告警徽章仅alarmCount>0/点击携带stationId跳详情/搜索提交重拉/下拉刷新refreshing复位/loading指示器/空态文案）+ StationDetailScreen（9条：挂载并行拉详情+设备+告警使用路由stationId/头部渲染/快捷操作跳转/设备列表计数/设备超5台"查看全部设备"跳转/最近告警渲染/双空态/loading指示器/下拉并行重拉refreshing复位）；全仓 351→**368 tests** 全绿，全量覆盖 stmts 80.34→**83.6%** / branches 75.05→**78.8%** / funcs 79.14→**83.71%** / lines 79.94→**83.52%**；coverageThreshold棘轮上调 80/75/79/79→**83/78/83/83**（上调后 jest --coverage --ci 复验通过 exit 0）；剩余 4 个零测试文件（AppNavigator/Dashboard/Profile/types，types纯类型有效目标3个）；接手时清理3条lint warning（两文件多余eslint-disable no-require-imports头+1处未用import TouchableOpacity）；tsc 0err + eslint 0err/0warn + jest --coverage --ci 全门复验通过；README质量门控章节同步新数
+
+### Added
 - **零测试文件补测第二批（F213）**：补齐 LoginScreen（资金/认证敏感页，7条：表单渲染/用户名空拦截/密码空白拦截/trim用户名+原始密码透传/Error失败弹服务端文案并复位按钮/非Error失败兜底文案/加载中spinner+按钮禁用挂起探针验证复位）+ MainTabNavigator（2条：五Tab中文标签齐备getAllByText容忍header/title双匹配/默认落首页）；全仓 342→**351 tests** 全绿，全量覆盖 stmts 78.87→**80.34%** / branches 73.77→**75.05%** / funcs 78.28→**79.14%** / lines 78.33→**79.94%**；coverageThreshold棘轮上调 78/73/78/78→**80/75/79/79**（上调后 jest --coverage --ci 复验通过）；剩余 6 个零测试文件（AppNavigator/Dashboard/Profile/StationDetail/StationList/types）待后续测试轮；tsc 0err + eslint 0err/0warn（--max-warnings 0）+ jest --coverage --ci 全门复验通过；README质量门控章节同步新数
 - 测试工程要点：jest.mock工厂被hoisting，工厂内引用顶层import会TDZ，须工厂内require（文件级加 eslint-disable no-require-imports，与既有测试模式一致）；mock组件用命名函数避免 react/display-name；加载态断言用 UNSAFE_getAllByType(TouchableOpacity) 取稳定容器引用（文本子节点会卸载致旧引用失效）
 
