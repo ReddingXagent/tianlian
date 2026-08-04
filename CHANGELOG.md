@@ -6,6 +6,9 @@
 
 ## [Unreleased]
 
+### Added
+- engines门控强制(F218): package.json `engines.node>=20` 原仅为声明 — npm默认对EBADENGINE只警告不拦截, Node 18/16本地`npm ci/install`+构建无声通过(声明的门控=假门控, F206同族) → 新增 `.npmrc` 设 `engine-strict=true`, npm ci/install在低版本Node直接失败; CI两job的npm ci读项目.npmrc自动生效, 零调用点改动(F206单一源模式); 变异实测四档: ①正常engines exit 0 ②变异`>=99`+engine-strict exit 1(EBADENGINE精确报错) ③恢复后exit 0 ④对照移除.npmrc+变异engines exit 0无声放行(证明缺口真实); 全门复验: tsc 0err + lint 0err/0warn + jest 263绿
+
 ### Fixed
 - bundle-size门控单平台静默漏测(F212): 原逻辑导出目录缺失即"跳过"返回0 — 只导出android没导ios时门控照样通过, ios bundle超限无声放行 → 改为缺目录返回2, 单平台缺失/双缺均FAIL(门控要求双平台齐验); 变异三档实测: 双平台齐在exit 0 / 单缺exit 1(新拦截) / 双缺exit 1
 - F206遗留清零: CI export job与Makefile export-android/export-ios仍为裸 `npx expo export` → 全部委托 `npm run build:android/build:ios -- --output-dir ...`(参数透传); 验证: YAML结构断言(新调用点在位/裸npx清零/timeout与artifact保留) + make -n委托确认 + 真实android导出实测2.19MB与基线一致
