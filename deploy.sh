@@ -46,6 +46,11 @@
 #   - 新增: 迁移前自动备份 data/gateway.db → data/backups/gateway.db.<时间戳>.bak
 #     (同秒重跑追加后缀不覆盖旧备份; 仅保留最近5份), 回滚/坏迁移后可用新子命令
 #     restore-db 恢复
+# v9 (2026-08-04 自驱部署轮):
+#   - fix: rollback迁移盲区(F223) — rollback只revert代码, 若回滚范围内含
+#     db_migration.py变更, 数据库schema已被新版本前移, revert后"bash deploy.sh"
+#     重部署会让旧代码跑在新schema上(no such column崩/数据错乱), 且全程零提示 →
+#     revert前探测范围内迁移commit, 命中即醒目警告+引导restore-db并列出可用备份
 set -e
 
 # 配置: 仓库目录自动探测(脚本所在目录优先, 回退Pi实际路径)
@@ -94,6 +99,10 @@ if [ "$1" = "rollback" ]; then
     fi
     echo "回滚到: $REV (revert其后 $N 个提交)"
     git rev-list --oneline "$RANGE" | sed 's/^/  revert: /'
+    # F223: 迁移感知 — 范围内若含db_migration.py变更, DB schema已被前移,
+    # 只回滚代码会让旧代码跑在新schema上; revert前先探测(revert后HEAD不变但
+    # 工作区已变, 探测放前面最稳)
+    MIG_COMMITS=$(git log --oneline "$RANGE" -- db_migration.py 2>/dev/null || true)
     # 脏工作区先stash(revert需干净树); 记录计数以判断是否真的产生了stash
     STASH_CNT_BEFORE=$(git stash list | wc -l)
     git stash --include-untracked 2>/dev/null || true
@@ -117,6 +126,16 @@ if [ "$1" = "rollback" ]; then
     if [ "$STASHED" = true ]; then
         echo "ℹ️ 回滚前的未提交改动保存在 stash@{0}(回滚需干净工作区)"
         echo "   如需找回: git stash pop (注意: 可能与回滚后状态冲突)"
+    fi
+    if [ -n "$MIG_COMMITS" ]; then
+        echo ""
+        echo "⚠️⚠️ 回滚范围包含DB迁移变更(db_migration.py被改过, 数据库schema已前移):"
+        echo "$MIG_COMMITS" | sed 's/^/    /'
+        echo "   代码已回滚但数据库仍是新schema — 旧代码跑新schema会'no such column'崩/数据错乱。"
+        echo "   重新部署前务必先恢复迁移前备份:"
+        echo "     bash deploy.sh restore-db          # 默认恢复最新一份备份"
+        echo "     ls data/backups/                    # 列出可用备份(选更早的作为第2参数)"
+        echo ""
     fi
     echo "重新部署验证: bash deploy.sh"
     echo "确认无误后: git commit -m 'rollback to $REV' && git push origin master"

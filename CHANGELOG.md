@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### Fixed
+- `deploy.sh` rollback (F223): 迁移盲区守卫 — rollback只revert代码, 若回滚范围内含 db_migration.py 变更, 数据库schema已被新版本前移, revert后直接 `bash deploy.sh` 重部署会让旧代码跑在新schema上(“no such column”崩/数据错乱)且全程零提示 → revert前探测范围内迁移commit(`git log RANGE -- db_migration.py`), 命中即醒目警告+引导 `restore-db` 恢复迁移前备份并列出可用备份; 变异三档实测(范围含迁移commit→精确警告含commit清单/范围无迁移commit→零警告行为不变/ bash -n 语法通过); pytest 232绿
+
+### Fixed
 - `deploy.sh` (F217): 双模式冲突守卫 — unit已安装(make systemd-install)时, 主流程仍pgrep+kill停进程+nohup启新实例: `Restart=always`在kill后5秒内复活systemd进程, 与nohup第二实例撞端口(一者无限重启风暴/新代码未生效假部署); `restore-db`同型(kill后复活进程立即写回刚恢复的库) → 新增SYSTEMD_MODE探测(unit文件存在即systemd模式), 步骤6/7与restore-db停启全部委托`systemctl stop/start`(start后取MainPID接健康检查轮询), systemd模式下不写.pid/不nohup/日志提示切journalctl; stop失败即中止(exit 1, 不碰库); 变异三档实测(systemd模式stop+start调用链精确/直跑模式零systemctl调用行为不变/stop失败exit 1库不动); systemd/README.md新增自动探测章节
 
 ### Fixed
