@@ -44,6 +44,9 @@ jobs:
       - name: Compile check
         run: python -m compileall main.py config.py adapters/ api/ models/ storage/ -q
 
+      - name: Deploy names guard (F236)
+        run: bash scripts/check-deploy-names.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov

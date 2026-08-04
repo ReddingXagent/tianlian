@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- `scripts/check-deploy-names.sh` (F236): 部署同名源一致性守卫 — SYSTEMD_MODE探测(F217/F230退位守卫)依赖 deploy.sh/watchdog.sh 的 UNIT_FILE 默认值与 Makefile systemd-install 实际安装路径**精确同名**, 三处任一单独改名→unit已装但探测失配→退位守卫整体失效(kill+nohup撞systemd Restart=always重启风暴); logrotate同理(Makefile安装名 vs deploy.sh部署尾提示探测名漂移→提示误报/漏报) → 脚本对账unit三源+logrotate双源, 不一致即exit 1, 并断言unit模板 systemd/<basename> 存在; 接入 `make check`(deploy-names-check target) + CI check job; 变异两档实测(watchdog UNIT_FILE改名→三源漂移精确拦截exit 1 / Makefile logrotate安装名改名→双源漂移精确拦截exit 1, 基线exit 0); pytest 232绿
+
 ### Fixed
 - `scripts/watchdog.sh` (F230): systemd模式退位守卫 — F217同族漏网点: unit已装时systemd接管进程生死(Restart=always), watchdog仍按cron/loop定时kill+nohup重启: ①杀卡死进程后unit 5秒内复活, 与nohup第二实例撞端口(重启风暴); ②.pid被改写指向nohup实例, systemd实例失联 → 与deploy.sh一致的SYSTEMD_MODE探测(unit文件存在, `TIANLIAN_UNIT_FILE`可覆盖测试钩子), 命中即记日志+exit 0整体退位, 绝不启动第二进程, 恢复交给Restart=always; 变异三档实测(unit存在→exit 0+退位日志+未进flock/unit不存在+健康→过守卫正常exit 0零退位日志/bash -n通过); README+DEPLOYMENT.md同步说明
 
