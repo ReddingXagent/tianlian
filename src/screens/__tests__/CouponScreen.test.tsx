@@ -11,6 +11,11 @@ jest.mock('../../services/api', () => ({
   },
 }));
 
+let mockFocused = true;
+jest.mock('@react-navigation/native', () => ({
+  useIsFocused: () => mockFocused,
+}));
+
 const makeCoupon = (over: Record<string, unknown> = {}) => ({
   id: 1,
   userId: 1,
@@ -29,6 +34,7 @@ const makeCoupon = (over: Record<string, unknown> = {}) => ({
 describe('CouponScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFocused = true;
   });
 
   it('加载成功后渲染优惠券列表', async () => {
@@ -102,5 +108,22 @@ describe('CouponScreen', () => {
     expect(utils.queryByText('加载失败')).toBeNull();
     const rcAfter = utils.UNSAFE_getByType(RefreshControl);
     expect(rcAfter.props.refreshing).toBe(false);
+  });
+
+  // --- F215: 回焦静默刷新对齐(F170/F209模式) ---
+  it('回焦时重新拉取优惠券(用券后券状态可能已变化)', async () => {
+    mockGetList.mockResolvedValue({
+      data: { items: [makeCoupon()], total: 1, page: 1, pageSize: 20 },
+    });
+    const utils = render(<CouponScreen />);
+    await waitFor(() => expect(mockGetList).toHaveBeenCalledTimes(1));
+
+    mockFocused = false;
+    utils.rerender(<CouponScreen />);
+    expect(mockGetList).toHaveBeenCalledTimes(1);
+
+    mockFocused = true;
+    utils.rerender(<CouponScreen />);
+    await waitFor(() => expect(mockGetList).toHaveBeenCalledTimes(2));
   });
 });

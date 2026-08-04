@@ -7,6 +7,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import { couponApi } from '../services/api';
 import { Coupon } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -59,9 +60,16 @@ const CouponScreen: React.FC = () => {
     }
   }, [hasMore, loadingMore, loading, page, coupons]);
 
+  // 回焦静默刷新: 支付/下单页用券后返回, 券状态(已用/过期)会陈旧。
+  // 与订单/首页/钱包/站点详情等屏对齐(F170/F209交互一致性模式);
+  // 重拉固定回第1页, 分页态随之重置。
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    loadCoupons();
-  }, []);
+    if (isFocused) {
+      loadCoupons();
+    }
+  }, [isFocused, loadCoupons]);
 
   const handleRefresh = async () => {
     setRefreshing(true);

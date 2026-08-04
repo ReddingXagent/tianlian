@@ -9,7 +9,9 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import { vehicleApi } from '../services/api';
 import { Vehicle } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -21,6 +23,7 @@ const VehicleScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // 表单
   const [plate, setPlate] = useState('');
@@ -44,9 +47,22 @@ const VehicleScreen: React.FC = () => {
     }
   }, []);
 
+  // 回焦静默刷新: 与订单/首页/钱包等屏对齐(F170/F209交互一致性模式);
+  // 默认车辆/车辆状态可能在支付/充电流程后变化。
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    loadVehicles();
-  }, []);
+    if (isFocused) {
+      loadVehicles();
+    }
+  }, [isFocused, loadVehicles]);
+
+  // 下拉刷新: 与订单/优惠券/钱包等列表屏对齐(F209模式)。
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadVehicles();
+    setRefreshing(false);
+  };
 
   const handleAdd = async () => {
     if (!plate.trim()) {
@@ -150,11 +166,12 @@ const VehicleScreen: React.FC = () => {
     </View>
   );
 
-  if (loading) {
+  // 仅首屏(无数据)才切整屏spinner/错误页; 回焦重拉/刷新失败时保留已有列表不闪屏(F209模式)
+  if (loading && vehicles.length === 0) {
     return <LoadingSpinner text="加载车辆列表..." />;
   }
 
-  if (error) {
+  if (error && vehicles.length === 0) {
     return (
       <EmptyState
         icon="⚠️"
@@ -173,6 +190,14 @@ const VehicleScreen: React.FC = () => {
         keyExtractor={(item) => String(item.id)}
         renderItem={renderVehicleItem}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={["#1a73e8"]}
+            tintColor="#1a73e8"
+          />
+        }
         ListEmptyComponent={
           <EmptyState
             icon="🚗"

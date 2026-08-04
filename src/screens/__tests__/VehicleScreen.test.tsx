@@ -1,10 +1,14 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { RefreshControl } from 'react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import VehicleScreen from '../VehicleScreen';
 
+let mockGetList: jest.Mock;
+
 jest.mock('../../services/api', () => {
   const getList = jest.fn();
+  mockGetList = getList;
   const add = jest.fn();
   const remove = jest.fn();
   const setDefault = jest.fn();
@@ -33,6 +37,11 @@ jest.mock('../../components/EmptyState', () => {
   return Empty;
 });
 
+let mockFocused = true;
+jest.mock('@react-navigation/native', () => ({
+  useIsFocused: () => mockFocused,
+}));
+
 const mockVehicles = [
   { id: 1, userId: 1, plate: '京A12345', brand: 'Tesla', model: 'Model 3',
     color: '白色', vin: 'VIN001', isDefault: true, createdAt: '2026-01-01T00:00:00Z' },
@@ -41,7 +50,7 @@ const mockVehicles = [
 ];
 
 describe('VehicleScreen', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => { jest.clearAllMocks(); mockFocused = true; });
 
   const renderScreen = () =>
     render(<SafeAreaProvider><VehicleScreen /></SafeAreaProvider>);
@@ -116,5 +125,57 @@ describe('VehicleScreen', () => {
       expect(getByText('Tesla Model 3')).toBeTruthy();
       expect(getByText('BYD 汉EV')).toBeTruthy();
     });
+  });
+
+  // --- F215: 回焦静默刷新 + 下拉刷新对齐(F170/F209模式) ---
+  it('回焦时重新拉取车辆列表(默认车辆/状态可能已变化)', async () => {
+    mockGetList.mockResolvedValue({ data: mockVehicles });
+    const utils = renderScreen();
+    await waitFor(() => expect(mockGetList).toHaveBeenCalledTimes(1));
+
+    mockFocused = false;
+    utils.rerender(<SafeAreaProvider><VehicleScreen /></SafeAreaProvider>);
+    expect(mockGetList).toHaveBeenCalledTimes(1);
+
+    mockFocused = true;
+    utils.rerender(<SafeAreaProvider><VehicleScreen /></SafeAreaProvider>);
+    await waitFor(() => expect(mockGetList).toHaveBeenCalledTimes(2));
+  });
+
+  it('下拉刷新重拉车辆列表(refreshControl onRefresh 并复位 refreshing)', async () => {
+    mockGetList.mockResolvedValue({ data: mockVehicles });
+    const utils = renderScreen();
+    await waitFor(() => expect(utils.getByText('京A12345')).toBeTruthy());
+    expect(mockGetList).toHaveBeenCalledTimes(1);
+
+    const rc = utils.UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      await rc.props.onRefresh();
+    });
+
+    expect(mockGetList).toHaveBeenCalledTimes(2);
+    const rcAfter = utils.UNSAFE_getByType(RefreshControl);
+    expect(rcAfter.props.refreshing).toBe(false);
+  });
+
+  it('回焦重拉期间已有列表保持可见(不整屏切spinner)', async () => {
+    let call = 0;
+    mockGetList.mockImplementation(() => {
+      call += 1;
+      if (call === 1) return Promise.resolve({ data: mockVehicles });
+      // 第二拉挂起: 模拟回焦重拉中, 验证列表不被LoadingSpinner替换
+      return new Promise(() => {});
+    });
+    const utils = renderScreen();
+    await waitFor(() => expect(utils.getByText('京A12345')).toBeTruthy());
+
+    mockFocused = false;
+    utils.rerender(<SafeAreaProvider><VehicleScreen /></SafeAreaProvider>);
+    mockFocused = true;
+    utils.rerender(<SafeAreaProvider><VehicleScreen /></SafeAreaProvider>);
+
+    // 重拉中: 已有车辆仍可见, 不切整屏spinner
+    expect(utils.getByText('京A12345')).toBeTruthy();
+    expect(utils.queryByText('加载车辆列表...')).toBeNull();
   });
 });
