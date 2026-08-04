@@ -7,6 +7,10 @@
 ## [Unreleased]
 
 ### Added
+- **零测试文件补测第五批（F226，接手并发轮改动复验落盘）**：补齐 AIChatPanel（头部/欢迎语/快捷提问/发送走ai.chat/流式渲染/错误兑底）+ AppNavigator（挂载checkAuth/isLoading加载态/未认证入Auth栈渲染LoginScreen/已认证入Main栈四Tab标签齐备默认Dashboard）；全仓 385→**396 tests** 全绿，全量覆盖 stmts 87.03→**96.65%** / branches 83.37→**90.28%** / funcs 88→**96.57%** / lines 87.19→**97.13%**；coverageThreshold棘轮上调 87/83/88/87→**96/90/96/97**（实测下沿留小缓冲）；剩余零测试文件仅 types/index.ts（纯类型定义无可执行逻辑，有效盲区清零）；接手时清理25条lint warning（AppNavigator缺文件级 eslint-disable no-require-imports 头×24 + AIChatPanel改named import消no-named-as-default×1，与既有8个测试文件模式一致）；同步补 F225 遗漏的 README/CHANGELOG 文档账；tsc 0err + eslint 0err/0warn + jest --coverage 全门复验通过；README质量门控章节同步新数
+- **零测试文件补测第四批（F225）**：补齐 ProfileScreen（用户卡片/角色映射/空user兑底/设置菜单/退出登录确认+取消+异常静默）+ DashboardScreen（三源拉取/统计API值优先/API失败回退本地口径/营收两位小数/快捷导航/空态/下拉刷新）；全仓 368→**385 tests** 全绿，覆盖 83.6→**87.03%**；coverageThreshold棘轮 83/78/83/83→**87/83/88/87**（文档账由 F226 轮补记）
+
+### Added
 - **零测试文件补测第三批（F219，接手并发轮改动复验落盘）**：补齐 StationListScreen（8条：挂载拉取默认参数/卡片三态徽章渲染/告警徽章仅alarmCount>0/点击携带stationId跳详情/搜索提交重拉/下拉刷新refreshing复位/loading指示器/空态文案）+ StationDetailScreen（9条：挂载并行拉详情+设备+告警使用路由stationId/头部渲染/快捷操作跳转/设备列表计数/设备超5台"查看全部设备"跳转/最近告警渲染/双空态/loading指示器/下拉并行重拉refreshing复位）；全仓 351→**368 tests** 全绿，全量覆盖 stmts 80.34→**83.6%** / branches 75.05→**78.8%** / funcs 79.14→**83.71%** / lines 79.94→**83.52%**；coverageThreshold棘轮上调 80/75/79/79→**83/78/83/83**（上调后 jest --coverage --ci 复验通过 exit 0）；剩余 4 个零测试文件（AppNavigator/Dashboard/Profile/types，types纯类型有效目标3个）；接手时清理3条lint warning（两文件多余eslint-disable no-require-imports头+1处未用import TouchableOpacity）；tsc 0err + eslint 0err/0warn + jest --coverage --ci 全门复验通过；README质量门控章节同步新数
 
 ### Added
