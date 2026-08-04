@@ -53,6 +53,9 @@ jobs:
       - name: API port guard (F249)
         run: bash scripts/check-api-port.sh
 
+      - name: Env keys guard (F255)
+        run: bash scripts/check-env-keys.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov

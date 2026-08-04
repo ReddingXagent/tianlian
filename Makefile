@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -32,6 +32,10 @@ deploy-endpoints-check:
 # F249: API端口多源一致性守卫(config.py声明侧↔deploy.sh/compose/Dockerfile探测发布侧对账)
 api-port-check:
 	@bash scripts/check-api-port.sh
+
+# F255: 环境变量键名双源一致性守卫(config.py os.getenv读取侧↔.env.example模板侧对账)
+env-keys-check:
+	@bash scripts/check-env-keys.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
