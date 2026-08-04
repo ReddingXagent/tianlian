@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Added
+- eslint 架构守卫（F208）：no-restricted-syntax 禁页面/组件直连 wx.request，HTTP 必须走 services/api.js 统一封装（防绕过 baseURL/token 注入/统一错误处理/401 登出）；AST 级精确匹配 property.name='request'，wx.requestPayment/wx.uploadFile 不误伤（grep 前缀匹配会误报——payment.js 的 wx.requestPayment 即实例，守卫用 AST 规避）；变异测试三档实证（注入违规 exit 1/清理后 exit 0/全仓复验 exit 0）；jest 230 绿复验
+
 ### Changed
 - CI 健壮性补齐（F193/F199 模式例行体检落地本仓）：ci.yml 两 job 补 timeout-minutes（check=15 / structure=10，此前挂死最多吃满 GitHub 默认 6h runner）+ 新增 concurrency（cancel-in-progress，push/PR 并发跑批自动取消旧跑）；YAML 解析+结构断言校验（timeout/concurrency/原有 steps 全实测确认）；同轮摸底发现 jest 有 collectCoverageFrom 但无 coverageThreshold（覆盖率回退无声通过，F201 同型缺口），留测试维度轮按 F201 协议处理
 

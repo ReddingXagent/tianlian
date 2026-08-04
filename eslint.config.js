@@ -148,6 +148,20 @@ module.exports = [
     },
   },
   {
+    // 架构守卫 (F208, 2026-08-04 猴王自驱lint轮): HTTP请求必须走 services/api.js 统一封装,
+    // 禁页面/组件直连 wx.request(绕过 baseURL/token注入/统一错误处理/401登出)。
+    // AST级精确匹配 property.name='request': wx.requestPayment/wx.uploadFile 等不误伤
+    // (grep前缀匹配会误报——payment.js 的 wx.requestPayment 即实例)。
+    files: ['**/*.js'],
+    ignores: ['**/services/api.js'],
+    rules: {
+      'no-restricted-syntax': ['error', {
+        selector: "CallExpression[callee.object.name='wx'][callee.property.name='request']",
+        message: 'HTTP请求必须走 services/api.js 统一封装, 禁止直连 wx.request (架构守卫 F208)',
+      }],
+    },
+  },
+  {
     // 测试文件放开 jest 全局
     files: ['**/__tests__/**', '**/*.test.js'],
     languageOptions: {
