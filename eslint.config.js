@@ -183,6 +183,18 @@ module.exports = [
     },
   },
   {
+    // 运行时代码日志守卫 (F220 2026-08-04 猴王自驱lint轮)
+    // 小程序运行时 console.log/info/debug 残留污染微信开发者工具控制台, 且可能泄露
+    // 订单/位置/充电会话等敏感字段; console.warn/error 为既有catch块统一错误日志
+    // (实测17处)放行。scripts/是CLI脚本(console为合法输出)不在files内天然豁免;
+    // 测试文件跑jest(node环境, console为诊断输出)显式豁免防摩擦。
+    files: ['app.js', 'config/**/*.js', 'components/**/*.js', 'pages/**/*.js', 'services/**/*.js', 'utils/**/*.js'],
+    ignores: ['**/__tests__/**', '**/*.test.js'],
+    rules: {
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+    },
+  },
+  {
     // 测试文件放开 jest 全局
     files: ['**/__tests__/**', '**/*.test.js'],
     languageOptions: {

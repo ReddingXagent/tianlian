@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- eslint 运行时日志守卫（F220）：小程序运行时代码（app.js/config/components/pages/services/utils）启用 no-console（allow: warn/error）——console.log/info/debug 残留污染微信开发者工具控制台且可能泄露订单/位置/充电会话等敏感字段；既有 catch 块 console.error 17 处实测放行；scripts/（CLI 合法输出）不在 files 内天然豁免 + 测试文件（jest/node 环境）显式豁免；变异三档实证（pages 注入 log+debug 全拦精确报错 / scripts 注入 log 零误伤 / 清理后全仓 exit 0）；eslint 0err/0warn + jest 230 绿复验
 - eslint 架构守卫扩展（F214）：敏感凭据 storage 键（'token'/'userInfo'）仅认证层（app.js/services/api.js）可读写 + 禁直读 globalData.token 裸字段（须走 app.getToken()，含 storage 兜底逻辑）；3 条新 no-restricted-syntax selector（sync/async storage 形态 + MemberExpression 链）与 F208 守卫**同块声明**——flat config 同 rule id 后块覆盖前块不合并，分块声明前条会静默失效（调试实测，教训固化）；ignores 取豁免并集（app.js+api.js），前置核验两文件零违规、页面私有键（scanHistory/station_filter）零误伤；pages/profile 直读 globalData.token 改走 app.getToken()；变异测试实证（6 类违规注入全拦 exit 1 / F208 合并块回归仍触发 / 非敏感键零误伤 / 清理后 exit 0）；eslint 0err/0warn + jest 230 绿复验
 - eslint 架构守卫（F208）：no-restricted-syntax 禁页面/组件直连 wx.request，HTTP 必须走 services/api.js 统一封装（防绕过 baseURL/token 注入/统一错误处理/401 登出）；AST 级精确匹配 property.name='request'，wx.requestPayment/wx.uploadFile 不误伤（grep 前缀匹配会误报——payment.js 的 wx.requestPayment 即实例，守卫用 AST 规避）；变异测试三档实证（注入违规 exit 1/清理后 exit 0/全仓复验 exit 0）；jest 230 绿复验
 
