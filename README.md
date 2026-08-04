@@ -37,7 +37,7 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（243 用例全绿）
+npm test             # jest 单测（268 用例全绿）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo export --platform ios   # 产物构建验证
 ```
