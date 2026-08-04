@@ -21,6 +21,8 @@ jobs:
       - run: npm run check:version
       # 路径别名双源漂移守卫(F231): tsconfig.paths 与 jest.moduleNameMapper 必须一致, 防 tsc/jest 解析分叉
       - run: npm run check:alias
+      # node版本双源漂移守卫(F237): engines.node 与 CI setup-node node-version 必须兼容, 防本地门限与CI运行版本分叉
+      - run: npm run check:node
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint

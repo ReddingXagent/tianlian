@@ -15,7 +15,8 @@
     "build:ios": "expo export --platform ios",
     "build": "tsc --noEmit && expo export",
     "check:version": "bash scripts/check-app-version.sh",
-    "check:alias": "bash scripts/check-alias-config.sh"
+    "check:alias": "bash scripts/check-alias-config.sh",
+    "check:node": "bash scripts/check-node-version.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",
