@@ -13,7 +13,8 @@
     "doctor": "expo-doctor",
     "build:android": "expo export --platform android",
     "build:ios": "expo export --platform ios",
-    "build": "tsc --noEmit && expo export"
+    "build": "tsc --noEmit && expo export",
+    "check:version": "bash scripts/check-app-version.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",
