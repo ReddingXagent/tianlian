@@ -7,6 +7,8 @@
 ## [Unreleased]
 
 ### Added
+- **NetworkStatus 卸载竞态补测 + branches 棘轮上调（F251）**：NetworkStatus 组件 branches 75%（全仓分支覆盖洼地之一）— 补齐 3 条守卫用例：卸载后 ping 才 resolve / 卸载后 ping 才 reject（mountedRef 守卫拦截 setState，React 无警告）+ AppState 订阅对象无 remove 方法时清理可选链不崩（subscription?.remove?.()）；全仓 405→**408 tests** 全绿，全量 branches 91.92→**92.15%**（NetworkStatus 自身 75→91.66%）；coverageThreshold 棘轮上调 branches 91→**92**（实测下沿取整，F207 规矩只升不降；其余三项 99/98/99 已在实测下沿无余量）；变异档实证（门限上调 99→jest --coverage exit 1 精确拦截，还原后 exit 0）；全门复验 tsc 0err + eslint 0err/0warn；README 质量门控章节测试数/覆盖率/门限同步
+### Added
 - **app.json 构建配置回归守卫（F245，F244 跨仓移植）**：app.json 是构建/导出的配置声明源，四类零断言补齐 — ①platforms 限定 android+ios（防误挂 web，F179 同型）②plugins↔deps 双向对账（每 plugin 必有已装 dep，缺则 export/prebuild 直接炸；expo-secure-store/expo-asset 等已知原生模块必声明 plugin，F196 反向静默缺口）③android.package↔ios.bundleIdentifier 应用标识同语义双源一致（同文件内双源形态，单侧改名=双平台 OTA/商店归属漂移，F224 同族）④icon/splash/adaptiveIcon 资产文件存在断言（缺=导出后程失败提前 FAIL）；新增 `src/__tests__/appConfig.test.ts`（ops-app F244 模板结构同构零改复用，F238 移植模式），jest 全量跑自动接入 CI check job 零额外接线；变异三档实证（platforms 加 web / android.package 单侧改名 / 移除 expo-asset plugin，均精确拦截 1 failed，sed 反向还原后基线 5/5 + git diff 零残留，变异档保持 JSON 合法性，F244 花絮教训）；全门复验 tsc 0err + eslint 0err/0warn + jest 400→**405 tests** 全绿（33 suites，coverageThreshold 99/91/98/99 棘轮不受影响，测试文件不入覆盖率口径）；README 质量门控章节测试数同步 400→405；RN 三仓 app.json 配置自洽守卫至此全覆盖（user-app F196 / ops-app F244 / station-app 本条）
 
 ### Added

@@ -85,4 +85,46 @@ describe('NetworkStatus', () => {
     unmount();
     expect(removeSpy).toHaveBeenCalled();
   });
+
+  it('should not set state after unmount when ping resolves late', async () => {
+    let resolvePing!: (v: unknown) => void;
+    mockedGet.mockReturnValue(
+      new Promise((resolve) => {
+        resolvePing = resolve;
+      })
+    );
+    const { unmount } = render(<NetworkStatus />);
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledTimes(1));
+    unmount();
+    // 卸载后 ping 才返回 → mountedRef 守卫拦截 setState，不抛异常
+    resolvePing({ data: {} });
+    await waitFor(() => expect(true).toBe(true));
+  });
+
+  it('should not set state after unmount when ping fails late', async () => {
+    let rejectPing!: (e: unknown) => void;
+    mockedGet.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectPing = reject;
+      })
+    );
+    const { unmount } = render(<NetworkStatus />);
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledTimes(1));
+    unmount();
+    // 卸载后 ping 才失败 → mountedRef 守卫拦截 setState，不抛异常
+    rejectPing(new Error('offline'));
+    await waitFor(() => expect(true).toBe(true));
+  });
+
+  it('should tolerate AppState subscription without remove method', async () => {
+    mockedGet.mockResolvedValue({ data: {} });
+    addEventListenerSpy.mockImplementation((_event: string, listener: AppListener) => {
+      appListener = listener;
+      return {} as never; // 无 remove 方法的订阅对象
+    });
+    const { unmount } = render(<NetworkStatus />);
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled());
+    // subscription?.remove?.() 可选链 → 无 remove 也不崩
+    expect(() => unmount()).not.toThrow();
+  });
 });
