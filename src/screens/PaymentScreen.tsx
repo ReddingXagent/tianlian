@@ -12,6 +12,7 @@ import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { paymentApi } from '../services/api';
 import { RootStackParamList, PaymentMethod } from '../types';
+import { formatMoney } from '../utils/format';
 
 type PaymentRouteProp = RouteProp<RootStackParamList, 'Payment'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -37,7 +38,7 @@ const PaymentScreen: React.FC = () => {
         method: selectedMethod,
       });
       if (response.data.success) {
-        Alert.alert('支付成功', `已支付 ¥${response.data.paidAmount.toFixed(2)}`, [
+        Alert.alert('支付成功', `已支付 ¥${formatMoney(response.data.paidAmount)}`, [
           {
             text: '完成',
             onPress: () => {
@@ -67,7 +68,7 @@ const PaymentScreen: React.FC = () => {
         <Text style={styles.amountLabel}>待支付金额</Text>
         <Text style={styles.amountValue}>
           <Text style={styles.amountSymbol}>¥</Text>
-          {amount.toFixed(2)}
+          {formatMoney(amount)}
         </Text>
       </View>
 
@@ -110,7 +111,7 @@ const PaymentScreen: React.FC = () => {
           <ActivityIndicator color="#fff" size="small" />
         ) : (
           <Text style={styles.payBtnText}>
-            确认支付 ¥{amount.toFixed(2)}
+            确认支付 ¥{formatMoney(amount)}
           </Text>
         )}
       </TouchableOpacity>

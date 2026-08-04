@@ -36,6 +36,12 @@ module.exports = defineConfig([
           message:
             '距离显示一律走src/utils/format.ts的formatDistance, 禁止内联distance/1000(F253单一源守卫)',
         },
+        {
+          selector:
+            "CallExpression[callee.property.name='toFixed'][callee.object.property.name=/^(amount|balance|pricePerKwh|serviceFee|paidAmount|value|couponDiscount)$/]",
+          message:
+            '金额显示一律走src/utils/format.ts的formatMoney, 禁止内联金额类属性.toFixed(2)(F259单一源守卫)',
+        },
       ],
     },
   },

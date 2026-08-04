@@ -17,6 +17,7 @@ import { RootStackParamList, Charger } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
+import { formatMoney } from '../utils/format';
 
 type StationDetailRouteProp = RouteProp<RootStackParamList, 'StationDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -152,7 +153,7 @@ const StationDetailScreen: React.FC = () => {
           <View style={styles.priceItem}>
             <Text style={styles.priceLabel}>电费</Text>
             <Text style={styles.priceValue}>
-              <Text style={styles.priceNum}>{station?.pricePerKwh.toFixed(2)}</Text>
+              <Text style={styles.priceNum}>{station && formatMoney(station.pricePerKwh)}</Text>
               <Text style={styles.priceUnit}> 元/度</Text>
             </Text>
           </View>
@@ -160,7 +161,7 @@ const StationDetailScreen: React.FC = () => {
           <View style={styles.priceItem}>
             <Text style={styles.priceLabel}>服务费</Text>
             <Text style={styles.priceValue}>
-              <Text style={styles.priceNum}>{station?.serviceFee.toFixed(2)}</Text>
+              <Text style={styles.priceNum}>{station && formatMoney(station.serviceFee)}</Text>
               <Text style={styles.priceUnit}> 元/度</Text>
             </Text>
           </View>
@@ -169,7 +170,7 @@ const StationDetailScreen: React.FC = () => {
             <Text style={styles.priceLabel}>合计</Text>
             <Text style={styles.priceValue}>
               <Text style={[styles.priceNum, { color: '#e65100' }]}>
-                {(station ? station.pricePerKwh + station.serviceFee : 0).toFixed(2)}
+                {formatMoney(station ? station.pricePerKwh + station.serviceFee : 0)}
               </Text>
               <Text style={styles.priceUnit}> 元/度</Text>
             </Text>
@@ -219,7 +220,7 @@ const StationDetailScreen: React.FC = () => {
               <StatusBadge status={charger.type as 'dc' | 'ac'} />
               <Text style={styles.chargerPower}>{charger.power}kW</Text>
               <Text style={styles.chargerPrice}>
-                {(charger.pricePerKwh + charger.serviceFee).toFixed(2)} 元/度
+                {formatMoney(charger.pricePerKwh + charger.serviceFee)} 元/度
               </Text>
             </View>
           </TouchableOpacity>

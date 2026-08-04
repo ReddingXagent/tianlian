@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Station } from '../types';
-import { formatDistance } from '../utils/format';
+import { formatDistance, formatMoney } from '../utils/format';
 import StatusBadge from './StatusBadge';
 
 interface StationCardProps {
@@ -37,7 +37,7 @@ const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
         <View style={styles.priceItem}>
           <Text style={styles.priceLabel}>电费</Text>
           <Text style={styles.priceValue}>
-            <Text style={styles.priceNum}>{station.pricePerKwh.toFixed(2)}</Text>
+            <Text style={styles.priceNum}>{formatMoney(station.pricePerKwh)}</Text>
             <Text style={styles.priceUnit}> 元/度</Text>
           </Text>
         </View>
@@ -45,7 +45,7 @@ const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
         <View style={styles.priceItem}>
           <Text style={styles.priceLabel}>服务费</Text>
           <Text style={styles.priceValue}>
-            <Text style={styles.priceNum}>{station.serviceFee.toFixed(2)}</Text>
+            <Text style={styles.priceNum}>{formatMoney(station.serviceFee)}</Text>
             <Text style={styles.priceUnit}> 元/度</Text>
           </Text>
         </View>

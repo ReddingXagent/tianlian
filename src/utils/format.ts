@@ -61,3 +61,16 @@ export function formatDistance(meters: number): string {
   }
   return `${(meters / 1000).toFixed(1)}公里`;
 }
+
+/**
+ * 金额显示单一源(F259)。
+ *
+ * 此前 10 文件 21 处内联 `.toFixed(2)`(金额/余额/电费/服务费/面值/优惠, 9屏+StationCard),
+ * 形态虽一致但精度口径(两位小数)散布多源——未来任一处单独改成
+ * toFixed(1)/toFixed(0) 即静默分叉(资金展示口径漂移)。
+ * 收敛规则: 渲染侧一律走本函数; 符号前缀(+/-)由调用侧按业务语义处理,
+ * 本函数只负责数值→两位小数字符串。
+ */
+export function formatMoney(value: number): string {
+  return value.toFixed(2);
+}

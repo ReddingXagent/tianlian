@@ -12,6 +12,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { authApi, statsApi } from '../services/api';
 import { RootStackParamList, UserStats } from '../types';
+import { formatMoney } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -90,7 +91,7 @@ const ProfileScreen: React.FC = () => {
         <Text style={styles.phone}>{user?.phone}</Text>
         <View style={styles.balanceRow}>
           <Text style={styles.balanceLabel}>余额</Text>
-          <Text style={styles.balanceValue}>¥{(user?.balance || 0).toFixed(2)}</Text>
+          <Text style={styles.balanceValue}>¥{formatMoney(user?.balance || 0)}</Text>
         </View>
       </View>
 

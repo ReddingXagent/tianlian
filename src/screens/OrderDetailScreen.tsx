@@ -14,7 +14,7 @@ import { RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
-import { formatDateTime } from '../utils/format';
+import { formatDateTime, formatMoney } from '../utils/format';
 
 type OrderDetailRouteProp = RouteProp<RootStackParamList, 'OrderDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -96,7 +96,7 @@ const OrderDetailScreen: React.FC = () => {
       {/* 订单状态 */}
       <View style={styles.statusCard}>
         <StatusBadge status={statusMap[order.status] || order.status} />
-        <Text style={styles.statusAmount}>¥{order.amount.toFixed(2)}</Text>
+        <Text style={styles.statusAmount}>¥{formatMoney(order.amount)}</Text>
         <Text style={styles.statusNo}>订单号: {order.orderNo}</Text>
       </View>
 
@@ -141,18 +141,18 @@ const OrderDetailScreen: React.FC = () => {
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>充电费用</Text>
-            <Text style={styles.infoValue}>¥{order.amount.toFixed(2)}</Text>
+            <Text style={styles.infoValue}>¥{formatMoney(order.amount)}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>优惠减免</Text>
             <Text style={[styles.infoValue, { color: '#2e7d32' }]}>
-              -¥{order.couponDiscount.toFixed(2)}
+              -¥{formatMoney(order.couponDiscount)}
             </Text>
           </View>
           <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
             <Text style={styles.infoLabel}>实付金额</Text>
             <Text style={[styles.infoValue, { color: '#e65100', fontWeight: '700' }]}>
-              ¥{(order.amount - order.couponDiscount).toFixed(2)}
+              ¥{formatMoney(order.amount - order.couponDiscount)}
             </Text>
           </View>
         </View>

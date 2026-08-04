@@ -13,7 +13,7 @@ import { Coupon } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import StatusBadge from '../components/StatusBadge';
-import { formatDate } from '../utils/format';
+import { formatDate, formatMoney } from '../utils/format';
 
 const PAGE_SIZE = 20;
 
@@ -87,7 +87,7 @@ const CouponScreen: React.FC = () => {
       <Text style={styles.couponDesc}>{item.description}</Text>
       <View style={styles.couponMeta}>
         <Text style={styles.couponMetaItem}>类型: {item.type}</Text>
-        <Text style={styles.couponMetaItem}>面值: ¥{item.value.toFixed(2)}</Text>
+        <Text style={styles.couponMetaItem}>面值: ¥{formatMoney(item.value)}</Text>
         <Text style={styles.couponMetaItem}>
           有效期: {formatDate(item.startAt)} - {formatDate(item.expireAt)}
         </Text>

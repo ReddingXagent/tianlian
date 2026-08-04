@@ -15,7 +15,7 @@ import { authApi, walletApi } from '../services/api';
 import { WalletRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
-import { formatDateTime } from '../utils/format';
+import { formatDateTime, formatMoney } from '../utils/format';
 
 const RECORD_TYPE_LABELS: Record<string, string> = {
   recharge: '充值',
@@ -148,9 +148,9 @@ const WalletScreen: React.FC = () => {
           ]}
         >
           {item.type === 'consume' || item.type === 'withdraw' ? '-' : '+'}
-          ¥{item.amount.toFixed(2)}
+          ¥{formatMoney(item.amount)}
         </Text>
-        <Text style={styles.recordBalance}>余额 ¥{item.balance.toFixed(2)}</Text>
+        <Text style={styles.recordBalance}>余额 ¥{formatMoney(item.balance)}</Text>
       </View>
     </View>
   );
@@ -161,7 +161,7 @@ const WalletScreen: React.FC = () => {
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>账户余额</Text>
         <Text style={styles.balanceValue}>
-          ¥{(user?.balance || 0).toFixed(2)}
+          ¥{formatMoney(user?.balance || 0)}
         </Text>
         <TouchableOpacity
           style={[styles.rechargeBtn, recharging && styles.rechargeBtnDisabled]}

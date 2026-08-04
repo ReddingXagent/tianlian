@@ -2,6 +2,7 @@ import {
   formatDate,
   formatDateTime,
   formatDistance,
+  formatMoney,
   formatShortDateTime,
 } from '../format';
 
@@ -75,5 +76,20 @@ describe('formatDistance(F253距离单一源)', () => {
   it('边界1000精确切换单位', () => {
     expect(formatDistance(999.9)).toBe('999.9米');
     expect(formatDistance(1000.4)).toBe('1.0公里');
+  });
+});
+
+describe('formatMoney(F259金额单一源)', () => {
+  it('整数补两位小数', () => {
+    expect(formatMoney(10)).toBe('10.00');
+    expect(formatMoney(0)).toBe('0.00');
+  });
+  it('小数四舍五入到两位', () => {
+    expect(formatMoney(1.005)).toBe('1.00'); // IEEE754: 1.005实际为1.00499...
+    expect(formatMoney(2.346)).toBe('2.35');
+    expect(formatMoney(0.1 + 0.2)).toBe('0.30');
+  });
+  it('符号由调用侧处理, 函数只格式化数值', () => {
+    expect(formatMoney(-5)).toBe('-5.00');
   });
 });

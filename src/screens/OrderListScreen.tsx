@@ -15,7 +15,7 @@ import { Order, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
-import { formatShortDateTime } from '../utils/format';
+import { formatShortDateTime, formatMoney } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -85,7 +85,7 @@ const OrderListScreen: React.FC = () => {
           <View style={styles.metaItem}>
             <Text style={styles.metaLabel}>费用</Text>
             <Text style={[styles.metaValue, { color: '#e65100', fontWeight: '700' }]}>
-              ¥{item.amount.toFixed(2)}
+              ¥{formatMoney(item.amount)}
             </Text>
           </View>
         </View>

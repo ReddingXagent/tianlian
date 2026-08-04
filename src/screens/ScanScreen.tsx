@@ -16,6 +16,7 @@ import { useOrderStore } from '../store/orderStore';
 import { ScanResult, RootStackParamList } from '../types';
 import StatusBadge from '../components/StatusBadge';
 import CameraScanner from '../components/CameraScanner';
+import { formatMoney } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -211,7 +212,7 @@ const ScanScreen: React.FC = () => {
               </View>
               <View style={styles.priceRow}>
                 <Text style={styles.resultPrice}>
-                  电费 {lastResult.pricePerKwh.toFixed(2)} + 服务费 {lastResult.serviceFee.toFixed(2)}
+                  电费 {formatMoney(lastResult.pricePerKwh)} + 服务费 {formatMoney(lastResult.serviceFee)}
                 </Text>
               </View>
             </View>
