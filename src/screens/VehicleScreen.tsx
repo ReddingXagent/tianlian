@@ -10,6 +10,8 @@ import {
   TextInput,
   ActivityIndicator,
   RefreshControl,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { vehicleApi } from '../services/api';
@@ -223,7 +225,13 @@ const VehicleScreen: React.FC = () => {
         transparent
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        {/* F271: 底部弹出表单(justifyContent:flex-end)键盘遮挡修复——
+            Modal内TextInput聚焦时软键盘直接覆盖下半部输入项与保存按钮,
+            KAV behavior分平台(iOS padding/Android height), 与LoginScreen同惯例 */}
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>添加车辆</Text>
 
@@ -296,7 +304,7 @@ const VehicleScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

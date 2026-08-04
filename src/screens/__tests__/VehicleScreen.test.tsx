@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshControl } from 'react-native';
+import { RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import VehicleScreen from '../VehicleScreen';
@@ -177,5 +177,31 @@ describe('VehicleScreen', () => {
     // 重拉中: 已有车辆仍可见, 不切整屏spinner
     expect(utils.getByText('京A12345')).toBeTruthy();
     expect(utils.queryByText('加载车辆列表...')).toBeNull();
+  });
+
+  // --- F271: 底部弹出表单键盘遮挡修复(Modal内KAV包裹+behavior分平台) ---
+  it('添加车辆弹窗表单由KeyboardAvoidingView包裹(防软键盘遮挡下半部输入项)', async () => {
+    mockGetList.mockResolvedValue({ data: mockVehicles });
+    const utils = renderScreen();
+    await waitFor(() => expect(utils.getByText('+ 添加车辆')).toBeTruthy());
+    fireEvent.press(utils.getByText('+ 添加车辆'));
+    // jest RN preset默认Platform.OS=ios → behavior=padding(LoginScreen同惯例)
+    const kav = utils.UNSAFE_getByType(KeyboardAvoidingView);
+    expect(kav.props.behavior).toBe('padding');
+  });
+
+  it('Android平台弹窗KAV behavior切换为height(平台分支)', async () => {
+    mockGetList.mockResolvedValue({ data: mockVehicles });
+    const origOS = Platform.OS;
+    (Platform as { OS: string }).OS = 'android';
+    try {
+      const utils = renderScreen();
+      await waitFor(() => expect(utils.getByText('+ 添加车辆')).toBeTruthy());
+      fireEvent.press(utils.getByText('+ 添加车辆'));
+      const kav = utils.UNSAFE_getByType(KeyboardAvoidingView);
+      expect(kav.props.behavior).toBe('height');
+    } finally {
+      (Platform as { OS: string }).OS = origOS;
+    }
   });
 });
