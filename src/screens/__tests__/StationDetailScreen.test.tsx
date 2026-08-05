@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { RefreshControl, ActivityIndicator } from 'react-native';
+import { RefreshControl, ActivityIndicator, View } from 'react-native';
 import StationDetailScreen from '../StationDetailScreen';
 import { useStationStore } from '../../store/stationStore';
 
@@ -130,5 +130,38 @@ describe('StationDetailScreen', () => {
     expect(fns.fetchStationDevices).toHaveBeenCalledTimes(2);
     expect(fns.fetchStationAlarms).toHaveBeenCalledTimes(2);
     expect(UNSAFE_getByType(RefreshControl).props.refreshing).toBe(false);
+  });
+
+  it('离线站点渲染"离线"徽章(离线样式分支)', async () => {
+    setup({
+      selectedStation: { id: 7, name: '充电站B', code: 'ST-008', address: 'addr', status: 'offline' },
+    });
+    const { getByText } = render(<StationDetailScreen />);
+    await waitFor(() => getByText('离线'));
+    expect(() => getByText('在线')).toThrow();
+  });
+
+  it('站点名称缺失时跳转回退默认名"站点"(快捷操作与查看全部两处)', async () => {
+    setup({
+      selectedStation: { id: 7, name: '', code: 'ST-007', address: 'addr', status: 'online' },
+      devices: Array.from({ length: 6 }, (_, i) => makeDevice({ id: i + 1, name: `桩-${i + 1}` })),
+    });
+    const { getByText } = render(<StationDetailScreen />);
+    await waitFor(() => getByText('查看全部设备 →'));
+    fireEvent.press(getByText('设备'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('DeviceList', { stationId: 7, stationName: '站点' });
+    fireEvent.press(getByText('查看全部设备 →'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('DeviceList', { stationId: 7, stationName: '站点' });
+  });
+
+  it('离线设备状态点走 dotOffline 样式分支', async () => {
+    setup({ devices: [makeDevice({ status: 'offline', name: '离线桩' })] });
+    const { getByText, UNSAFE_getAllByType } = render(<StationDetailScreen />);
+    await waitFor(() => getByText('离线桩'));
+    const dot = UNSAFE_getAllByType(View).find((v) => {
+      const arr = (Array.isArray(v.props.style) ? v.props.style : [v.props.style]) as Array<Record<string, unknown> | null | undefined>;
+      return arr.some((s) => s && s.backgroundColor === '#666') && arr.some((s) => s && s.width === 10);
+    });
+    expect(dot).toBeTruthy();
   });
 });
