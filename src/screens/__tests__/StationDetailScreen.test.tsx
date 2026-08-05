@@ -159,7 +159,7 @@ describe('StationDetailScreen', () => {
     const { getByText, UNSAFE_getAllByType } = render(<StationDetailScreen />);
     await waitFor(() => getByText('离线桩'));
     const dot = UNSAFE_getAllByType(View).find((v) => {
-      const arr = (Array.isArray(v.props.style) ? v.props.style : [v.props.style]) as Array<Record<string, unknown> | null | undefined>;
+      const arr = (Array.isArray(v.props.style) ? v.props.style : [v.props.style]) as (Record<string, unknown> | null | undefined)[];
       return arr.some((s) => s && s.backgroundColor === '#666') && arr.some((s) => s && s.width === 10);
     });
     expect(dot).toBeTruthy();
