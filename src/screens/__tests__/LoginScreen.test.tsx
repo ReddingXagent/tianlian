@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import LoginScreen from '../LoginScreen';
 
 const mockLogin = jest.fn();
@@ -107,5 +107,16 @@ describe('LoginScreen', () => {
       expect(getByText('登录')).toBeTruthy();
     });
     expect(button.props.disabled).toBe(false);
+  });
+
+  it('KAV平台适配: android侧behavior为undefined(不做padding避让)', () => {
+    const origOS = Platform.OS;
+    (Platform as { OS: string }).OS = 'android';
+    try {
+      const { UNSAFE_getByType } = render(<LoginScreen />);
+      expect(UNSAFE_getByType(KeyboardAvoidingView).props.behavior).toBeUndefined();
+    } finally {
+      (Platform as { OS: string }).OS = origOS;
+    }
   });
 });

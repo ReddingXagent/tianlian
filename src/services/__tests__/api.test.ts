@@ -710,6 +710,41 @@ describe('F257 fallback branches', () => {
     });
   });
 
+  it('dashboardApi.getStats stations.data整体缺失 → 可选链+?? 全兜底(getList直通防御形态)', async () => {
+    mockAxios.onGet('/work-orders/stats').reply(200, { code: 200, message: 'success', data: {} });
+    mockAxios.onGet('/alarms').reply(200, { code: 200, message: 'success', data: {} });
+    // mapPagination恒归一化→正常路径data必有; spy直通缺失形态验证getStats自身防御层
+    const spy = jest
+      .spyOn(stationApi, 'getList')
+      .mockResolvedValueOnce({ code: 200, message: 'success', data: undefined } as never);
+    const res = await dashboardApi.getStats();
+    expect(res.data.totalStations).toBe(0);
+    expect(res.data.onlineStations).toBe(0);
+    expect(res.data.offlineStations).toBe(0);
+    spy.mockRestore();
+  });
+
+  it('dashboardApi.getStats data在但items缺失 → totalStations回退list.length; total<在线数 → Math.max钳制0', async () => {
+    mockAxios.onGet('/work-orders/stats').reply(200, { code: 200, message: 'success', data: {} });
+    mockAxios.onGet('/alarms').reply(200, { code: 200, message: 'success', data: {} });
+    const spy = jest.spyOn(stationApi, 'getList');
+    // 形态一: data在但无items → list=[] → totalStations ?? list.length = 0
+    spy.mockResolvedValueOnce({ code: 200, message: 'success', data: { total: 5, page: 1, pageSize: 100 } } as never);
+    const res1 = await dashboardApi.getStats();
+    expect(res1.data.totalStations).toBe(5); // total存在不走fallback
+    expect(res1.data.onlineStations).toBe(0);
+    expect(res1.data.offlineStations).toBe(5);
+    // 形态二: total(1) < 在线数(2) → offlineStations = Math.max(0, -1) = 0 数据不一致防御
+    spy.mockResolvedValueOnce({
+      code: 200, message: 'success',
+      data: { items: [{ status: 'online' }, { status: 'online' }], total: 1, page: 1, pageSize: 100 },
+    } as never);
+    const res2 = await dashboardApi.getStats();
+    expect(res2.data.onlineStations).toBe(2);
+    expect(res2.data.offlineStations).toBe(0);
+    spy.mockRestore();
+  });
+
   it('revenueApi.getSummary data缺失 → ?? 兜底 + daily空数组 today 归零', async () => {
     mockAxios.onGet('/business/revenue/summary').reply(200, { code: 200, message: 'success' });
     mockAxios.onGet('/business/revenue/daily').reply(200, { code: 200, message: 'success' });

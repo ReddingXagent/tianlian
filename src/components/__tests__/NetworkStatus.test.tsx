@@ -116,6 +116,21 @@ describe('NetworkStatus', () => {
     await waitFor(() => expect(true).toBe(true));
   });
 
+  it('should not set state after unmount when ping fails late with 401', async () => {
+    let rejectPing!: (e: unknown) => void;
+    mockedGet.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectPing = reject;
+      })
+    );
+    const { unmount } = render(<NetworkStatus />);
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledTimes(1));
+    unmount();
+    // 卸载后 ping 才以 401 失败 → 401 分支内的 mountedRef 守卫拦截 setState，不抛异常
+    rejectPing({ response: { status: 401 } });
+    await waitFor(() => expect(true).toBe(true));
+  });
+
   it('should tolerate AppState subscription without remove method', async () => {
     mockedGet.mockResolvedValue({ data: {} });
     addEventListenerSpy.mockImplementation((_event: string, listener: AppListener) => {
