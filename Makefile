@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -68,6 +68,10 @@ backup-restore-check:
 # F308: pid文件写读对账守卫(deploy.sh写读↔watchdog PID_FILE四源同名+目录段同基准, 堵pid交接静默失效双启撞端口)
 pid-file-check:
 	@bash scripts/check-pid-file.sh
+
+# F314: 启动解释器多源对账守卫(deploy.sh/watchdog/systemd unit/Dockerfile四生产源解释器token归一化相等, Makefile dev venv源豁免)
+start-interpreter-check:
+	@bash scripts/check-start-interpreter.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \

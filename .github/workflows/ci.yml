@@ -80,6 +80,9 @@ jobs:
       - name: Pid file guard (F308)
         run: bash scripts/check-pid-file.sh
 
+      - name: Start interpreter guard (F314)
+        run: bash scripts/check-start-interpreter.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov
