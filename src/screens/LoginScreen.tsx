@@ -189,6 +189,8 @@ const LoginScreen: React.FC = () => {
                     setError(null);
                   }}
                   secureTextEntry
+                  autoComplete="password"
+                  textContentType="password"
                   editable={!loading}
                 />
               </View>
