@@ -717,3 +717,38 @@ describe('F257 fallback branches', () => {
     expect(res.data).toEqual({ today: 0, week: 0, month: 0, total: 0 });
   });
 });
+
+// =====================
+// F290: 可达兜底分支定向补测（ternary假分支 / daily条目缺net_revenue的 || 0）
+// =====================
+describe('F290 reachable fallback branches', () => {
+  it('workOrderApi.getList 无参调用 → status ternary假分支+params可选链', async () => {
+    let params: Record<string, unknown> = {};
+    mockAxios.onGet('/work-orders').reply((config) => {
+      params = config.params ?? {};
+      return [200, { code: 200, message: 'success', data: { items: [], total: 0, page: 1, page_size: 20 } }];
+    });
+    await workOrderApi.getList();
+    expect(params.status).toBeUndefined();
+    expect(params.station_id).toBeUndefined();
+    expect(params.page).toBeUndefined();
+  });
+
+  it('revenueApi.getSummary daily条目缺net_revenue → month/week/today全||0兜底', async () => {
+    mockAxios.onGet('/business/revenue/summary').reply(200, {
+      code: 200,
+      message: 'success',
+      data: { order_count: 1, net_revenue: 88, gross_amount: 88, discount_total: 0 },
+    });
+    mockAxios.onGet('/business/revenue/daily').reply(200, {
+      code: 200,
+      message: 'success',
+      data: [
+        { date: '2026-08-04', order_count: 1 }, // net_revenue缺失 → month/week聚合 || 0
+        { date: '2026-08-05', order_count: 2 }, // net_revenue缺失 → today || 0
+      ],
+    });
+    const res = await revenueApi.getSummary();
+    expect(res.data).toEqual({ today: 0, week: 0, month: 0, total: 88 });
+  });
+});
