@@ -20,7 +20,8 @@
     "check:guard-wiring": "bash scripts/check-guard-wiring.sh",
     "check:env-defaults": "bash scripts/check-env-defaults.sh",
     "check:unused-deps": "bash scripts/check-unused-deps.sh",
-    "check:ci-parity": "bash scripts/check-ci-parity.sh"
+    "check:ci-parity": "bash scripts/check-ci-parity.sh",
+    "check:engine-strict": "bash scripts/check-engine-strict.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",

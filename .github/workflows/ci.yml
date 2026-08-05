@@ -31,6 +31,8 @@ jobs:
       - run: npm run check:unused-deps
       # CI门控链↔ci-local双源漂移守卫: ci.yml run门控集合 ↔ Makefile ci-local递归展开 必须一致, 防本地CI模拟与真实CI分叉(本地全绿≠CI绿)
       - run: npm run check:ci-parity
+      # engines.node执行力双源漂移守卫: .npmrc engine-strict=true ↔ package.json engines.node 必须成对, 防引擎门控静默失效(npm默认EBADENGINE仅warning)
+      - run: npm run check:engine-strict
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint
