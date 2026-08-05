@@ -46,6 +46,8 @@ jobs:
       - run: npm run check:easignore-secrets
       # assets磁盘↔引用源反向对账守卫(F327): 死资产检测, app.json资产字段+代码require 双引用源
       - run: npm run check:unused-assets
+      # assets体积上限守卫(F334): 单文件≤512KB/总≤2048KB, APK直装分发无商店体积审查兜底, 防资产膨胀静默进包
+      - run: npm run check:asset-size
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint

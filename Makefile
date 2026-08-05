@@ -1,7 +1,7 @@
 # 天链运维 App - Makefile
 # 本地构建与验证快捷命令
 
-.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check easignore-secrets-check unused-assets-check check clean export-android export-ios bundle-size ci-local
+.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check easignore-secrets-check unused-assets-check asset-size-check check clean export-android export-ios bundle-size ci-local
 
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -79,7 +79,10 @@ easignore-secrets-check: ## .gitignore↔.easignore敏感排除超集守卫 (凭
 unused-assets-check: ## assets磁盘↔引用源反向对账守卫 (死资产检测, 委托 npm run check:unused-assets, F327)
 	npm run check:unused-assets
 
-check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check easignore-secrets-check unused-assets-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + 品牌色一致 + 构建序号配对 + 敏感排除超集 + 死资产对账 + tsc + eslint + jest)
+asset-size-check: ## assets体积上限守卫 (单文件≤512KB/总≤2048KB, 委托 npm run check:asset-size, F334)
+	npm run check:asset-size
+
+check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check easignore-secrets-check unused-assets-check asset-size-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + 品牌色一致 + 构建序号配对 + 敏感排除超集 + 死资产对账 + 体积上限 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 
