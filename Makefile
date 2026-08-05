@@ -27,6 +27,8 @@ dead-handlers-check: ## 死handler反向可达性对账 (js方法⊆wxml绑定�
 nav-targets-check: ## 导航目标↔页面注册双源对账 (跳转url字面量↔app.json pages, F246; 委托 npm run check:nav-targets)
 	npm run check:nav-targets
 
+orphan-components-check: ## 孤儿组件反向对账 (组件实体⊆usingComponents引用集, F284; 委托 npm run check:orphan-components)
+	npm run check:orphan-components
 orphan-pages-check: ## 孤儿页面反向可达性对账 (注册页⊆静态导航目标∪tabBar页, F258; 委托 npm run check:orphan-pages)
 	npm run check:orphan-pages
 permission-apis-check: ## 隐私API↔app.json声明双向对账 (调用映射⊆requiredPrivateInfos⊆调用映射+scope desc, F277; 委托 npm run check:permission-apis)
@@ -37,7 +39,7 @@ storage-keys-check: ## storage键生命周期双向对账 (get键⊆set键⊆get
 wxml-handlers-check: ## WXML事件绑定↔JS方法双源对账 (绑定名↔Page/Component methods, F252; 委托 npm run check:wxml-handlers)
 	npm run check:wxml-handlers
 
-check: lint auth-keys-check dead-handlers-check nav-targets-check orphan-pages-check permission-apis-check storage-keys-check wxml-handlers-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + 导航对账 + 孤儿页对账 + 隐私API对账 + storage键对账 + 绑定对账 + jest)
+check: lint auth-keys-check dead-handlers-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check storage-keys-check wxml-handlers-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + 导航对账 + 孤儿组件对账 + 孤儿页对账 + 隐私API对账 + storage键对账 + 绑定对账 + jest)
 
 ci-local: check ## 本地模拟 CI 流程 (check)
 

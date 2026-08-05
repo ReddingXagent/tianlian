@@ -25,6 +25,7 @@ jobs:
       - run: npm run check:auth-keys
       - run: npm run check:dead-handlers
       - run: npm run check:nav-targets
+      - run: npm run check:orphan-components
       - run: npm run check:orphan-pages
       - run: npm run check:permission-apis
       - run: npm run check:storage-keys
