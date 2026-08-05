@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
-import { render, act } from '@testing-library/react-native';
+import { render, act, fireEvent, waitFor } from '@testing-library/react-native';
 import AlarmListScreen from '../AlarmListScreen';
 import { alarmApi } from '../../services/api';
 
@@ -115,6 +115,22 @@ describe('AlarmListScreen', () => {
     const { getByText } = render(<AlarmListScreen />);
     // Filter chips should be visible during loading
     expect(getByText('全部')).toBeTruthy();
+  });
+
+  it('筛选chip切换: 点按状态chip触发带status参数的重新拉取(setFilter非all分支)', async () => {
+    const { getAllByText } = render(<AlarmListScreen />);
+    await waitFor(() => {
+      expect((alarmApi.getList as jest.Mock).mock.calls.length).toBeGreaterThan(0);
+    });
+    // '未处理'在chip与告警卡片状态文本双处出现, 逐个press——仅chip有onPress生效
+    for (const el of getAllByText('未处理')) {
+      fireEvent.press(el);
+    }
+    await waitFor(() => {
+      const calls = (alarmApi.getList as jest.Mock).mock.calls;
+      const last = calls[calls.length - 1][0];
+      expect(last.status).toBe('unhandled');
+    });
   });
 
   it('should render alarm list after loading', async () => {

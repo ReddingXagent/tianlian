@@ -164,6 +164,34 @@ describe('AIChatPanel', () => {
     expect(getByText('共有12个充电站')).toBeTruthy();
   });
 
+  it('迟到token守卫: 末条消息已非占位时onToken增量更新空转, 不污染后续新消息', async () => {
+    let onTokenCb: ((token: string) => void) | undefined;
+    mockChat.mockImplementationOnce((_msgs: unknown, onToken: (t: string) => void) => {
+      onTokenCb = onToken;
+      return Promise.resolve(assistantMsg('第一答'));
+    });
+    const { getByPlaceholderText, getByText } = render(<AIChatPanel />);
+
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '第一问');
+    fireEvent.press(getByText('↑'));
+    await waitFor(() => {
+      expect(getByText('第一答')).toBeTruthy();
+    });
+
+    // 第二轮提问入列: 末条消息变为第二轮用户消息, 第一轮占位已不在末尾
+    mockChat.mockResolvedValueOnce(assistantMsg('第二答'));
+    fireEvent.changeText(getByPlaceholderText('输入你的问题…'), '第二问');
+    fireEvent.press(getByText('↑'));
+    expect(getByText('第二问')).toBeTruthy();
+
+    // 第一轮的迟到token此刻才到达: 流式更新守卫(末条id≠占位id)必须空转,
+    // 否则用户消息"第二问"会被流式内容覆盖成错误气泡
+    act(() => {
+      (onTokenCb as (t: string) => void)('迟到token');
+    });
+    expect(getByText('第二问')).toBeTruthy();
+  });
+
   it('打字指示器: 400ms步进点动画循环不崩, scroll定时器安全触发', () => {
     jest.useFakeTimers();
     try {

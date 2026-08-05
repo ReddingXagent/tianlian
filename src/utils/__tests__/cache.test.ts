@@ -26,6 +26,19 @@ describe('API Cache', () => {
     it('不存在的 key 应返回 null', () => {
       expect(getCache('nonexistent')).toBeNull();
     });
+
+    it('LRU 淘汰: 容量满50时新写入淘汰lastAccess最旧条目', () => {
+      // MAX_ENTRIES=50(cache.ts内部常量, 此处硬编码对齐)
+      for (let i = 0; i < 50; i++) {
+        setCache(`evict-${i}`, i);
+      }
+      // 访问evict-1使其lastAccess变新, 则evict-0成为全局最旧
+      expect(getCache('evict-1')).toBe(1);
+      setCache('evict-new', 999); // 触发淘汰
+      expect(getCache('evict-0')).toBeNull();
+      expect(getCache('evict-1')).toBe(1);
+      expect(getCache('evict-new')).toBe(999);
+    });
   });
 
   describe('cachedFetch', () => {

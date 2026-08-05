@@ -137,6 +137,18 @@ describe('DeviceListScreen', () => {
     expect(await findByText('储能电池A-01')).toBeTruthy();
   });
 
+  it('未知设备类型: 类型标签回退原值渲染不崩(deviceTypeLabel的||兜底分支)', async () => {
+    (useStationStore as unknown as jest.Mock).mockReturnValue({
+      devices: [{ ...MOCK_DEVICES[0], id: 99, name: '实验设备X', type: 'plasma' }],
+      loading: false,
+      fetchStationDevices: mockFetchStationDevices,
+    });
+    const { findByText } = render(<DeviceListScreen />);
+    expect(await findByText('实验设备X')).toBeTruthy();
+    // labels映射未收录plasma → 回退展示原始type值
+    expect(await findByText('plasma')).toBeTruthy();
+  });
+
   it('should render device codes and models', async () => {
     const { findByText } = render(<DeviceListScreen />);
 
