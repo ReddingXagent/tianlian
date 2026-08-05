@@ -23,7 +23,8 @@
     "check:ci-parity": "bash scripts/check-ci-parity.sh",
     "check:engine-strict": "bash scripts/check-engine-strict.sh",
     "check:app-version-source": "bash scripts/check-app-version-source.sh",
-    "check:expo-plugins": "bash scripts/check-expo-plugins-deps.sh"
+    "check:expo-plugins": "bash scripts/check-expo-plugins-deps.sh",
+    "check:updates-channel": "bash scripts/check-updates-channel.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",

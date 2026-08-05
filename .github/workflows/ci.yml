@@ -36,6 +36,8 @@ jobs:
       # appVersionSource双源成对守卫(F288): eas.json appVersionSource=local ↔ app.json versionCode/buildNumber 必须成对, 防EAS本地版本管理无锚点静默撞车
       - run: npm run check:app-version-source
       - run: npm run check:expo-plugins
+      # OTA更新通道双源成对守卫(F302): app.json updates.url ↔ eas.json projectId 必须成对, 防半接线静默OTA失效(设备端永不收到更新)
+      - run: npm run check:updates-channel
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint
