@@ -930,3 +930,113 @@ describe('F257 fallback branches', () => {
     expect(JSON.parse(mockAxios.history.post[0].data)).toEqual({ command: 'start' });
   });
 });
+
+// =====================
+// F316 定向补测：ai.ts 残余兜底分支（executeToolCall 无 message 错误兜底 /
+// streamChatMessage 跨块行重组 / chat() 无名 tool call 跳过+generateId 兜底）
+// =====================
+
+describe('ai.ts residual fallback branches (F316)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
+  });
+
+  it('executeToolCall: error without message/response falls back to Unknown error', async () => {
+    // ai.ts:358 的 err?.message || 'Unknown error' 末段兜底——抛无 message 对象触发
+    mockAxios.onAny().reply(() => {
+      throw Object.create(null);
+    });
+
+    const result = await executeToolCall('get_device_status', { device_id: 1 });
+    const parsed = JSON.parse(result);
+    expect(parsed.error).toBe('Failed to execute get_device_status: Unknown error');
+  });
+
+  it('streamChatMessage: incomplete line split across chunks is reassembled via buffer', async () => {
+    // ai.ts:432 buffer = lines.pop() || '' 的左侧真值分支——
+    // 首块不以换行结尾时 pop 返回半行残留（truthy），次块拼接后才成行解析
+    const mockReader = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s1","choices":[{"delta":{"content":"跨块'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('拼接"}}]}\n\ndata: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
+    ];
+    const contents: string[] = [];
+    for await (const chunk of streamChatMessage(messages)) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) contents.push(content);
+    }
+    expect(contents).toEqual(['跨块拼接']);
+  });
+
+  it('chat: unnamed tool call with missing id is skipped with generateId/empty-string fallbacks', async () => {
+    // ai.ts:501-504 else 新建分支的三处 || 兜底（tc.id 缺失→generateId /
+    // name 缺失→'' / arguments 缺失→''）+ ai.ts:543 !tc.function.name continue 跳过分支
+    const reader1 = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"function":{}}]}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('data: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+    const reader2 = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s2","choices":[{"delta":{"content":"好的"}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('data: [DONE]\n\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader1 } })
+      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader2 } });
+
+    const getsBefore = mockAxios.history.get.length;
+    const result = await chat([
+      { id: '1', role: 'user', content: '查一下', timestamp: Date.now() },
+    ]);
+
+    // 无名 tool call 被 continue 跳过 → 无业务 API 请求，第二轮纯文本收尾
+    expect(result.content).toBe('好的');
+    expect(mockAxios.history.get.length).toBe(getsBefore);
+  });
+});
