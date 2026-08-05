@@ -14,6 +14,7 @@
     "check:setdata-perf": "node scripts/check-setdata-perf.js",
     "check:storage-keys": "node scripts/check-storage-keys.js",
     "check:wxml-handlers": "node scripts/check-wxml-handlers.js",
+    "check:wxs-isolation": "node scripts/check-wxs-isolation.js",
     "deploy": "node scripts/deploy.js",
     "deploy:check": "node scripts/deploy.js --check",
     "lint": "eslint . --max-warnings 0",
