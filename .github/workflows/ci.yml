@@ -74,6 +74,9 @@ jobs:
       - name: Template render guard (F295)
         run: bash scripts/check-template-render.sh
 
+      - name: Backup restore guard (F301)
+        run: bash scripts/check-backup-restore.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov

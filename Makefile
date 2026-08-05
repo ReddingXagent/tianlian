@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -60,6 +60,10 @@ python-version-check:
 # F295: 部署模板渲染路径一致性守卫(Makefile sed模式↔unit/logrotate模板路径字面量对账, 堵静默no-op)
 template-render-check:
 	@bash scripts/check-template-render.sh
+
+# F301: 备份写读对账守卫(备份写模式↔回滚/保留读glob双向匹配+DB_FILE↔config.py db_path, 堵回滚现场无备份可用)
+backup-restore-check:
+	@bash scripts/check-backup-restore.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
