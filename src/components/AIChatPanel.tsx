@@ -166,8 +166,9 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
           {match[4]}
         </Text>
       );
-    } else if (match[6]) {
-      // `行内代码`
+    } else {
+      // `行内代码`——正则三分组(粗体|斜体|代码)每次命中必占其一, match[6]条件不可达;
+      // else替代else if(match[6])消除死分支, 行为等价(不匹配时原逻辑也是不push)
       parts.push(
         <Text
           key={`c-${match.index}`}
