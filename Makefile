@@ -1,4 +1,4 @@
-.PHONY: help install dev build test lint check auth-keys-check dead-handlers-check nav-targets-check orphan-pages-check permission-apis-check storage-keys-check wxml-handlers-check ci-local clean deploy deploy-check
+.PHONY: help install dev build test lint check auth-keys-check dead-handlers-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check request-source-check storage-keys-check wxml-handlers-check ci-local clean deploy deploy-check
 
 help: ## 显示所有命令
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -33,13 +33,17 @@ orphan-pages-check: ## 孤儿页面反向可达性对账 (注册页⊆静态导�
 	npm run check:orphan-pages
 permission-apis-check: ## 隐私API↔app.json声明双向对账 (调用映射⊆requiredPrivateInfos⊆调用映射+scope desc, F277; 委托 npm run check:permission-apis)
 	npm run check:permission-apis
+
+request-source-check: ## 请求出口↔URL声明单一源对账 (wx.request调用点⊆api.js + http(s)字面量⊆config/index.js, F292; 委托 npm run check:request-source)
+	npm run check:request-source
+
 storage-keys-check: ## storage键生命周期双向对账 (get键⊆set键⊆get键全仓, F270; 委托 npm run check:storage-keys)
 	npm run check:storage-keys
 
 wxml-handlers-check: ## WXML事件绑定↔JS方法双源对账 (绑定名↔Page/Component methods, F252; 委托 npm run check:wxml-handlers)
 	npm run check:wxml-handlers
 
-check: lint auth-keys-check dead-handlers-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check storage-keys-check wxml-handlers-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + 导航对账 + 孤儿组件对账 + 孤儿页对账 + 隐私API对账 + storage键对账 + 绑定对账 + jest)
+check: lint auth-keys-check dead-handlers-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check request-source-check storage-keys-check wxml-handlers-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + 导航对账 + 孤儿组件对账 + 孤儿页对账 + 隐私API对账 + 请求单一源对账 + storage键对账 + 绑定对账 + jest)
 
 ci-local: check ## 本地模拟 CI 流程 (check)
 
