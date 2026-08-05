@@ -41,7 +41,7 @@ npm run ios          # iOS
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
 npm run check:alias  # 路径别名双源漂移守卫（tsconfig.paths ↔ jest.moduleNameMapper，F238）
-npm test             # jest 单测（429 用例全绿；加 --coverage 触发覆盖率门限）
+npm test             # jest 单测（433 用例全绿；加 --coverage 触发覆盖率门限）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）

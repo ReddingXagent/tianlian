@@ -646,4 +646,68 @@ describe('WorkOrderScreen', () => {
       expect.objectContaining({ priority: 'low', title: '低优先级工单' })
     );
   });
+
+  // === 补测: 未知枚举防御fallback + formatTime空值 + loadMore空转分支 (F283) ===
+
+  it('should fallback to raw priority with neutral color for unknown priority', async () => {
+    (workOrderApi.getList as jest.Mock).mockResolvedValue({
+      data: {
+        items: [{ ...MOCK_ORDERS[0], id: 9, title: '未知优先级工单', priority: 'mystery_level' }],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+    });
+
+    const { findByText } = render(<WorkOrderScreen />);
+    // PRIORITY_CONFIG未命中 → 原样输出priority值(label=item.priority)
+    const badge = await findByText('mystery_level');
+    expect(badge).toBeTruthy();
+  });
+
+  it('should fallback to raw type string for unknown work order type', async () => {
+    (workOrderApi.getList as jest.Mock).mockResolvedValue({
+      data: {
+        items: [{ ...MOCK_ORDERS[0], id: 10, title: '未知类型工单', type: 'custom_type' }],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+    });
+
+    const { findByText } = render(<WorkOrderScreen />);
+    // WORK_ORDER_TYPE_LABEL未命中 → 原样输出type值
+    expect(await findByText('custom_type')).toBeTruthy();
+  });
+
+  it('should render "-" when createdAt is missing (formatTime空值分支)', async () => {
+    (workOrderApi.getList as jest.Mock).mockResolvedValue({
+      data: {
+        items: [{ ...MOCK_ORDERS[0], id: 11, title: '无时间工单', createdAt: undefined }],
+        total: 1,
+        page: 1,
+        pageSize: 20,
+      },
+    });
+
+    const { findByText, getAllByText } = render(<WorkOrderScreen />);
+    await findByText('无时间工单');
+    // formatTime(undefined) → '-'
+    expect(getAllByText('-').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should not fetch again when onEndReached fires after all pages loaded', async () => {
+    const { findByText, UNSAFE_getByType } = render(<WorkOrderScreen />);
+    await findByText('充电桩A-01故障维修');
+    (workOrderApi.getList as jest.Mock).mockClear();
+
+    // orders.length(3) >= total(3) → handleLoadMore空转, 不发请求
+    const flatList = UNSAFE_getByType(FlatList);
+    await act(async () => {
+      flatList.props.onEndReached();
+      await new Promise((r) => setTimeout(r, 100));
+    });
+
+    expect(workOrderApi.getList).not.toHaveBeenCalled();
+  });
 });
