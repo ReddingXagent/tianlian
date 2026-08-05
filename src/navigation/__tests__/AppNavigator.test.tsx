@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { AppNavigator } from '../AppNavigator';
 
 // ---- authStore mock: 组件用selector调用 useAuthStore((s)=>...), mock需支持selector ----
@@ -9,6 +9,9 @@ let mockAuthState = {
   isLoading: false,
 };
 const mockCheckAuth = jest.fn();
+// 导航探针: Dashboard mock内置按钮按此目标navigate, 触发深层Screen的options回调(F336)
+let mockNavTarget: string | null = null;
+let mockNavParams: Record<string, string> | undefined;
 jest.mock('../../store/authStore', () => ({
   useAuthStore: (selector: (s: typeof mockAuthState & { checkAuth: jest.Mock }) => unknown) =>
     selector({ ...mockAuthState, checkAuth: mockCheckAuth }),
@@ -27,8 +30,21 @@ jest.mock('../../screens/LoginScreen', () => {
 jest.mock('../../screens/DashboardScreen', () => {
   const M = () => {
     const R = require('react');
-    const { Text } = require('react-native');
-    return R.createElement(Text, null, 'dashboard-screen');
+    const { Text, TouchableOpacity } = require('react-native');
+    const { useNavigation } = require('@react-navigation/native');
+    const navigation = useNavigation() as { navigate: (name: string, params?: unknown) => void };
+    return R.createElement(
+      TouchableOpacity,
+      {
+        testID: 'mock-nav-btn',
+        onPress: () => {
+          if (mockNavTarget) {
+            navigation.navigate(mockNavTarget, mockNavParams);
+          }
+        },
+      },
+      R.createElement(Text, null, 'dashboard-screen'),
+    );
   };
   return { __esModule: true, default: M };
 });
@@ -116,6 +132,8 @@ jest.mock('../../screens/WorkOrderScreen', () => {
 describe('AppNavigator', () => {
   beforeEach(() => {
     mockAuthState = { isAuthenticated: false, isLoading: false };
+    mockNavTarget = null;
+    mockNavParams = undefined;
     mockCheckAuth.mockClear();
   });
 
@@ -147,5 +165,41 @@ describe('AppNavigator', () => {
     for (const label of ['首页', '站点', '营收', '我的']) {
       expect(getAllByText(label).length).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  it('导航到ChargerMonitor时options回调执行且渲染监控屏', () => {
+    mockAuthState = { isAuthenticated: true, isLoading: false };
+    mockNavTarget = 'ChargerMonitor';
+    // jest下native-stack header标题不渲染为文本, 以屏内容断言; options回调活性由coverage验
+    const { getByText, getByTestId } = render(<AppNavigator />);
+    fireEvent.press(getByTestId('mock-nav-btn'));
+    expect(getByText('chargermonitor-screen')).toBeTruthy();
+  });
+
+  it('导航到DeviceList带stationName时options走||左侧分支', () => {
+    mockAuthState = { isAuthenticated: true, isLoading: false };
+    mockNavTarget = 'DeviceList';
+    mockNavParams = { stationId: 's1', stationName: '测试站' };
+    const { getByText, getByTestId } = render(<AppNavigator />);
+    fireEvent.press(getByTestId('mock-nav-btn'));
+    expect(getByText('devicelist-screen')).toBeTruthy();
+  });
+
+  it('导航到DeviceList有params但缺stationName时标题回落空串', () => {
+    mockAuthState = { isAuthenticated: true, isLoading: false };
+    mockNavTarget = 'DeviceList';
+    mockNavParams = { stationId: 's1' };
+    const { getByText, getByTestId } = render(<AppNavigator />);
+    fireEvent.press(getByTestId('mock-nav-btn'));
+    expect(getByText('devicelist-screen')).toBeTruthy();
+  });
+
+  it('导航到DeviceList无params时可选链短路标题回落空串', () => {
+    mockAuthState = { isAuthenticated: true, isLoading: false };
+    mockNavTarget = 'DeviceList';
+    mockNavParams = undefined;
+    const { getByText, getByTestId } = render(<AppNavigator />);
+    fireEvent.press(getByTestId('mock-nav-btn'));
+    expect(getByText('devicelist-screen')).toBeTruthy();
   });
 });
