@@ -18,7 +18,7 @@
 ## 快速开始
 
 ```bash
-pip install -r requirements.txt   # Python 3.10+（ruff target py313）
+pip install -r requirements.txt   # Python 3.10+（ruff target py310）
 python main.py                    # 默认配置
 python main.py --config cfg.yaml  # 自定义配置
 GATEWAY_ID=GW-002 python main.py  # 环境变量覆盖
@@ -137,7 +137,7 @@ make install          # 创建 venv + 装依赖
 make run              # 启动网关
 make test             # 跑测试
 make lint             # ruff 检查
-make check            # 部署守卫八项(同名源/探测端点/API端口/env键/日志路径/数据路径/入口文件/健康探测路径) + lint + test 一键门控
+make check            # 部署守卫九项(同名源/探测端点/API端口/env键/日志路径/数据路径/入口文件/健康探测路径/Python版本多源) + lint + test 一键门控
 ```
 
 ## 配置文件

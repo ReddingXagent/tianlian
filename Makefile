@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -52,6 +52,10 @@ entry-file-check:
 # F280: 健康探测路径多源一致性守卫(deploy.sh/watchdog/Dockerfile HEALTHCHECK探测路径↔server.py路由声明对账)
 health-probes-check:
 	@bash scripts/check-health-probes.sh
+
+# F287: Python版本多源一致性守卫(ci.yml/Dockerfile/pyproject target/deploy.sh执行+提示/DEPLOYMENT.md/README.md对账)
+python-version-check:
+	@bash scripts/check-python-version.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \

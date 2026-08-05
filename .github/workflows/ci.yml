@@ -68,6 +68,9 @@ jobs:
       - name: Health probes guard (F280)
         run: bash scripts/check-health-probes.sh
 
+      - name: Python version guard (F287)
+        run: bash scripts/check-python-version.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov

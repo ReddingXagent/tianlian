@@ -10,7 +10,7 @@ select = [
     "E4", "E7", "E9",   # pycodestyle 核心
     "F",                 # pyflakes
     "I",                 # import 排序
-    "UP",                # pyupgrade（py313 现代化）
+    "UP",                # pyupgrade（py310 基线）
     "B",                 # flake8-bugbear
     "PIE", "PLR1711",    # 杂项质量
     "RUF",               # ruff 专属
