@@ -1,7 +1,7 @@
 # 天链运维 App - Makefile
 # 本地构建与验证快捷命令
 
-.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check app-version-source-check check clean export-android export-ios bundle-size ci-local
+.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check app-version-source-check brand-color-check check clean export-android export-ios bundle-size ci-local
 
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -66,7 +66,11 @@ expo-plugins-check: ## expo.plugins↔package.json依赖双源成对守卫 (声�
 	npm run check:expo-plugins
 updates-channel-check: ## OTA更新通道双源成对守卫 (app.json updates.url ↔ eas.json projectId, 委托 npm run check:updates-channel, F302)
 	npm run check:updates-channel
-check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + tsc + eslint + jest)
+
+brand-color-check: ## 品牌色双源漂移守卫 (app.json splash.backgroundColor ↔ adaptiveIcon.backgroundColor, 委托 npm run check:brand-color, F309)
+	npm run check:brand-color
+
+check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + 品牌色一致 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 

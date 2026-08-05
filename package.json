@@ -24,7 +24,8 @@
     "check:engine-strict": "bash scripts/check-engine-strict.sh",
     "check:app-version-source": "bash scripts/check-app-version-source.sh",
     "check:expo-plugins": "bash scripts/check-expo-plugins-deps.sh",
-    "check:updates-channel": "bash scripts/check-updates-channel.sh"
+    "check:updates-channel": "bash scripts/check-updates-channel.sh",
+    "check:brand-color": "bash scripts/check-brand-color.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",
