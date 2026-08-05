@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 
 const LoginScreen: React.FC = () => {
@@ -101,10 +102,13 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    // F299: AuthStack为headerShown:false导航器, 无原生header兜顶,
+    // iOS刘海屏状态栏会叠在登录表单上方 → 根容器消费顶部安全区
+    <SafeAreaView style={styles.safeRoot} edges={['top', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.content}>
           <View style={styles.header}>
@@ -217,11 +221,16 @@ const LoginScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeRoot: {
+    flex: 1,
+    backgroundColor: '#1a73e8',
+  },
   container: {
     flex: 1,
     backgroundColor: '#1a73e8',
