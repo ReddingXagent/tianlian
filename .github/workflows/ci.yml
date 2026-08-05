@@ -65,6 +65,9 @@ jobs:
       - name: Entry file guard (F273)
         run: bash scripts/check-entry-file.sh
 
+      - name: Health probes guard (F280)
+        run: bash scripts/check-health-probes.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov

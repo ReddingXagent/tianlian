@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -48,6 +48,10 @@ data-paths-check:
 # F273: 入口文件多源一致性守卫(unit/Dockerfile/Makefile/watchdog/deploy.sh启动与探测/pgrep匹配模式对账)
 entry-file-check:
 	@bash scripts/check-entry-file.sh
+
+# F280: 健康探测路径多源一致性守卫(deploy.sh/watchdog/Dockerfile HEALTHCHECK探测路径↔server.py路由声明对账)
+health-probes-check:
+	@bash scripts/check-health-probes.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
