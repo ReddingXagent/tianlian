@@ -4,11 +4,6 @@
   "description": "天链V3用户小程序",
   "scripts": {
     "check": "node scripts/check-mp-structure.js",
-    "test": "jest --passWithNoTests",
-    "lint": "eslint . --max-warnings 0",
-    "lint:ci": "node scripts/lint-ci.js",
-    "deploy": "node scripts/deploy.js",
-    "deploy:check": "node scripts/deploy.js --check",
     "check:auth-keys": "node scripts/check-auth-keys.js",
     "check:dead-handlers": "node scripts/check-dead-handlers.js",
     "check:nav-targets": "node scripts/check-nav-targets.js",
@@ -16,8 +11,14 @@
     "check:orphan-pages": "node scripts/check-orphan-pages.js",
     "check:permission-apis": "node scripts/check-permission-apis.js",
     "check:request-source": "node scripts/check-request-source.js",
+    "check:setdata-perf": "node scripts/check-setdata-perf.js",
     "check:storage-keys": "node scripts/check-storage-keys.js",
-    "check:wxml-handlers": "node scripts/check-wxml-handlers.js"
+    "check:wxml-handlers": "node scripts/check-wxml-handlers.js",
+    "deploy": "node scripts/deploy.js",
+    "deploy:check": "node scripts/deploy.js --check",
+    "lint": "eslint . --max-warnings 0",
+    "lint:ci": "node scripts/lint-ci.js",
+    "test": "jest --passWithNoTests"
   },
   "jest": {
     "testEnvironment": "node",

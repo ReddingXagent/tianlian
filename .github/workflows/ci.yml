@@ -29,6 +29,7 @@ jobs:
       - run: npm run check:orphan-pages
       - run: npm run check:permission-apis
       - run: npm run check:request-source
+      - run: npm run check:setdata-perf
       - run: npm run check:storage-keys
       - run: npm run check:wxml-handlers
       - run: npm test -- --coverage --passWithNoTests
