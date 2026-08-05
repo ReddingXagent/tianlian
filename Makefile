@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -64,6 +64,10 @@ template-render-check:
 # F301: 备份写读对账守卫(备份写模式↔回滚/保留读glob双向匹配+DB_FILE↔config.py db_path, 堵回滚现场无备份可用)
 backup-restore-check:
 	@bash scripts/check-backup-restore.sh
+
+# F308: pid文件写读对账守卫(deploy.sh写读↔watchdog PID_FILE四源同名+目录段同基准, 堵pid交接静默失效双启撞端口)
+pid-file-check:
+	@bash scripts/check-pid-file.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
