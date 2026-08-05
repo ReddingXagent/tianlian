@@ -481,6 +481,59 @@ describe('streamChatMessage', () => {
     }).rejects.toThrow('AI API error 500');
   });
 
+  it('should fallback to empty error body when text() rejects', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      text: () => Promise.reject(new Error('body read failed')),
+    });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: 'test', timestamp: Date.now() },
+    ];
+
+    await expect(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _ of streamChatMessage(messages)) {
+        // should throw before yielding
+      }
+    }).rejects.toThrow('AI API error 503: ');
+  });
+
+  it('should end gracefully when reader signals done without [DONE]', async () => {
+    const mockReader = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'data: {"id":"s1","choices":[{"delta":{"content":"一段"}}]}\n\n'
+          ),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: '你好', timestamp: Date.now() },
+    ];
+
+    const chunks: string[] = [];
+    for await (const chunk of streamChatMessage(messages)) {
+      if (chunk.choices[0]?.delta?.content) {
+        chunks.push(chunk.choices[0].delta.content);
+      }
+    }
+
+    expect(chunks).toEqual(['一段']);
+    expect(mockReader.releaseLock).toHaveBeenCalledTimes(1);
+  });
+
   it('should handle request without token', async () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
 

@@ -7,6 +7,8 @@
 ## [Unreleased]
 
 ### Added
+- **ai.ts 流式故障分支定向补测接手 +2（F328）**：接手并发轮未提交改动（ai.test.ts +53 行 2 例：streamChatMessage response.text() reject 时 catch 兜底空错误体（断言 `AI API error 503: ` 尾冒号形态，ai.ts:417 `.catch(() => '')` 真值分支）/ reader done 无 [DONE] 正常收尾 + releaseLock 恰好一次断言（ai.ts:442 [DONE] 判断的非命中路径+453 releaseLock）），四门逐项实测复验全吻合：tsc **0err** / jest 450→**452 绿**（33 suites）/ coverage 全量实测 **99.67/97.31/99.14/99.82** 门限 99/96/98/99 exit 0（branches 97.2→97.31，上调 97 后余量 0.31<1 不升棘轮，F278 规则）/ eslint 全量（非 --quiet）**0err/0warn**；变异一档抽查当场命中：ai.ts:417 `.catch(() => '')` 删除→新用例 1 failed 精确拦（reject 穿透后错误文案变 body read failed），cp 备份还原 diff 零残留（F231）；README 测试数/覆盖率段已同步（并发轮已写）；并发轮 CHANGELOG 欠账本轮补落（F328 条目即本条）
+
 - **jest testTimeout 15000 加固——负载型 flaky 超时修复（F322）**：全量 --coverage 跑撞 1 failed（ChargerTrendChart › should fetch trend for the given deviceId，thrown Exceeded timeout of 5000ms）；同套件单跑 2s 全绿（14/14），用例本体极轻（render+单微任务 flush），根因=全量并发 worker 资源争用下 RN preset 初始化慢致 wall time 超 jest 默认 5s 上限——负载型 flake 非产品缺陷（F263 先追根因判定）；修法：jest config 加 \`"testTimeout": 15000\`（全仓口径保护所有 suite）；验证：修后全量 --coverage 复跑**两次**均 450 绿 exit 0（coverage 99.51/97.2/98.85/99.82 不变，门限 99/96/98/99 不受影响）；变异活性一档：testTimeout→1→该 suite 11 failed 精确拦（配置键活性证明），cp 备份还原 diff 零残留；tsc 0err / eslint 全量 0err/0warn / 测试数不变 450
 
 ### Added
