@@ -35,6 +35,8 @@ npm run ios          # iOS
 
 ## 质量门控
 
+基础四门：
+
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
 npm test             # jest 单测（268 用例全绿）
@@ -42,22 +44,51 @@ npm run lint         # eslint（0 err / 0 warn）
 npx expo export --platform ios   # 产物构建验证
 ```
 
-- 测试覆盖率：Statements 83.62% | Branches 71.65% | Functions 77.34% | Lines 85.39%
-- coverage 收集范围：`src/**`（排除 `*.d.ts` 与 `types/`）
+- 测试覆盖率（`src/**` 全量口径，F248 起；排除 `*.d.ts` 与 `types/`）：Statements 84.24% | Branches 70.93% | Functions 79.6% | Lines 85.91%
+- ⚠️ 尚未配置 coverageThreshold（高优卡在办），门限棘轮随后补
 - components / store 层 100% 覆盖；screens 层 15 个页面均已补测试（F17 ✅ 已解决）
+
+`make ci-local` 模拟 CI 全流程 = `make check`（守卫链 + tsc + lint + jest）+ doctor 体检 + 双平台导出 + bundle 体积门控：
+
+**构建守卫族十七枚**（`make check` 内 16 个 check:* 脚本 + bundle-size；每枚均三源接线 package.json↔Makefile↔CI，由 F250 guard-wiring 自动对账，ci-parity 23 门控）：
+
+| 守卫 | 对账语义 | 编号 |
+|------|---------|------|
+| check:version | package.json.version ↔ app.json.expo.version 双源值级 | F224 |
+| check:alias | tsconfig.paths ↔ jest.moduleNameMapper 双源 | F231 |
+| check:node | engines.node ↔ CI node-version（逐 job） | F237 |
+| check:guard-wiring | 守卫接线三源一致性（自身也在对账范围） | F250 |
+| check:env-defaults | 代码读取 env 键 ↔ .env.example 模板键 + 内联 fallback 值级 | F256 |
+| check:unused-deps | 未使用依赖（import/plugins/隐式白名单三形态） | F262 |
+| check:ci-parity | ci.yml run 步骤 ↔ ci-local 递归展开集合双向 | F274 |
+| check:engine-strict | .npmrc engine-strict ↔ engines.node 成对执行力 | F282 |
+| check:app-version-source | eas.json appVersionSource=local ↔ app.json versionCode/buildNumber | F288 |
+| check:expo-plugins | app.json expo.plugins ↔ package.json 依赖成对 | F296 |
+| check:updates-channel | app.json updates.url ↔ eas.json projectId（双占位一致态放行） | F302 |
+| check:brand-color | splash.backgroundColor ↔ adaptiveIcon.backgroundColor | F309 |
+| check:build-number-parity | android.versionCode ↔ ios.buildNumber 数值配对 | F315 |
+| check:easignore-secrets | .gitignore ↔ .easignore 敏感排除超集 | F321 |
+| check:unused-assets | assets 磁盘 ↔ 引用源反向对账（死资产） | F327 |
+| check:asset-size | assets 体积上限（单文件≤512KB / 总≤2048KB） | F334 |
+| scripts/bundle-size.sh | JS Bundle 体积门控（双平台齐验，缺目录 FAIL） | F212 |
+
+另有 jest 层 appConfig.test.ts 构建配置回归守卫（platforms 限定/plugins↔deps/应用标识双源/资产存在断言，F244 移植形态）。
+
+**expo-doctor 体检**：`make doctor`（依赖版本/配置一致性，与 CI 同步骤）。
 
 ## 构建与部署
 
 ```bash
 npx expo export --platform android   # OTA 更新包（JS bundle + assets）
 npx expo export --platform ios       # 同上，iOS 平台
-eas build --profile preview          # 内测 APK（需 EAS 账号）
+eas build --profile preview          # 内测 APK（EAS 云端构建）
 eas build --profile production       # 商店构建
 ```
 
 - `eas.json`：development / preview(内部 APK) / production 三档 profile
+- 分发策略（08-05 决策，F25/F33 清零）：当前阶段不需要 Expo 账号——测试走 Expo Go 扫码，内部分发走 APK 直装/二维码（充电站运维场景不上架商店）；OTA 推送延后到发布候选期，届时 updates.url↔projectId 双侧同步接线（F302 守卫即为此决策的门禁形态）
 - `assets/`：icon / adaptive-icon / splash / favicon 品牌占位图（蓝底白字 TL，待设计稿替换）
-- 已知缺口：web 导出不可用（纯移动端，无 react-dom，F85 ✅ 确认预期行为）；BASE_URL 硬编码生产 IP 无环境切换（F22）；EAS Update 通道未配（需账号，F25）
+- 已知缺口：web 导出不可用（纯移动端，无 react-dom，F85 ✅ 确认预期行为）；BASE_URL 硬编码生产 IP 无环境切换（F22）；EAS Update 通道未接（08-05 决策延后到发布候选期，F25/F33 已清零）
 
 ## 目录结构
 
@@ -76,7 +107,7 @@ src/
 
 - **F21**: ScanScreen 为手动输码，缺 expo-camera 真扫码能力
 - **F22**: `api.ts` BASE_URL 硬编码生产 IP，缺 dev/mock 环境切换
-- **F25**: EAS Update 通道未配，需 Expo 账号
+- **F25**: ~~EAS Update 通道未配，需 Expo 账号~~ → 08-05 决策清零：当前阶段不需要 Expo 账号（测试 Expo Go 扫码/内部分发 APK 直装），OTA 延后到发布候选期
 - **F69**: InspectionDetailScreen 覆盖 57.4%、ScanScreen 65.62%、WorkOrderDetailScreen 65.45% 为薄弱 Screen
 - **F70**: AppNavigator 0% 覆盖（导航层，测试成本高）
 - **F74**: WorkOrderDetailScreen 测试有 act() 警告（不影响通过）
