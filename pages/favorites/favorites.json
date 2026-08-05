@@ -1,5 +1,8 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "loading": "/components/loading/index",
+    "empty": "/components/empty/index"
+  },
   "navigationBarTitleText": "收藏站点",
   "enablePullDownRefresh": true
 }
