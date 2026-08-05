@@ -8,6 +8,7 @@
 #   目录段漂移 → make systemd-install 的sed渲染不到 → 装出去的logrotate仍指Pi默认路径。
 # 本脚本断言: 轮转目标basename ↔ deploy.sh写侧basename ↔ watchdog写侧basename 三源一致,
 #   且 logrotate目录段 == unit WorkingDirectory 默认值。缺输入/提取空/不等均exit1。
+# F341: 声明源外全域字面量写读点扫描(见下方扫描段注释)。
 # 接入 make check(log-paths-check) + CI check job。
 set -euo pipefail
 
@@ -68,7 +69,47 @@ if [ "$fail" -eq 0 ]; then
     fi
 fi
 
+# F341: 全域字面量日志写读点扫描(声明源外的绕过通道)
+# F261原对账锚定三声明源(轮转目标/deploy nohup重定向/watchdog LOG_FILE声明),
+# 代码内绕过声明的硬编码字面量是盲区(实证存量): watchdog.sh systemd退位消息直写
+# ">> $REPO_DIR/gateway.log"(绕过下方LOG_FILE变量) + deploy.sh status/logs子命令
+# tail读引用×2。漂移场景: 三声明源同步改名(F261全绿)而字面量漏同步→
+# watchdog继续写旧文件名幻影日志(无人轮转) / tail永显"(无日志)"运维误判日志丢失。
+# 扫描域: deploy.sh + scripts/*.sh(排除check-*守卫脚本——其regex/注释含.log字面量,
+# 非行为写读); Makefile不入域(.tianlian-gateway.logrotate.rendered中间产物名含".log"
+# 子串但非应用日志); 注释行剥除(文档提及非行为)。断言: 全部字面量basename==轮转目标。
+f341_files="deploy.sh"
+for f in scripts/*.sh; do
+    case "$f" in scripts/check-*) continue ;; esac
+    f341_files="$f341_files $f"
+done
+
+f341_found=0
+for f in $f341_files; do
+    if [ ! -f "$f" ]; then
+        echo "❌ F341 缺输入: $f 不存在"; exit 1
+    fi
+    while IFS=: read -r lno tok; do
+        [ -z "${tok:-}" ] && continue
+        # 注释行(文档提及)剥除
+        if sed -n "${lno}p" "$f" | grep -q '^[[:space:]]*#'; then
+            continue
+        fi
+        f341_found=1
+        if [ "$tok" != "$rotate_base" ]; then
+            echo "❌ F341 字面量日志写读点漂移: $f:$lno → $tok (轮转目标: $rotate_base)"
+            echo "   声明源外硬编码日志路径必须与轮转目标同名, 否则幻影日志无人轮转/tail读空"
+            fail=1
+        fi
+    done < <(grep -noE '[A-Za-z0-9._-]+\.log' "$f" || true)
+done
+
+if [ "$f341_found" -eq 0 ]; then
+    echo "❌ F341 全域字面量日志点提取为空: 扫描域 $f341_files"
+    fail=1
+fi
+
 if [ "$fail" -ne 0 ]; then
     exit 1
 fi
-echo "✅ 日志路径双源一致: ${rotate_base}(轮转↔deploy↔watchdog三源) 目录段=${rotate_dir}(↔unit WorkingDirectory)"
+echo "✅ 日志路径全域一致: ${rotate_base}(轮转↔deploy↔watchdog声明三源+全域字面量写读点F341) 目录段=${rotate_dir}(↔unit WorkingDirectory)"

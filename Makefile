@@ -37,7 +37,7 @@ api-port-check:
 env-keys-check:
 	@bash scripts/check-env-keys.sh
 
-# F261: 日志路径双源漂移守卫(logrotate轮转目标↔deploy.sh/watchdog.sh写侧文件名对账)
+# F261: 日志路径漂移守卫(logrotate轮转目标↔写侧声明三源对账; F341扩全域字面量写读点扫描)
 log-paths-check:
 	@bash scripts/check-log-paths.sh
 
