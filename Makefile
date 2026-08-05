@@ -1,7 +1,7 @@
 # 天链运维 App - Makefile
 # 本地构建与验证快捷命令
 
-.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check check clean export-android export-ios bundle-size ci-local
+.PHONY: help install dev build test lint doctor version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check app-version-source-check check clean export-android export-ios bundle-size ci-local
 
 help: ## 显示帮助
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -58,7 +58,10 @@ ci-parity-check: ## CI门控链↔ci-local双源漂移守卫 (ci.yml run步骤 v
 
 engine-strict-check: ## engines.node执行力双源漂移守卫 (.npmrc engine-strict ↔ engines.node成对, 委托 npm run check:engine-strict)
 	npm run check:engine-strict
-check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + tsc + eslint + jest)
+
+app-version-source-check: ## appVersionSource双源成对守卫 (eas.json appVersionSource=local ↔ app.json versionCode/buildNumber, 委托 npm run check:app-version-source, F288)
+	npm run check:app-version-source
+check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 

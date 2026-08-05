@@ -15,14 +15,16 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tianlian.operator"
+      "bundleIdentifier": "com.tianlian.operator",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1a73e8"
       },
-      "package": "com.tianlian.operator"
+      "package": "com.tianlian.operator",
+      "versionCode": 1
     },
     "runtimeVersion": {
       "policy": "sdkVersion"
