@@ -24,6 +24,7 @@ jobs:
       - run: npm run lint
       - run: npm run check:auth-keys
       - run: npm run check:dead-handlers
+      - run: npm run check:event-usage
       - run: npm run check:json-keys
       - run: npm run check:nav-targets
       - run: npm run check:orphan-components
