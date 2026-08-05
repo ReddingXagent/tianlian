@@ -61,7 +61,10 @@ engine-strict-check: ## engines.node执行力双源漂移守卫 (.npmrc engine-s
 
 app-version-source-check: ## appVersionSource双源成对守卫 (eas.json appVersionSource=local ↔ app.json versionCode/buildNumber, 委托 npm run check:app-version-source, F288)
 	npm run check:app-version-source
-check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + tsc + eslint + jest)
+
+expo-plugins-check: ## expo.plugins↔package.json依赖双源成对守卫 (声明侧↔供给侧, 委托 npm run check:expo-plugins, F296)
+	npm run check:expo-plugins
+check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 

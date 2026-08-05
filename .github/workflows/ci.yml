@@ -35,6 +35,7 @@ jobs:
       - run: npm run check:engine-strict
       # appVersionSource双源成对守卫(F288): eas.json appVersionSource=local ↔ app.json versionCode/buildNumber 必须成对, 防EAS本地版本管理无锚点静默撞车
       - run: npm run check:app-version-source
+      - run: npm run check:expo-plugins
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint
