@@ -137,7 +137,7 @@ make install          # 创建 venv + 装依赖
 make run              # 启动网关
 make test             # 跑测试
 make lint             # ruff 检查
-make check            # 部署守卫十三项(同名源/探测端点/API端口/env键/日志路径/数据路径/入口文件/健康探测路径/Python版本多源/模板渲染路径/备份写读对账/pid文件写读对账/启动解释器多源) + lint + test 一键门控
+make check            # 部署守卫十四项(同名源/探测端点/API端口/env键/日志路径/数据路径/入口文件/健康探测路径/Python版本多源/模板渲染路径/备份写读对账/pid文件写读对账/启动解释器多源/.env凭据语义四源) + lint + test 一键门控
 ```
 
 ## 配置文件

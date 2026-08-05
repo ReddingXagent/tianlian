@@ -83,6 +83,9 @@ jobs:
       - name: Start interpreter guard (F314)
         run: bash scripts/check-start-interpreter.sh
 
+      - name: Env file guard (F326)
+        run: bash scripts/check-env-file.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov
