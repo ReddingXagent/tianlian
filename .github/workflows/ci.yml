@@ -62,6 +62,9 @@ jobs:
       - name: Data paths guard (F267)
         run: bash scripts/check-data-paths.sh
 
+      - name: Entry file guard (F273)
+        run: bash scripts/check-entry-file.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov

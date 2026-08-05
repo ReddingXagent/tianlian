@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -44,6 +44,10 @@ log-paths-check:
 # F267: 数据持久化路径多源一致性守卫(config.py db_path声明↔Dockerfile VOLUME/compose挂载/deploy.sh备份glob对账)
 data-paths-check:
 	@bash scripts/check-data-paths.sh
+
+# F273: 入口文件多源一致性守卫(unit/Dockerfile/Makefile/watchdog/deploy.sh启动与探测/pgrep匹配模式对账)
+entry-file-check:
+	@bash scripts/check-entry-file.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
