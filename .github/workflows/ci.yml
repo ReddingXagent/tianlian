@@ -44,6 +44,8 @@ jobs:
       - run: npm run check:build-number-parity
       # .gitignore↔.easignore敏感排除超集守卫(F321): 凭据类模式(.env/*.jks/*.keystore)双侧对账, 防云端构建上传凭据
       - run: npm run check:easignore-secrets
+      # assets磁盘↔引用源反向对账守卫(F327): 死资产检测, app.json资产字段+代码require 双引用源
+      - run: npm run check:unused-assets
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint
