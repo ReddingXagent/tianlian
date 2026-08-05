@@ -71,6 +71,9 @@ jobs:
       - name: Python version guard (F287)
         run: bash scripts/check-python-version.sh
 
+      - name: Template render guard (F295)
+        run: bash scripts/check-template-render.sh
+
       - name: Pytest with coverage
         run: |
           pip install pytest-cov
