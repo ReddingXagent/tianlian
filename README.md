@@ -55,7 +55,7 @@ scripts/          check-mp-structure.js 结构门控 / deploy.js 部署门控(mi
 
 - 测试：230 全绿，coverage 98.07%（Stmts 98.07% / Branch 85.76% / Funcs 98.33% / Lines 98.91%）
 - lint：ESLint 10 flat config，0 错 0 警
-- 对账守卫族：十一枚自动守卫全接 CI check job + Makefile check 链——导航↔注册（F246）/wxml绑定↔方法（F252）/auth键（F240）/死handler（F264）/孤儿页（F258）/孤儿组件（F284）/storage键（F270）/隐私API↔声明（F277）/请求单一源（F292）/setData性能反模式（F298）/wxs视图层隔离（F305）
+- 对账守卫族：十二枚自动守卫全接 CI check job + Makefile check 链——导航↔注册（F246）/wxml绑定↔方法（F252）/auth键（F240）/死handler（F264）/孤儿页（F258）/孤儿组件（F284）/storage键（F270）/隐私API↔声明（F277）/请求单一源（F292）/setData性能反模式（F298）/wxs视图层隔离（F305）/JSON配置键白名单（F311）
 - 上传包：主包 ~704K（≪2MB 限额），packOptions.ignore 已排除开发产物
 - 合规：`lazyCodeLoading` / `requiredPrivateInfos` / `permission` 声明齐全；废弃 API（`wx.getSystemInfoSync` / `wx.getUserProfile`）已清零
 

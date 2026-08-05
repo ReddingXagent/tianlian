@@ -1,4 +1,4 @@
-.PHONY: help install dev build test lint check auth-keys-check dead-handlers-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check request-source-check setdata-perf-check storage-keys-check wxml-handlers-check wxs-isolation-check ci-local clean deploy deploy-check
+.PHONY: help install dev build test lint check auth-keys-check dead-handlers-check json-keys-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check request-source-check setdata-perf-check storage-keys-check wxml-handlers-check wxs-isolation-check ci-local clean deploy deploy-check
 
 help: ## 显示所有命令
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -23,6 +23,9 @@ auth-keys-check: ## auth存储键双源对账 (app.js↔services/api.js, F240; �
 
 dead-handlers-check: ## 死handler反向可达性对账 (js方法⊆wxml绑定∪this调用, F264; 委托 npm run check:dead-handlers)
 	npm run check:dead-handlers
+
+json-keys-check: ## JSON配置键白名单对账 (app/页面/组件json键⊆官方键域+枚举值域+tabBar/preloadRule↔pages跨源, F311; 委托 npm run check:json-keys)
+	npm run check:json-keys
 
 nav-targets-check: ## 导航目标↔页面注册双源对账 (跳转url字面量↔app.json pages, F246; 委托 npm run check:nav-targets)
 	npm run check:nav-targets
@@ -49,7 +52,7 @@ wxml-handlers-check: ## WXML事件绑定↔JS方法双源对账 (绑定名↔Pag
 wxs-isolation-check: ## wxs视图层隔离双向对账 (wxs实体↔<wxs src>声明双向+js禁引用, F305; 委托 npm run check:wxs-isolation)
 	npm run check:wxs-isolation
 
-check: lint auth-keys-check dead-handlers-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check request-source-check setdata-perf-check storage-keys-check wxml-handlers-check wxs-isolation-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + 导航对账 + 孤儿组件对账 + 孤儿页对账 + 隐私API对账 + 请求单一源对账 + setData性能对账 + storage键对账 + 绑定对账 + wxs隔离对账 + jest)
+check: lint auth-keys-check dead-handlers-check json-keys-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check request-source-check setdata-perf-check storage-keys-check wxml-handlers-check wxs-isolation-check test ## 完整质量检查 (eslint + auth键对账 + 死handler对账 + JSON配置键对账 + 导航对账 + 孤儿组件对账 + 孤儿页对账 + 隐私API对账 + 请求单一源对账 + setData性能对账 + storage键对账 + 绑定对账 + wxs隔离对账 + jest)
 
 ci-local: check ## 本地模拟 CI 流程 (check)
 

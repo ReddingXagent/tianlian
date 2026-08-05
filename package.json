@@ -6,6 +6,7 @@
     "check": "node scripts/check-mp-structure.js",
     "check:auth-keys": "node scripts/check-auth-keys.js",
     "check:dead-handlers": "node scripts/check-dead-handlers.js",
+    "check:json-keys": "node scripts/check-json-keys.js",
     "check:nav-targets": "node scripts/check-nav-targets.js",
     "check:orphan-components": "node scripts/check-orphan-components.js",
     "check:orphan-pages": "node scripts/check-orphan-pages.js",
