@@ -42,6 +42,8 @@ jobs:
       - run: npm run check:brand-color
       # versionCode↔buildNumber数值配对守卫(F315): app.json android.versionCode ↔ ios.buildNumber 同语义双源值级配对(F224族), 防双平台构建序号分叉
       - run: npm run check:build-number-parity
+      # .gitignore↔.easignore敏感排除超集守卫(F321): 凭据类模式(.env/*.jks/*.keystore)双侧对账, 防云端构建上传凭据
+      - run: npm run check:easignore-secrets
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint

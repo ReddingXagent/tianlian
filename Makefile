@@ -73,7 +73,10 @@ brand-color-check: ## 品牌色双源漂移守卫 (app.json splash.backgroundCol
 build-number-parity-check: ## versionCode↔buildNumber数值配对守卫 (app.json android.versionCode ↔ ios.buildNumber, 委托 npm run check:build-number-parity, F315)
 	npm run check:build-number-parity
 
-check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + 品牌色一致 + 构建序号配对 + tsc + eslint + jest)
+easignore-secrets-check: ## .gitignore↔.easignore敏感排除超集守卫 (凭据类模式双侧对账, 委托 npm run check:easignore-secrets, F321)
+	npm run check:easignore-secrets
+
+check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check easignore-secrets-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + 品牌色一致 + 构建序号配对 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 

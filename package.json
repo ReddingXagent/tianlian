@@ -26,7 +26,8 @@
     "check:expo-plugins": "bash scripts/check-expo-plugins-deps.sh",
     "check:updates-channel": "bash scripts/check-updates-channel.sh",
     "check:brand-color": "bash scripts/check-brand-color.sh",
-    "check:build-number-parity": "bash scripts/check-build-number-parity.sh"
+    "check:build-number-parity": "bash scripts/check-build-number-parity.sh",
+    "check:easignore-secrets": "bash scripts/check-easignore-secrets.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",

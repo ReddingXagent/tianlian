@@ -1,4 +1,8 @@
 # EAS Build ignore - excludes non-essential files from cloud builds
+# 敏感文件排除必须覆盖 .gitignore 凭据类模式 (F321守卫: check-easignore-secrets)
+.env
+*.jks
+*.keystore
 __tests__/
 __mocks__/
 *.test.*
@@ -6,7 +10,7 @@ __mocks__/
 coverage/
 .env.example
 .gitignore
-.eslintrc.js
+eslint.config.js
 .prettierrc
 jest.config.js
 jest.setup.ts
