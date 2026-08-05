@@ -37,7 +37,8 @@ interface ChargerTrendChartProps {
 }
 
 // 将趋势点转为图表标签（最多展示 6 个时间点，避免拥挤）
-const buildLabels = (points: ChargerTrendPoint[]): string[] => {
+// 导出供测试直接验证防御分支（空输入兜底）
+export const buildLabels = (points: ChargerTrendPoint[]): string[] => {
   if (points.length === 0) return [];
   const step = Math.max(1, Math.ceil(points.length / 6));
   return points.map((p, i) => (i % step === 0 ? formatClock(p.timestamp) : ''));
@@ -161,7 +162,8 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
 };
 
 // hex(#1a73e8) -> "26,115,232" 供 rgba 使用
-const hexToRgb = (hex: string): string => {
+// 导出供测试直接验证防御分支（零通道/非法hex的 || 0 兜底）
+export const hexToRgb = (hex: string): string => {
   const clean = hex.replace('#', '');
   const r = parseInt(clean.substring(0, 2), 16) || 0;
   const g = parseInt(clean.substring(2, 4), 16) || 0;

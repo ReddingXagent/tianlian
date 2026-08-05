@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { render, act, fireEvent } from '@testing-library/react-native';
-import ChargerTrendChart from '../ChargerTrendChart';
+import ChargerTrendChart, { buildLabels, hexToRgb } from '../ChargerTrendChart';
 import { chargerApi } from '../../services/api';
 
 // Mock chart-kit 避免 SVG 渲染
@@ -163,6 +163,33 @@ describe('ChargerTrendChart', () => {
       ? chart.props.children.join('')
       : String(chart.props.children);
     expect(text).toContain('labels=12,empty=6');
+  });
+
+  it('should render current(电流) metric chart with zero-blue color path', async () => {
+    const { findByText, getByText, findByTestId } = render(<ChargerTrendChart deviceId={101} />);
+
+    await findByText('功率');
+    fireEvent.press(getByText('电流'));
+
+    // #ef6c00 → rgb(239,108,0): b=00 命中 hexToRgb `|| 0` 左值假分支（组件路径唯一触达形态）
+    const chart = await findByTestId('line-chart');
+    const text = Array.isArray(chart.props.children)
+      ? chart.props.children.join('')
+      : String(chart.props.children);
+    expect(text).toContain('239,108,0');
+  });
+
+  it('buildLabels: should return [] for empty points (防御兜底分支)', () => {
+    // 组件路径永不调用空数组形态(buildLabels 仅在 points>0 时被调)——防御分支直测
+    expect(buildLabels([])).toEqual([]);
+  });
+
+  it('hexToRgb: should fall back to 0 for zero channels (#000000 三通道 || 0)', () => {
+    expect(hexToRgb('#000000')).toBe('0,0,0');
+  });
+
+  it('hexToRgb: should fall back to 0 for non-hex input (NaN 防御)', () => {
+    expect(hexToRgb('#zzzzzz')).toBe('0,0,0');
   });
 
   it('should fall back to empty label when timestamp formatting fails', async () => {
