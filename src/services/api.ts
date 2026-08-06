@@ -27,7 +27,7 @@ import {
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
-const BASE_URL = 'http://8.134.106.166/api/v1';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://8.134.106.166/api/v1';
 
 const api = axios.create({
   baseURL: BASE_URL,
