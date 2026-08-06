@@ -13,7 +13,9 @@
     "check:alias": "bash scripts/check-alias-config.sh",
     "check:test-liveness": "bash scripts/check-test-suite-liveness.sh",
     "export:android": "expo export --platform android",
-    "export:ios": "expo export --platform ios"
+    "export:ios": "expo export --platform ios",
+    "check:node": "bash scripts/check-node-version.sh",
+    "check:engine-strict": "bash scripts/check-engine-strict.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",
@@ -85,5 +87,8 @@
         ]
       }
     }
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

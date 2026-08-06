@@ -21,6 +21,8 @@ jobs:
       - run: npx eslint . --max-warnings 0
       - run: npm run check:alias
       - run: npm run check:test-liveness
+      - run: npm run check:node
+      - run: npm run check:engine-strict
       - run: npm test -- --coverage
 
   export:

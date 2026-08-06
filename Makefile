@@ -32,7 +32,13 @@ alias-check: ## 路径别名双源漂移守卫 (tsconfig.paths ↔ jest.moduleNa
 test-liveness-check: ## 测试套件活性守卫 (收集数下限33+路径域断言, 拦--passWithNoTests零收集静默放行 F379)
 	npm run check:test-liveness
 
-check: build lint alias-check test-liveness-check test ## 完整质量检查 (tsc + eslint + 别名守卫 + 套件活性守卫 + jest)
+node-check: ## node版本双源漂移守卫 (engines.node vs CI node-version, 委托 npm run check:node, F237同型跨仓跟进F420)
+	npm run check:node
+
+engine-strict-check: ## engines.node执行力双源漂移守卫 (.npmrc engine-strict ↔ engines.node成对, 委托 npm run check:engine-strict, F218同型跨仓跟进F420)
+	npm run check:engine-strict
+
+check: build lint alias-check test-liveness-check node-check engine-strict-check test ## 完整质量检查 (tsc + eslint + 别名守卫 + 套件活性守卫 + node版本双源守卫 + engines执行力守卫 + jest)
 
 ci-local: check export ## 本地模拟 CI 流程 (check + export)
 
