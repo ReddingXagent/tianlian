@@ -23,6 +23,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run check:auth-keys
+      - run: npm run check:asset-refs
       - run: npm run check:css-vars
       - run: npm run check:css-classes
       - run: npm run check:dead-handlers
