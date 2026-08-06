@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check env-file-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check env-file-check compile-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -19,7 +19,7 @@ test:
 lint:
 	$(VENV)/bin/ruff check .
 
-check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check env-file-check lint test
+check: deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check env-file-check compile-check lint test
 
 # F236: 部署同名源一致性守卫(unit三源/logrotate双源对账, 防SYSTEMD_MODE探测失配)
 deploy-names-check:
@@ -76,6 +76,10 @@ start-interpreter-check:
 # F326: .env凭据语义多源对账守卫(unit EnvironmentFile无'-'前缀+basename ↔ compose env_file basename ↔ .gitignore精确保护条目)
 env-file-check:
 	@bash scripts/check-env-file.sh
+
+# F365: 编译检查(CI compileall本地化, Makefile↔ci.yml parity, 本地make check即覆盖CI编译门控)
+compile-check:
+	$(PYTHON) -m compileall main.py config.py adapters/ api/ models/ storage/ -q
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
