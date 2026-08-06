@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Changed
+- lint:ci 阈值棘轮收紧 60→54（F361，lint维度，白天降级档）— 与F348 coverageThreshold同款棘轮语义：eslint --max-warnings 原设60（余量6），实测全仓54warn（37 no-require-imports测试文件jest require+7 react-hooks/set-state-in-effect+6 react-hooks/exhaustive-deps+2 import/first+2 unused eslint-disable），阈值下取整至54（==阈值通过，>54即FAIL）；变异验证 max-warnings=53 → exit 1 FAIL（ESLint found too many warnings maximum: 53），棘轮活性确认；warning分布摸底：no-require-imports全来自测试文件jest mock加载（RN生态惯例不改）、set-state-in-effect是effect内同步setState（7处hooks/screens，功能性正确仅性能建议不改）、exhaustive-deps是hooks依赖缺失（6处，留夜间档评估是否修复降warn）；README lint棘轮行同步≤60→≤54
+
 ### Added
 - TextInput验证码族keyboardType×maxLength↔sms-otp autofill成对守卫 + LoginScreen真缺口修复（F345，移动端维度，输入族第三枚）— 缺口：验证码输入（number-pad+短maxLength）只约束按键集合与长度，不告诉系统这是"短信验证码"——缺 autoComplete="sms-otp"（Android）与 textContentType="oneTimeCode"（iOS）时系统 SMS 验证码自动填充静默失效，用户切到短信 app 手抄 6 位码再切回；两 prop 均 optional，tsc 盲区，与 F330（数字键盘×maxLength）/F338（密码族×autofill）同族形态。摸底撞真缺口：LoginScreen 验证码输入（number-pad/6）零 autofill 声明，同轮修复补齐双平台声明。新增 src/__tests__/otpAutofillGuards.test.ts：全仓 src/**/*.tsx（排除 __tests__）扫描，入族判定——keyboardType="number-pad"|"numeric"（静态字面量）且 maxLength={2..8 静态数字字面量}（验证码典型长度域）→ otp 族；键盘集外（phone-pad/decimal-pad）/长度域外/任一 prop 缺失 → 族外豁免（maxLength 缺失归 F330 守卫域管辖）；keyboardType 或 maxLength 为 {变量} 静态不可判定 → 族外豁免（F330 语义：无入族信息即无义务）；不变量——otp 族 TextInput 必须同时声明 autoComplete="sms-otp" 与 textContentType="oneTimeCode"（平台分治缺一侧即该平台 SMS autofill 静默失效，F338 同语义）；缺输入（零 tsx 可扫/开标签未配平）抛错 FAIL（F212 不静默）；提取健壮性：花括号深度扫描开标签终点 + <TextInputMask 前缀碰撞不误提取（F318 铁律，与 F330/F338 共享提取器形态）；合成样例正向控制 12 条 + 缺输入 1 条 + 全仓对账 1 条，共 14 条（431→445，42→43 suites）；四门全走：tsc 0err → jest 445 绿 → 覆盖率实测 78.83/70.38/77.58/78.64（棘轮 78/70/77/78 exit 0，测试文件不入覆盖率口径零变动）→ eslint 全量（非 quiet）0err/54warn 零增量；变异 M1 一档命中（sed NR 锚定删 LoginScreen autoComplete="sms-otp" 行→全仓对账用例精确 1failed，cp 备份还原 diff 零残留，F231 铁律）；README 测试数 431→445 + suites 42→43 同步
 
