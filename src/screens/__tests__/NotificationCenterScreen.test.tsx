@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { FlatList, RefreshControl } from 'react-native';
 import { render, act, fireEvent } from '@testing-library/react-native';
@@ -146,7 +145,7 @@ describe('NotificationCenterScreen', () => {
   it('should call markAsRead when tapping unread notification', async () => {
     (notificationApi.markAsRead as jest.Mock).mockResolvedValue({ data: MOCK_NOTIFICATIONS[0] });
 
-    const { findAllByText } = render(<NotificationCenterScreen />); // eslint-disable-line @typescript-eslint/no-unused-vars
+    render(<NotificationCenterScreen />);
 
     // 等待渲染完成后，未读通知应该有点击标记已读功能
     await act(async () => {
@@ -252,7 +251,7 @@ describe('NotificationCenterScreen', () => {
   it('should handle markAsRead error silently', async () => {
     (notificationApi.markAsRead as jest.Mock).mockRejectedValue(new Error('fail'));
 
-    const { findByText, getAllByTestId } = render(<NotificationCenterScreen />); // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { findByText } = render(<NotificationCenterScreen />);
     await findByText('充电桩A-01温度异常告警');
 
     // No crash — component still functional

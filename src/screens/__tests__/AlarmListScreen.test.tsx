@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { render, act, fireEvent, waitFor } from '@testing-library/react-native';
 import AlarmListScreen from '../AlarmListScreen';

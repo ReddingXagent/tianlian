@@ -17,7 +17,7 @@ module.exports = defineConfig([
     },
   },
   {
-    // 测试文件放开 jest 全局
+    // 测试文件放开 jest 全局 + require (jest.mock 工厂模式)
     files: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
     languageOptions: {
       globals: {
@@ -31,6 +31,10 @@ module.exports = defineConfig([
         beforeAll: 'readonly',
         afterAll: 'readonly',
       },
+    },
+    rules: {
+      // jest.mock 工厂函数内 require() 是 RN 测试标准模式
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 ]);
