@@ -194,7 +194,12 @@ if [ "$1" = "status" ]; then
     curl -s -m 3 "http://localhost:$PORT/health" 2>/dev/null && echo "" || echo "健康检查: 不可达"
     curl -s -m 3 "http://localhost:$PORT/api/v1/status" 2>/dev/null | python3 -m json.tool 2>/dev/null || echo "状态API: 不可达"
     echo "日志最后10行:"
-    tail -10 "$REPO_DIR/gateway.log" 2>/dev/null || echo "(无日志)"
+    if [ "$SYSTEMD_MODE" = true ]; then
+        # F383: systemd模式unit输出进journal, 无gateway.log, 裸tail文件恒空误导
+        journalctl -u tianlian-gateway -n 10 --no-pager 2>/dev/null || echo "(journalctl不可用)"
+    else
+        tail -10 "$REPO_DIR/gateway.log" 2>/dev/null || echo "(无日志)"
+    fi
     exit 0
 fi
 
@@ -394,6 +399,11 @@ if [ "$HEALTH_OK" = true ] && kill -0 "$NEW_PID" 2>/dev/null; then
     fi
 else
     echo "❌ 启动失败, 日志最后20行:"
-    tail -20 gateway.log
+    if [ "$SYSTEMD_MODE" = true ]; then
+        # F383: systemd模式启动走systemctl无nohup写盘, gateway.log不存在/陈旧
+        journalctl -u tianlian-gateway -n 20 --no-pager 2>/dev/null || echo "(journalctl不可用)"
+    else
+        tail -20 gateway.log
+    fi
     exit 1
 fi
