@@ -50,6 +50,8 @@ jobs:
       - run: npm run check:asset-size
       # eas.json构建期env↔.env.example模板对账守卫(F342): EXPO_PUBLIC_*键登记+值级对账, 防云端/本地构建内联env静默分叉
       - run: npm run check:eas-env
+      # 跨平台身份一致性守卫(F354): android.package↔ios.bundleIdentifier, 防双平台身份分叉致推送/OAuth/深度链接静默失效
+      - run: npm run check:app-identity
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint

@@ -84,8 +84,10 @@ asset-size-check: ## assets体积上限守卫 (单文件≤512KB/总≤2048KB, �
 
 eas-env-check: ## eas.json构建期env↔.env.example模板对账守卫 (EXPO_PUBLIC_*键登记+值级对账, 委托 npm run check:eas-env, F342)
 	npm run check:eas-env
+app-identity-check: ## 跨平台身份一致性守卫 (android.package↔ios.bundleIdentifier, 委托 npm run check:app-identity, F354)
+	npm run check:app-identity
 
-check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check easignore-secrets-check unused-assets-check asset-size-check eas-env-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + 品牌色一致 + 构建序号配对 + 敏感排除超集 + 死资产对账 + 体积上限 + EAS env对账 + tsc + eslint + jest)
+check: version-check alias-check node-check guard-wiring-check env-defaults-check unused-deps-check ci-parity-check engine-strict-check app-version-source-check expo-plugins-check updates-channel-check brand-color-check build-number-parity-check easignore-secrets-check unused-assets-check asset-size-check eas-env-check app-identity-check build lint test ## 全量检查 (版本同步 + 别名同步 + node基线同步 + 守卫接线同步 + 死依赖 + CI同构 + 版本号成对 + 插件依赖成对 + OTA通道成对 + 品牌色一致 + 构建序号配对 + 敏感排除超集 + 死资产对账 + 体积上限 + EAS env对账 + 跨平台身份一致 + tsc + eslint + jest)
 
 ci-local: check doctor export-android export-ios bundle-size ## 模拟 CI 全流程 (检查 + doctor体检 + 双平台导出 + 体积门控)
 

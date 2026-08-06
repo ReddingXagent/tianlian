@@ -50,7 +50,7 @@ npx expo export --platform ios   # 产物构建验证
 
 `make ci-local` 模拟 CI 全流程 = `make check`（守卫链 + tsc + lint + jest）+ doctor 体检 + 双平台导出 + bundle 体积门控：
 
-**构建守卫族十八枚**（`make check` 内 17 个 check:* 脚本 + bundle-size；每枚均三源接线 package.json↔Makefile↔CI，由 F250 guard-wiring 自动对账，ci-parity 24 门控）：
+**构建守卫族十九枚**（`make check` 内 18 个 check:* 脚本 + bundle-size；每枚均三源接线 package.json↔Makefile↔CI，由 F250 guard-wiring 自动对账，ci-parity 25 门控）：
 
 | 守卫 | 对账语义 | 编号 |
 |------|---------|------|
@@ -71,6 +71,7 @@ npx expo export --platform ios   # 产物构建验证
 | check:unused-assets | assets 磁盘 ↔ 引用源反向对账（死资产） | F327 |
 | check:asset-size | assets 体积上限（单文件≤512KB / 总≤2048KB） | F334 |
 | check:eas-env | eas.json 构建期 env ↔ .env.example 模板（EXPO_PUBLIC_* 键登记 + 值级，基线空=守卫先行） | F342 |
+| check:app-identity | android.package ↔ ios.bundleIdentifier 跨平台身份一致性 | F354 |
 | scripts/bundle-size.sh | JS Bundle 体积门控（双平台齐验，缺目录 FAIL） | F212 |
 
 另有 jest 层 appConfig.test.ts 构建配置回归守卫（platforms 限定/plugins↔deps/应用标识双源/资产存在断言，F244 移植形态）。
