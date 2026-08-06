@@ -73,7 +73,13 @@ wxml-handlers-check: ## WXML事件绑定↔JS方法双源对账 (绑定名↔Pag
 wxs-isolation-check: ## wxs视图层隔离双向对账 (wxs实体↔<wxs src>声明双向+js禁引用, F305; 委托 npm run check:wxs-isolation)
 	npm run check:wxs-isolation
 
-check: lint auth-keys-check asset-refs-check css-vars-check css-classes-check dead-handlers-check event-usage-check native-attrs-check json-keys-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check prop-usage-check request-source-check setdata-payload-check setdata-perf-check storage-keys-check wxml-handlers-check wxs-isolation-check test ## 完整质量检查 (eslint + auth键对账 + 静态资源对账 + CSS变量死代码 + CSS死类对账 + 死handler对账 + 组件事件对账 + 原生组件属性对账 + JSON配置键对账 + 导航对账 + 孤儿组件对账 + 孤儿页对账 + 隐私API对账 + 组件属性对账 + 请求单一源对账 + setData负载守卫 + setData性能对账 + storage键对账 + 绑定对账 + wxs隔离对账 + jest)
+node-check: ## node版本双源漂移守卫 (engines.node vs CI node-version, F237同型跨仓跟进F420; 委托 npm run check:node)
+	npm run check:node
+
+engine-strict-check: ## engines.node执行力双源漂移守卫 (.npmrc engine-strict ↔ engines.node成对, F218同型跨仓跟进F420; 委托 npm run check:engine-strict)
+	npm run check:engine-strict
+
+check: lint auth-keys-check asset-refs-check css-vars-check css-classes-check dead-handlers-check event-usage-check native-attrs-check json-keys-check nav-targets-check orphan-components-check orphan-pages-check permission-apis-check prop-usage-check request-source-check setdata-payload-check setdata-perf-check storage-keys-check wxml-handlers-check wxs-isolation-check node-check engine-strict-check test ## 完整质量检查 (eslint + auth键对账 + 静态资源对账 + CSS变量死代码 + CSS死类对账 + 死handler对账 + 组件事件对账 + 原生组件属性对账 + JSON配置键对账 + 导航对账 + 孤儿组件对账 + 孤儿页对账 + 隐私API对账 + 组件属性对账 + 请求单一源对账 + setData负载守卫 + setData性能对账 + storage键对账 + 绑定对账 + wxs隔离对账 + node版本双源守卫 + engines执行力守卫 + jest)
 
 ci-local: check ## 本地模拟 CI 流程 (check)
 

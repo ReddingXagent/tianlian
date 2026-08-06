@@ -27,7 +27,9 @@
     "deploy:check": "node scripts/deploy.js --check",
     "lint": "eslint . --max-warnings 0",
     "lint:ci": "node scripts/lint-ci.js",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "check:node": "bash scripts/check-node-version.sh",
+    "check:engine-strict": "bash scripts/check-engine-strict.sh"
   },
   "jest": {
     "testEnvironment": "node",
@@ -57,5 +59,8 @@
     "eslint": "^10.8.0",
     "jest": "^29.7.0",
     "miniprogram-ci": "^2.1.31"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
