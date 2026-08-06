@@ -155,6 +155,8 @@ const LoginScreen: React.FC = () => {
                     }}
                     keyboardType="number-pad"
                     maxLength={6}
+                    autoComplete="sms-otp"
+                    textContentType="oneTimeCode"
                     editable={!loading}
                   />
                   <TouchableOpacity
