@@ -44,7 +44,9 @@ export function setCache<T>(key: string, data: T, ttl: number = DEFAULT_TTL): vo
         oldestKey = k;
       }
     }
-    if (oldestKey) store.delete(oldestKey);
+    // oldestKey 必非空: 进入本块时 store.size>=MAX_ENTRIES(50)>=1, 循环至少迭代一次,
+    // 首个条目 lastAccess(=++lruSeq, 恒有限) < Infinity 必成立 → 死分支守卫已消除(F349, F343同族)
+    store.delete(oldestKey);
   }
 
   store.set(key, { data, expireAt: Date.now() + ttl, lastAccess: ++lruSeq });
