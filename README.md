@@ -45,7 +45,7 @@ npx expo export --platform ios   # 产物构建验证
 ```
 
 - 测试覆盖率（`src/**` 全量口径，F248 起；排除 `*.d.ts` 与 `types/`）：Statements 84.24% | Branches 70.93% | Functions 79.6% | Lines 85.91%
-- ⚠️ 尚未配置 coverageThreshold（高优卡在办），门限棘轮随后补
+- coverageThreshold 已配置（F348 落地高优卡）：global statements 84 / branches 70 / functions 79 / lines 85，取实测 84.24/70.93/79.6/85.91 下取整（station/user-app 同款下取整惯例），门限棘轮只升不降（F207）
 - components / store 层 100% 覆盖；screens 层 15 个页面均已补测试（F17 ✅ 已解决）
 
 `make ci-local` 模拟 CI 全流程 = `make check`（守卫链 + tsc + lint + jest）+ doctor 体检 + 双平台导出 + bundle 体积门控：
