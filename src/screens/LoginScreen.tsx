@@ -109,7 +109,7 @@ const LoginScreen: React.FC = () => {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.appName}>天链充电</Text>

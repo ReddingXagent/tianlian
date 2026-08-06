@@ -140,6 +140,7 @@ const HomeScreen: React.FC = () => {
             />
           }
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
         >
           {/* 站点地图(模拟): MapView自组件落地起零挂载(F228同款死代码),
               此前此处仅静态占位文案——挂载后可视化站点分布/可用状态, 点marker直达详情 */}

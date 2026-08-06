@@ -103,6 +103,7 @@ const ScanScreen: React.FC = () => {
       style={styles.container}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
     >
       {/* 扫码区域: 未开启时为入口, 开启后为相机取景框 */}
       <View style={styles.scannerFrame}>
