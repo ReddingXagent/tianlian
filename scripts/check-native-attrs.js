@@ -10,7 +10,8 @@
  * <input> (3文件使用, type/confirm-type 拼错=键盘形态静默回落); F350
  * 扩域纳入 <text> (14文件187处使用, space/user-select/decode 拼错=空白
  * 符转义/长按复制能力静默失效) 与 <view> (14文件184处使用, hover-* 拼错=
- * 触摸反馈静默无效果)。textarea/cover-image/scroll-view 基线零使用, 活性
+ * 触摸反馈静默无效果) 与 <map> (1文件1处使用, latitude/longitude/show-location
+ * 等拼错=地图能力静默失效零报错)。textarea/cover-image/scroll-view 基线零使用, 活性
  * 断言(标签数≥1)不容忍, 待出现使用再入簿。与 F323
  * (自定义组件属性↔properties声明对账)互补: F323 管组件实体标签, 原生内置
  * 标签的属性域由本守卫静态断言(F295族静默no-op最恶漂移)。
@@ -27,10 +28,10 @@
  *      (hover-class/placeholder等自由文本域)。
  *
  * 活性断言(F306/F308/F311形态, 防豁免吞断言): wxml扫描数 ≥1 + 各登记标签
- * 数 ≥1 (基线 image 2 / button 15 / input 3 / text 187 / view 198) +
+ * 数 ≥1 (基线 image 2 / button 15 / input 3 / text 187 / view 198 / map 1) +
  * image mode 声明点 ≥1 (基线 2; button/input/text/view 的枚举位点静态
  * 可为零——open-type/space 基线未使用, 值域在出现时自动激活, 不设位点
- * 下限以免脆断)。
+ * 下限以免脆断) 。map 无典型枚举属性同理不设位点下限。
  * 缺输入(wxml为零) / 任一登记标签数为零(提取器失效信号) / 任一断言失败
  * -> exit 1 (F212)。
  *
@@ -104,6 +105,16 @@ const NATIVE_TAGS = {
     attrs: new Set([
       'hover-class', 'hover-start-time', 'hover-stay-time', 'hover-stop-propagation',
       'aria-role', 'aria-label',
+    ]),
+    enums: {},
+  },
+  map: {
+    attrs: new Set([
+      'longitude', 'latitude', 'scale', 'markers', 'polyline', 'circles', 'controls',
+      'include-points', 'show-location', 'enable-3D', 'show-compass', 'enable-zoom',
+      'enable-scroll', 'enable-rotate', 'enable-overlooking', 'enable-satellite',
+      'enable-traffic', 'setting', 'subkey', 'layer-style', 'polygon', 'enable-poi',
+      'enable-building', 'aria-role', 'aria-label',
     ]),
     enums: {},
   },
