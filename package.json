@@ -31,7 +31,8 @@
     "check:unused-assets": "bash scripts/check-unused-assets.sh",
     "check:asset-size": "bash scripts/check-asset-size.sh",
     "check:eas-env": "bash scripts/check-eas-env.sh",
-    "check:app-identity": "bash scripts/check-app-identity.sh"
+    "check:app-identity": "bash scripts/check-app-identity.sh",
+    "check:apk-direct-distribution": "bash scripts/check-apk-direct-distribution.sh"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.0",

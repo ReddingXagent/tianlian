@@ -52,6 +52,8 @@ jobs:
       - run: npm run check:eas-env
       # 跨平台身份一致性守卫(F354): android.package↔ios.bundleIdentifier, 防双平台身份分叉致推送/OAuth/深度链接静默失效
       - run: npm run check:app-identity
+      # APK直装分发形态成对守卫(F377): preview distribution:internal↔android.buildType:apk, F25/F33决策门禁, 防AAB产物致二维码直装静默失效
+      - run: npm run check:apk-direct-distribution
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint

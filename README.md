@@ -72,6 +72,7 @@ npx expo export --platform ios   # 产物构建验证
 | check:asset-size | assets 体积上限（单文件≤512KB / 总≤2048KB） | F334 |
 | check:eas-env | eas.json 构建期 env ↔ .env.example 模板（EXPO_PUBLIC_* 键登记 + 值级，基线空=守卫先行） | F342 |
 | check:app-identity | android.package ↔ ios.bundleIdentifier 跨平台身份一致性 | F354 |
+| check:apk-direct-distribution | preview distribution:internal ↔ android.buildType:apk APK直装分发形态成对（F25/F33 决策门禁） | F377 |
 | scripts/bundle-size.sh | JS Bundle 体积门控（双平台齐验，缺目录 FAIL） | F212 |
 
 另有 jest 层 appConfig.test.ts 构建配置回归守卫（platforms 限定/plugins↔deps/应用标识双源/资产存在断言，F244 移植形态）。
