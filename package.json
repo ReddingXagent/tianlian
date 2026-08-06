@@ -12,7 +12,8 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:ci": "eslint . --max-warnings=54",
-    "deploy:check": "node scripts/deploy-check.js"
+    "deploy:check": "node scripts/deploy-check.js",
+    "check:engine-strict": "bash scripts/check-engine-strict.sh"
   },
   "dependencies": {
     "@react-native-community/netinfo": "11.4.1",
@@ -74,5 +75,8 @@
       }
     }
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
 }
