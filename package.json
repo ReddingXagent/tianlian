@@ -5,6 +5,7 @@
   "scripts": {
     "check": "node scripts/check-mp-structure.js",
     "check:auth-keys": "node scripts/check-auth-keys.js",
+    "check:css-vars": "node scripts/check-css-vars.js",
     "check:dead-handlers": "node scripts/check-dead-handlers.js",
     "check:event-usage": "node scripts/check-event-usage.js",
     "check:native-attrs": "node scripts/check-native-attrs.js",

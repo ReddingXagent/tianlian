@@ -6,7 +6,6 @@ page {
   --primary-dark: #06AD56;
   --primary-light: #E8F8EF;
   --danger: #FA5151;
-  --warning: #FFC300;
   --text-primary: #333333;
   --text-secondary: #666666;
   --text-muted: #999999;
