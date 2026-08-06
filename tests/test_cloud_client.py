@@ -1,5 +1,6 @@
 """CloudClient 单元测试 — 边缘网关→云端对接验证"""
 
+import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -100,8 +101,9 @@ class TestCloudTelemetry:
         assert ok is True
 
         # 验证payload格式 (V3对齐: pod_id + records)
+        # F-gzip 后统一走 content= bytes (小 payload 明文 JSON, 大 payload gzip)
         call_args = cloud_client._client.post.call_args
-        payload = call_args.kwargs["json"]
+        payload = json.loads(call_args.kwargs["content"])
         assert payload["pod_id"] == "GW-TEST"
         assert len(payload["records"]) == 2
         assert payload["records"][0]["device_id"] == "CHG-001"

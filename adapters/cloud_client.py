@@ -12,6 +12,8 @@ API对齐日期: 2026-07-06 (对齐云端334端点真实OpenAPI schema)
 
 import asyncio
 import contextlib
+import gzip
+import json
 import logging
 from typing import TYPE_CHECKING, Optional
 
@@ -55,6 +57,7 @@ class CloudClient:
         self._token: str | None = None
         self._csrf_token: str = ""
         self._registered = False
+        self._gzip_disabled = False  # F-gzip 自适应: 服务端拒绝压缩后本会话关闭
         self._heartbeat_task: asyncio.Task | None = None
         self._sync_task: asyncio.Task | None = None
         self._client: httpx.AsyncClient | None = None
@@ -292,22 +295,47 @@ class CloudClient:
 
     async def _post_with_retry(self, path: str, payload: dict,
                                  op_name: str) -> bool:
-        """带指数退避重试的POST请求"""
+        """带指数退避重试的POST请求
+
+        F-gzip: payload 序列化后 >= config.compress_threshold 且开启压缩时，
+        发送 gzip 压缩 body + Content-Encoding: gzip；若服务端以 4xx 拒绝
+        压缩请求（如真云暂不支持 gzip 请求体），本会话永久关闭压缩并
+        立即明文重试一次（自适应降级，无需改配置）。
+        """
         last_error = None
-        headers = {}
+        headers = {"Content-Type": "application/json"}
         if self._token:
             headers["Authorization"] = f"Bearer {self._token}"
         if hasattr(self, "_csrf_token") and self._csrf_token:
             headers["X-CSRF-Token"] = self._csrf_token
             headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
             headers["Referer"] = self.config.base_url + "/"
+
+        body = json.dumps(payload).encode("utf-8")
+        use_gzip = (
+            getattr(self.config, "compress_enabled", False)
+            and not self._gzip_disabled
+            and len(body) >= getattr(self.config, "compress_threshold", 1024)
+        )
+        if use_gzip:
+            headers["Content-Encoding"] = "gzip"
+            body = gzip.compress(body)
+
         for attempt in range(self.MAX_RETRIES):
             try:
-                r = await self._client.post(path, json=payload, headers=headers)
+                r = await self._client.post(path, content=body, headers=headers)
                 if r.status_code == 200:
                     return True
-                # 4xx 不重试（客户端错误）
+                # 4xx 不重试（客户端错误）；例外: gzip 被拒 → 关压缩立即明文重试
                 if 400 <= r.status_code < 500:
+                    if use_gzip:
+                        logger.warning("%s: gzip rejected (%d), disabling compression, retry plain",
+                                       op_name, r.status_code)
+                        self._gzip_disabled = True
+                        use_gzip = False
+                        headers.pop("Content-Encoding", None)
+                        body = json.dumps(payload).encode("utf-8")
+                        continue
                     logger.warning("%s rejected: %d %s", op_name, r.status_code, r.text[:200])
                     return False
                 # 5xx 可重试
