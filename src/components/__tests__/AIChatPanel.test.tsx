@@ -10,9 +10,11 @@ jest.mock('../../services/ai', () => ({
   chat: (...args: unknown[]) => (mockChat as jest.Mock)(...args),
 }));
 
-// 构造一条助手消息
+// 构造一条助手消息(id用自增序号: 原content.length形态同长消息id碰撞→React duplicate key警告, F444修)
+let msgSeq = 0;
 function assistantMsg(content: string): ChatMessage {
-  return { id: `a-${content.length}`, role: 'assistant', content, timestamp: 1 };
+  msgSeq += 1;
+  return { id: `a-${msgSeq}`, role: 'assistant', content, timestamp: 1 };
 }
 
 describe('AIChatPanel', () => {
