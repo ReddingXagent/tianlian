@@ -42,7 +42,15 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/__tests__/"
-    ]
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 85,
+        "functions": 98,
+        "lines": 98,
+        "statements": 98
+      }
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
