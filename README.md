@@ -55,6 +55,7 @@ src/
   services/api.ts        # axios 实例 + 全部 API 封装（token 拦截器自动附加）
   store/                 # Zustand stores
   types/                 # 共享类型定义
+  utils/                 # format.ts（日期/距离/金额/电量单一源）+ scanCode.ts（扫码解析）
 __mocks__/               # expo-secure-store / expo-status-bar 的 jest mock
 jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 ```
@@ -74,11 +75,28 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 - **全局错误边界**：`src/components/ErrorBoundary.tsx` 包裹根组件，捕获 React 渲染异常并展示友好降级 UI（c7cdd76）。
 - **AppNavigator 测试**：导航逻辑（登录态切换 + Tab 路由）已补测试，覆盖率从 0% 提升至 76.92%（709cd04）。
 
+## 静态守卫族
+
+本仓通过 jest 门禁内置 11 枚静态守卫（`src/__tests__/*Guards.test.ts`），覆盖 tsc 盲区的移动端 UX 缺陷模式。新增守卫自动接入门禁（jest 全量跑即入门），无需 CI/Makefile 接线。
+
+| 守卫 | 维度 | 不变量 |
+|------|------|--------|
+| mobileKeyboardGuards | 键盘族① | Modal×TextInput → KeyboardAvoidingView 包裹 + onRequestClose 声明 |
+| scrollKeyboardGuards | 键盘族② | 非 Modal 屏 TextInput×ScrollView → keyboardShouldPersistTaps 声明 |
+| plainKeyboardGuards | 键盘族③ | 非 Modal/非滚动容器层 TextInput → KeyboardAvoidingView 包裹 |
+| headerlessSafeAreaGuards | 安全区 | headerShown:false 导航器 Screen → SafeAreaView 消费 |
+| listKeyGuards | 列表族① | FlatList/SectionList → keyExtractor 声明 |
+| listExtraDataGuards | 列表族② | FlatList/SectionList renderItem 闭包捕获 useState → extraData 声明 |
+| touchTargetGuards | 触控族 | Pressable/TouchableOpacity 固定尺寸 → height/width ≥ 44pt |
+| imageErrorGuards | 图片族 | Image source=远程/变量 → onError 声明 |
+| inputMaxLengthGuards | 输入族① | TextInput keyboardType=数字键盘 → maxLength 声明 |
+| passwordAutofillGuards | 输入族② | TextInput secureTextEntry → 双平台 autofill 声明 |
+| otpAutofillGuards | 输入族③ | TextInput 数字键盘×短 maxLength → sms-otp/oneTimeCode 双平台声明 |
+
 ## 已知限制
 
 - Web 导出（`expo export --platform web`）未验证，web 部署待定（同 ops/station F24/F34）。
 - EAS Update 渠道与 Expo 账号未配置，OTA 升级通道待开通（deploy:check 门控跟踪）。
-- 12 个 screen 中 8 个有测试（Home/Login/Coupon/OrderList/Profile/StationDetail/Wallet + AppNavigator 导航），剩余 4 个（Scan/Charging/OrderDetail/Payment/Vehicle）为后续补强重点。
 
 ## 关联仓库
 

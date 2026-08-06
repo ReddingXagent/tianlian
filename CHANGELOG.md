@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Changed
+- README 文档补全：新增静态守卫族章节（11 枚守卫全清单表格化，对齐 ops-app F186 门控章节惯例）+ 项目结构树补 utils/ 目录 + 删失实的「12 个 screen 中 8 个有测试」（实际 12/12 全覆盖）。（F363，文档维度，白天降级档）
 - lint:ci 阈值棘轮收紧 60→54（F361，lint维度，白天降级档）— 与F348 coverageThreshold同款棘轮语义：eslint --max-warnings 原设60（余量6），实测全仓54warn（37 no-require-imports测试文件jest require+7 react-hooks/set-state-in-effect+6 react-hooks/exhaustive-deps+2 import/first+2 unused eslint-disable），阈值下取整至54（==阈值通过，>54即FAIL）；变异验证 max-warnings=53 → exit 1 FAIL（ESLint found too many warnings maximum: 53），棘轮活性确认；warning分布摸底：no-require-imports全来自测试文件jest mock加载（RN生态惯例不改）、set-state-in-effect是effect内同步setState（7处hooks/screens，功能性正确仅性能建议不改）、exhaustive-deps是hooks依赖缺失（6处，留夜间档评估是否修复降warn）；README lint棘轮行同步≤60→≤54
 
 ### Added
