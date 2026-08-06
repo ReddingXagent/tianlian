@@ -63,7 +63,7 @@ const OrderListScreen: React.FC = () => {
     const timeText = formatShortDateTime(item.startTime);
 
     return (
-      <TouchableOpacity
+      <TouchableOpacity accessibilityRole="button"
         style={styles.orderCard}
         onPress={() => handleOrderPress(item)}
         activeOpacity={0.7}
@@ -117,7 +117,7 @@ const OrderListScreen: React.FC = () => {
       {/* 筛选栏 */}
       <View style={styles.filterRow}>
         {ORDER_STATUS_FILTERS.map((filter) => (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             key={filter.key}
             style={[styles.filterBtn, activeFilter === filter.key && styles.filterBtnActive]}
             onPress={() => setActiveFilter(filter.key)}

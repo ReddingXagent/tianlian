@@ -77,7 +77,7 @@ const MapView: React.FC<MapViewProps> = ({
           // Distribute stations across the map with some pseudo-random positioning
           const pos = getStationPosition(index, stations.length);
           return (
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               key={station.id}
               style={[
                 styles.marker,

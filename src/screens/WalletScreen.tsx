@@ -163,7 +163,7 @@ const WalletScreen: React.FC = () => {
         <Text style={styles.balanceValue}>
           ¥{formatMoney(user?.balance || 0)}
         </Text>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={[styles.rechargeBtn, recharging && styles.rechargeBtnDisabled]}
           onPress={handleRecharge}
           disabled={recharging}

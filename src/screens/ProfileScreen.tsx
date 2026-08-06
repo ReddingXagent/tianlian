@@ -116,7 +116,7 @@ const ProfileScreen: React.FC = () => {
       {/* 功能菜单 */}
       <View style={styles.menuCard}>
         {MENU_ITEMS.map((item, index) => (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             key={item.key}
             style={styles.menuItem}
             onPress={() => navigation.navigate(item.screen)}
@@ -145,7 +145,7 @@ const ProfileScreen: React.FC = () => {
       </View>
 
       {/* 退出登录 */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+      <TouchableOpacity accessibilityRole="button" style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
         <Text style={styles.logoutText}>退出登录</Text>
       </TouchableOpacity>
 

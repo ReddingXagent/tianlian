@@ -151,14 +151,14 @@ const VehicleScreen: React.FC = () => {
       </View>
       <View style={styles.vehicleActions}>
         {!item.isDefault && (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.actionBtn}
             onPress={() => handleSetDefault(item)}
           >
             <Text style={styles.actionBtnText}>设为默认</Text>
           </TouchableOpacity>
         )}
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={[styles.actionBtn, styles.actionBtnDanger]}
           onPress={() => handleRemove(item)}
         >
@@ -210,7 +210,7 @@ const VehicleScreen: React.FC = () => {
       />
 
       {/* 添加按钮 */}
-      <TouchableOpacity
+      <TouchableOpacity accessibilityRole="button"
         style={styles.addBtn}
         onPress={() => setModalVisible(true)}
         activeOpacity={0.7}
@@ -272,6 +272,8 @@ const VehicleScreen: React.FC = () => {
             />
 
             <TouchableOpacity
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: isDefault }}
               style={styles.defaultCheck}
               onPress={() => setIsDefault(!isDefault)}
             >
@@ -282,7 +284,7 @@ const VehicleScreen: React.FC = () => {
             </TouchableOpacity>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={styles.modalCancelBtn}
                 onPress={() => {
                   setModalVisible(false);
@@ -291,7 +293,7 @@ const VehicleScreen: React.FC = () => {
               >
                 <Text style={styles.modalCancelText}>取消</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={[styles.modalSaveBtn, saving && styles.modalSaveBtnDisabled]}
                 onPress={handleAdd}
                 disabled={saving}

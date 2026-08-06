@@ -85,7 +85,7 @@ const HomeScreen: React.FC = () => {
             returnKeyType="search"
             onSubmitEditing={handleSearch}
           />
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.searchBtn}
             onPress={handleSearch}
             activeOpacity={0.7}
@@ -96,7 +96,7 @@ const HomeScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
         {searchText.trim() ? (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.clearSearchBtn}
             onPress={() => {
               setSearchText('');

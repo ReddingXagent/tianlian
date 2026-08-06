@@ -38,7 +38,7 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
       <View style={styles.permissionBox} testID="camera-permission-box">
         <Text style={styles.permissionText}>需要相机权限才能扫码</Text>
         {permission.canAskAgain ? (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.permissionBtn}
             onPress={requestPermission}
             testID="camera-request-btn"
@@ -46,7 +46,7 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
             <Text style={styles.permissionBtnText}>授予权限</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.permissionBtn}
             onPress={() => Linking.openSettings()}
             testID="camera-settings-btn"
@@ -54,7 +54,7 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
             <Text style={styles.permissionBtnText}>去设置开启</Text>
           </TouchableOpacity>
         )}
-        <TouchableOpacity onPress={onClose} testID="camera-cancel-btn">
+        <TouchableOpacity accessibilityRole="button" onPress={onClose} testID="camera-cancel-btn">
           <Text style={styles.cancelText}>取消</Text>
         </TouchableOpacity>
       </View>
@@ -73,6 +73,8 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
         <Text style={styles.overlayHintText}>对准充电桩二维码</Text>
       </View>
       <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel="关闭扫码"
         style={styles.closeBtn}
         onPress={onClose}
         testID="camera-close-btn"

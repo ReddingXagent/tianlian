@@ -18,7 +18,7 @@ const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
   const hasAvailable = station.availableConnectors > 0;
 
   return (
-    <TouchableOpacity
+    <TouchableOpacity accessibilityRole="button"
       style={styles.card}
       onPress={() => onPress(station)}
       activeOpacity={0.7}

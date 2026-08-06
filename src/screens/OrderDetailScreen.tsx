@@ -160,12 +160,12 @@ const OrderDetailScreen: React.FC = () => {
 
       {/* 操作按钮 */}
       {order.status === 'charging' && (
-        <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelOrder} activeOpacity={0.7}>
+        <TouchableOpacity accessibilityRole="button" style={styles.cancelBtn} onPress={handleCancelOrder} activeOpacity={0.7}>
           <Text style={styles.cancelBtnText}>取消订单</Text>
         </TouchableOpacity>
       )}
       {order.paymentStatus === 'unpaid' && order.status !== 'charging' && (
-        <TouchableOpacity style={styles.payBtn} onPress={handlePay} activeOpacity={0.7}>
+        <TouchableOpacity accessibilityRole="button" style={styles.payBtn} onPress={handlePay} activeOpacity={0.7}>
           <Text style={styles.payBtnText}>去支付</Text>
         </TouchableOpacity>
       )}

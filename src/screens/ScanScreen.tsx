@@ -113,7 +113,7 @@ const ScanScreen: React.FC = () => {
             onClose={() => setCameraOpen(false)}
           />
         ) : (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.scannerBox}
             onPress={() => setCameraOpen(true)}
             activeOpacity={0.8}
@@ -146,7 +146,7 @@ const ScanScreen: React.FC = () => {
           returnKeyType="search"
           onSubmitEditing={handleScan}
         />
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={[styles.scanBtn, loading && styles.scanBtnDisabled]}
           onPress={handleScan}
           disabled={loading}
@@ -164,19 +164,19 @@ const ScanScreen: React.FC = () => {
       <View style={styles.quickContainer}>
         <Text style={styles.quickLabel}>快速输入:</Text>
         <View style={styles.quickRow}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.quickBtn}
             onPress={() => handleQuickInput('CH-001')}
           >
             <Text style={styles.quickBtnText}>CH-001</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.quickBtn}
             onPress={() => handleQuickInput('CH-002')}
           >
             <Text style={styles.quickBtnText}>CH-002</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.quickBtn}
             onPress={() => handleQuickInput('CH-003')}
           >
@@ -220,7 +220,7 @@ const ScanScreen: React.FC = () => {
           </View>
 
           {/* 开始充电按钮 */}
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[
               styles.startBtn,
               (lastResult.status !== 'idle' || starting) && styles.startBtnDisabled,

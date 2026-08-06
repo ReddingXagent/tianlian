@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <Text style={styles.message}>
             {this.state.error?.message || '应用遇到未知错误'}
           </Text>
-          <TouchableOpacity style={styles.button} onPress={this.handleReset}>
+          <TouchableOpacity accessibilityRole="button" style={styles.button} onPress={this.handleReset}>
             <Text style={styles.buttonText}>重试</Text>
           </TouchableOpacity>
         </View>

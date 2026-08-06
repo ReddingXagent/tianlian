@@ -34,8 +34,8 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 457 全绿（44 suites）✅ |
-| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 78 / branches 70 / functions 77 / lines 78（只升不降）；实测 78.83 / 70.38 / 77.58 / 78.64（457 tests，2026-08-06） |
+| 测试 | `npm run test:ci` | 468 全绿（45 suites）✅ |
+| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 78 / branches 70 / functions 77 / lines 78（只升不降）；实测 78.83 / 70.38 / 77.58 / 78.64（468 tests，2026-08-07） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤54 警告（`--max-warnings=54`，只降不升；当前 54） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（F25/F33 已决策清零 08-05：Expo 账号当前阶段不需要——测试走 Expo Go 扫码、内部分发走 APK 直装；OTA 延后到发布候选期再定，届时接账号须 app.json updates.url ↔ eas.json projectId 两侧同步，F302 守卫形态） |
 
@@ -77,7 +77,7 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 
 ## 静态守卫族
 
-本仓通过 jest 门禁内置 12 枚静态守卫（`src/__tests__/*Guards.test.ts`），覆盖 tsc 盲区的移动端 UX 缺陷模式。新增守卫自动接入门禁（jest 全量跑即入门），无需 CI/Makefile 接线。
+本仓通过 jest 门禁内置 13 枚静态守卫（`src/__tests__/*Guards.test.ts`），覆盖 tsc 盲区的移动端 UX 缺陷模式。新增守卫自动接入门禁（jest 全量跑即入门），无需 CI/Makefile 接线。
 
 | 守卫 | 维度 | 不变量 |
 |------|------|--------|
@@ -93,6 +93,7 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 | inputMaxLengthGuards | 输入族① | TextInput keyboardType=数字键盘 → maxLength 声明 |
 | passwordAutofillGuards | 输入族② | TextInput secureTextEntry → 双平台 autofill 声明 |
 | otpAutofillGuards | 输入族③ | TextInput 数字键盘×短 maxLength → sms-otp/oneTimeCode 双平台声明 |
+| accessibilityRoleGuards | accessibility族① | 带 onPress 的 Pressable/TouchableOpacity → accessibilityRole 声明（读屏语义） |
 
 ## 已知限制
 

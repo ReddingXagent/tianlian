@@ -159,7 +159,7 @@ const LoginScreen: React.FC = () => {
                     textContentType="oneTimeCode"
                     editable={!loading}
                   />
-                  <TouchableOpacity
+                  <TouchableOpacity accessibilityRole="button"
                     style={[
                       styles.codeBtn,
                       (countdown > 0 || sendingCode) && styles.codeBtnDisabled,
@@ -198,7 +198,7 @@ const LoginScreen: React.FC = () => {
               </View>
             )}
 
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={[styles.loginButton, loading && styles.loginButtonDisabled]}
               onPress={handleLogin}
               disabled={loading}
@@ -211,7 +211,7 @@ const LoginScreen: React.FC = () => {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.modeSwitch}
               onPress={() => {
                 setLoginMode(loginMode === 'code' ? 'password' : 'code');

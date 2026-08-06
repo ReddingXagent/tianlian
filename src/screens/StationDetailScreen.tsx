@@ -179,7 +179,7 @@ const StationDetailScreen: React.FC = () => {
       </View>
 
       {/* 导航按钮 */}
-      <TouchableOpacity style={styles.navButton} onPress={handleNavigate} activeOpacity={0.7}>
+      <TouchableOpacity accessibilityRole="button" style={styles.navButton} onPress={handleNavigate} activeOpacity={0.7}>
         <Text style={styles.navButtonIcon}>🗺️</Text>
         <Text style={styles.navButtonText}>导航到这里</Text>
       </TouchableOpacity>
@@ -206,7 +206,7 @@ const StationDetailScreen: React.FC = () => {
         <EmptyState icon="🔌" title="暂无充电桩" message="该站点暂无充电桩" />
       ) : (
         chargers.map((charger) => (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             key={charger.id}
             style={styles.chargerCard}
             onPress={() => handleChargerPress(charger)}
