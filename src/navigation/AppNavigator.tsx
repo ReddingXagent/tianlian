@@ -118,7 +118,7 @@ export const AppNavigator: React.FC = () => {
 
   React.useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
   if (isLoading) {
     return (

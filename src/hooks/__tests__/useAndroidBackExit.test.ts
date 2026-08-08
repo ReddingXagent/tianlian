@@ -16,7 +16,6 @@ function makeNavigation({ tabIndex = 0, parentIndex = 0 }: NavOptions = {}) {
     getState: () => ({ index: tabIndex }),
     navigate,
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return { navigation: navigation as any, navigate };
 }
 
@@ -70,7 +69,6 @@ describe('useAndroidBackExit (Android硬件返回键治理)', () => {
       getState: () => undefined,
       navigate: jest.fn(),
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     renderHook(() => useAndroidBackExit(navigation as any));
     expect(backCb!()).toBe(false);
   });
