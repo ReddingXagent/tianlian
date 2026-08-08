@@ -98,6 +98,16 @@ describe('stationStore', () => {
       expect(state.error).toBe('网络错误');
     });
 
+    it('should use fallback message when non-Error is thrown', async () => {
+      (stationApi.getList as jest.Mock).mockRejectedValue('connection refused');
+
+      await useStationStore.getState().fetchStations();
+
+      const state = useStationStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('获取站点列表失败');
+    });
+
     it('should set loading to true while fetching', async () => {
       (stationApi.getList as jest.Mock).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
@@ -118,6 +128,26 @@ describe('stationStore', () => {
       expect(useStationStore.getState().refreshing).toBe(false);
       expect(useStationStore.getState().stations.length).toBe(2);
     });
+
+    it('should set error on refresh failure', async () => {
+      (stationApi.getList as jest.Mock).mockRejectedValue(new Error('刷新失败'));
+
+      await useStationStore.getState().refreshStations();
+
+      const state = useStationStore.getState();
+      expect(state.refreshing).toBe(false);
+      expect(state.error).toBe('刷新失败');
+    });
+
+    it('should use fallback message when non-Error is thrown on refresh', async () => {
+      (stationApi.getList as jest.Mock).mockRejectedValue('network down');
+
+      await useStationStore.getState().refreshStations();
+
+      const state = useStationStore.getState();
+      expect(state.refreshing).toBe(false);
+      expect(state.error).toBe('刷新站点列表失败');
+    });
   });
 
   describe('fetchStationDetail', () => {
@@ -129,6 +159,26 @@ describe('stationStore', () => {
       expect(stationApi.getDetail).toHaveBeenCalledWith(1);
       expect(useStationStore.getState().selectedStation).toEqual(mockStations[0]);
       expect(useStationStore.getState().loading).toBe(false);
+    });
+
+    it('should set error on detail failure', async () => {
+      (stationApi.getDetail as jest.Mock).mockRejectedValue(new Error('详情不可用'));
+
+      await useStationStore.getState().fetchStationDetail(1);
+
+      const state = useStationStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('详情不可用');
+    });
+
+    it('should use fallback message when non-Error thrown on detail', async () => {
+      (stationApi.getDetail as jest.Mock).mockRejectedValue(404);
+
+      await useStationStore.getState().fetchStationDetail(1);
+
+      const state = useStationStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('获取站点详情失败');
     });
   });
 
@@ -145,6 +195,22 @@ describe('stationStore', () => {
       expect(stationApi.getChargers).toHaveBeenCalledWith(1);
       expect(useStationStore.getState().chargers).toEqual(mockChargers);
     });
+
+    it('should set error on chargers failure', async () => {
+      (stationApi.getChargers as jest.Mock).mockRejectedValue(new Error('桩数据失败'));
+
+      await useStationStore.getState().fetchChargers(1);
+
+      expect(useStationStore.getState().error).toBe('桩数据失败');
+    });
+
+    it('should use fallback message when non-Error thrown on chargers', async () => {
+      (stationApi.getChargers as jest.Mock).mockRejectedValue('timeout');
+
+      await useStationStore.getState().fetchChargers(1);
+
+      expect(useStationStore.getState().error).toBe('获取充电桩列表失败');
+    });
   });
 
   describe('searchStations', () => {
@@ -155,6 +221,26 @@ describe('stationStore', () => {
 
       expect(stationApi.search).toHaveBeenCalledWith('中心站');
       expect(useStationStore.getState().stations.length).toBe(2);
+    });
+
+    it('should set error on search failure', async () => {
+      (stationApi.search as jest.Mock).mockRejectedValue(new Error('搜索超时'));
+
+      await useStationStore.getState().searchStations('test');
+
+      const state = useStationStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('搜索超时');
+    });
+
+    it('should use fallback message when non-Error thrown on search', async () => {
+      (stationApi.search as jest.Mock).mockRejectedValue({ code: 500 });
+
+      await useStationStore.getState().searchStations('test');
+
+      const state = useStationStore.getState();
+      expect(state.loading).toBe(false);
+      expect(state.error).toBe('搜索站点失败');
     });
   });
 
