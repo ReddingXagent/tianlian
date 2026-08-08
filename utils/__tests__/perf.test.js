@@ -244,10 +244,78 @@ describe('perf utilities', () => {
       expect(fetchFn).toHaveBeenCalledTimes(2);
       expect(result.list).toEqual([2]);
     });
+
+    test('isLoading 反映加载状态', async () => {
+      const fetchFn = jest.fn()
+        .mockResolvedValueOnce({ list: [1], total: 1 });
+      const pager = createPagination(fetchFn, { pageSize: 10 });
+
+      // 初始状态未加载
+      expect(pager.isLoading()).toBe(false);
+
+      // 开始加载
+      const p = pager.loadMore();
+      expect(pager.isLoading()).toBe(true);
+
+      await p;
+      expect(pager.isLoading()).toBe(false);
+    });
+
+    test('getLastFetchAt 返回加载时间戳', async () => {
+      const fetchFn = jest.fn()
+        .mockResolvedValueOnce({ list: [1], total: 1 });
+      const pager = createPagination(fetchFn, { pageSize: 10 });
+
+      // 初始无时间戳
+      expect(pager.getLastFetchAt()).toBe(0);
+
+      await pager.loadMore();
+      const ts = pager.getLastFetchAt();
+      expect(ts).toBeGreaterThan(0);
+    });
+
+    test('createPagination 不传 options 使用默认值', async () => {
+      const fetchFn = jest.fn()
+        .mockResolvedValueOnce({ list: [1, 2, 3], total: 3 });
+      // 不传 options 触发 options={} 和解构默认值
+      const pager = createPagination(fetchFn);
+      const result = await pager.loadMore();
+      expect(result.list).toEqual([1, 2, 3]);
+      // pageSize 默认 10，3 条数据 < 10 → hasMore=false
+      expect(pager.getHasMore()).toBe(false);
+    });
+
+    test('fetchFn 返回 res.data.list 格式', async () => {
+      // 覆盖 res.list || res.data?.list || [] 的第二分支
+      const fetchFn = jest.fn()
+        .mockResolvedValueOnce({ data: { list: [10, 20], total: 5 } });
+      const pager = createPagination(fetchFn, { pageSize: 10 });
+      const result = await pager.loadMore();
+      expect(result.list).toEqual([10, 20]);
+      expect(pager.getHasMore()).toBe(true);
+    });
+
+    test('fetchFn 返回空对象触发 || 后备值', async () => {
+      // 覆盖 res.list || res.data?.list || [] 的第三分支 (||[] 和 ||0)
+      const fetchFn = jest.fn()
+        .mockResolvedValueOnce({}); // 没有 list 也没有 data
+      const pager = createPagination(fetchFn, { pageSize: 10 });
+      const result = await pager.loadMore();
+      expect(result.list).toEqual([]); // || [] 后备
+      expect(pager.getHasMore()).toBe(false); // 0 条 < 0 total → false
+    });
   });
 
   // ========== prepareLazyImages ==========
   describe('prepareLazyImages', () => {
+    test('使用默认参数生成懒加载属性', () => {
+      // 不传 urlKey 和 placeholder 触发默认值
+      const items = [{ id: 1, coverUrl: 'https://example.com/1.jpg' }];
+      const result = prepareLazyImages(items);
+      expect(result[0].lazySrc).toBe('');
+      expect(result[0].realSrc).toBe('https://example.com/1.jpg');
+    });
+
     test('生成懒加载属性', () => {
       const items = [
         { id: 1, coverUrl: 'https://example.com/1.jpg' },
