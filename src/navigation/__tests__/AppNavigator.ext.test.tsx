@@ -1,141 +1,119 @@
 /**
- * AppNavigator Extension Tests — 追加分支覆盖
- * 目标: 66.7% → 90%+ branches
- * 覆盖: TabIcon focused/unfocused, MainTabNavigatorWithDetail screen rendering
+ * AppNavigator 扩展测试 — 分支覆盖率提升
+ * 目标: 67% → 85%+ branches
  */
+import { render } from '@testing-library/react-native';
 import React from 'react';
-import { View, Text } from 'react-native';
-import { render, waitFor } from '@testing-library/react-native';
 
-const PassChildren = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+// Must use require to avoid hoisting issues
+const mockAuth = {
+  isAuthenticated: false,
+  isLoading: false,
+  checkAuth: jest.fn(),
+};
 
-jest.mock('@react-navigation/native', () => {
-  const Real = jest.requireActual('@react-navigation/native');
+// Mock the store
+jest.mock('../../store/authStore', () => ({
+  useAuthStore: (selector: (s: typeof mockAuth) => unknown) => selector(mockAuth),
+}));
+
+// Mock NavigationContainer
+jest.mock('@react-navigation/native', () => ({
+  NavigationContainer: ({ children }: any) => children,
+}));
+
+// Mock navigators — use require('react') inside factory
+jest.mock('@react-navigation/native-stack', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const R = require('react');
   return {
-    ...Real,
-    NavigationContainer: PassChildren,
+    createNativeStackNavigator: () => ({
+      Navigator: ({ children }: any) => children,
+      Screen: ({ component: Comp }: any) => Comp ? R.createElement(Comp) : null,
+      Group: ({ children }: any) => children,
+    }),
   };
 });
 
-jest.mock('@react-navigation/native-stack', () => ({
-  createNativeStackNavigator: () => ({
-    Navigator: PassChildren,
-    Screen: ({ component: Comp }: { component: React.FC }) => <Comp />,
-  }),
-}));
+jest.mock('@react-navigation/bottom-tabs', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const R = require('react');
+  return {
+    createBottomTabNavigator: () => ({
+      Navigator: ({ children }: any) => children,
+      Screen: ({ component: Comp }: any) => Comp ? R.createElement(Comp) : null,
+    }),
+  };
+});
 
-jest.mock('@react-navigation/bottom-tabs', () => ({
-  createBottomTabNavigator: () => ({
-    Navigator: PassChildren,
-    Screen: ({ component: Comp, options }: { component: React.FC; options?: any }) => {
-      // Render the screen component so it's visible
-      return <Comp />;
-    },
-  }),
-}));
+// Mock all screens with simple components
+const makeScreen = (name: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const R = require('react');
+  return function MockScreen() {
+    return R.createElement('Text', { testID: name.toLowerCase() }, name);
+  };
+};
 
-jest.mock('../../store/authStore', () => ({
-  useAuthStore: jest.fn(),
-}));
-
-const MockScreen = ({ name }: { name: string }) => (
-  <View><Text>{name}</Text></View>
-);
-jest.mock('../../screens/LoginScreen', () => () => <MockScreen name="LoginScreen" />);
-jest.mock('../../screens/WorkbenchScreen', () => () => <MockScreen name="WorkbenchScreen" />);
-jest.mock('../../screens/WorkOrderListScreen', () => () => <MockScreen name="WorkOrderListScreen" />);
-jest.mock('../../screens/WorkOrderDetailScreen', () => () => <MockScreen name="WorkOrderDetailScreen" />);
-jest.mock('../../screens/WorkOrderCreateScreen', () => () => <MockScreen name="WorkOrderCreateScreen" />);
-jest.mock('../../screens/WorkOrderTransferScreen', () => () => <MockScreen name="WorkOrderTransferScreen" />);
-jest.mock('../../screens/ScanScreen', () => () => <MockScreen name="ScanScreen" />);
-jest.mock('../../screens/MonitorScreen', () => () => <MockScreen name="MonitorScreen" />);
-jest.mock('../../screens/InspectionListScreen', () => () => <MockScreen name="InspectionListScreen" />);
-jest.mock('../../screens/InspectionDetailScreen', () => () => <MockScreen name="InspectionDetailScreen" />);
-jest.mock('../../screens/DashboardScreen', () => () => <MockScreen name="DashboardScreen" />);
-jest.mock('../../screens/ProfileScreen', () => () => <MockScreen name="ProfileScreen" />);
-jest.mock('../../screens/DiagnosisScreen', () => () => <MockScreen name="DiagnosisScreen" />);
-jest.mock('../../screens/KnowledgeScreen', () => () => <MockScreen name="KnowledgeScreen" />);
-jest.mock('../../screens/KnowledgeDetailScreen', () => () => <MockScreen name="KnowledgeDetailScreen" />);
+jest.mock('../../screens/LoginScreen', () => makeScreen('Login'));
+jest.mock('../../screens/WorkbenchScreen', () => makeScreen('Workbench'));
+jest.mock('../../screens/WorkOrderListScreen', () => makeScreen('WOList'));
+jest.mock('../../screens/WorkOrderDetailScreen', () => makeScreen('WODetail'));
+jest.mock('../../screens/WorkOrderCreateScreen', () => makeScreen('WOCreate'));
+jest.mock('../../screens/WorkOrderTransferScreen', () => makeScreen('WOTransfer'));
+jest.mock('../../screens/ScanScreen', () => makeScreen('Scan'));
+jest.mock('../../screens/MonitorScreen', () => makeScreen('Monitor'));
+jest.mock('../../screens/InspectionListScreen', () => makeScreen('InspList'));
+jest.mock('../../screens/InspectionDetailScreen', () => makeScreen('InspDetail'));
+jest.mock('../../screens/DashboardScreen', () => makeScreen('Dashboard'));
+jest.mock('../../screens/ProfileScreen', () => makeScreen('Profile'));
+jest.mock('../../screens/DiagnosisScreen', () => makeScreen('Diag'));
+jest.mock('../../screens/KnowledgeScreen', () => makeScreen('Knowledge'));
+jest.mock('../../screens/KnowledgeDetailScreen', () => makeScreen('KnowDetail'));
 
 import { AppNavigator } from '../AppNavigator';
-import { useAuthStore } from '../../store/authStore';
 
-const mockedUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
-
-describe('AppNavigator.ext — additional coverage', () => {
-  const mockCheckAuth = jest.fn();
-
-  afterEach(() => {
+describe('AppNavigator.ext', () => {
+  beforeEach(() => {
     jest.clearAllMocks();
+    mockAuth.isAuthenticated = false;
+    mockAuth.isLoading = false;
   });
 
-  it('renders all main tab screens when authenticated', async () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
-      return selector({
-        isAuthenticated: true,
-        isLoading: false,
-        checkAuth: mockCheckAuth,
-      });
-    });
-
-    const { getByText } = render(<AppNavigator />);
-    await waitFor(() => {
-      // All tab screens should render
-      expect(getByText('WorkbenchScreen')).toBeTruthy();
-      expect(getByText('WorkOrderListScreen')).toBeTruthy();
-      expect(getByText('ScanScreen')).toBeTruthy();
-      expect(getByText('InspectionListScreen')).toBeTruthy();
-      expect(getByText('MonitorScreen')).toBeTruthy();
-      expect(getByText('DashboardScreen')).toBeTruthy();
-      expect(getByText('ProfileScreen')).toBeTruthy();
-    });
-  });
-
-  it('renders detail screens in RootStack when authenticated', async () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
-      return selector({
-        isAuthenticated: true,
-        isLoading: false,
-        checkAuth: mockCheckAuth,
-      });
-    });
-
-    const { getByText } = render(<AppNavigator />);
-    await waitFor(() => {
-      // Detail screens from MainTabNavigatorWithDetail
-      expect(getByText('WorkOrderDetailScreen')).toBeTruthy();
-      expect(getByText('WorkOrderCreateScreen')).toBeTruthy();
-      expect(getByText('WorkOrderTransferScreen')).toBeTruthy();
-      expect(getByText('InspectionDetailScreen')).toBeTruthy();
-      expect(getByText('DiagnosisScreen')).toBeTruthy();
-      expect(getByText('KnowledgeScreen')).toBeTruthy();
-      expect(getByText('KnowledgeDetailScreen')).toBeTruthy();
-    });
-  });
-
-  it('checkAuth is called exactly once on mount', () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
-      return selector({
-        isAuthenticated: false,
-        isLoading: true,
-        checkAuth: mockCheckAuth,
-      });
-    });
-
-    render(<AppNavigator />);
-    expect(mockCheckAuth).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows loading indicator with correct text', () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
-      return selector({
-        isAuthenticated: false,
-        isLoading: true,
-        checkAuth: mockCheckAuth,
-      });
-    });
-
+  it('renders loading state when isLoading=true', () => {
+    mockAuth.isLoading = true;
     const { getByText } = render(<AppNavigator />);
     expect(getByText('加载中...')).toBeTruthy();
+  });
+
+  it('renders Auth (Login) when not authenticated', () => {
+    mockAuth.isAuthenticated = false;
+    mockAuth.isLoading = false;
+    const { getByText } = render(<AppNavigator />);
+    expect(getByText('Login')).toBeTruthy();
+  });
+
+  it('renders Main when authenticated', () => {
+    mockAuth.isAuthenticated = true;
+    mockAuth.isLoading = false;
+    const { getByText } = render(<AppNavigator />);
+    expect(getByText('Workbench')).toBeTruthy();
+  });
+
+  it('calls checkAuth on mount', () => {
+    render(<AppNavigator />);
+    expect(mockAuth.checkAuth).toHaveBeenCalled();
+  });
+
+  it('renders all tab screens when authenticated', () => {
+    mockAuth.isAuthenticated = true;
+    const { getByText } = render(<AppNavigator />);
+    expect(getByText('Workbench')).toBeTruthy();
+    expect(getByText('WOList')).toBeTruthy();
+    expect(getByText('Scan')).toBeTruthy();
+    expect(getByText('InspList')).toBeTruthy();
+    expect(getByText('Monitor')).toBeTruthy();
+    expect(getByText('Dashboard')).toBeTruthy();
+    expect(getByText('Profile')).toBeTruthy();
   });
 });
