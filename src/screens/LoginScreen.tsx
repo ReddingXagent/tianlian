@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
+import { authApi } from '../services/api';
 
 const LoginScreen: React.FC = () => {
   const [phone, setPhone] = useState('');
@@ -47,7 +48,6 @@ const LoginScreen: React.FC = () => {
     setSendingCode(true);
     setError(null);
     try {
-      const { authApi } = await import('../services/api');
       await authApi.sendCode({ phone: phone.trim() });
       startCountdown();
     } catch (err: unknown) {
