@@ -148,12 +148,16 @@ class CloudClient:
                         return True
 
             # 尝试注册新Pod
-            r = await self._client.post("/api/v1/pod/register", json={
+            reg_payload: dict = {
                 "pod_id": self.pod_id,
                 "region_id": self.region_id,
                 "endpoint": f"http://{self._get_local_ip()}:8080",
                 "version": "3.0.0",
-            })
+            }
+            # pod_secret 非空时加入 payload (向后兼容: 空值不影响现有行为)
+            if self.config.pod_secret:
+                reg_payload["pod_secret"] = self.config.pod_secret
+            r = await self._client.post("/api/v1/pod/register", json=reg_payload)
             if r.status_code == 200:
                 self._registered = True
                 logger.info("Cloud pod registered: %s", self.pod_id)
@@ -366,15 +370,19 @@ class CloudClient:
         while True:
             await asyncio.sleep(self.config.heartbeat_interval)
             try:
+                hb_payload: dict = {
+                    "pod_id": self.pod_id,
+                    "load": {
+                        "gateway_id": self.gateway_id,
+                        "region_id": self.region_id,
+                    },
+                }
+                # pod_secret 非空时加入 payload (向后兼容: 空值不影响现有行为)
+                if self.config.pod_secret:
+                    hb_payload["pod_secret"] = self.config.pod_secret
                 r = await self._client.post(
                     "/api/v1/pod/heartbeat",
-                    json={
-                        "pod_id": self.pod_id,
-                        "load": {
-                            "gateway_id": self.gateway_id,
-                            "region_id": self.region_id,
-                        },
-                    },
+                    json=hb_payload,
                 )
                 if r.status_code != 200:
                     logger.warning("Cloud heartbeat failed: %d", r.status_code)

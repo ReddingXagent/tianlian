@@ -21,6 +21,7 @@ class CloudConfig:
     # (真云是否支持 gzip 请求体待大圣确认, 不支持时自适应兜底, 无需改配置)
     compress_enabled: bool = True
     compress_threshold: int = 1024  # bytes, 小 payload 压缩不划算
+    pod_secret: str = ""  # 云端Pod注册密钥(空=不发送, 向后兼容)
 
 
 @dataclass
@@ -108,6 +109,7 @@ class GatewayConfig:
                 token=os.getenv("CLOUD_TOKEN", ""),
                 register_on_startup=os.getenv("CLOUD_REGISTER", "true").lower() == "true",
                 deregister_on_shutdown=os.getenv("CLOUD_DEREGISTER", "true").lower() == "true",
+                pod_secret=os.getenv("POD_SECRET", ""),
             ),
             mqtt=MQTTConfig(
                 host=os.getenv("MQTT_HOST", "localhost"),

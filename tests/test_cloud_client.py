@@ -86,6 +86,50 @@ class TestCloudRegister:
         cloud_client._client.post.assert_not_called()
 
 
+# ── pod_secret 传递 ────────────────────────────────────────────────
+
+class TestPodSecret:
+    """验证 pod_secret 在 register/heartbeat payload 中正确传递"""
+
+    @pytest.mark.asyncio
+    async def test_register_includes_pod_secret(self):
+        """register payload 应包含非空 pod_secret"""
+        cfg = CloudConfig(
+            base_url="http://localhost:8000/api/v1",
+            heartbeat_interval=0,
+            register_on_startup=False,
+            deregister_on_shutdown=False,
+            pod_secret="s3cr3t-abc",
+        )
+        client = CloudClient(cfg, gateway_id="GW-TEST")
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500  # 避免注册成功跳过post
+        client._client = AsyncMock()
+        client._client.get = AsyncMock(return_value=MagicMock(status_code=404))
+        client._client.post = AsyncMock(return_value=mock_resp)
+
+        await client.register()
+
+        call_args = client._client.post.call_args
+        payload = call_args.kwargs["json"]
+        assert payload["pod_secret"] == "s3cr3t-abc"
+
+    @pytest.mark.asyncio
+    async def test_register_omits_empty_pod_secret(self, cloud_client):
+        """pod_secret 为空时 register payload 不含 pod_secret 键"""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 500
+        cloud_client._client = AsyncMock()
+        cloud_client._client.get = AsyncMock(return_value=MagicMock(status_code=404))
+        cloud_client._client.post = AsyncMock(return_value=mock_resp)
+
+        await cloud_client.register()
+
+        call_args = cloud_client._client.post.call_args
+        payload = call_args.kwargs["json"]
+        assert "pod_secret" not in payload
+
+
 # ── 遥测上报 ──────────────────────────────────────────────────────────
 
 class TestCloudTelemetry:
