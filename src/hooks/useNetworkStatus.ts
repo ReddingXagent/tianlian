@@ -30,13 +30,19 @@ interface NetInfoModule {
   addEventListener: (cb: (state: NetInfoState) => void) => () => void;
 }
 
-async function loadNetInfo(): Promise<NetInfoModule | null> {
+// Static require for testability — dynamic import() is not mockable in Jest
+// without --experimental-vm-modules. In production, RN bundler resolves this.
+let cachedNetInfo: NetInfoModule | null | undefined;
+function loadNetInfo(): NetInfoModule | null {
+  if (cachedNetInfo !== undefined) return cachedNetInfo;
   try {
-    // eslint-disable-next-line import/no-unresolved
-    const mod: unknown = await import('@react-native-community/netinfo');
-    return ((mod as { default?: NetInfoModule }).default ??
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod: unknown = require('@react-native-community/netinfo');
+    cachedNetInfo = ((mod as { default?: NetInfoModule }).default ??
       (mod as NetInfoModule)) as NetInfoModule;
+    return cachedNetInfo;
   } catch {
+    cachedNetInfo = null;
     return null;
   }
 }
@@ -72,7 +78,7 @@ export function useNetworkStatus() {
     }
 
     const setup = async () => {
-      const NetInfo = await loadNetInfo();
+      const NetInfo = loadNetInfo();
       if (!mounted || !NetInfo) return;
 
       const state = await NetInfo.fetch();
@@ -106,7 +112,7 @@ export function useNetworkStatus() {
       setNetworkState(getWebNetworkState());
       return;
     }
-    const NetInfo = await loadNetInfo();
+    const NetInfo = loadNetInfo();
     if (!NetInfo) return;
     const state = await NetInfo.fetch();
     setNetworkState({

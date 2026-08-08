@@ -50,34 +50,34 @@ describe('useNetworkStatus.ext — additional branch coverage', () => {
     Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
   });
 
-  // ---------- native: loadNetInfo returns null (module not installed) ----------
+  // ---------- native: NetInfo resolves via moduleNameMapper mock ----------
 
-  it('native: loadNetInfo returns null → setup no-ops, state stays default', async () => {
+  it('native: NetInfo mock resolves → state updates from fetch', async () => {
     setPlatform('ios');
     const { result } = renderHook(() => useNetworkStatus());
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
     });
 
-    // NetInfo not installed → state remains initial
+    // NetInfo mock returns connected wifi
     expect(result.current.isConnected).toBe(true);
-    expect(result.current.type).toBe('unknown');
+    expect(result.current.type).toBe('wifi');
   });
 
-  it('native: loadNetInfo returns null → refresh no-ops', async () => {
+  it('native: refresh via mock returns updated state', async () => {
     setPlatform('ios');
     const { result } = renderHook(() => useNetworkStatus());
 
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise(resolve => setTimeout(resolve, 200));
     });
 
+    // Refresh works via mock
     await act(async () => {
       await result.current.refresh();
     });
 
-    // No crash, state unchanged
     expect(result.current.isConnected).toBe(true);
   });
 
