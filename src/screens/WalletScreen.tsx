@@ -113,7 +113,6 @@ const WalletScreen: React.FC = () => {
           try {
             await walletApi.recharge(amount);
             // 刷新用户信息获取新余额
-            const { authApi } = await import('../services/api');
             const response = await authApi.getProfile();
             setUser(response.data);
             loadRecords();
