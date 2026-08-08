@@ -1,69 +1,72 @@
 import { parseScanPayload } from '../scanCode';
 
-describe('parseScanPayload extended coverage', () => {
-  // === decodeURIComponent throw path (malformed percent-encoding) ===
-
-  it('handles malformed percent-encoding gracefully (decodeURIComponent throws)', () => {
-    // %E0%A4 - incomplete UTF-8 sequence, decodeURIComponent may throw
-    // Using a known-bad sequence that triggers URIError
-    expect(parseScanPayload('https://x.com/%E0%A4%A4%E0%A4')).toBeDefined();
+describe('scanCode.ext — branch coverage', () => {
+  // ── decodeURIComponent fallback (catch branch, L31) ───────
+  it('falls back to raw last segment when decodeURIComponent throws', () => {
+    // %E0%B4 is an invalid UTF-8 sequence → decodeURIComponent throws
+    const result = parseScanPayload('https://x.com/charger/%E0%B4');
+    // Should hit the catch block and return the raw (non-decoded) segment
+    expect(result).toBe('%E0%B4');
   });
 
-  // === URL with only path segments after domain ===
-
-  it('extracts code from URL with port number', () => {
-    expect(parseScanPayload('http://localhost:3000/charger/EV-100')).toBe('EV-100');
+  // ── URL with empty last segment after stripping ──────────
+  it('returns original data for URL with only slashes', () => {
+    const result = parseScanPayload('https://x.com/');
+    // After processing, last segment becomes 'x.com'
+    expect(result).toBe('x.com');
   });
 
-  it('extracts code from URL with encoded characters that decode successfully', () => {
-    expect(parseScanPayload('https://x.com/AB-001')).toBe('AB-001');
+  // ── URL with only protocol and slashes ───────────────────
+  it('returns data for plain URL without path', () => {
+    const result = parseScanPayload('https://example.com');
+    // No path beyond domain → last segment is 'example.com'
+    expect(result).toBe('example.com');
   });
 
-  // === URL where last segment is empty after stripping trailing slash ===
-
-  it('returns null for URL with only trailing slashes after domain', () => {
-    // https://x.com/ → path segments after split: ['https:', '', 'x.com', '']
-    // last segment after removing trailing slash: 'x.com'
-    expect(parseScanPayload('https://x.com/')).toBe('x.com');
+  // ── valid decodeURIComponent ─────────────────────────────
+  it('decodes percent-encoded last segment', () => {
+    const result = parseScanPayload('https://x.com/charger/CH%2D001');
+    expect(result).toBe('CH-001');
   });
 
-  // === CODE_PATTERN edge cases ===
-
-  it('matches code with more than 2 digits', () => {
-    expect(parseScanPayload('CH-123456')).toBe('CH-123456');
+  // ── code match takes priority over URL path ──────────────
+  it('extracts code pattern even from URL', () => {
+    const result = parseScanPayload('https://x.com/charger/DC-005?from=qr');
+    expect(result).toBe('DC-005');
   });
 
-  it('matches code with more than 2 letters', () => {
-    expect(parseScanPayload('ELEC-001')).toBe('ELEC-001');
+  // ── plain string returns as-is ───────────────────────────
+  it('returns plain string trimmed', () => {
+    expect(parseScanPayload('  hello world  ')).toBe('hello world');
   });
 
-  it('matches code embedded in longer text', () => {
-    expect(parseScanPayload('prefix-ABC-999-suffix')).toBe('ABC-999');
+  // ── empty returns null ────────────────────────────────────
+  it('returns null for empty string', () => {
+    expect(parseScanPayload('')).toBeNull();
   });
 
-  it('does not match single letter prefix', () => {
-    // A-01 should not match CODE_PATTERN (needs 2+ letters)
-    expect(parseScanPayload('A-01')).toBe('A-01');
+  // ── whitespace only returns null ──────────────────────────
+  it('returns null for whitespace only', () => {
+    expect(parseScanPayload('   ')).toBeNull();
   });
 
-  it('does not match single digit suffix', () => {
-    // AB-1 should not match CODE_PATTERN (needs 2+ digits)
-    expect(parseScanPayload('AB-1')).toBe('AB-1');
+  // ── code match toUpperCase ────────────────────────────────
+  it('uppercases code match', () => {
+    expect(parseScanPayload('ab-123')).toBe('AB-123');
   });
 
-  // === Various URL schemes ===
-
-  it('handles ftp:// scheme URL', () => {
-    expect(parseScanPayload('ftp://server/XY-001')).toBe('XY-001');
+  // ── URL with query but no code pattern ───────────────────
+  it('extracts path segment from URL with query params', () => {
+    expect(parseScanPayload('https://x.com/station/ZH-ABC')).toBe('ZH-ABC');
   });
 
-  it('handles custom scheme with code pattern', () => {
-    expect(parseScanPayload('myapp://open?code=PWR-100')).toBe('PWR-100');
+  // ── non-URL with no code → original ──────────────────────
+  it('returns original for non-URL non-code string', () => {
+    expect(parseScanPayload('random-string')).toBe('random-string');
   });
 
-  // === Whitespace handling ===
-
-  it('trims and processes URL with surrounding whitespace', () => {
-    expect(parseScanPayload('  https://x.com/CH-007  ')).toBe('CH-007');
+  // ── custom scheme URL ─────────────────────────────────────
+  it('handles custom scheme URL', () => {
+    expect(parseScanPayload('myapp://charge/AB-999')).toBe('AB-999');
   });
 });
