@@ -494,3 +494,10 @@ class TelemetryCache:
         if self._conn:
             self._conn.close()
             self._conn = None
+
+    def __del__(self) -> None:
+        """Best-effort cleanup to avoid ResourceWarning on GC."""
+        try:
+            self.close()
+        except Exception:
+            pass

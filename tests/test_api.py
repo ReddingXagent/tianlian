@@ -19,8 +19,10 @@ from storage.cache import TelemetryCache
 
 @pytest.fixture
 def cache():
-    """In-memory TelemetryCache."""
-    return TelemetryCache(StorageConfig(db_path=":memory:"))
+    """In-memory TelemetryCache (auto-closes after test)."""
+    c = TelemetryCache(StorageConfig(db_path=":memory:"))
+    yield c
+    c.close()
 
 
 @pytest.fixture
