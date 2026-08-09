@@ -23,7 +23,9 @@ jest.mock('expo-secure-store', () => ({
 
 const mockAxios = new MockAdapter(api);
 const TEST_TOKEN = 'test-jwt-token-12345';
-const BASE_URL = 'http://8.134.106.166/api/v1';
+const BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ||
+  (__DEV__ ? 'http://localhost:8000/api/v1' : 'http://8.134.106.166/api/v1');
 
 // =====================
 // AI_FUNCTIONS 定义测试
