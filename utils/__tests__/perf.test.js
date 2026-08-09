@@ -7,11 +7,17 @@ const {
   guardTap,
   buildMarkers
 } = require('../perf');
+const { cache } = require('../cache');
 
 // Mock wx
 global.wx = {
   showToast: jest.fn()
 };
+
+// 清理 createPagination 间接创建的 cache TTL 定时器，避免 worker 泄漏告警
+afterAll(() => {
+  cache.clear();
+});
 
 describe('perf utilities', () => {
 

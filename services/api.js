@@ -78,7 +78,9 @@ function request(url, options = {}) {
             reject(new Error('TOKEN_EXPIRED'));
           } else if (statusCode >= 500 && isIdempotent && attempt < MAX_RETRY) {
             // 5xx 服务端错误, 幂等请求自动重试一次
-            setTimeout(() => doRequest(attempt + 1).then(resolve, reject), 1000);
+            const t = setTimeout(() => doRequest(attempt + 1).then(resolve, reject), 1000);
+            // Node.js 环境 unref 避免阻止 Jest worker 退出; 微信小程序环境无副作用
+            if (t && typeof t.unref === 'function') t.unref();
           } else {
             wx.showToast({ title: `请求失败(${statusCode})`, icon: 'none' });
             reject(new Error(`HTTP ${statusCode}`));
@@ -87,7 +89,8 @@ function request(url, options = {}) {
         fail(err) {
           if (isIdempotent && attempt < MAX_RETRY) {
             // 网络层失败, 幂等请求自动重试一次
-            setTimeout(() => doRequest(attempt + 1).then(resolve, reject), 1000);
+            const t = setTimeout(() => doRequest(attempt + 1).then(resolve, reject), 1000);
+            if (t && typeof t.unref === 'function') t.unref();
           } else {
             const msg = err.errMsg.includes('timeout') ? '请求超时' : '网络异常';
             wx.showToast({ title: msg, icon: 'none' });

@@ -112,7 +112,10 @@ class LRUCache {
 
   _refreshTimer(key, ttl) {
     this._clearTimer(key);
-    this.timers[key] = setTimeout(() => this.delete(key), ttl);
+    const t = setTimeout(() => this.delete(key), ttl);
+    // Node.js 测试环境避免阻止 worker 退出; 微信小程序环境无副作用
+    if (t) t.unref?.();
+    this.timers[key] = t;
   }
 
   _clearTimer(key) {
