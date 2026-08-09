@@ -28,3 +28,9 @@ ignore = [
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI 依赖注入模式: Depends()/Query() 作默认参数是惯用法
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "fastapi.Header"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # starlette 1.6 deprecation: httpx-based TestClient, 待fastapi原生支持httpx2后移除
+    "ignore:Using.*httpx.*:starlette.exceptions.StarletteDeprecationWarning",
+]
