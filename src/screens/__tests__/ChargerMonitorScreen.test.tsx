@@ -258,4 +258,55 @@ describe('ChargerMonitorScreen', () => {
     const { findByText } = render(<ChargerMonitorScreen />);
     expect(await findByText('暂无充电桩')).toBeTruthy();
   });
+
+  it('should show ❓ fallback for unknown connectorStatus', async () => {
+    (chargerApi.getMonitorList as jest.Mock).mockResolvedValue({
+      data: [{
+        ...MOCK_CHARGERS[0],
+        connectorStatus: 'unknown_status' as any,
+        deviceName: '未知桩',
+      }],
+    });
+
+    const { findByText } = render(<ChargerMonitorScreen />);
+    await findByText('未知桩');
+    // getConnectorConfig fallback: unknown status → label = status string itself
+    expect(await findByText('unknown_status')).toBeTruthy();
+  });
+
+  it('should render session info with soc=null (no battery percentage)', async () => {
+    (chargerApi.getMonitorList as jest.Mock).mockResolvedValue({
+      data: [{
+        ...MOCK_CHARGERS[0],
+        soc: null,
+        state: 'charging',
+        sessionDuration: 90,
+        deviceName: '无SOC桩',
+      }],
+    });
+
+    const { findByText, queryByText } = render(<ChargerMonitorScreen />);
+    await findByText('无SOC桩');
+    // session info renders with duration >= 60 → '1小时30分钟' format
+    expect(await findByText(/1小时30分钟/)).toBeTruthy();
+    // soc=null → no '电量 XX%' in session text
+    expect(queryByText(/电量/)).toBeNull();
+  });
+
+  it('should render session info for suspended state', async () => {
+    (chargerApi.getMonitorList as jest.Mock).mockResolvedValue({
+      data: [{
+        ...MOCK_CHARGERS[0],
+        state: 'suspended',
+        connectorStatus: 'suspended',
+        sessionDuration: 30,
+        deviceName: '暂停桩',
+      }],
+    });
+
+    const { findByText } = render(<ChargerMonitorScreen />);
+    await findByText('暂停桩');
+    // suspended state also shows session info
+    expect(await findByText(/30分钟/)).toBeTruthy();
+  });
 });
