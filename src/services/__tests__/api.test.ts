@@ -384,6 +384,25 @@ describe('deviceApi contract', () => {
     expect(params.search).toBe('CP');
     expect(resp.code).toBe(200);
   });
+
+  it('getHealth maps snake_case fields from /devices/{id}/health', async () => {
+    mockAxios.onGet('/devices/5/health').reply(200, {
+      code: 200, message: 'success',
+      data: {
+        device_id: 5,
+        health_score: 87,
+        health_status: 'good',
+        dimension_scores: { thermal: 90, electrical: 85 },
+        checked_at: '2026-08-10T06:00:00Z',
+      },
+    });
+    const resp = await deviceApi.getHealth(5);
+    expect(resp.data.deviceId).toBe(5);
+    expect(resp.data.healthScore).toBe(87);
+    expect(resp.data.healthStatus).toBe('good');
+    expect(resp.data.dimensionScores).toEqual({ thermal: 90, electrical: 85 });
+    expect(resp.data.checkedAt).toBe('2026-08-10T06:00:00Z');
+  });
 });
 
 describe('dashboardApi aggregation (real cloud has no dashboard endpoint)', () => {

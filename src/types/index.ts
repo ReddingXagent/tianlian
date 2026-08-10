@@ -185,6 +185,17 @@ export interface DeviceTelemetry {
 }
 
 // =====================
+// 设备健康度 (Device Health)
+// =====================
+export interface DeviceHealth {
+  deviceId: number;
+  healthScore: number;          // 0-100
+  healthStatus: 'excellent' | 'good' | 'warning' | 'critical';
+  dimensionScores: Record<string, number>;
+  checkedAt: string;
+}
+
+// =====================
 // 充电桩实时监控 (Charger Monitor)
 // =====================
 export interface ChargerStatus {

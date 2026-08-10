@@ -19,6 +19,7 @@ import {
   RevenueRecord,
   RevenueQuery,
   DeviceTelemetry,
+  DeviceHealth,
   CreateWorkOrderData,
   ChargerStatus,
   ChargerMonitorSummary,
@@ -264,7 +265,7 @@ export const authApi = {
     return api.post('/auth/logout').then((res) => res.data);
   },
   getProfile(): Promise<ApiResponse<User>> {
-    return api.get('/auth/profile').then((res) => res.data);
+    return api.get('/auth/me').then((res) => res.data);
   },
 };
 
@@ -313,6 +314,21 @@ export const deviceApi = {
   },
   getTelemetry(deviceId: number): Promise<ApiResponse<DeviceTelemetry>> {
     return api.get(`/devices/${deviceId}/telemetry`).then((res) => res.data);
+  },
+  getHealth(deviceId: number): Promise<ApiResponse<DeviceHealth>> {
+    return api.get(`/devices/${deviceId}/health`).then((res) => {
+      const d = res.data.data;
+      return {
+        ...res.data,
+        data: {
+          deviceId: d.device_id ?? d.deviceId ?? deviceId,
+          healthScore: d.health_score ?? d.healthScore ?? 0,
+          healthStatus: d.health_status ?? d.healthStatus ?? 'good',
+          dimensionScores: d.dimension_scores ?? d.dimensionScores ?? {},
+          checkedAt: d.checked_at ?? d.checkedAt ?? new Date().toISOString(),
+        },
+      };
+    });
   },
   controlDevice(deviceId: number, command: string): Promise<ApiResponse<{ success: boolean; message: string }>> {
     return api.post(`/devices/${deviceId}/control`, { command }).then((res) => res.data);

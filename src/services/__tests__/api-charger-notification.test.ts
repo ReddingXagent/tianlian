@@ -140,8 +140,8 @@ describe('authApi additional methods', () => {
     expect(resp.code).toBe(200);
   });
 
-  it('getProfile hits /auth/profile', async () => {
-    mockAxios.onGet('/auth/profile').reply(200, {
+  it('getProfile hits /auth/me', async () => {
+    mockAxios.onGet('/auth/me').reply(200, {
       code: 200, message: 'success', data: { id: 1, username: 'tl' },
     });
     const resp = await authApi.getProfile();
