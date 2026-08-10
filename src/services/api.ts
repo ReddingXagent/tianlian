@@ -8,6 +8,7 @@ import {
   Alarm,
   Device,
   DeviceMetrics,
+  DeviceHealth,
   MonitorSummary,
   KnowledgeArticle,
   ScanResult,
@@ -338,6 +339,28 @@ export const deviceApi = {
   },
   getMetrics(id: number): Promise<ApiResponse<DeviceMetrics>> {
     return api.get(`/devices/${id}/metrics`).then((res) => res.data);
+  },
+  /** GET /devices/{id}/health — 设备健康度 */
+  getHealth(id: number): Promise<ApiResponse<DeviceHealth>> {
+    return api.get(`/devices/${id}/health`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          deviceId: (d.device_id as number) ?? 0,
+          deviceCode: (d.device_code as string) ?? '',
+          deviceName: (d.device_name as string) ?? '',
+          deviceType: (d.device_type as string) ?? '',
+          healthScore: (d.health_score as number) ?? 0,
+          healthStatus: (d.health_status as string) ?? '',
+          healthStatusDisplay: (d.health_status_display as string) ?? '',
+          dimensionScores: (d.dimension_scores as Record<string, number>) ?? {},
+          checkedAt: (d.checked_at as string) ?? '',
+          lastHealthCheck: (d.last_health_check as string | null) ?? null,
+        },
+      };
+    });
   },
 };
 

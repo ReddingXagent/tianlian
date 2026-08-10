@@ -490,3 +490,19 @@ export interface AuthMe {
   teamType: string | null;
   teamId: number | null;
 }
+
+// =====================
+// 设备健康度 (Device Health — from /devices/{id}/health)
+// =====================
+export interface DeviceHealth {
+  deviceId: number;
+  deviceCode: string;
+  deviceName: string;
+  deviceType: string;
+  healthScore: number;
+  healthStatus: string;
+  healthStatusDisplay: string;
+  dimensionScores: Record<string, number>;
+  checkedAt: string;
+  lastHealthCheck: string | null;
+}
