@@ -31,6 +31,5 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "f
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    # starlette 1.6 deprecation: httpx-based TestClient, 待fastapi原生支持httpx2后移除
-    "ignore:Using.*httpx.*:starlette.exceptions.StarletteDeprecationWarning",
+    # starlette deprecation 已移除，空配置
 ]
