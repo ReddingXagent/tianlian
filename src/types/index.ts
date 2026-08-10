@@ -459,3 +459,25 @@ export interface AlarmReport {
     alarmCount: number;
   }[];
 }
+
+// =====================
+// 工单报告 (WorkOrderReport — from /reports/workorders)
+// =====================
+export interface WorkOrderReport {
+  periodDays: number;
+  totalWorkorders: number;
+  typeDistribution: Record<string, number>;
+  levelDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
+  completionRate: number;
+  efficiency: {
+    avgResponseHours: number;
+    avgCompletionHours: number;
+  };
+  engineerPerformance: {
+    engineerId: number;
+    engineerName: string;
+    completedCount: number;
+    avgCompletionHours: number;
+  }[];
+}

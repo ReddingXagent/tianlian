@@ -30,6 +30,7 @@ import {
   DeviceConfig,
   DeviceReport,
   AlarmReport,
+  WorkOrderReport,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -582,15 +583,15 @@ export const energyApi = {
           dischargeRevenue: num(d.discharge_revenue),
           totalRevenue: num(d.total_revenue),
           yoy: {
-            pvGenerationYoY: num(d.yoy?.pv_generation_yoy),
-            chargingAmountYoY: num(d.yoy?.charging_amount_yoy),
-            dischargeAmountYoY: num(d.yoy?.discharge_amount_yoy),
-            totalRevenueYoY: num(d.yoy?.total_revenue_yoy),
+            pvGenerationYoY: num((d.yoy as Raw | undefined)?.pv_generation_yoy),
+            chargingAmountYoY: num((d.yoy as Raw | undefined)?.charging_amount_yoy),
+            dischargeAmountYoY: num((d.yoy as Raw | undefined)?.discharge_amount_yoy),
+            totalRevenueYoY: num((d.yoy as Raw | undefined)?.total_revenue_yoy),
           },
           priceInfo: {
-            feedInTariff: num(d.price_info?.feed_in_tariff),
-            chargingPrice: num(d.price_info?.charging_price),
-            dischargePrice: num(d.price_info?.discharge_price),
+            feedInTariff: num((d.price_info as Raw | undefined)?.feed_in_tariff),
+            chargingPrice: num((d.price_info as Raw | undefined)?.charging_price),
+            dischargePrice: num((d.price_info as Raw | undefined)?.discharge_price),
           },
         },
       };
