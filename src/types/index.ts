@@ -274,6 +274,36 @@ export interface ChargerMonitorSummary {
 }
 
 // =====================
+// 能源概览 (Energy Summary — GET /energy/summary)
+// =====================
+export interface EnergyYoY {
+  pvGenerationYoY: number;
+  chargingAmountYoY: number;
+  dischargeAmountYoY: number;
+  totalRevenueYoY: number;
+}
+
+export interface EnergyPriceInfo {
+  feedInTariff: number;
+  chargingPrice: number;
+  dischargePrice: number;
+}
+
+export interface EnergySummary {
+  period: string;
+  days: number;
+  pvGeneration: number;      // kWh 光伏发电量
+  chargingAmount: number;     // kWh 充电量
+  dischargeAmount: number;    // kWh 放电量
+  pvRevenue: number;          // 元 光伏收入
+  chargingRevenue: number;    // 元 充电收入
+  dischargeRevenue: number;   // 元 放电收入
+  totalRevenue: number;       // 元 总收入
+  yoy: EnergyYoY;
+  priceInfo: EnergyPriceInfo;
+}
+
+// =====================
 // 通知/消息 (Notification)
 // =====================
 export interface AppNotification {
