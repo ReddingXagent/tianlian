@@ -1423,8 +1423,9 @@ class TestRealChargerConnectionClosed:
             code = 1000
             reason = "normal closure"
 
-        async def mock_connect(*a, **kw):
-            # Return a mock async context manager
+        def mock_connect(*a, **kw):
+            # websockets.connect() returns a sync object whose __aenter__/__aexit__
+            # are awaited via `async with`. Must NOT be an async def.
             mock_ctx = AsyncMock()
             mock_ws = AsyncMock()
             mock_ctx.__aenter__ = AsyncMock(return_value=mock_ws)
