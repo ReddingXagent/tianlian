@@ -1,16 +1,40 @@
 """Telemetry data models"""
 
 import contextlib
+import json
+import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
 UTC = timezone.utc  # Py3.10 compat
-# 设备名→云端ID映射（云端要求整数device_id）
-DEVICE_ID_MAP = {
-    "modbus-1": 1,
-    "CHARGER-001": 2,
-    "GW-001": 0,
-}
+
+
+def _load_device_id_map() -> dict[str, int]:
+    """Load device name → cloud ID map from env var or defaults.
+
+    Env var ``DEVICE_ID_MAP_JSON`` overrides defaults, e.g.::
+
+        DEVICE_ID_MAP_JSON='{"modbus-1": 1, "CHARGER-001": 6}'
+
+    This lets each deployment map edge device names to actual cloud device IDs
+    without code changes.
+    """
+    defaults: dict[str, int] = {
+        "modbus-1": 1,
+        "CHARGER-001": 2,
+        "GW-001": 0,
+    }
+    env_val = os.getenv("DEVICE_ID_MAP_JSON")
+    if env_val:
+        with contextlib.suppress(json.JSONDecodeError, TypeError):
+            parsed = json.loads(env_val)
+            if isinstance(parsed, dict):
+                return {str(k): int(v) for k, v in parsed.items()}
+    return defaults
+
+
+# 设备名→云端ID映射（云端要求整数device_id，可通过 DEVICE_ID_MAP_JSON 环境变量覆盖）
+DEVICE_ID_MAP = _load_device_id_map()
 
 
 @dataclass

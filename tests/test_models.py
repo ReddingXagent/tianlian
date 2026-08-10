@@ -1,8 +1,9 @@
 """Tests for models/telemetry.py and models/device.py"""
 
 
+
 from models.device import DeviceInfo, DeviceStatus, DeviceType, ProtocolType
-from models.telemetry import TelemetryBatch, TelemetryPoint
+from models.telemetry import DEVICE_ID_MAP, TelemetryBatch, TelemetryPoint, _load_device_id_map
 
 
 class TestTelemetryPoint:
@@ -111,6 +112,51 @@ class TestTelemetryPoint:
         assert payload["device_id"] == "METER-001"
         # Zero values are filtered out (None check), so only device_id present
         assert "grid_power_total" not in payload  # 0.0 is falsy, filtered out
+
+
+class TestDeviceIdMap:
+    """DEVICE_ID_MAP and env override tests"""
+
+    def test_default_device_id_map(self):
+        """Default DEVICE_ID_MAP has expected entries"""
+        assert DEVICE_ID_MAP["modbus-1"] == 1
+        assert DEVICE_ID_MAP["CHARGER-001"] == 2
+        assert DEVICE_ID_MAP["GW-001"] == 0
+
+    def test_env_override_device_id_map(self, monkeypatch):
+        """DEVICE_ID_MAP_JSON env var overrides defaults"""
+        monkeypatch.setenv(
+            "DEVICE_ID_MAP_JSON",
+            '{"modbus-1": 10, "CHARGER-001": 6, "GW-001": 99}',
+        )
+        new_map = _load_device_id_map()
+        assert new_map["modbus-1"] == 10
+        assert new_map["CHARGER-001"] == 6
+        assert new_map["GW-001"] == 99
+
+    def test_env_override_partial(self, monkeypatch):
+        """Partial env override replaces entire map (no merge)"""
+        monkeypatch.setenv("DEVICE_ID_MAP_JSON", '{"foo": 42}')
+        new_map = _load_device_id_map()
+        assert new_map == {"foo": 42}
+
+    def test_env_override_invalid_json(self, monkeypatch):
+        """Invalid JSON falls back to defaults"""
+        monkeypatch.setenv("DEVICE_ID_MAP_JSON", "not-json")
+        new_map = _load_device_id_map()
+        assert new_map == DEVICE_ID_MAP
+
+    def test_env_override_non_dict(self, monkeypatch):
+        """Non-dict JSON falls back to defaults"""
+        monkeypatch.setenv("DEVICE_ID_MAP_JSON", '[1, 2, 3]')
+        new_map = _load_device_id_map()
+        assert new_map == DEVICE_ID_MAP
+
+    def test_no_env_uses_defaults(self, monkeypatch):
+        """No env var → defaults"""
+        monkeypatch.delenv("DEVICE_ID_MAP_JSON", raising=False)
+        new_map = _load_device_id_map()
+        assert new_map == DEVICE_ID_MAP
 
 
 class TestTelemetryBatch:

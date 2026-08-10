@@ -298,7 +298,6 @@ class TestMQTTConnectInternal:
 
             async def run_in_executor_real(pool, fn):
                 fn()  # Actually execute the nested function
-                return None
 
             with patch("adapters.mqtt_client.asyncio.get_event_loop") as mock_loop:
                 loop = MagicMock()
