@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { render, waitFor } from '@testing-library/react-native';
+import { act, render, waitFor } from '@testing-library/react-native';
 import api from '../../services/api';
 import NetworkStatus from '../NetworkStatus';
 
@@ -98,7 +98,9 @@ describe('NetworkStatus', () => {
     unmount();
     // 卸载后 ping 才返回 → mountedRef 守卫拦截 setState，不抛异常
     resolvePing({ data: {} });
-    await waitFor(() => expect(true).toBe(true));
+    // 推进微任务队列让promise settlement完成
+    await act(async () => { await Promise.resolve(); });
+    expect(mockedGet).toHaveBeenCalledTimes(1);
   });
 
   it('should not set state after unmount when ping fails late', async () => {
@@ -113,7 +115,8 @@ describe('NetworkStatus', () => {
     unmount();
     // 卸载后 ping 才失败 → mountedRef 守卫拦截 setState，不抛异常
     rejectPing(new Error('offline'));
-    await waitFor(() => expect(true).toBe(true));
+    await act(async () => { await Promise.resolve(); });
+    expect(mockedGet).toHaveBeenCalledTimes(1);
   });
 
   it('should not set state after unmount when ping fails late with 401', async () => {
@@ -128,7 +131,8 @@ describe('NetworkStatus', () => {
     unmount();
     // 卸载后 ping 才以 401 失败 → 401 分支内的 mountedRef 守卫拦截 setState，不抛异常
     rejectPing({ response: { status: 401 } });
-    await waitFor(() => expect(true).toBe(true));
+    await act(async () => { await Promise.resolve(); });
+    expect(mockedGet).toHaveBeenCalledTimes(1);
   });
 
   it('should tolerate AppState subscription without remove method', async () => {
