@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Alert, Linking, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import ScanScreen from '../ScanScreen';
 import { chargingApi } from '../../services/api';
 

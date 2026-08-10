@@ -1,6 +1,6 @@
 import React from 'react';
-import { FlatList, RefreshControl, ActivityIndicator } from 'react-native';
-import { render, waitFor, fireEvent, act } from '@testing-library/react-native';
+import { FlatList, RefreshControl } from 'react-native';
+import { render, waitFor, act } from '@testing-library/react-native';
 import CouponScreen from '../CouponScreen';
 
 const mockGetList = jest.fn();
@@ -95,7 +95,6 @@ describe('CouponScreen.ext — 分支覆盖', () => {
 
   // 2. loadMoreCoupons dedup: same id from page2 filtered out
   it('deduplicates coupons on loadMore', async () => {
-    const dup = makeCoupon({ id: 1 });
     const page1 = [makeCoupon({ id: 1 })];
     const page2 = [makeCoupon({ id: 1 })]; // same id
 

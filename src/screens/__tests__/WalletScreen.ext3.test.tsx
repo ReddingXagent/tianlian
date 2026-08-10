@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, FlatList } from 'react-native';
+import { Alert } from 'react-native';
 import { render, waitFor, act, fireEvent } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import WalletScreen from '../WalletScreen';

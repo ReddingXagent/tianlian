@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, fireEvent, act } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Alert } from 'react-native';
 
@@ -33,7 +33,7 @@ jest.mock('../../hooks/useChargingPolling', () => ({
   }),
 }));
 
-const alertSpy = jest.spyOn(Alert, 'alert');
+jest.spyOn(Alert, 'alert');
 
 // Import after mocks
 import ChargingScreen from '../ChargingScreen';
