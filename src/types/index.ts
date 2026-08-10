@@ -339,6 +339,39 @@ export interface InspectionResult {
 }
 
 // =====================
+// 巡检计划/模板 (Inspection Plans/Templates — /inspection/*)
+// =====================
+export interface InspectionPlan {
+  id: number;
+  name: string;
+  stationId: number;
+  stationName?: string;
+  deviceId?: number;
+  deviceName?: string;
+  type: InspectionType;
+  status: InspectionStatus;
+  scheduledDate: string;
+  cycle?: string;
+  assignedTo?: number;
+  assignedName?: string;
+  templateId?: number;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InspectionTemplate {
+  id: number;
+  name: string;
+  type: InspectionType;
+  items: InspectionItem[];
+  description?: string;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
 // 数据看板 (Dashboard)
 // =====================
 export interface DashboardStats {

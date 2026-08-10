@@ -17,6 +17,8 @@ import {
   DiagnosisResult,
   WorkOrderRecord,
   InspectionTask,
+  InspectionPlan,
+  InspectionTemplate,
   DashboardData,
   AlarmTrend,
   WorkOrderTrend,
@@ -1150,5 +1152,149 @@ export const pricingApi = {
           : null,
       };
     });
+  },
+};
+
+// =====================
+// 巡检计划 API (/inspection/plans)
+// =====================
+export const inspectionPlanApi = {
+  /** GET /inspection/plans — 巡检计划列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<InspectionPlan>>> {
+    return api
+      .get('/inspection/plans', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          stationId: (it.station_id as number) ?? 0,
+          stationName: (it.station_name as string) ?? '',
+          deviceId: it.device_id as number | undefined,
+          deviceName: it.device_name as string | undefined,
+          type: (it.type as InspectionPlan['type']) ?? 'daily',
+          status: (it.status as InspectionPlan['status']) ?? 'pending',
+          scheduledDate: (it.scheduled_date as string) ?? '',
+          cycle: it.cycle as string | undefined,
+          assignedTo: it.assigned_to as number | undefined,
+          assignedName: it.assigned_name as string | undefined,
+          templateId: it.template_id as number | undefined,
+          description: it.description as string | undefined,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 巡检模板 API (/inspection/templates)
+// =====================
+export const inspectionTemplateApi = {
+  /** GET /inspection/templates — 巡检模板列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<InspectionTemplate>>> {
+    return api
+      .get('/inspection/templates', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          type: (it.type as InspectionTemplate['type']) ?? 'daily',
+          items: ((it.items as Record<string, unknown>[]) ?? []).map((item) => ({
+            id: (item.id as number) ?? 0,
+            name: (item.name as string) ?? '',
+            expected: (item.expected as string) ?? '',
+            result: item.result as 'pass' | 'fail' | 'na' | undefined,
+            note: item.note as string | undefined,
+          })),
+          description: it.description as string | undefined,
+          enabled: (it.enabled as boolean) ?? true,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 巡检任务 V2 API (/inspection/tasks)
+// =====================
+export const inspectionTaskApi = {
+  /** GET /inspection/tasks — 巡检任务列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<InspectionTask>>> {
+    return api
+      .get('/inspection/tasks', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          stationId: (it.station_id as number) ?? 0,
+          stationName: (it.station_name as string) ?? '',
+          deviceId: (it.device_id as number) ?? 0,
+          deviceName: (it.device_name as string) ?? '',
+          type: (it.type as InspectionTask['type']) ?? 'daily',
+          status: (it.status as InspectionTask['status']) ?? 'pending',
+          scheduledDate: (it.scheduled_date as string) ?? '',
+          completedDate: it.completed_date as string | undefined,
+          assignedTo: it.assigned_to as number | undefined,
+          assignedName: it.assigned_name as string | undefined,
+          description: (it.description as string) ?? '',
+          items: ((it.items as Record<string, unknown>[]) ?? []).map((item) => ({
+            id: (item.id as number) ?? 0,
+            name: (item.name as string) ?? '',
+            expected: (item.expected as string) ?? '',
+            result: item.result as 'pass' | 'fail' | 'na' | undefined,
+            note: item.note as string | undefined,
+          })),
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        })) as InspectionTask[];
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
   },
 };
