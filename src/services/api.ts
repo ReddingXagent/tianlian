@@ -27,6 +27,9 @@ import {
   AppNotification,
   EnergySummary,
   ReportSummary,
+  DeviceConfig,
+  DeviceReport,
+  AlarmReport,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -335,6 +338,28 @@ export const deviceApi = {
   controlDevice(deviceId: number, command: string): Promise<ApiResponse<{ success: boolean; message: string }>> {
     return api.post(`/devices/${deviceId}/control`, { command }).then((res) => res.data);
   },
+  /** GET /devices/{id}/config — 充电桩配置 (仅充电桩设备) */
+  getConfig(deviceId: number): Promise<ApiResponse<DeviceConfig>> {
+    return api.get(`/devices/${deviceId}/config`).then((res) => {
+      const d = res.data.data;
+      return {
+        ...res.data,
+        data: {
+          deviceId: d.device_id ?? d.deviceId ?? deviceId,
+          voltageLimit: d.voltage_limit ?? d.voltageLimit ?? 0,
+          currentLimit: d.current_limit ?? d.currentLimit ?? 0,
+          maxPower: d.max_power ?? d.maxPower ?? 0,
+          chargeMode: d.charge_mode ?? d.chargeMode ?? 'standard',
+          overloadProtection: d.overload_protection ?? d.overloadProtection ?? false,
+          timePeriods: (d.time_periods ?? d.timePeriods ?? []).map((p: Record<string, unknown>) => ({
+            start: (p.start as string) ?? '',
+            end: (p.end as string) ?? '',
+            maxPower: (p.max_power as number) ?? (p.maxPower as number) ?? 0,
+          })),
+        },
+      };
+    });
+  },
 };
 
 // =====================
@@ -634,6 +659,58 @@ export const reportApi = {
             offline: dist.offline ?? 0,
             healthyRate: (sh.healthy_rate as number) ?? 0,
           },
+        },
+      };
+    });
+  },
+  /** GET /reports/devices — 30天设备报告 */
+  getDevices(): Promise<ApiResponse<DeviceReport>> {
+    return api.get('/reports/devices').then((res) => {
+      const d = (res.data.data ?? {}) as Record<string, unknown>;
+      const ov = (d.overview as Record<string, unknown>) ?? {};
+      const typeDist = (d.type_distribution as Record<string, number>) ?? {};
+      const statusDist = (d.status_distribution as Record<string, number>) ?? {};
+      const stationDist = (d.station_distribution as Record<string, number>) ?? {};
+      return {
+        ...res.data,
+        data: {
+          periodDays: (d.period_days as number) ?? 30,
+          totalDevices: (ov.total_devices as number) ?? 0,
+          onlineDevices: (ov.online_devices as number) ?? 0,
+          offlineDevices: (ov.offline_devices as number) ?? 0,
+          faultDevices: (ov.fault_devices as number) ?? 0,
+          maintenanceDevices: (ov.maintenance_devices as number) ?? 0,
+          typeDistribution: typeDist,
+          statusDistribution: statusDist,
+          stationDistribution: stationDist,
+        },
+      };
+    });
+  },
+  /** GET /reports/alarms — 30天告警报告 */
+  getAlarms(): Promise<ApiResponse<AlarmReport>> {
+    return api.get('/reports/alarms').then((res) => {
+      const d = (res.data.data ?? {}) as Record<string, unknown>;
+      const ov = (d.overview as Record<string, unknown>) ?? {};
+      const levelDist = (d.level_distribution as Record<string, number>) ?? {};
+      const typeDist = (d.type_distribution as Record<string, number>) ?? {};
+      const trend = (d.trend as Record<string, unknown>[]) ?? [];
+      const topFaults = (d.top_fault_devices as Record<string, unknown>[]) ?? [];
+      return {
+        ...res.data,
+        data: {
+          periodDays: (d.period_days as number) ?? 30,
+          totalAlarms: (ov.total_alarms as number) ?? 0,
+          activeAlarms: (ov.active_alarms as number) ?? 0,
+          resolvedAlarms: (ov.resolved_alarms as number) ?? 0,
+          levelDistribution: levelDist,
+          typeDistribution: typeDist,
+          trend: trend.map((t) => ({ date: (t.date as string) ?? '', count: (t.count as number) ?? 0 })),
+          topFaultDevices: topFaults.map((f) => ({
+            deviceId: (f.device_id as number) ?? (f.deviceId as number) ?? 0,
+            deviceName: (f.device_name as string) ?? (f.deviceName as string) ?? '',
+            alarmCount: (f.alarm_count as number) ?? (f.alarmCount as number) ?? 0,
+          })),
         },
       };
     });

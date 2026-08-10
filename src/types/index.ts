@@ -406,3 +406,56 @@ export interface ReportSummary {
   overview: ReportOverview;
   stationHealth: StationHealthDist;
 }
+
+// =====================
+// 充电桩配置 (Device Config)
+// =====================
+export interface DeviceConfig {
+  deviceId: number;
+  voltageLimit: number;
+  currentLimit: number;
+  maxPower: number;
+  chargeMode: string;
+  overloadProtection: boolean;
+  timePeriods?: {
+    start: string;
+    end: string;
+    maxPower: number;
+  }[];
+}
+
+// =====================
+// 设备报告 (Device Report)
+// =====================
+export interface DeviceReport {
+  periodDays: number;
+  totalDevices: number;
+  onlineDevices: number;
+  offlineDevices: number;
+  faultDevices: number;
+  maintenanceDevices: number;
+  typeDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
+  stationDistribution: Record<string, number>;
+}
+
+// =====================
+// 告警报告 (Alarm Report)
+// =====================
+export interface AlarmReport {
+  periodDays: number;
+  totalAlarms: number;
+  activeAlarms: number;
+  resolvedAlarms: number;
+  levelDistribution: Record<string, number>;
+  typeDistribution: Record<string, number>;
+  trend: {
+    date: string;
+    count: number;
+  }[];
+  topFaultDevices: {
+    deviceId: number;
+    deviceName: string;
+    alarmCount: number;
+  }[];
+}
