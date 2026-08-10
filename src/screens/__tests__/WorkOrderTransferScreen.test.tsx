@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, type AlertButton } from 'react-native';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import WorkOrderTransferScreen from '../WorkOrderTransferScreen';
 import { useWorkOrderEnhancedStore } from '../../store/workOrderEnhancedStore';
@@ -15,7 +15,7 @@ jest.mock('../../store/workOrderEnhancedStore', () => ({
   useWorkOrderEnhancedStore: jest.fn(),
 }));
 
-const pressTransferButton = (getAllByText: any) => {
+const pressTransferButton = (getAllByText: (text: string) => { testID?: string }[]) => {
   const matches = getAllByText('转派工单');
   fireEvent.press(matches[matches.length - 1]);
 };
@@ -86,7 +86,7 @@ describe('WorkOrderTransferScreen', () => {
   });
 
   it('urges the order after confirmation', () => {
-    let buttons: any[] = [];
+    let buttons: AlertButton[] = [];
     const alertSpy = jest
       .spyOn(Alert, 'alert')
       .mockImplementation((_t, _m, b) => {

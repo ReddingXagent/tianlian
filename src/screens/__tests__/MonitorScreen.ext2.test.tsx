@@ -48,7 +48,7 @@ const METRICS = {
 };
 
 function setupMocks(opts?: {
-  devices?: any[]; faults?: any[]; alarms?: any[]; metrics?: any[];
+  devices?: Record<string, unknown>[]; faults?: Record<string, unknown>[]; alarms?: Record<string, unknown>[]; metrics?: Record<string, unknown>[];
   summaryError?: boolean; metricsError?: boolean;
 }) {
   if (opts?.summaryError) {

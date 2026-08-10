@@ -5,7 +5,7 @@
  *        null task rendering, partial/fail result, in_progress items with result,
  *        showCompleteForm toggle, Alert empty note, type labels
  */
-import { Alert } from 'react-native';
+import { Alert, type AlertButton } from 'react-native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import InspectionDetailScreen from '../InspectionDetailScreen';
 import { useInspectionStore } from '../../store/inspectionStore';
@@ -87,7 +87,7 @@ describe('InspectionDetailScreen — 扩展覆盖', () => {
   // --- handleStart alert buttons ---
 
   it('handleStart alert 确定按钮 → startTask 调用', () => {
-    let capturedButtons: any[] = [];
+    let capturedButtons: AlertButton[] = [];
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_, __, buttons) => {
       capturedButtons = buttons || [];
     });

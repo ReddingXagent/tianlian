@@ -4,7 +4,7 @@
  * 覆盖: network error, signIn flow (success/fail), reportFault, quickInput clears error,
  *       resultIcon/resultTypeLabel default, signInMode render, onChangeText clears error
  */
-import { Alert } from 'react-native';
+import { Alert, type AlertButton } from 'react-native';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import ScanScreen from '../ScanScreen';
 import { scanApi } from '../../services/api';
@@ -21,20 +21,20 @@ const MOCK_DEVICE = {
   status: 'online',
 };
 
-const MOCK_STATION: any = {
-  type: 'station',
+const MOCK_STATION = {
+  type: 'station' as const,
   id: 3,
   code: 'STATION-A01',
   name: '东站',
-  status: undefined,
+  status: undefined as string | undefined,
 };
 
-const MOCK_UNKNOWN: any = {
-  type: 'unknown',
+const MOCK_UNKNOWN = {
+  type: 'unknown' as const,
   id: 99,
   code: 'X-001',
-  name: undefined,
-  status: undefined,
+  name: undefined as string | undefined,
+  status: undefined as string | undefined,
 };
 
 describe('ScanScreen.ext', () => {
@@ -144,10 +144,10 @@ describe('ScanScreen.ext', () => {
   // ── signIn success flow ─────────────────────────────────────
 
   it('signIn flow: Alert confirm → checkIn success → success alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons?: any) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
       // Simulate pressing "签到" button
       if (buttons && buttons[1]) {
-        buttons[1].onPress();
+        buttons[1].onPress?.();
       }
     });
     (scanApi.scan as jest.Mock).mockResolvedValue({ data: MOCK_DEVICE });
@@ -174,9 +174,9 @@ describe('ScanScreen.ext', () => {
   // ── signIn failure flow ─────────────────────────────────────
 
   it('signIn flow: Alert confirm → checkIn failure → failure alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons?: any) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
       if (buttons && buttons[1]) {
-        buttons[1].onPress();
+        buttons[1].onPress?.();
       }
     });
     (scanApi.scan as jest.Mock).mockResolvedValue({ data: MOCK_DEVICE });
@@ -200,7 +200,7 @@ describe('ScanScreen.ext', () => {
   // ── signIn cancel ───────────────────────────────────────────
 
   it('signIn flow: Alert cancel → setSignInMode(false)', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons?: any) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
       // Press cancel
       if (buttons && buttons[0]) {
         buttons[0].onPress?.();
@@ -233,10 +233,10 @@ describe('ScanScreen.ext', () => {
   // ── reportFault flow ────────────────────────────────────────
 
   it('reportFault: shows confirm alert then success on submit', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons?: any) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
       // First call: confirm, press "提交"
       if (buttons && buttons[1]) {
-        buttons[1].onPress();
+        buttons[1].onPress?.();
       }
     });
     (scanApi.scan as jest.Mock).mockResolvedValue({ data: MOCK_DEVICE });
@@ -260,7 +260,7 @@ describe('ScanScreen.ext', () => {
   // ── reportFault cancel ──────────────────────────────────────
 
   it('reportFault: cancel does nothing', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons?: any) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
       if (buttons && buttons[0]) {
         buttons[0].onPress?.();
       }
@@ -282,7 +282,7 @@ describe('ScanScreen.ext', () => {
   // ── device without status (no StatusBadge) ──────────────────
 
   it('device without status does not render StatusBadge', async () => {
-    const dev: any = { type: 'device', id: 1, code: 'D1', name: 'Dev1', status: undefined };
+    const dev = { type: 'device' as const, id: 1, code: 'D1', name: 'Dev1', status: undefined as string | undefined };
     (scanApi.scan as jest.Mock).mockResolvedValue({ data: dev });
     const { getByPlaceholderText, getByText, findByText } = render(<ScanScreen />);
     fireEvent.changeText(getByPlaceholderText('输入设备/站点编码'), 'D1');

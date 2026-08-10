@@ -5,7 +5,7 @@
  *        handleAction (accept/execute/complete) success+fail,
  *        loadRecords error, null order, type labels, completedAt, description fallback
  */
-import { Alert } from 'react-native';
+import { Alert, type AlertButton } from 'react-native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import WorkOrderDetailScreen from '../WorkOrderDetailScreen';
 import { useWorkOrderStore } from '../../store/workOrderStore';
@@ -126,7 +126,7 @@ describe('WorkOrderDetailScreen — 扩展覆盖', () => {
   // --- handleAction: accept success ---
 
   it('handleAction accept → 成功 Alert', async () => {
-    let capturedButtons: any[] = [];
+    let capturedButtons: AlertButton[] = [];
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_, __, buttons) => {
       capturedButtons = buttons || [];
     });
@@ -146,7 +146,7 @@ describe('WorkOrderDetailScreen — 扩展覆盖', () => {
   // --- handleAction: execute ---
 
   it('handleAction execute → start 调用', async () => {
-    let capturedButtons: any[] = [];
+    let capturedButtons: AlertButton[] = [];
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_, __, buttons) => {
       capturedButtons = buttons || [];
     });
@@ -168,7 +168,7 @@ describe('WorkOrderDetailScreen — 扩展覆盖', () => {
   // --- handleAction: complete ---
 
   it('handleAction complete → complete 调用', async () => {
-    let capturedButtons: any[] = [];
+    let capturedButtons: AlertButton[] = [];
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_, __, buttons) => {
       capturedButtons = buttons || [];
     });
@@ -191,7 +191,7 @@ describe('WorkOrderDetailScreen — 扩展覆盖', () => {
 
   it('handleAction accept fail → Alert 操作失败', async () => {
     (workOrderActionApi.accept as jest.Mock).mockRejectedValue(new Error('fail'));
-    let capturedButtons: any[] = [];
+    let capturedButtons: AlertButton[] = [];
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_, __, buttons) => {
       capturedButtons = buttons || [];
     });

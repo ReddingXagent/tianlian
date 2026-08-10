@@ -67,7 +67,7 @@ describe('KnowledgeScreen.ext3 — refresh & retry callbacks', () => {
     await findByText('操作手册');
 
     // Walk the test tree to find RefreshControl and invoke its onRefresh
-    const findRefreshControl = (node: any): any => {
+    const findRefreshControl = (node: React.ReactElement | null): React.ReactElement | null => {
       if (!node) return null;
       if (node.type === RefreshControl) return node;
       if (node.props?.refreshControl?.type === RefreshControl) return node.props.refreshControl;

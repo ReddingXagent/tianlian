@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, type AlertButton } from 'react-native';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import ProfileScreen from '../ProfileScreen';
 import { useAuthStore } from '../../store/authStore';
@@ -73,7 +73,7 @@ describe('ProfileScreen', () => {
   });
 
   it('calls logout when confirmation is pressed', () => {
-    let buttons: any[] = [];
+    let buttons: AlertButton[] = [];
     const alertSpy = jest
       .spyOn(Alert, 'alert')
       .mockImplementation((_t, _m, b) => {

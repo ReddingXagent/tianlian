@@ -3,7 +3,7 @@
  * 目标: 73.9% → 95%+ branches
  * 覆盖: assigneeId NaN, transferring render, urge success/fail, localError clear
  */
-import { Alert } from 'react-native';
+import { Alert, type AlertButton } from 'react-native';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import WorkOrderTransferScreen from '../WorkOrderTransferScreen';
 import { useWorkOrderEnhancedStore } from '../../store/workOrderEnhancedStore';
@@ -20,7 +20,7 @@ jest.mock('../../store/workOrderEnhancedStore', () => ({
   useWorkOrderEnhancedStore: jest.fn(),
 }));
 
-const pressTransferBtn = (getAllByText: any) => {
+const pressTransferBtn = (getAllByText: (text: string) => { testID?: string }[]) => {
   const matches = getAllByText('转派工单');
   fireEvent.press(matches[matches.length - 1]);
 };
@@ -103,11 +103,11 @@ describe('WorkOrderTransferScreen.ext', () => {
   });
 
   it('urge flow: success shows alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons?: any) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t: string, _m: string, buttons?: AlertButton[]) => {
       // First call: confirm dialog, press 确定催单
-      const confirm = buttons?.find((b: any) => b.text === '确定催单');
+      const confirm = buttons?.find((b: AlertButton) => b.text === '确定催单');
       if (confirm) {
-        confirm.onPress();
+        confirm.onPress?.();
       }
     });
     mockUrgeOrder.mockResolvedValue({ id: 'WO-1' });
@@ -125,10 +125,10 @@ describe('WorkOrderTransferScreen.ext', () => {
   });
 
   it('urge flow: failure (null result) does not show success alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons?: any) => {
-      const confirm = buttons?.find((b: any) => b.text === '确定催单');
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t: string, _m: string, buttons?: AlertButton[]) => {
+      const confirm = buttons?.find((b: AlertButton) => b.text === '确定催单');
       if (confirm) {
-        confirm.onPress();
+        confirm.onPress?.();
       }
     });
     mockUrgeOrder.mockResolvedValue(null);
@@ -146,8 +146,8 @@ describe('WorkOrderTransferScreen.ext', () => {
   });
 
   it('urge flow: cancel does not call urgeOrder', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons?: any) => {
-      const cancel = buttons?.find((b: any) => b.text === '取消');
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t: string, _m: string, buttons?: AlertButton[]) => {
+      const cancel = buttons?.find((b: AlertButton) => b.text === '取消');
       if (cancel) {
         cancel.onPress?.();
       }

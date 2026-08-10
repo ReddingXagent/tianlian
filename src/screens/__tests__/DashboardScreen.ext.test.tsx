@@ -203,7 +203,7 @@ describe('DashboardScreen.ext', () => {
   });
 
   it('renders with null data fields using fallback dashes', () => {
-    const nullData: any = {
+    const nullData: Record<string, unknown> = {
       stats: { totalOrders: null, completedOrders: null, pendingOrders: null, avgCompletionHours: null, onTimeRate: null },
       deviceHealth: { online: null, offline: null, fault: null, onlineRate: null },
       alarmTrends: null,

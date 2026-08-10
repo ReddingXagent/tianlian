@@ -84,14 +84,14 @@ const ORDER_DETAIL = {
 };
 
 /** Traverse rendered tree to find RefreshControl via refreshControl prop */
-function getOnRefresh(root: any, containerType: any): (() => void) | null {
+function getOnRefresh(root: React.ReactElement | null, containerType: string): (() => void) | null {
   const all = root.findAllByType ? root.findAllByType(containerType) : [];
   for (const node of all) {
     const rc = node.props?.refreshControl;
     if (rc?.props?.onRefresh) return rc.props.onRefresh;
   }
   // Also try UNSAFE_allChildren traversal
-  function walk(node: any): (() => void) | null {
+  function walk(node: React.ReactElement | null): (() => void) | null {
     if (!node) return null;
     const rc = node.props?.refreshControl;
     if (rc?.props?.onRefresh) return rc.props.onRefresh;

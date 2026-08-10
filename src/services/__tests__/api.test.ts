@@ -201,7 +201,7 @@ describe('workbenchApi', () => {
   });
 
   it('getPendingOrders should GET /workbench/pending-orders with limit', async () => {
-    const orders: any[] = [];
+    const orders: Record<string, unknown>[] = [] = [];
     const apiResponse = { code: 0, message: 'success', data: orders };
     mockAxios.onGet('/workbench/pending-orders', { params: { limit: 5 } }).reply(200, apiResponse);
 
@@ -210,7 +210,7 @@ describe('workbenchApi', () => {
   });
 
   it('getRecentAlarms should GET /workbench/recent-alarms with limit', async () => {
-    const alarms: any[] = [];
+    const alarms: Record<string, unknown>[] = [] = [];
     const apiResponse = { code: 0, message: 'success', data: alarms };
     mockAxios.onGet('/workbench/recent-alarms', { params: { limit: 5 } }).reply(200, apiResponse);
 
@@ -578,7 +578,7 @@ describe('knowledgeApi', () => {
   });
 
   it('search should GET /knowledge/search with query', async () => {
-    const articles: any[] = [];
+    const articles: Record<string, unknown>[] = [] = [];
     const apiResponse = { code: 0, message: 'success', data: articles };
     mockAxios.onGet('/knowledge/search', { params: { q: '充电' } }).reply(200, apiResponse);
 
@@ -681,7 +681,7 @@ describe('dashboardApi', () => {
   });
 
   it('getAlarmTrends should GET /dashboard/alarm-trends with days', async () => {
-    const trends: any[] = [];
+    const trends: Record<string, unknown>[] = [] = [];
     const apiResponse = { code: 0, message: 'success', data: trends };
     mockAxios.onGet('/dashboard/alarm-trends', { params: { days: 7 } }).reply(200, apiResponse);
 
@@ -690,7 +690,7 @@ describe('dashboardApi', () => {
   });
 
   it('getWorkOrderTrends should GET /dashboard/workorder-trends', async () => {
-    const trends: any[] = [];
+    const trends: Record<string, unknown>[] = [] = [];
     const apiResponse = { code: 0, message: 'success', data: trends };
     mockAxios.onGet('/dashboard/workorder-trends', { params: { days: 30 } }).reply(200, apiResponse);
 

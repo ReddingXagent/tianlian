@@ -19,7 +19,7 @@ jest.mock('../../store/authStore', () => ({
 
 // Mock NavigationContainer
 jest.mock('@react-navigation/native', () => ({
-  NavigationContainer: ({ children }: any) => children,
+  NavigationContainer: ({ children }: { children: React.ReactNode }) => children,
 }));
 
 // Mock navigators — use require('react') inside factory
@@ -28,9 +28,9 @@ jest.mock('@react-navigation/native-stack', () => {
   const R = require('react');
   return {
     createNativeStackNavigator: () => ({
-      Navigator: ({ children }: any) => children,
-      Screen: ({ component: Comp }: any) => Comp ? R.createElement(Comp) : null,
-      Group: ({ children }: any) => children,
+      Navigator: ({ children }: { children: React.ReactNode }) => children,
+      Screen: ({ component: Comp }: { component: React.FC }) => Comp ? R.createElement(Comp) : null,
+      Group: ({ children }: { children: React.ReactNode }) => children,
     }),
   };
 });
@@ -40,8 +40,8 @@ jest.mock('@react-navigation/bottom-tabs', () => {
   const R = require('react');
   return {
     createBottomTabNavigator: () => ({
-      Navigator: ({ children }: any) => children,
-      Screen: ({ component: Comp }: any) => Comp ? R.createElement(Comp) : null,
+      Navigator: ({ children }: { children: React.ReactNode }) => children,
+      Screen: ({ component: Comp }: { component: React.FC }) => Comp ? R.createElement(Comp) : null,
     }),
   };
 });

@@ -7,7 +7,7 @@ import { View, Text } from 'react-native';
 import { render } from '@testing-library/react-native';
 
 jest.mock('@react-navigation/native', () => ({
-  NavigationContainer: ({ children }: any) => <>{children}</>,
+  NavigationContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 jest.mock('@react-navigation/native-stack', () => {
@@ -15,8 +15,8 @@ jest.mock('@react-navigation/native-stack', () => {
   const R = require('react');
   return {
     createNativeStackNavigator: () => ({
-      Navigator: ({ children }: any) => R.createElement(R.Fragment, null, children),
-      Screen: ({ component: Comp }: any) => Comp ? R.createElement(Comp) : null,
+      Navigator: ({ children }: { children: React.ReactNode }) => R.createElement(R.Fragment, null, children),
+      Screen: ({ component: Comp }: { component: React.FC }) => Comp ? R.createElement(Comp) : null,
     }),
   };
 });
@@ -26,8 +26,8 @@ jest.mock('@react-navigation/bottom-tabs', () => {
   const R = require('react');
   return {
     createBottomTabNavigator: () => ({
-      Navigator: ({ children }: any) => R.createElement(R.Fragment, null, children),
-      Screen: ({ component: Comp, options }: any) => {
+      Navigator: ({ children }: { children: React.ReactNode }) => R.createElement(R.Fragment, null, children),
+      Screen: ({ component: Comp, options }: { component: React.FC; options?: Record<string, unknown> }) => {
         // Invoke tabBarIcon to cover TabIcon branches
         if (options?.tabBarIcon) {
           try {
@@ -44,7 +44,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
 });
 
 jest.mock('../../store/authStore', () => ({
-  useAuthStore: (selector: (s: any) => any) =>
+  useAuthStore: (selector: (s: { isAuthenticated: boolean; isLoading: boolean; checkAuth: jest.Mock }) => unknown) =>
     selector({
       isAuthenticated: true,
       isLoading: false,
