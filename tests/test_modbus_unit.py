@@ -26,14 +26,16 @@ class TestCallbackRegistration:
     def test_on_telemetry_registers_callback(self):
         cfg = ModbusConfig(use_real_modbus=False)
         adapter = ModbusAdapter(cfg)
-        cb = lambda p: None
+        def cb(p):
+            return None
         adapter.on_telemetry(cb)
         assert adapter._on_telemetry is cb
 
     def test_on_alarm_registers_callback(self):
         cfg = ModbusConfig(use_real_modbus=False)
         adapter = ModbusAdapter(cfg)
-        cb = lambda d, t, m: None
+        def cb(d, t, m):
+            return None
         adapter.on_alarm(cb)
         assert adapter._on_alarm is cb
 

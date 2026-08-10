@@ -7,11 +7,9 @@ Targeting lines: 120-197, 208-209, 238-239, 273-284, 394-419, 457, 463-464,
 
 import asyncio
 import json
-import logging
 import os
 import sys
 import tempfile
-import contextlib
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -229,7 +227,7 @@ class TestCloudUploadLoop:
             await asyncio.sleep(0.15)
             gw._running = False
 
-        asyncio.create_task(stop_after_delay())
+        _stop_task = asyncio.create_task(stop_after_delay())  # noqa: RUF006
         await gw._cloud_upload_loop()
         # If we get here without hanging, the loop respected _running=False
 
@@ -239,7 +237,6 @@ class TestCloudUploadLoop:
         gw._running = True
         call_count = 0
 
-        original_upload = gw._upload_telemetry_batch
 
         async def failing_upload():
             nonlocal call_count
@@ -253,7 +250,7 @@ class TestCloudUploadLoop:
             await asyncio.sleep(0.2)
             gw._running = False
 
-        asyncio.create_task(stop_after_delay())
+        _stop_task = asyncio.create_task(stop_after_delay())  # noqa: RUF006
         await gw._cloud_upload_loop()
         # Should have been called multiple times despite exception
         assert call_count >= 1
@@ -271,14 +268,13 @@ class TestOfflineSyncLoop:
             await asyncio.sleep(0.15)
             gw._running = False
 
-        asyncio.create_task(stop_after_delay())
+        _stop_task = asyncio.create_task(stop_after_delay())  # noqa: RUF006
         await gw._offline_sync_loop()
 
     @pytest.mark.asyncio
     async def test_sync_loop_handles_exception(self, gw):
         """sync loop should swallow exceptions and continue"""
         gw._running = True
-        original_sync = gw._sync_cached_telemetry
         call_count = 0
 
         async def failing_sync():
@@ -293,7 +289,7 @@ class TestOfflineSyncLoop:
             await asyncio.sleep(0.2)
             gw._running = False
 
-        asyncio.create_task(stop_after_delay())
+        _stop_task = asyncio.create_task(stop_after_delay())  # noqa: RUF006
         await gw._offline_sync_loop()
         assert call_count >= 1
 
@@ -319,7 +315,7 @@ class TestOfflineSyncLoop:
             await asyncio.sleep(0.25)
             gw._running = False
 
-        asyncio.create_task(stop_after_delay())
+        _stop_task = asyncio.create_task(stop_after_delay())  # noqa: RUF006
         await gw._offline_sync_loop()
         assert cleanup_called
 
@@ -498,8 +494,8 @@ class TestMainEntryPoint:
 
         with patch.object(GatewayConfig, "from_env", return_value=GatewayConfig()), \
              patch("main.setup_logging") as mock_log, \
-             patch.object(main.EdgeGateway, "start", new=AsyncMock()) as mock_start, \
-             patch.object(main.EdgeGateway, "stop", new=AsyncMock()) as mock_stop:
+             patch.object(main.EdgeGateway, "start", new=AsyncMock()), \
+             patch.object(main.EdgeGateway, "stop", new=AsyncMock()):
 
             # Set _running False quickly so the while loop exits
             async def quick_start(self):
@@ -586,7 +582,7 @@ class TestOfflineSyncFullFlow:
             await asyncio.sleep(0.12)
             gw._running = False
 
-        asyncio.create_task(stop_after_delay())
+        _stop_task = asyncio.create_task(stop_after_delay())  # noqa: RUF006
         await gw._offline_sync_loop()
 
         assert telemetry_synced
@@ -619,7 +615,7 @@ class TestRemainingBranches:
             try:
                 await asyncio.sleep(100)
             except asyncio.CancelledError:
-                raise RuntimeError("task inner error")
+                raise RuntimeError("task inner error") from None
 
         gw._api_task = loop.create_task(raising_task())
         gw._sync_task = None
@@ -669,7 +665,6 @@ class TestRemainingBranches:
             raise asyncio.CancelledError()
 
         # Patch _upload_telemetry_batch to trigger CancelledError
-        original = gw._upload_telemetry_batch
 
         async def cancelling_upload():
             await cancel_after()
@@ -719,7 +714,7 @@ class TestRemainingBranches:
             await asyncio.sleep(0.2)
             gw._running = False
 
-        asyncio.create_task(stop_after_delay())
+        _stop_task = asyncio.create_task(stop_after_delay())  # noqa: RUF006
         await gw._offline_sync_loop()
         assert cleanup_called
 

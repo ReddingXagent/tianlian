@@ -5,14 +5,11 @@ Targeting: L94-97, L174-241
 """
 
 import asyncio
-import contextlib
-import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from config import ModbusConfig
-from models import TelemetryPoint
 
 
 @pytest.fixture
@@ -316,7 +313,7 @@ class TestPollLoopFallback:
             adapter._running = False
 
         # Start adapter (which starts poll loop)
-        asyncio.create_task(stop_soon())
+        _stop_task = asyncio.create_task(stop_soon())  # noqa: RUF006
         await adapter.start()
 
         # Wait for simulation to produce telemetry
@@ -338,7 +335,6 @@ class TestPollLoopFallback:
 
         # First poll fails, reconnect succeeds, then stop
         poll_count = 0
-        original_poll_real = None
 
         async def failing_real_poll():
             nonlocal poll_count
@@ -348,7 +344,6 @@ class TestPollLoopFallback:
         adapter._poll_real_device = failing_real_poll
 
         reconnect_called = False
-        original_connect = None
 
         async def mock_connect():
             nonlocal reconnect_called
@@ -364,7 +359,7 @@ class TestPollLoopFallback:
             adapter._running = False
 
         adapter._running = True
-        asyncio.create_task(stop_soon())
+        _stop_task = asyncio.create_task(stop_soon())  # noqa: RUF006
         await adapter._poll_loop()
 
         assert reconnect_called

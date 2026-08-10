@@ -11,8 +11,7 @@ Covers:
 """
 
 import asyncio
-import random
-from datetime import datetime, timezone
+from datetime import timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -285,13 +284,11 @@ class TestWebSocketBootstrapSuccess:
     @pytest.mark.asyncio
     async def test_boot_notification_accepted_enters_main_loop(self, real_adapter):
         """Test the full success path: BootNotification accepted → main loop runs."""
-        pass
 
     @pytest.mark.skip(reason="Requires mock CSMS server; same as accepted test")
     @pytest.mark.asyncio
     async def test_boot_notification_rejected_returns_early(self, real_adapter):
         """When BootNotification status is Rejected, should return without main loop."""
-        pass
 
     @pytest.mark.asyncio
     async def test_connection_closed_triggers_reconnect(self, real_adapter):
@@ -335,7 +332,6 @@ class TestWebSocketBootstrapSuccess:
     @pytest.mark.asyncio
     async def test_charge_point_generic_error_reraises(self, real_adapter):
         """When generic Exception occurs inside WS context and _running, should reraise."""
-        pass
 
 
 # ── L1084-1087: ImportError inside _run_real_charger ────────────────

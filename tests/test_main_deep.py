@@ -369,7 +369,7 @@ class TestCleanupLogging:
             await asyncio.sleep(0.15)
             gw._running = False
 
-        asyncio.create_task(stop_after())
+        _stop_task = asyncio.create_task(stop_after())  # noqa: RUF006
         await gw._offline_sync_loop()
 
         # Verify the old entry was cleaned up
@@ -389,7 +389,7 @@ class TestStopBgTaskException:
             try:
                 await asyncio.sleep(100)
             except asyncio.CancelledError:
-                raise RuntimeError("sync inner error")
+                raise RuntimeError("sync inner error") from None
 
         gw._sync_task = loop.create_task(raising_sync_task())
         gw._cloud_upload_task = None
@@ -413,7 +413,7 @@ class TestStopBgTaskException:
             try:
                 await asyncio.sleep(100)
             except asyncio.CancelledError:
-                raise RuntimeError("api inner error")
+                raise RuntimeError("api inner error") from None
 
         gw._api_task = loop.create_task(raising_api_task())
         gw._sync_task = None
@@ -548,7 +548,7 @@ class TestCloudUploadLoopAlarms:
             await asyncio.sleep(0.15)
             gw._running = False
 
-        asyncio.create_task(stop_after())
+        _stop_task = asyncio.create_task(stop_after())  # noqa: RUF006
         await gw._cloud_upload_loop()
 
         assert alarm_uploaded

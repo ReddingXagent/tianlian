@@ -15,10 +15,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-import paho.mqtt.client as mqtt_lib
 from adapters.mqtt_client import MQTTClient
 from config import MQTTConfig
-from models import TelemetryPoint
 
 
 @pytest.fixture

@@ -10,9 +10,7 @@ Uncovered lines:
 - L220-221: push_telemetry_batch failure → cache fallback path
 """
 
-import asyncio
-import json
-from unittest.mock import AsyncMock, MagicMock, patch, mock_open
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest

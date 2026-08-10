@@ -7,10 +7,6 @@ L312-316, L370-392, L422-423, L428, L456
 """
 
 import asyncio
-import gzip
-import json
-import tempfile
-import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx

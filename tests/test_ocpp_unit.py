@@ -18,11 +18,8 @@ from adapters.ocpp_adapter import (
     AuthorizeRequest,
     AuthorizeResponse,
     BootNotificationRequest,
-    BootNotificationResponse,
     ChargePointErrorCode,
     ChargePointStatus,
-    HeartbeatRequest,
-    HeartbeatResponse,
     Measurand,
     MeterValue,
     MeterValuesRequest,
@@ -1038,7 +1035,7 @@ class TestRealChargerBootstrap:
         real_adapter._running = True
 
         with patch("websockets.connect", side_effect=ConnectionRefusedError("refused")):
-            with patch.object(real_adapter, "_run_simulated_charger", new_callable=AsyncMock) as mock_sim:
+            with patch.object(real_adapter, "_run_simulated_charger", new_callable=AsyncMock):
                 with patch("asyncio.sleep", new_callable=AsyncMock):
                     await real_adapter._run_real_charger()
         assert real_adapter._reconnect_count == 3
@@ -1454,7 +1451,6 @@ class TestRealChargerConnectionClosed:
         """When generic Exception occurs inside the WS context and _running, should reraise."""
         real_adapter._running = True
 
-        from unittest.mock import patch as ut_patch
 
         # We test the inner exception path indirectly by verifying the adapter state
         # The actual WebSocket context mock is complex; test the error state machine
@@ -1471,7 +1467,6 @@ class TestSimulatedIdleTemperatureAlarm:
     @pytest.mark.asyncio
     async def test_high_temperature_alarm_emitted(self):
         """When temperature exceeds 50, alarm callback should be invoked."""
-        import random as _r
         config = OCPPConfig(
             charger_id="TEMP-ALARM-001",
             heartbeat_interval=0.01,
@@ -1663,8 +1658,8 @@ class TestMainPyMissingLines:
 
     def test_edge_gateway_init_with_config(self):
         """Test EdgeGateway initialization with custom config."""
-        from main import EdgeGateway
         from config import GatewayConfig
+        from main import EdgeGateway
         config = GatewayConfig()
         gw = EdgeGateway(config)
         assert gw is not None
@@ -1673,8 +1668,8 @@ class TestMainPyMissingLines:
 
     def test_edge_gateway_start_time_zero(self):
         """Test initial state of EdgeGateway."""
-        from main import EdgeGateway
         from config import GatewayConfig
+        from main import EdgeGateway
         config = GatewayConfig()
         gw = EdgeGateway(config)
         assert gw._start_time == 0.0
@@ -1685,8 +1680,8 @@ class TestMainPyMissingLines:
     @pytest.mark.asyncio
     async def test_edge_gateway_stop_without_start(self):
         """Stop without start should be safe."""
-        from main import EdgeGateway
         from config import GatewayConfig
+        from main import EdgeGateway
         config = GatewayConfig()
         gw = EdgeGateway(config)
         await gw.stop()  # Should not raise
@@ -1694,8 +1689,8 @@ class TestMainPyMissingLines:
     @pytest.mark.asyncio
     async def test_edge_gateway_stop_with_running_flag(self):
         """Stop should set _running to False."""
-        from main import EdgeGateway
         from config import GatewayConfig
+        from main import EdgeGateway
         config = GatewayConfig()
         gw = EdgeGateway(config)
         gw._running = True
@@ -1704,8 +1699,8 @@ class TestMainPyMissingLines:
 
     def test_edge_gateway_logger(self):
         """Test logger is available."""
-        from main import EdgeGateway
         from config import GatewayConfig
+        from main import EdgeGateway
         config = GatewayConfig()
         gw = EdgeGateway(config)
         assert gw.logger is not None
