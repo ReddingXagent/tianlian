@@ -33,6 +33,7 @@ import {
   AlarmRule,
   NotificationRule,
   SparePart,
+  ChargerConfig,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -365,6 +366,27 @@ export const deviceApi = {
           dimensionScores: (d.dimension_scores as Record<string, number>) ?? {},
           checkedAt: (d.checked_at as string) ?? '',
           lastHealthCheck: (d.last_health_check as string | null) ?? null,
+        },
+      };
+    });
+  },
+  /** GET /devices/{id}/config — 充电桩设备配置 */
+  getConfig(id: number): Promise<ApiResponse<ChargerConfig>> {
+    return api.get(`/devices/${id}/config`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          deviceId: (d.device_id as number) ?? 0,
+          voltageLimit: (d.voltage_limit as number) ?? 0,
+          currentLimit: (d.current_limit as number) ?? 0,
+          maxPower: (d.max_power as number) ?? 0,
+          chargeMode: (d.charge_mode as string) ?? '',
+          overloadProtection: (d.overload_protection as boolean) ?? false,
+          timePeriods: (d.time_periods as { start_time: string; end_time: string; power_limit: number }[]) ?? [],
+          createdAt: (d.created_at as string | null) ?? null,
+          updatedAt: (d.updated_at as string | null) ?? null,
         },
       };
     });

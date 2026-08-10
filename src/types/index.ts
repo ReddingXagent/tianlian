@@ -600,6 +600,25 @@ export interface NotificationRule {
 }
 
 // =====================
+// 充电桩配置 (ChargerConfig — from /devices/{id}/config)
+// =====================
+export interface ChargerConfig {
+  deviceId: number;
+  voltageLimit: number;
+  currentLimit: number;
+  maxPower: number;
+  chargeMode: string;
+  overloadProtection: boolean;
+  timePeriods: {
+    startTime: string;
+    endTime: string;
+    powerLimit: number;
+  }[];
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+// =====================
 // 备件 (SparePart — from /spare-parts)
 // =====================
 export interface SparePart {
