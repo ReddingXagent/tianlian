@@ -1,5 +1,6 @@
 // components/station-card/index.js
 const util = require('../../utils/util');
+const brandingUtil = require('../../utils/branding');
 
 Component({
   properties: {
@@ -7,17 +8,28 @@ Component({
       type: Object,
       value: {},
       observer: function(newVal) {
-        if (newVal && newVal.distance !== undefined) {
-          this.setData({
-            distanceText: util.formatDistance(newVal.distance)
-          });
+        if (!newVal) return;
+        const updates = {};
+        if (newVal.distance !== undefined) {
+          updates.distanceText = util.formatDistance(newVal.distance);
         }
+        // 消费 branding 字段做动态品牌渲染
+        const branding = brandingUtil.getStationBranding(newVal);
+        updates.brandOperator = branding.operatorName;
+        updates.brandColor = branding.themeColor;
+        updates.brandColorLight = brandingUtil.hexToRgba(branding.themeColor, 0.1);
+        updates.brandIsCustom = branding.isCustom;
+        this.setData(updates);
       }
     }
   },
 
   data: {
-    distanceText: ''
+    distanceText: '',
+    brandOperator: '',
+    brandColor: '',
+    brandColorLight: '',
+    brandIsCustom: false
   },
 
   methods: {
