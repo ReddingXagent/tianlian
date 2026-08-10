@@ -37,6 +37,7 @@ import {
   SparePart,
   ChargerConfig,
   PricingRule,
+  EfficiencyReport,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -883,6 +884,52 @@ export const reportApi = {
             completedCount: (e.completed_count as number) ?? 0,
             avgCompletionHours: (e.avg_completion_hours as number) ?? 0,
           })),
+        },
+      };
+    });
+  },
+
+  /** GET /reports/efficiency — 效率报告 */
+  getEfficiency(params?: {
+    period?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<EfficiencyReport>> {
+    return api.get('/reports/efficiency', { params: { period: params?.period, page: params?.page, page_size: params?.pageSize } }).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const alerts = (d.alerts ?? {}) as Record<string, unknown>;
+      const abnormal = (alerts.abnormal_low_efficiency ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          items: ((d.items as Record<string, unknown>[]) ?? []).map((item) => ({
+            stationId: (item.station_id as number) ?? undefined,
+            stationName: (item.station_name as string) ?? undefined,
+            deviceId: (item.device_id as number) ?? undefined,
+            deviceName: (item.device_name as string) ?? undefined,
+            efficiency: (item.efficiency as number) ?? undefined,
+            uptime: (item.uptime as number) ?? undefined,
+            utilization: (item.utilization as number) ?? undefined,
+          })),
+          total: (d.total as number) ?? 0,
+          page: (d.page as number) ?? 1,
+          pageSize: (d.page_size as number) ?? 20,
+          alerts: {
+            abnormalLowEfficiency: {
+              count: (abnormal.count as number) ?? 0,
+              threshold: (abnormal.threshold as string) ?? '',
+              items: ((abnormal.items as Record<string, unknown>[]) ?? []).map((item) => ({
+                stationId: (item.station_id as number) ?? undefined,
+                stationName: (item.station_name as string) ?? undefined,
+                deviceId: (item.device_id as number) ?? undefined,
+                deviceName: (item.device_name as string) ?? undefined,
+                efficiency: (item.efficiency as number) ?? undefined,
+                uptime: (item.uptime as number) ?? undefined,
+                utilization: (item.utilization as number) ?? undefined,
+              })),
+            },
+          },
         },
       };
     });

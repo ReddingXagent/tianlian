@@ -690,3 +690,30 @@ export interface SparePart {
   createdAt: string;
   updatedAt: string;
 }
+
+// =====================
+// 效率报告 (EfficiencyReport — from /reports/efficiency)
+// ====================
+export interface EfficiencyReport {
+  items: EfficiencyItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  alerts: {
+    abnormalLowEfficiency: {
+      count: number;
+      threshold: string;
+      items: EfficiencyItem[];
+    };
+  };
+}
+
+export interface EfficiencyItem {
+  stationId?: number;
+  stationName?: string;
+  deviceId?: number;
+  deviceName?: string;
+  efficiency?: number;
+  uptime?: number;
+  utilization?: number;
+}
