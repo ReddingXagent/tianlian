@@ -281,3 +281,42 @@ class TestMQTTConnect:
             mock_client.will_set.assert_called_once()
             will_args = mock_client.will_set.call_args[0]
             assert "status/offline" in will_args[0]
+
+
+# ── Coverage: _do_connect internal execution ────────────────────────────
+
+
+class TestMQTTConnectInternal:
+    """Cover lines 103-104: actual _do_connect callback execution."""
+
+    @pytest.mark.asyncio
+    async def test_do_connect_executes_inner_connect(self, mqtt_client):
+        """When run_in_executor calls the function, _client.connect + loop_start execute."""
+        with patch("adapters.mqtt_client.mqtt.Client") as mock_client_cls:
+            mock_client = MagicMock()
+            mock_client_cls.return_value = mock_client
+
+            async def run_in_executor_real(pool, fn):
+                fn()  # Actually execute the nested function
+                return None
+
+            with patch("adapters.mqtt_client.asyncio.get_event_loop") as mock_loop:
+                loop = MagicMock()
+                loop.run_in_executor = run_in_executor_real
+                mock_loop.return_value = loop
+
+                await mqtt_client.connect()
+
+            # Verify _do_connect's internals ran
+            mock_client.connect.assert_called_once_with(
+                mqtt_client.config.host, mqtt_client.config.port, mqtt_client.config.keepalive
+            )
+            mock_client.loop_start.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_publish_alarm_not_connected_returns_false(self, mqtt_client):
+        """Line 212: publish_alarm returns False when not connected."""
+        mqtt_client._connected = False
+        mqtt_client._client = None
+        result = await mqtt_client.publish_alarm("EVSE-001", {"type": "overtemp"})
+        assert result is False

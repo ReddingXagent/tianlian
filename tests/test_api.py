@@ -468,3 +468,39 @@ class TestFormatUptime:
         result = _format_uptime(86400 * 3 + 3661)
         assert "3d" in result
         assert "1h" in result
+
+
+# ── Coverage Gap Tests ─────────────────────────────────────────────────
+
+
+class TestSimulateAlarmEdgeCases:
+    """Cover modbus alarm without adapter and unknown type paths."""
+
+    def test_alarm_modbus_without_adapter_returns_400(self, client):
+        """Line 212: modbus alarm path when no modbus adapter configured."""
+        resp = client.post(
+            "/api/v1/simulate/alarm",
+            json={"device_type": "modbus", "alarm_type": "comm_loss"},
+        )
+        assert resp.status_code == 400
+        assert "Modbus adapter not available" in resp.json()["detail"]
+
+    def test_alarm_ocpp_without_adapter_returns_400(self, client):
+        """Line 208: ocpp alarm path when no ocpp adapter configured."""
+        # The default client has no ocpp_adapter
+        resp = client.post(
+            "/api/v1/simulate/alarm",
+            json={"device_type": "ocpp", "alarm_type": "overheating"},
+        )
+        # client fixture has no ocpp adapter, should 400
+        assert resp.status_code == 400
+
+
+class TestCacheStatsNoCache:
+    """Cover line 228: cache/stats when cache is None."""
+
+    def test_cache_stats_without_cache(self):
+        """When cache=None, /api/v1/cache/stats returns 500."""
+        app = create_app(cache=None, start_time=time.monotonic())
+        resp = TestClient(app).get("/api/v1/cache/stats")
+        assert resp.status_code == 500
