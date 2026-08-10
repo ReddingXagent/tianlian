@@ -410,3 +410,17 @@ export interface EnergySummary {
     dischargePrice: number;
   };
 }
+
+// =====================
+// 能源趋势 (Energy Trend)
+// =====================
+export interface EnergyTrendItem {
+  date: string;
+  pvGeneration: number;
+  chargingAmount: number;
+  dischargeAmount: number;
+  pvRevenue: number;
+  chargingRevenue: number;
+  dischargeRevenue: number;
+  totalRevenue: number;
+}

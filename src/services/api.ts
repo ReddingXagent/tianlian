@@ -22,6 +22,7 @@ import {
   WorkOrderTrend,
   DeviceHealthStats,
   EnergySummary,
+  EnergyTrendItem,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -576,6 +577,27 @@ export const energyApi = {
             dischargePrice: (price.discharge_price as number) ?? 0,
           },
         },
+      };
+    });
+  },
+
+  /** GET /energy/trend — 31天光伏充电趋势 */
+  getTrend(): Promise<ApiResponse<EnergyTrendItem[]>> {
+    return api.get('/energy/trend').then((res) => {
+      const raw = res.data as ApiResponse<{ trend?: Record<string, unknown>[] }>;
+      const items = (raw.data?.trend ?? []) as Record<string, unknown>[];
+      return {
+        ...raw,
+        data: items.map((d) => ({
+          date: (d.date as string) ?? '',
+          pvGeneration: (d.pv_generation as number) ?? 0,
+          chargingAmount: (d.charging_amount as number) ?? 0,
+          dischargeAmount: (d.discharge_amount as number) ?? 0,
+          pvRevenue: (d.pv_revenue as number) ?? 0,
+          chargingRevenue: (d.charging_revenue as number) ?? 0,
+          dischargeRevenue: (d.discharge_revenue as number) ?? 0,
+          totalRevenue: (d.total_revenue as number) ?? 0,
+        })),
       };
     });
   },
