@@ -33,6 +33,7 @@ import {
   AlarmRule,
   NotificationRule,
   NotificationTemplate,
+  WorkOrderReport,
   SparePart,
   ChargerConfig,
 } from '../types';
@@ -846,6 +847,36 @@ export const reportApi = {
           dailyTrend: ((d.daily_trend as Record<string, unknown>[]) ?? []).map((t) => ({
             date: (t.date as string) ?? '',
             count: (t.count as number) ?? 0,
+          })),
+        },
+      };
+    });
+  },
+
+  /** GET /reports/workorders — 30天工单报告 */
+  getWorkOrderReport(): Promise<ApiResponse<WorkOrderReport>> {
+    return api.get('/reports/workorders').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const eff = (d.efficiency ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          periodDays: (d.period_days as number) ?? 30,
+          totalWorkorders: (d.total_workorders as number) ?? 0,
+          typeDistribution: (d.type_distribution as Record<string, number>) ?? {},
+          levelDistribution: (d.level_distribution as Record<string, number>) ?? {},
+          statusDistribution: (d.status_distribution as Record<string, number>) ?? {},
+          completionRate: (d.completion_rate as number) ?? 0,
+          efficiency: {
+            avgResponseHours: (eff.avg_response_hours as number) ?? 0,
+            avgCompletionHours: (eff.avg_completion_hours as number) ?? 0,
+          },
+          engineerPerformance: ((d.engineer_performance as Record<string, unknown>[]) ?? []).map((e) => ({
+            engineerId: (e.engineer_id as number) ?? 0,
+            engineerName: (e.engineer_name as string) ?? '',
+            completedCount: (e.completed_count as number) ?? 0,
+            avgCompletionHours: (e.avg_completion_hours as number) ?? 0,
           })),
         },
       };
