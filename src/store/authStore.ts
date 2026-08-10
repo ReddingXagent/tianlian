@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { User } from '../types';
+import { User, AuthMe } from '../types';
 import { authApi, tokenStorage } from '../services/api';
 
 interface AuthState {
@@ -11,6 +11,22 @@ interface AuthState {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   setUser: (user: User) => void;
+}
+
+/** Map AuthMe (from /auth/me) to User type with safe defaults */
+function authMeToUser(me: AuthMe): User {
+  return {
+    id: me.id,
+    username: me.username,
+    nickname: me.realName || me.username,
+    email: '',
+    phone: '',
+    role: (me.role as User['role']) || 'viewer',
+    avatar: undefined,
+    stationIds: [],
+    createdAt: '',
+    updatedAt: '',
+  };
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -56,7 +72,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const response = await authApi.getProfile();
       set({
         token,
-        user: response.data,
+        user: authMeToUser(response.data),
         isAuthenticated: true,
         isLoading: false,
       });

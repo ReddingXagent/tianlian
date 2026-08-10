@@ -1,7 +1,7 @@
 import { act } from '@testing-library/react-native';
 import { useAuthStore } from '../authStore';
 import { authApi, tokenStorage } from '../../services/api';
-import { User } from '../../types';
+import { User, AuthMe } from '../../types';
 
 // Mock the API module
 jest.mock('../../services/api', () => ({
@@ -18,6 +18,15 @@ jest.mock('../../services/api', () => ({
 }));
 
 const TEST_TOKEN = 'test-jwt-token-12345';
+const TEST_AUTH_ME: AuthMe = {
+  id: 1,
+  username: 'admin',
+  realName: '管理员',
+  role: 'admin',
+  permissions: ['read', 'write'],
+  teamType: null,
+  teamId: null,
+};
 const TEST_USER: User = {
   id: 1,
   username: 'admin',
@@ -142,7 +151,7 @@ describe('useAuthStore', () => {
   describe('checkAuth', () => {
     it('should set authenticated state when token exists and profile loads', async () => {
       (tokenStorage.getToken as jest.Mock).mockResolvedValue(TEST_TOKEN);
-      (authApi.getProfile as jest.Mock).mockResolvedValue({ data: TEST_USER });
+      (authApi.getProfile as jest.Mock).mockResolvedValue({ data: TEST_AUTH_ME });
 
       await act(async () => {
         await useAuthStore.getState().checkAuth();
@@ -152,7 +161,19 @@ describe('useAuthStore', () => {
       expect(tokenStorage.getToken).toHaveBeenCalled();
       expect(authApi.getProfile).toHaveBeenCalled();
       expect(state.token).toBe(TEST_TOKEN);
-      expect(state.user).toEqual(TEST_USER);
+      // AuthMe is mapped to User via authMeToUser
+      expect(state.user).toEqual({
+        id: 1,
+        username: 'admin',
+        nickname: '管理员',
+        email: '',
+        phone: '',
+        role: 'admin',
+        avatar: undefined,
+        stationIds: [],
+        createdAt: '',
+        updatedAt: '',
+      });
       expect(state.isAuthenticated).toBe(true);
       expect(state.isLoading).toBe(false);
     });

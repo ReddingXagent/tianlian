@@ -386,7 +386,11 @@ export const deviceApi = {
           maxPower: (d.max_power as number) ?? 0,
           chargeMode: (d.charge_mode as string) ?? '',
           overloadProtection: (d.overload_protection as boolean) ?? false,
-          timePeriods: (d.time_periods as { start_time: string; end_time: string; power_limit: number }[]) ?? [],
+          timePeriods: ((d.time_periods as { start_time: string; end_time: string; power_limit: number }[]) ?? []).map((tp) => ({
+            startTime: tp.start_time,
+            endTime: tp.end_time,
+            powerLimit: tp.power_limit,
+          })),
           createdAt: (d.created_at as string | null) ?? null,
           updatedAt: (d.updated_at as string | null) ?? null,
         },
