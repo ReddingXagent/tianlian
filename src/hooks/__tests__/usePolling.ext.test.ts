@@ -103,7 +103,8 @@ describe('usePolling — 扩展分支覆盖', () => {
     act(() => {
       jest.advanceTimersByTime(1000);
     });
-    expect(true).toBe(true);
+    // 卸载后fetcher不应被再次调用
+    expect(fetcher).not.toHaveBeenCalled();
   });
 
   it('execute: unmounted后不setData', async () => {

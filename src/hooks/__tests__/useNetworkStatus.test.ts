@@ -173,12 +173,13 @@ describe('useNetworkStatus', () => {
 
     expect(result.current.isConnected).toBe(true);
     unmount();
-    expect(true).toBe(true);
+    // 卸载后result引用已固定，isConnected保持上次值
+    expect(result.current.isConnected).toBe(true);
   });
 
   it('web: 卸载后移除事件监听器', async () => {
     setPlatform('web');
-    const { unmount } = renderHook(() => useNetworkStatus());
+    const { result, unmount } = renderHook(() => useNetworkStatus());
 
     await act(async () => {
       await Promise.resolve();
@@ -200,6 +201,7 @@ describe('useNetworkStatus', () => {
       value: true,
       configurable: true,
     });
-    expect(true).toBe(true);
+    // 卸载后事件监听已移除，isConnected保持初始值
+    expect(result.current.isConnected).toBe(true);
   });
 });

@@ -130,7 +130,8 @@ describe('usePolling.ext2 — deep branch coverage', () => {
     });
 
     // Should not crash regardless of scheduleNextRef state
-    expect(true).toBe(true);
+    expect(result.current.tickCount).toBeGreaterThanOrEqual(1);
+    expect(fetcher).toHaveBeenCalled();
   });
 
   // Retry path: successful retry resets retryCount
