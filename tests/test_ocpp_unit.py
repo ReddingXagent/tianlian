@@ -1710,3 +1710,82 @@ class TestMainPyMissingLines:
         assert gw.logger is not None
         assert gw.logger.name == "gateway"
 
+
+# ── L696-698: Simulation loop exception handler ────────────────────
+
+
+class TestSimulationLoopExceptionHandler:
+    """Cover the except Exception handler in _run_simulated_charger main loop."""
+
+    @pytest.mark.asyncio
+    async def test_simulation_loop_catches_and_continues(self):
+        """When _simulate_charging_session raises, the outer handler should catch it."""
+        from config import OCPPConfig
+
+        config = OCPPConfig(
+            charger_id="SIM-EXC-001",
+            heartbeat_interval=0.01,
+            use_real_charger=False,
+        )
+        adapter = OCPPAdapter(config)
+        adapter._running = True
+
+        original_sleep = asyncio.sleep
+        call_count = 0
+
+        async def fast_sleep(d):
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 3:
+                adapter._running = False
+            await original_sleep(0)
+
+        with patch.object(
+            adapter, "_simulate_charging_session",
+            new_callable=AsyncMock, side_effect=RuntimeError("sim crash")
+        ):
+            with patch.object(adapter, "_simulate_idle_period", new_callable=AsyncMock):
+                with patch("random.random", return_value=0.1):
+                    with patch("asyncio.sleep", side_effect=fast_sleep):
+                        await adapter._run_simulated_charger()
+
+        assert call_count >= 3  # 0.5s status + 5s error + next loop
+
+
+# ── L1190-1191: Heartbeat loop exception handler ───────────────────
+
+
+class TestHeartbeatLoopExceptionHandler:
+    """Cover the except Exception handler in _heartbeat_loop."""
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_loop_catches_exception(self):
+        """When protocol.build_heartbeat raises, handler should log and continue."""
+        from config import OCPPConfig
+
+        config = OCPPConfig(
+            charger_id="HB-EXC-001",
+            heartbeat_interval=0.01,
+            use_real_charger=False,
+        )
+        adapter = OCPPAdapter(config)
+        adapter._running = True
+
+        original_sleep = asyncio.sleep
+        call_count = 0
+
+        async def fast_sleep(d):
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                adapter._running = False
+            await original_sleep(0)
+
+        # Make build_heartbeat raise an exception
+        adapter._protocol.build_heartbeat = MagicMock(side_effect=RuntimeError("hb crash"))
+
+        with patch("asyncio.sleep", side_effect=fast_sleep):
+            await adapter._heartbeat_loop()
+
+        assert call_count >= 1
+
