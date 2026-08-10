@@ -424,3 +424,69 @@ export interface EnergyTrendItem {
   dischargeRevenue: number;
   totalRevenue: number;
 }
+
+// =====================
+// 报告概览 (Report Summary)
+// =====================
+export interface ReportSummary {
+  periodDays: number;
+  overview: {
+    totalDevices: number;
+    onlineDevices: number;
+    offlineDevices: number;
+    faultDevices: number;
+    maintenanceDevices: number;
+    onlineRate: number;
+    totalStations: number;
+    totalWorkorders: number;
+    completedWorkorders: number;
+    completionRate: number;
+    totalAlarms: number;
+    activeAlarms: number;
+  };
+  stationHealth: {
+    distribution: {
+      normal: number;
+      warning: number;
+      critical: number;
+      offline: number;
+    };
+    healthyRate: number;
+  };
+  teamPerformance: {
+    engineers: unknown[];
+    totalEngineers: number;
+    topEngineers: unknown[];
+  };
+}
+
+// =====================
+// 用户详情 (User Detail — from /users/{id})
+// =====================
+export interface UserDetail {
+  id: number;
+  username: string;
+  realName: string;
+  phone: string | null;
+  role: string;
+  level: string;
+  teamId: number | null;
+  teamName: string | null;
+  status: string;
+  lastLogin: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// 当前用户信息 (Auth Me — from /auth/me)
+// =====================
+export interface AuthMe {
+  id: number;
+  username: string;
+  realName: string;
+  role: string;
+  permissions: string[];
+  teamType: string | null;
+  teamId: number | null;
+}

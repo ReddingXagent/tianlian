@@ -166,17 +166,20 @@ describe('authApi', () => {
     expect(result).toEqual(apiResponse);
   });
 
-  it('getProfile should GET /auth/profile', async () => {
-    const user = {
-      id: 1, username: 'admin', nickname: '管理员', email: 'admin@test.com',
-      phone: '13800138000', role: 'admin' as const, stationIds: [1, 2],
-      createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
+  it('getProfile should GET /auth/me', async () => {
+    const rawUser = {
+      id: 1, username: 'admin', real_name: '管理员', role: 'super_admin',
+      permissions: ['station:view'], team_type: null, team_id: null,
     };
-    const apiResponse = { code: 0, message: 'success', data: user };
-    mockAxios.onGet('/auth/profile').reply(200, apiResponse);
+    const apiResponse = { code: 200, message: 'success', data: rawUser };
+    mockAxios.onGet('/auth/me').reply(200, apiResponse);
 
     const result = await authApi.getProfile();
-    expect(result).toEqual(apiResponse);
+    expect(result.data.id).toBe(1);
+    expect(result.data.username).toBe('admin');
+    expect(result.data.realName).toBe('管理员');
+    expect(result.data.role).toBe('super_admin');
+    expect(result.data.permissions).toEqual(['station:view']);
   });
 });
 

@@ -4,7 +4,6 @@ import {
   ApiResponse,
   LoginRequest,
   LoginResponse,
-  User,
   WorkOrder,
   Alarm,
   Device,
@@ -23,6 +22,9 @@ import {
   DeviceHealthStats,
   EnergySummary,
   EnergyTrendItem,
+  ReportSummary,
+  UserDetail,
+  AuthMe,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -99,8 +101,24 @@ export const authApi = {
   logout(): Promise<ApiResponse<null>> {
     return api.post('/auth/logout').then((res) => res.data);
   },
-  getProfile(): Promise<ApiResponse<User>> {
-    return api.get('/auth/profile').then((res) => res.data);
+  /** GET /auth/me — 当前登录用户信息 + 权限列表 */
+  getProfile(): Promise<ApiResponse<AuthMe>> {
+    return api.get('/auth/me').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (d.id as number) ?? 0,
+          username: (d.username as string) ?? '',
+          realName: (d.real_name as string) ?? '',
+          role: (d.role as string) ?? '',
+          permissions: (d.permissions as string[]) ?? [],
+          teamType: (d.team_type as string) ?? null,
+          teamId: (d.team_id as number) ?? null,
+        },
+      };
+    });
   },
 };
 
@@ -598,6 +616,87 @@ export const energyApi = {
           dischargeRevenue: (d.discharge_revenue as number) ?? 0,
           totalRevenue: (d.total_revenue as number) ?? 0,
         })),
+      };
+    });
+  },
+};
+
+// =====================
+// 用户管理 API
+// =====================
+export const userApi = {
+  /** GET /users/{id} — 用户详情 */
+  getDetail(id: number): Promise<ApiResponse<UserDetail>> {
+    return api.get(`/users/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (d.id as number) ?? 0,
+          username: (d.username as string) ?? '',
+          realName: (d.real_name as string) ?? '',
+          phone: (d.phone as string | null) ?? null,
+          role: (d.role as string) ?? '',
+          level: (d.level as string) ?? '',
+          teamId: (d.team_id as number | null) ?? null,
+          teamName: (d.team_name as string | null) ?? null,
+          status: (d.status as string) ?? '',
+          lastLogin: (d.last_login as string) ?? '',
+          createdAt: (d.created_at as string) ?? '',
+          updatedAt: (d.updated_at as string) ?? '',
+        },
+      };
+    });
+  },
+};
+
+// =====================
+// 报告 API (GET /reports/summary)
+// =====================
+export const reportApi = {
+  /** GET /reports/summary — 30天运维报告概览 */
+  getSummary(): Promise<ApiResponse<ReportSummary>> {
+    return api.get('/reports/summary').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const overview = (d.overview ?? {}) as Record<string, unknown>;
+      const health = (d.station_health ?? {}) as Record<string, unknown>;
+      const dist = (health.distribution ?? {}) as Record<string, unknown>;
+      const team = (d.team_performance ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          periodDays: (d.period_days as number) ?? 30,
+          overview: {
+            totalDevices: (overview.total_devices as number) ?? 0,
+            onlineDevices: (overview.online_devices as number) ?? 0,
+            offlineDevices: (overview.offline_devices as number) ?? 0,
+            faultDevices: (overview.fault_devices as number) ?? 0,
+            maintenanceDevices: (overview.maintenance_devices as number) ?? 0,
+            onlineRate: (overview.online_rate as number) ?? 0,
+            totalStations: (overview.total_stations as number) ?? 0,
+            totalWorkorders: (overview.total_workorders as number) ?? 0,
+            completedWorkorders: (overview.completed_workorders as number) ?? 0,
+            completionRate: (overview.completion_rate as number) ?? 0,
+            totalAlarms: (overview.total_alarms as number) ?? 0,
+            activeAlarms: (overview.active_alarms as number) ?? 0,
+          },
+          stationHealth: {
+            distribution: {
+              normal: (dist.normal as number) ?? 0,
+              warning: (dist.warning as number) ?? 0,
+              critical: (dist.critical as number) ?? 0,
+              offline: (dist.offline as number) ?? 0,
+            },
+            healthyRate: (health.healthy_rate as number) ?? 0,
+          },
+          teamPerformance: {
+            engineers: (team.engineers as unknown[]) ?? [],
+            totalEngineers: (team.total_engineers as number) ?? 0,
+            topEngineers: (team.top_engineers as unknown[]) ?? [],
+          },
+        },
       };
     });
   },
