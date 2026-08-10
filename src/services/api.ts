@@ -125,10 +125,10 @@ export const authApi = {
     return api.post('/auth/logout').then((res) => res.data);
   },
   getProfile(): Promise<ApiResponse<User>> {
-    return api.get('/auth/profile').then((res) => res.data);
+    return api.get('/auth/me').then((res) => res.data);
   },
   updateProfile(data: Partial<User>): Promise<ApiResponse<User>> {
-    return api.put('/auth/profile', data).then((res) => res.data);
+    return api.put('/auth/me', data).then((res) => res.data);
   },
 };
 

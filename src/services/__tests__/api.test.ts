@@ -126,15 +126,15 @@ describe('API Service', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/auth/logout');
     });
 
-    it('getProfile gets /auth/profile', async () => {
+    it('getProfile gets /auth/me', async () => {
       await authApi.getProfile();
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/auth/profile');
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/auth/me');
     });
 
-    it('updateProfile puts to /auth/profile', async () => {
+    it('updateProfile puts to /auth/me', async () => {
       const data = { nickname: 'Updated' };
       await authApi.updateProfile(data);
-      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/auth/profile', data);
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/auth/me', data);
     });
   });
 
