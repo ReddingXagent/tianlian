@@ -984,6 +984,9 @@ class OCPPAdapter:
 
                 logger.info("OCPP WebSocket connected to %s", url)
 
+                # Start OCPP message router in background so call() can receive responses
+                router_task = asyncio.create_task(cp.start())
+
                 try:
                     # 1. Send BootNotification
                     boot_result = await cp.call(_ocpp_call.BootNotification(
@@ -1051,6 +1054,9 @@ class OCPPAdapter:
                         raise
                 finally:
                     self._ws_connected = False
+                    router_task.cancel()
+                    with __import__('contextlib').suppress(asyncio.CancelledError):
+                        await router_task
 
         except ImportError as e:
             logger.error("OCPP real charger mode requires 'ocpp' and 'websockets' packages: %s", e)

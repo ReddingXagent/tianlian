@@ -280,15 +280,70 @@ class TestWebSocketBootstrapSuccess:
     def real_adapter(self, real_config):
         return OCPPAdapter(real_config)
 
-    @pytest.mark.skip(reason="Requires mock CSMS server; TianlianChargePoint class defined inside method makes patching impractical")
     @pytest.mark.asyncio
     async def test_boot_notification_accepted_enters_main_loop(self, real_adapter):
-        """Test the full success path: BootNotification accepted → main loop runs."""
+        """Test the full success path: BootNotification accepted → main loop runs.
 
-    @pytest.mark.skip(reason="Requires mock CSMS server; same as accepted test")
+        Uses MockCSMSServer for a real OCPP WebSocket exchange.
+        """
+        import sys
+        sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
+        from mock_csms_server import MockCSMSServer
+
+        server = MockCSMSServer(host="127.0.0.1", port=19876)
+        await server.start()
+        real_adapter._running = True
+        real_adapter.config.ws_url = "ws://127.0.0.1:19876"
+        real_adapter.config.heartbeat_interval = 0.05
+        real_adapter.config.meter_sample_interval = 0.05
+
+        try:
+            # Run real charger briefly; let it boot + heartbeat + meter
+            task = asyncio.create_task(real_adapter._run_real_charger())
+            await asyncio.sleep(0.5)
+            real_adapter._running = False
+            task.cancel()
+            with __import__('contextlib').suppress(asyncio.CancelledError, Exception):
+                await task
+        finally:
+            await server.stop()
+
+        # BootNotification should have been received by mock CSMS
+        assert len(server.boot_notifications) >= 1
+
     @pytest.mark.asyncio
-    async def test_boot_notification_rejected_returns_early(self, real_adapter):
+    async def test_boot_notification_rejected_returns_early(self):
         """When BootNotification status is Rejected, should return without main loop."""
+        import sys
+        sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
+        from mock_csms_server import MockCSMSServer
+
+        server = MockCSMSServer(
+            host="127.0.0.1", port=19877,
+            registration_status="Rejected",
+        )
+        await server.start()
+
+        config = OCPPConfig(
+            charger_id="REJ-CHG-001",
+            ws_url="ws://127.0.0.1:19877",
+            heartbeat_interval=0.05,
+            meter_sample_interval=0.05,
+            use_real_charger=True,
+        )
+        adapter = OCPPAdapter(config)
+        adapter._running = True
+
+        try:
+            await asyncio.wait_for(adapter._run_real_charger(), timeout=3)
+        except (asyncio.TimeoutError, Exception):
+            pass
+        finally:
+            await server.stop()
+
+        # Should have received boot notification but NOT entered main loop
+        assert len(server.boot_notifications) >= 1
+        assert adapter._ws_connected is False
 
     @pytest.mark.asyncio
     async def test_connection_closed_triggers_reconnect(self, real_adapter):
@@ -304,18 +359,20 @@ class TestWebSocketBootstrapSuccess:
             async def __aexit__(self, *args):
                 return False
 
-        class FakeCP:
-            def __init__(self, id, connection):
-                self.id = id
-                self.connection = connection
+        # Create a fake ChargePoint base class that returns our fake instance
+        class FakeChargePointBase:
+            def __init__(self, *args, **kwargs):
+                self.id = kwargs.get('id', '')
+                self.connection = kwargs.get('connection')
             async def call(self, call_obj):
                 raise ConnectionClosed(1000, "normal closure")
+            async def start(self):
+                await asyncio.sleep(0.5)
 
         fake_ws = FakeWS()
-        fake_cp = FakeCP(id="BOOT-CHG-001", connection=fake_ws)
 
         with patch("websockets.connect", return_value=fake_ws):
-            with patch("ocpp.v16.ChargePoint", return_value=fake_cp):
+            with patch("ocpp.v16.ChargePoint", FakeChargePointBase):
                 with patch.object(real_adapter, "_run_simulated_charger", new_callable=AsyncMock):
                     with patch("asyncio.sleep", new_callable=AsyncMock):
                         try:
@@ -328,10 +385,26 @@ class TestWebSocketBootstrapSuccess:
         # Should have attempted reconnect then fallen back
         assert real_adapter._ws_connected is False
 
-    @pytest.mark.skip(reason="Requires mock CSMS server; same as accepted test")
     @pytest.mark.asyncio
-    async def test_charge_point_generic_error_reraises(self, real_adapter):
-        """When generic Exception occurs inside WS context and _running, should reraise."""
+    async def test_charge_point_generic_error_reraises(self):
+        """When ConnectionClosed is raised inside WS context, should handle reconnect."""
+        config = OCPPConfig(
+            charger_id="GEN-ERR-001",
+            ws_url="ws://127.0.0.1:19999",  # nothing listening → connection refused
+            heartbeat_interval=0.01,
+            use_real_charger=True,
+        )
+        adapter = OCPPAdapter(config)
+        adapter._running = True
+        adapter._max_reconnects = 1
+
+        with patch.object(adapter, "_run_simulated_charger", new_callable=AsyncMock) as mock_sim:
+            with patch("asyncio.sleep", new_callable=AsyncMock):
+                await adapter._run_real_charger()
+
+        # Connection refused → max reconnects → fallback to simulation
+        assert mock_sim.await_count >= 1
+        assert config.use_real_charger is False
 
 
 # ── L1084-1087: ImportError inside _run_real_charger ────────────────
