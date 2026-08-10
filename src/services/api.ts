@@ -26,6 +26,7 @@ import {
   ChargerTrend,
   AppNotification,
   EnergySummary,
+  ReportSummary,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -595,3 +596,46 @@ export const notificationApi = {
 };
 
 export default api;
+
+// =====================
+// 运维报表 API (GET /reports/summary)
+// =====================
+export const reportApi = {
+  /** GET /reports/summary — 30天运维报表摘要 */
+  getSummary(): Promise<ApiResponse<ReportSummary>> {
+    return api.get('/reports/summary').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const ov = (d.overview as Record<string, unknown>) ?? {};
+      const sh = (d.station_health as Record<string, unknown>) ?? {};
+      const dist = (sh.distribution as Record<string, number>) ?? {};
+      return {
+        ...raw,
+        data: {
+          periodDays: (d.period_days as number) ?? 30,
+          overview: {
+            totalDevices: (ov.total_devices as number) ?? 0,
+            onlineDevices: (ov.online_devices as number) ?? 0,
+            offlineDevices: (ov.offline_devices as number) ?? 0,
+            faultDevices: (ov.fault_devices as number) ?? 0,
+            maintenanceDevices: (ov.maintenance_devices as number) ?? 0,
+            onlineRate: (ov.online_rate as number) ?? 0,
+            totalStations: (ov.total_stations as number) ?? 0,
+            totalWorkorders: (ov.total_workorders as number) ?? 0,
+            completedWorkorders: (ov.completed_workorders as number) ?? 0,
+            completionRate: (ov.completion_rate as number) ?? 0,
+            totalAlarms: (ov.total_alarms as number) ?? 0,
+            activeAlarms: (ov.active_alarms as number) ?? 0,
+          },
+          stationHealth: {
+            normal: dist.normal ?? 0,
+            warning: dist.warning ?? 0,
+            critical: dist.critical ?? 0,
+            offline: dist.offline ?? 0,
+            healthyRate: (sh.healthy_rate as number) ?? 0,
+          },
+        },
+      };
+    });
+  },
+};
