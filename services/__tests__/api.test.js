@@ -326,9 +326,13 @@ describe('API Service (B3 真契约)', () => {
       await expect(api.wxLogin()).rejects.toThrow('请使用用户名密码登录');
     });
 
-    it('reviewOrder/updateUserInfo FEATURE_UNAVAILABLE', async () => {
+    it('reviewOrder FEATURE_UNAVAILABLE; updateUserInfo 本地缓存合并', async () => {
       await expect(api.reviewOrder()).rejects.toThrow('FEATURE_UNAVAILABLE');
-      await expect(api.updateUserInfo()).rejects.toThrow('FEATURE_UNAVAILABLE');
+      // updateUserInfo 现在走本地缓存合并
+      mockGetStorageSync.mockReturnValueOnce({ id: 1, username: 'tl' });
+      const res = await api.updateUserInfo({ nickname: 'updated' });
+      expect(res.code).toBe(200);
+      expect(res.data.nickname).toBe('updated');
     });
 
     it('站点降级接口: nearby/search/filter 走列表', async () => {
@@ -382,16 +386,16 @@ describe('API Service (B3 真契约)', () => {
       expect(mockShowToast.mock.calls[0][0].title).toBe('网络异常');
     });
 
-    it('getUserInfo: 无登录用户 reject 未登录', async () => {
-      useStore({});
-      await expect(api.getUserInfo()).rejects.toThrow('未登录');
-    });
-
-    it('getUserInfo: 有登录用户 返回200+data', async () => {
-      useStore({ userInfo: { id: 5, username: 'tester' } });
+    it('getUserInfo: 调用 /auth/me 获取用户信息', async () => {
+      useStore({ token: 'tok' });
+      mockWxRequest.mockImplementation((opts) => {
+        opts.success({ statusCode: 200, data: { code: 0, data: { id: 5, username: 'tester' } } });
+      });
       const res = await api.getUserInfo();
-      expect(res.code).toBe(200);
       expect(res.data).toEqual({ id: 5, username: 'tester' });
+      expect(mockWxRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ url: expect.stringContaining('/auth/me') })
+      );
     });
 
     it('幂等GET 5xx 自动重试一次后成功', async () => {

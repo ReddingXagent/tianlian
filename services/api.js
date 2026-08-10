@@ -220,20 +220,29 @@ function getCurrentUserId() {
 }
 
 /**
- * 获取用户信息 (后端无专用端点, 返回登录时落盘的用户信息)
+ * 获取用户信息 → GET /auth/me (后端返回当前用户+权限列表)
+ * 同时更新本地缓存
  */
 function getUserInfo() {
-  const user = getCurrentUser();
-  return user
-    ? Promise.resolve({ code: 200, data: user })
-    : Promise.reject(new Error('未登录'));
+  return request('/auth/me').then((res) => {
+    if (res.data) {
+      wx.setStorageSync('userInfo', res.data);
+    }
+    return res;
+  });
 }
 
 /**
- * 更新用户信息 (后端暂无端点)
+ * 更新用户信息 (后端暂无 PUT/PATCH 端点, 走本地缓存更新)
  */
-function updateUserInfo() {
-  return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
+function updateUserInfo(data) {
+  const user = getCurrentUser();
+  if (user) {
+    const updated = { ...user, ...data };
+    wx.setStorageSync('userInfo', updated);
+    return Promise.resolve({ code: 200, data: updated });
+  }
+  return Promise.reject(new Error('未登录'));
 }
 
 // ========== 站点接口 (真云端可用) ==========
@@ -479,6 +488,16 @@ function redeemPoints() {
   return Promise.reject(new Error('FEATURE_UNAVAILABLE'));
 }
 
+// ========== 能源概览接口 (真云端可用) ==========
+
+/**
+ * 获取光储充经营概览 → GET /energy/summary
+ * 返回: 总发电量/总充电量/总收入/今日数据等
+ */
+function getEnergySummary() {
+  return request('/energy/summary');
+}
+
 // ========== 通知接口 (后端暂无, 占位) ==========
 
 function getNotifications() {
@@ -548,6 +567,8 @@ module.exports = {
   getPointsHistory,
   dailySignIn,
   redeemPoints,
+  // 能源概览
+  getEnergySummary,
   // 通知
   getNotifications,
   markNotificationRead,

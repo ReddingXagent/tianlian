@@ -296,13 +296,18 @@ describe('api.ext2: branches 78→100%', () => {
     expect(res.data).toEqual([{ delta: 10, reason: 'test', createdAt: 'T' }]);
   });
 
-  // === getUserInfo: 已有用户 ===
+  // === getUserInfo: 调用 /auth/me ===
 
-  it('getUserInfo: 返回落盘的用户信息', async () => {
-    useStore({ userInfo: { id: 5, name: 'test' } });
+  it('getUserInfo: 调用 /auth/me 并更新缓存', async () => {
+    useStore({ token: 'tok' });
+    mockWxRequest.mockImplementation((opts) => {
+      opts.success({ statusCode: 200, data: { code: 0, data: { id: 5, name: 'test' } } });
+    });
     const res = await api.getUserInfo();
-    expect(res.code).toBe(200);
     expect(res.data).toEqual({ id: 5, name: 'test' });
+    expect(mockWxRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ url: expect.stringContaining('/auth/me') })
+    );
   });
 
   // === createPayment 无券 ===
