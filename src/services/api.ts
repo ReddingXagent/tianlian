@@ -30,7 +30,6 @@ import {
   DeviceConfig,
   DeviceReport,
   AlarmReport,
-  WorkOrderReport,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
