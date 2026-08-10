@@ -506,3 +506,63 @@ export interface DeviceHealth {
   checkedAt: string;
   lastHealthCheck: string | null;
 }
+
+// =====================
+// 设备报告 (Device Report — from /reports/devices)
+// =====================
+export interface DeviceReport {
+  periodDays: number;
+  totalDevices: number;
+  typeDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
+  stationDistribution: {
+    stationId: number;
+    stationName: string;
+    deviceCount: number;
+  }[];
+}
+
+// =====================
+// 告警报告 (Alarm Report — from /reports/alarms)
+// =====================
+export interface AlarmReport {
+  periodDays: number;
+  totalAlarms: number;
+  levelDistribution: Record<string, number>;
+  typeDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
+  resolvedRate: number;
+  activeAlarms: number;
+  topFaultDevices: {
+    deviceId: number;
+    deviceName: string;
+    alarmCount: number;
+  }[];
+  dailyTrend: {
+    date: string;
+    count: number;
+  }[];
+}
+
+// =====================
+// 角色 (Role — from /roles)
+// =====================
+export interface Role {
+  id: number;
+  name: string;
+  displayName: string;
+  description: string;
+  isSystem: boolean;
+  permissions: string[];
+}
+
+// =====================
+// 权限项 (Permission — from /permissions)
+// =====================
+export interface Permission {
+  name: string;
+  resource: string;
+  action: string;
+  label: string;
+  labelShort: string;
+}

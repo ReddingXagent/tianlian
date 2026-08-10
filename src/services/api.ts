@@ -26,6 +26,10 @@ import {
   ReportSummary,
   UserDetail,
   AuthMe,
+  DeviceReport,
+  AlarmReport,
+  Role,
+  Permission,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -582,6 +586,53 @@ export const workOrderTransferApi = {
   },
 };
 
+// =====================
+// 角色管理 API (GET /roles)
+// =====================
+export const roleApi = {
+  /** GET /roles — 角色列表 */
+  getList(): Promise<ApiResponse<Role[]>> {
+    return api.get('/roles').then((res) => {
+      const raw = res.data as ApiResponse<{ items?: Record<string, unknown>[] }>;
+      const items = (raw.data?.items ?? []) as Record<string, unknown>[];
+      return {
+        ...raw,
+        data: items.map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          displayName: (it.display_name as string) ?? '',
+          description: (it.description as string) ?? '',
+          isSystem: (it.is_system as boolean) ?? false,
+          permissions: (it.permissions as string[]) ?? [],
+        })),
+      };
+    });
+  },
+};
+
+// =====================
+// 权限管理 API (GET /permissions)
+// =====================
+export const permissionApi = {
+  /** GET /permissions — 权限列表 */
+  getList(): Promise<ApiResponse<Permission[]>> {
+    return api.get('/permissions').then((res) => {
+      const raw = res.data as ApiResponse<{ items?: Record<string, unknown>[] }>;
+      const items = (raw.data?.items ?? []) as Record<string, unknown>[];
+      return {
+        ...raw,
+        data: items.map((it) => ({
+          name: (it.name as string) ?? '',
+          resource: (it.resource as string) ?? '',
+          action: (it.action as string) ?? '',
+          label: (it.label as string) ?? '',
+          labelShort: (it.label_short as string) ?? '',
+        })),
+      };
+    });
+  },
+};
+
 export default api;
 
 // =====================
@@ -719,6 +770,57 @@ export const reportApi = {
             totalEngineers: (team.total_engineers as number) ?? 0,
             topEngineers: (team.top_engineers as unknown[]) ?? [],
           },
+        },
+      };
+    });
+  },
+
+  /** GET /reports/devices — 30天设备报告 */
+  getDeviceReport(): Promise<ApiResponse<DeviceReport>> {
+    return api.get('/reports/devices').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          periodDays: (d.period_days as number) ?? 30,
+          totalDevices: (d.total_devices as number) ?? 0,
+          typeDistribution: (d.type_distribution as Record<string, number>) ?? {},
+          statusDistribution: (d.status_distribution as Record<string, number>) ?? {},
+          stationDistribution: ((d.station_distribution as Record<string, unknown>[]) ?? []).map((s) => ({
+            stationId: (s.station_id as number) ?? 0,
+            stationName: (s.station_name as string) ?? '',
+            deviceCount: (s.device_count as number) ?? 0,
+          })),
+        },
+      };
+    });
+  },
+
+  /** GET /reports/alarms — 30天告警报告 */
+  getAlarmReport(): Promise<ApiResponse<AlarmReport>> {
+    return api.get('/reports/alarms').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          periodDays: (d.period_days as number) ?? 30,
+          totalAlarms: (d.total_alarms as number) ?? 0,
+          levelDistribution: (d.level_distribution as Record<string, number>) ?? {},
+          typeDistribution: (d.type_distribution as Record<string, number>) ?? {},
+          statusDistribution: (d.status_distribution as Record<string, number>) ?? {},
+          resolvedRate: (d.resolved_rate as number) ?? 0,
+          activeAlarms: (d.active_alarms as number) ?? 0,
+          topFaultDevices: ((d.top_fault_devices as Record<string, unknown>[]) ?? []).map((t) => ({
+            deviceId: (t.device_id as number) ?? 0,
+            deviceName: (t.device_name as string) ?? '',
+            alarmCount: (t.alarm_count as number) ?? 0,
+          })),
+          dailyTrend: ((d.daily_trend as Record<string, unknown>[]) ?? []).map((t) => ({
+            date: (t.date as string) ?? '',
+            count: (t.count as number) ?? 0,
+          })),
         },
       };
     });
