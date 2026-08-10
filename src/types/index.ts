@@ -656,6 +656,23 @@ export interface ChargerConfig {
 }
 
 // =====================
+// 定价规则 (PricingRule — from /pricing)
+// =====================
+export interface PricingRule {
+  id: number;
+  name: string;
+  periodType: string;
+  startTime: string;
+  endTime: string;
+  energyPrice?: number;
+  servicePrice?: number;
+  powerLimit?: number;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
 // 备件 (SparePart — from /spare-parts)
 // =====================
 export interface SparePart {

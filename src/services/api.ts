@@ -36,6 +36,7 @@ import {
   WorkOrderReport,
   SparePart,
   ChargerConfig,
+  PricingRule,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -1034,5 +1035,73 @@ export const notificationTemplateApi = {
           },
         };
       });
+  },
+};
+
+// =====================
+// 定价规则 API (/pricing)
+// =====================
+export const pricingApi = {
+  /** GET /pricing — 定价规则列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<PricingRule>>> {
+    return api
+      .get('/pricing', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          periodType: (it.period_type as string) ?? '',
+          startTime: (it.start_time as string) ?? '',
+          endTime: (it.end_time as string) ?? '',
+          energyPrice: it.energy_price as number | undefined,
+          servicePrice: it.service_price as number | undefined,
+          powerLimit: it.power_limit as number | undefined,
+          enabled: (it.enabled as boolean) ?? false,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+
+  /** GET /pricing/{id} — 定价规则详情 */
+  getById(id: number): Promise<ApiResponse<PricingRule | null>> {
+    return api.get(`/pricing/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown> | null>;
+      const it = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: raw.data
+          ? {
+              id: (it.id as number) ?? 0,
+              name: (it.name as string) ?? '',
+              periodType: (it.period_type as string) ?? '',
+              startTime: (it.start_time as string) ?? '',
+              endTime: (it.end_time as string) ?? '',
+              energyPrice: it.energy_price as number | undefined,
+              servicePrice: it.service_price as number | undefined,
+              powerLimit: it.power_limit as number | undefined,
+              enabled: (it.enabled as boolean) ?? false,
+              createdAt: (it.created_at as string) ?? '',
+              updatedAt: (it.updated_at as string) ?? '',
+            }
+          : null,
+      };
+    });
   },
 };
