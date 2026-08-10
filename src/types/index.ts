@@ -600,8 +600,23 @@ export interface NotificationRule {
 }
 
 // =====================
-// 充电桩配置 (ChargerConfig — from /devices/{id}/config)
+// 通知模板 (Notification Template — from /notifications/templates)
 // =====================
+export interface NotificationTemplate {
+  id: number;
+  name: string;
+  channel: string;
+  subject: string;
+  body: string;
+  variables: string[];
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// 充电桩配置 (ChargerConfig — from /devices/{id}/config)
+// ====================
 export interface ChargerConfig {
   deviceId: number;
   voltageLimit: number;

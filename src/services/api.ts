@@ -32,6 +32,7 @@ import {
   Permission,
   AlarmRule,
   NotificationRule,
+  NotificationTemplate,
   SparePart,
   ChargerConfig,
 } from '../types';
@@ -945,6 +946,46 @@ export const sparePartApi = {
           location: (it.location as string) ?? '',
           safetyStock: (it.safety_stock as number) ?? 0,
           status: (it.status as string) ?? '',
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 通知模板 API (GET /notifications/templates)
+// =====================
+export const notificationTemplateApi = {
+  /** GET /notifications/templates — 通知模板列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<NotificationTemplate>>> {
+    return api
+      .get('/notifications/templates', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          channel: (it.channel as string) ?? '',
+          subject: (it.subject as string) ?? '',
+          body: (it.body as string) ?? '',
+          variables: (it.variables as string[]) ?? [],
+          enabled: (it.enabled as boolean) ?? false,
           createdAt: (it.created_at as string) ?? '',
           updatedAt: (it.updated_at as string) ?? '',
         }));

@@ -1,8 +1,8 @@
 /**
- * api ext10 — ChargerConfig API (GET /devices/{id}/config)
- * Target: snake_case → camelCase mapping for charging pile config
+ * api ext10 — NotificationTemplate API (GET /notifications/templates)
+ * Target: pagination + snake_case → camelCase mapping
  */
-import { deviceApi } from '../api';
+import { notificationTemplateApi } from '../api';
 
 jest.mock('axios', () => {
   const mockAxios = {
@@ -28,107 +28,146 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const api = require('../api').default as jest.Mocked<{ get: jest.Mock }>;
+const api = require('../api').default;
 
-describe('deviceApi.getConfig() — GET /devices/{id}/config', () => {
-  beforeEach(() => jest.clearAllMocks());
-
-  it('maps snake_case → camelCase ChargerConfig', async () => {
-    api.get.mockResolvedValue({
-      data: {
-        code: 200,
-        message: 'success',
-        data: {
-          device_id: 6,
-          voltage_limit: 420.0,
-          current_limit: 60.0,
-          max_power: 60.0,
-          charge_mode: 'smart',
-          overload_protection: true,
-          time_periods: [],
-          created_at: null,
-          updated_at: null,
-        },
-      },
-    });
-
-    const res = await deviceApi.getConfig(6);
-    expect(api.get).toHaveBeenCalledWith('/devices/6/config');
-    expect(res.data).toEqual({
-      deviceId: 6,
-      voltageLimit: 420.0,
-      currentLimit: 60.0,
-      maxPower: 60.0,
-      chargeMode: 'smart',
-      overloadProtection: true,
-      timePeriods: [],
-      createdAt: null,
-      updatedAt: null,
-    });
+describe('notificationTemplateApi.getList', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('handles time_periods with entries', async () => {
-    api.get.mockResolvedValue({
+  it('maps snake_case response to camelCase', async () => {
+    api.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
         data: {
-          device_id: 8,
-          voltage_limit: 750.0,
-          current_limit: 200.0,
-          max_power: 240.0,
-          charge_mode: 'timer',
-          overload_protection: false,
-          time_periods: [
-            { start_time: '22:00', end_time: '06:00', power_limit: 100.0 },
+          items: [
+            {
+              id: 1,
+              name: '告警邮件模板',
+              channel: 'email',
+              subject: '【告警】{{station_name}} - {{device_name}}',
+              body: '设备 {{device_name}} 发生 {{level }} 级告警',
+              variables: ['station_name', 'device_name', 'level'],
+              enabled: true,
+              created_at: '2026-01-15T08:00:00Z',
+              updated_at: '2026-02-20T10:30:00Z',
+            },
+            {
+              id: 2,
+              name: '工单短信模板',
+              channel: 'sms',
+              subject: '工单通知',
+              body: '您有新的工单: {{workorder_title}}',
+              variables: ['workorder_title'],
+              enabled: false,
+              created_at: '2026-01-20T09:00:00Z',
+              updated_at: '2026-03-01T14:00:00Z',
+            },
           ],
-          created_at: '2026-01-15T08:00:00Z',
-          updated_at: '2026-08-01T12:00:00Z',
+          total: 2,
+          page: 1,
+          page_size: 20,
         },
+        timestamp: 1786370000,
       },
     });
 
-    const res = await deviceApi.getConfig(8);
-    expect(res.data.chargeMode).toBe('timer');
-    expect(res.data.overloadProtection).toBe(false);
-    expect(res.data.maxPower).toBe(240.0);
-    expect(res.data.createdAt).toBe('2026-01-15T08:00:00Z');
-    expect(res.data.updatedAt).toBe('2026-08-01T12:00:00Z');
+    const res = await notificationTemplateApi.getList({ page: 1, pageSize: 20 });
+
+    expect(api.get).toHaveBeenCalledWith('/notifications/templates', {
+      params: { page: 1, page_size: 20 },
+    });
+
+    const items = res.data.items;
+    expect(items).toHaveLength(2);
+
+    // First template
+    expect(items[0]).toEqual({
+      id: 1,
+      name: '告警邮件模板',
+      channel: 'email',
+      subject: '【告警】{{station_name}} - {{device_name}}',
+      body: '设备 {{device_name}} 发生 {{level }} 级告警',
+      variables: ['station_name', 'device_name', 'level'],
+      enabled: true,
+      createdAt: '2026-01-15T08:00:00Z',
+      updatedAt: '2026-02-20T10:30:00Z',
+    });
+
+    // Second template
+    expect(items[1].id).toBe(2);
+    expect(items[1].channel).toBe('sms');
+    expect(items[1].enabled).toBe(false);
+    expect(items[1].variables).toEqual(['workorder_title']);
   });
 
-  it('defaults on missing fields', async () => {
-    api.get.mockResolvedValue({
+  it('handles empty list', async () => {
+    api.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
-        data: {},
+        data: {
+          items: [],
+          total: 0,
+          page: 1,
+          page_size: 100,
+        },
+        timestamp: 1786370000,
       },
     });
 
-    const res = await deviceApi.getConfig(1);
-    expect(res.data).toEqual({
-      deviceId: 0,
-      voltageLimit: 0,
-      currentLimit: 0,
-      maxPower: 0,
-      chargeMode: '',
-      overloadProtection: false,
-      timePeriods: [],
-      createdAt: null,
-      updatedAt: null,
+    const res = await notificationTemplateApi.getList();
+
+    expect(res.data.items).toHaveLength(0);
+    expect(res.data.total).toBe(0);
+  });
+
+  it('handles missing fields with defaults', async () => {
+    api.get.mockResolvedValueOnce({
+      data: {
+        code: 200,
+        message: 'success',
+        data: {
+          items: [{}],
+          total: 1,
+          page: 1,
+          page_size: 20,
+        },
+        timestamp: 1786370000,
+      },
+    });
+
+    const res = await notificationTemplateApi.getList();
+    const item = res.data.items[0];
+
+    expect(item).toEqual({
+      id: 0,
+      name: '',
+      channel: '',
+      subject: '',
+      body: '',
+      variables: [],
+      enabled: false,
+      createdAt: '',
+      updatedAt: '',
     });
   });
 
-  it('handles 400 for non-charger devices', async () => {
-    api.get.mockRejectedValue({
-      response: {
-        status: 400,
-        data: { code: 400, message: '仅支持充电桩设备配置', data: null },
+  it('passes pagination params correctly', async () => {
+    api.get.mockResolvedValueOnce({
+      data: {
+        code: 200,
+        message: 'success',
+        data: { items: [], total: 0, page: 2, page_size: 50 },
+        timestamp: 1786370000,
       },
     });
 
-    await expect(deviceApi.getConfig(1)).rejects.toMatchObject({
-      response: { status: 400 },
+    await notificationTemplateApi.getList({ page: 2, pageSize: 50 });
+
+    expect(api.get).toHaveBeenCalledWith('/notifications/templates', {
+      params: { page: 2, page_size: 50 },
     });
   });
 });
