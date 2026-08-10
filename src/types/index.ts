@@ -384,3 +384,29 @@ export interface DashboardData {
     faultCount: number;
   }[];
 }
+
+// =====================
+// 能源概览 (Energy Summary)
+// =====================
+export interface EnergySummary {
+  period: string;
+  days: number;
+  pvGeneration: number;
+  chargingAmount: number;
+  dischargeAmount: number;
+  pvRevenue: number;
+  chargingRevenue: number;
+  dischargeRevenue: number;
+  totalRevenue: number;
+  yoy: {
+    pvGenerationYoy: number;
+    chargingAmountYoy: number;
+    dischargeAmountYoy: number;
+    totalRevenueYoy: number;
+  };
+  priceInfo: {
+    feedInTariff: number;
+    chargingPrice: number;
+    dischargePrice: number;
+  };
+}

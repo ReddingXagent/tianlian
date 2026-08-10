@@ -21,6 +21,7 @@ import {
   AlarmTrend,
   WorkOrderTrend,
   DeviceHealthStats,
+  EnergySummary,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -540,3 +541,42 @@ export const workOrderTransferApi = {
 };
 
 export default api;
+
+// =====================
+// 能源概览 API (GET /energy/summary)
+// =====================
+export const energyApi = {
+  getSummary(): Promise<ApiResponse<EnergySummary>> {
+    return api.get('/energy/summary').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const yoy = (d.yoy ?? {}) as Record<string, unknown>;
+      const price = (d.price_info ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          period: (d.period as string) ?? 'month',
+          days: (d.days as number) ?? 0,
+          pvGeneration: (d.pv_generation as number) ?? 0,
+          chargingAmount: (d.charging_amount as number) ?? 0,
+          dischargeAmount: (d.discharge_amount as number) ?? 0,
+          pvRevenue: (d.pv_revenue as number) ?? 0,
+          chargingRevenue: (d.charging_revenue as number) ?? 0,
+          dischargeRevenue: (d.discharge_revenue as number) ?? 0,
+          totalRevenue: (d.total_revenue as number) ?? 0,
+          yoy: {
+            pvGenerationYoy: (yoy.pv_generation_yoy as number) ?? 0,
+            chargingAmountYoy: (yoy.charging_amount_yoy as number) ?? 0,
+            dischargeAmountYoy: (yoy.discharge_amount_yoy as number) ?? 0,
+            totalRevenueYoy: (yoy.total_revenue_yoy as number) ?? 0,
+          },
+          priceInfo: {
+            feedInTariff: (price.feed_in_tariff as number) ?? 0,
+            chargingPrice: (price.charging_price as number) ?? 0,
+            dischargePrice: (price.discharge_price as number) ?? 0,
+          },
+        },
+      };
+    });
+  },
+};
