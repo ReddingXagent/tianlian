@@ -63,13 +63,13 @@ describe('ChargingScreen.ext2 — remaining branches', () => {
   // status was already null but the button still rendered due to React batching.
   // Since this is practically an unreachable defensive branch, we verify
   // by making status=0 (falsy) and checking if the code handles it.
-  it('stopCharging success with status=0 (falsy) → no navigation', async () => {
-    // status=0 is falsy in JS, so `if (status)` → false
-    // But loading=false so the `if (loading || !status)` check: !0 = true → shows loading screen.
-    // Actually this means the stop button is never visible when status is falsy.
-    // This is a truly defensive dead branch.
-    // We skip this test and verify it differently.
-    expect(true).toBe(true);
+  it('stopCharging success with status=0 (falsy) → button not visible', async () => {
+    // status=0 is falsy: `if (loading || !status)` → shows loading screen, stop button never renders
+    mockPollingStatus = 0;
+    mockPollingLoading = false;
+    const { queryByText } = renderScreen();
+    // Stop button should not be rendered when status is falsy
+    expect(queryByText(/停止|stop/i)).toBeNull();
   });
 
   // ── error hint text rendered when error present alongside data ──
