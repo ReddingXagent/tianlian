@@ -1,6 +1,8 @@
 """Tests for enhanced TelemetryCache (T-1102: batch ops, alarms, stats, state)"""
 
 
+from unittest.mock import patch
+
 import pytest
 
 from config import StorageConfig
@@ -243,5 +245,132 @@ class TestRetryBehavior:
 
             # Should not appear in unsynced anymore
             assert cache.get_unsynced() == []
+        finally:
+            cache.close()
+
+
+# ── Coverage boost: empty-list guards, cleanup VACUUM, close/__del__ ──
+
+
+class TestEmptyListGuards:
+    """Cover the early-return paths when ids list is empty."""
+
+    def test_mark_cloud_synced_empty_list(self, temp_db):
+        """mark_cloud_synced with empty list should return immediately."""
+        # Should not raise
+        temp_db.mark_cloud_synced([])
+
+    def test_mark_alarms_cloud_synced_empty_list(self, temp_db):
+        """mark_alarms_cloud_synced with empty list should return immediately."""
+        temp_db.mark_alarms_cloud_synced([])
+
+    def test_increment_alarm_retry_empty_list(self, temp_db):
+        """increment_alarm_retry with empty list should return immediately."""
+        temp_db.increment_alarm_retry([])
+
+
+class TestCleanupVacuum:
+    """Cover the VACUUM path in cleanup() when entries are actually deleted."""
+
+    def test_cleanup_vacuums_when_entries_deleted(self, temp_db, sample_points):
+        """cleanup() should execute VACUUM when old synced entries are purged."""
+        # Insert and sync telemetry
+        for p in sample_points:
+            temp_db.cache_telemetry(p)
+        unsynced = temp_db.get_unsynced()
+        ids = [e["id"] for e in unsynced]
+        temp_db.mark_cloud_synced(ids)
+        temp_db.mark_synced(ids)
+
+        # Insert and sync an alarm
+        temp_db.cache_alarm("EVSE-001", {"type": "OverVoltage", "message": "Voltage too high"})
+        alarms = temp_db.get_unsynced_alarms()
+        alarm_ids = [a["id"] for a in alarms]
+        temp_db.mark_alarms_cloud_synced(alarm_ids)
+        temp_db.mark_alarms_synced(alarm_ids)
+
+        # Manually backdate timestamps so cleanup finds them
+        conn = temp_db._get_conn()
+        conn.execute(
+            "UPDATE telemetry_cache SET created_at = '2020-01-01T00:00:00Z'"
+        )
+        conn.execute(
+            "UPDATE alarm_cache SET created_at = '2020-01-01T00:00:00Z'"
+        )
+        conn.commit()
+
+        deleted = temp_db.cleanup(max_age_days=1)
+        assert deleted > 0
+
+
+class TestCloseAndDel:
+    """Cover close() and __del__ cleanup paths."""
+
+    def test_close_sets_conn_to_none(self, tmp_path):
+        """close() should set _conn to None."""
+        db_path = str(tmp_path / "test_close.db")
+        config = StorageConfig(db_path=db_path)
+        cache = TelemetryCache(config)
+        # Trigger lazy connection
+        cache._get_conn()
+        assert cache._conn is not None
+        cache.close()
+        assert cache._conn is None
+
+    def test_close_idempotent(self, tmp_path):
+        """Double close should not raise."""
+        db_path = str(tmp_path / "test_double.db")
+        config = StorageConfig(db_path=db_path)
+        cache = TelemetryCache(config)
+        cache.close()
+        cache.close()  # Should not raise
+
+    def test_del_calls_close(self, tmp_path):
+        """__del__ should call close() without raising."""
+        db_path = str(tmp_path / "test_del.db")
+        config = StorageConfig(db_path=db_path)
+        cache = TelemetryCache(config)
+        # Force __del__
+        cache.__del__()
+        assert cache._conn is None
+
+    def test_del_swallows_exception(self, tmp_path):
+        """__del__ should swallow any exception during cleanup."""
+        db_path = str(tmp_path / "test_del_exc.db")
+        config = StorageConfig(db_path=db_path)
+        cache = TelemetryCache(config)
+        cache.close()
+        # After close, _conn is None; calling __del__ again should still not raise
+        cache.__del__()
+
+    def test_del_swallows_close_exception(self, tmp_path):
+        """__del__ should catch and swallow exceptions from close()."""
+        db_path = str(tmp_path / "test_del_swallow.db")
+        config = StorageConfig(db_path=db_path)
+        cache = TelemetryCache(config)
+        # Patch close to raise
+        with patch.object(cache, "close", side_effect=RuntimeError("boom")):
+            # Should not raise
+            cache.__del__()
+
+
+class TestEnforceCacheLimit:
+    """Cover _enforce_cache_limit eviction path when cache exceeds max_cache_size."""
+
+    def test_eviction_when_over_limit(self, tmp_path, sample_points):
+        """When telemetry_cache rows exceed max_cache_size * 1.05, oldest are evicted."""
+        db_path = str(tmp_path / "test_evict.db")
+        config = StorageConfig(db_path=db_path, max_cache_size=5)
+        cache = TelemetryCache(config)
+        try:
+            # Insert 10 points (well above threshold of int(5 * 1.05) = 5)
+            for _i in range(10):
+                cache.cache_telemetry(sample_points[0])
+
+            # Verify eviction occurred - should have at most max_cache_size entries
+            conn = cache._get_conn()
+            cursor = conn.execute("SELECT COUNT(*) FROM telemetry_cache")
+            count = cursor.fetchone()[0]
+            assert count <= 5, f"Expected <= 5 after eviction, got {count}"
         finally:
             cache.close()
