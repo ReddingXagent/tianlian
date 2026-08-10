@@ -598,3 +598,22 @@ export interface NotificationRule {
   createdAt: string;
   updatedAt: string;
 }
+
+// =====================
+// 备件 (SparePart — from /spare-parts)
+// =====================
+export interface SparePart {
+  id: number;
+  name: string;
+  model: string;
+  manufacturer: string;
+  stockQty: number;
+  unit: string;
+  price: number;
+  warehouse: string;
+  location: string;
+  safetyStock: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}

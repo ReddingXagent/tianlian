@@ -32,6 +32,7 @@ import {
   Permission,
   AlarmRule,
   NotificationRule,
+  SparePart,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -891,5 +892,49 @@ export const notificationRuleApi = {
         })),
       };
     });
+  },
+};
+
+// =====================
+// 备件 API (GET /spare-parts)
+// =====================
+export const sparePartApi = {
+  /** GET /spare-parts — 备件列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<SparePart>>> {
+    return api
+      .get('/spare-parts', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          model: (it.model as string) ?? '',
+          manufacturer: (it.manufacturer as string) ?? '',
+          stockQty: (it.stock_qty as number) ?? 0,
+          unit: (it.unit as string) ?? '',
+          price: (it.price as number) ?? 0,
+          warehouse: (it.warehouse as string) ?? '',
+          location: (it.location as string) ?? '',
+          safetyStock: (it.safety_stock as number) ?? 0,
+          status: (it.status as string) ?? '',
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
   },
 };
