@@ -750,3 +750,67 @@ export interface EfficiencyItem {
   uptime?: number;
   utilization?: number;
 }
+
+// =====================
+// 工程师 (Engineer — from /engineers)
+// ====================
+export interface Engineer {
+  id: number;
+  username: string;
+  name: string;
+  phone: string | null;
+  level: 'junior' | 'senior' | 'expert';
+  teamId: number | null;
+  status: 'active' | 'inactive' | 'on_leave';
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// Webhook (from /webhooks)
+// ====================
+export interface Webhook {
+  id: number;
+  name: string;
+  url: string;
+  events: string[];
+  secret: string | null;
+  enabled: boolean;
+  lastTriggeredAt: string | null;
+  lastResponseStatus: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// 自愈规则 (HealingRule — from /healing/rules)
+// ====================
+export interface HealingRule {
+  id: number;
+  name: string;
+  deviceType: string;
+  faultCode: string;
+  action: string;
+  conditions: Record<string, unknown>;
+  enabled: boolean;
+  successRate: number;
+  lastTriggeredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// API密钥 (ApiKey — from /api-keys)
+// ====================
+export interface ApiKey {
+  id: number;
+  name: string;
+  keyPrefix: string;
+  permissions: string[];
+  lastUsedAt: string | null;
+  expiresAt: string | null;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

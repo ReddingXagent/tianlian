@@ -40,6 +40,10 @@ import {
   ChargerConfig,
   PricingRule,
   EfficiencyReport,
+  Engineer,
+  Webhook,
+  HealingRule,
+  ApiKey,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -1286,6 +1290,170 @@ export const inspectionTaskApi = {
           createdAt: (it.created_at as string) ?? '',
           updatedAt: (it.updated_at as string) ?? '',
         })) as InspectionTask[];
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 工程师 API (/engineers)
+// =====================
+export const engineerApi = {
+  /** GET /engineers — 工程师列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<Engineer>>> {
+    return api
+      .get('/engineers', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          username: (it.username as string) ?? '',
+          name: (it.name as string) ?? '',
+          phone: (it.phone as string | null) ?? null,
+          level: (it.level as Engineer['level']) ?? 'junior',
+          teamId: (it.team_id as number | null) ?? null,
+          status: (it.status as Engineer['status']) ?? 'active',
+          role: (it.role as string) ?? '',
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// Webhook API (/webhooks)
+// =====================
+export const webhookApi = {
+  /** GET /webhooks — Webhook列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<Webhook>>> {
+    return api
+      .get('/webhooks', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          url: (it.url as string) ?? '',
+          events: ((it.events as string[]) ?? []),
+          secret: (it.secret as string | null) ?? null,
+          enabled: (it.enabled as boolean) ?? false,
+          lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
+          lastResponseStatus: (it.last_response_status as number | null) ?? null,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 自愈规则 API (/healing/rules)
+// =====================
+export const healingRuleApi = {
+  /** GET /healing/rules — 自愈规则列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<HealingRule>>> {
+    return api
+      .get('/healing/rules', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          deviceType: (it.device_type as string) ?? '',
+          faultCode: (it.fault_code as string) ?? '',
+          action: (it.action as string) ?? '',
+          conditions: (it.conditions as Record<string, unknown>) ?? {},
+          enabled: (it.enabled as boolean) ?? false,
+          successRate: (it.success_rate as number) ?? 0,
+          lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// API密钥 API (/api-keys)
+// =====================
+export const apiKeyApi = {
+  /** GET /api-keys — API密钥列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<ApiKey>>> {
+    return api
+      .get('/api-keys', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          keyPrefix: (it.key_prefix as string) ?? '',
+          permissions: ((it.permissions as string[]) ?? []),
+          lastUsedAt: (it.last_used_at as string | null) ?? null,
+          expiresAt: (it.expires_at as string | null) ?? null,
+          enabled: (it.enabled as boolean) ?? false,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
         return {
           ...raw,
           data: {
