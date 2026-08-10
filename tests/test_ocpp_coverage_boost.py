@@ -379,6 +379,85 @@ class TestRealChargerImportErrorFallback:
             sys.modules.update(saved)
 
 
+# ── L979-1053: WebSocket bootstrap — ConnectionRefused + reconnect exhaustion ─
+
+
+class TestRealChargerConnectionRefused:
+    """Cover the (TimeoutError, OSError, ConnectionRefusedError) handler and reconnect logic."""
+
+    @pytest.mark.asyncio
+    async def test_connection_refused_triggers_reconnect(self):
+        """When websockets.connect raises ConnectionRefusedError,
+        should increment _reconnect_count and retry until max_reconnects."""
+        config = OCPPConfig(
+            charger_id="CONN-REF-001",
+            ws_url="ws://mock-csms:9000",
+            heartbeat_interval=0.01,
+            use_real_charger=True,
+        )
+        adapter = OCPPAdapter(config)
+        adapter._running = True
+        adapter._max_reconnects = 2
+
+        # websockets.connect returns a connector object; we make it raise
+        # by returning an object whose __aenter__ raises.
+        class FailingConnector:
+            async def __aenter__(self):
+                raise ConnectionRefusedError("Connection refused")
+            async def __aexit__(self, *args):
+                return False
+
+        with patch("websockets.connect", return_value=FailingConnector()):
+            with patch.object(adapter, "_run_simulated_charger", new_callable=AsyncMock) as mock_sim:
+                with patch("asyncio.sleep", new_callable=AsyncMock):
+                    await adapter._run_real_charger()
+
+        # After exceeding max_reconnects (2), should fall back to simulation
+        assert mock_sim.await_count >= 1
+        assert config.use_real_charger is False
+
+    @pytest.mark.asyncio
+    async def test_generic_exception_triggers_reconnect(self):
+        """When websockets.connect raises a generic Exception,
+        the outer except Exception handler should catch it and retry once
+        before falling back to simulation."""
+        config = OCPPConfig(
+            charger_id="GEN-EXC-001",
+            ws_url="ws://mock-csms:9000",
+            heartbeat_interval=0.01,
+            use_real_charger=True,
+        )
+        adapter = OCPPAdapter(config)
+        adapter._running = True
+        adapter._max_reconnects = 2  # Allow one retry before fallback
+
+        class FailingConnector:
+            async def __aenter__(self):
+                raise RuntimeError("unexpected boom")
+            async def __aexit__(self, *args):
+                return False
+
+        with patch("websockets.connect", return_value=FailingConnector()):
+            with patch.object(adapter, "_run_simulated_charger", new_callable=AsyncMock) as mock_sim:
+                with patch("asyncio.sleep", new_callable=AsyncMock):
+                    await adapter._run_real_charger()
+
+        # First call: _reconnect_count=1 < 2 → retry via _run_real_charger()
+        # Second call: _reconnect_count=2 >= 2 → fallback to simulation
+        assert mock_sim.await_count == 1
+        assert config.use_real_charger is False
+        assert adapter._reconnect_count == 2
+
+
+# ── L979-1053: WebSocket bootstrap — skipped (requires mock CSMS server) ─
+# The TianlianChargePoint class is defined inside _run_real_charger, making
+# external mocking of cp.call() impractical without a real WS server.
+# Connection-level exceptions (refused, timeout) ARE covered above.
+
+
+# ── L1038-1045: Inner exception handlers — skipped (same reason as above) ─
+
+
 # ── L541-544: _HAS_OCPP import guard ────────────────────────────────
 
 
