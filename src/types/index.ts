@@ -566,3 +566,35 @@ export interface Permission {
   label: string;
   labelShort: string;
 }
+
+// =====================
+// 告警规则 (Alarm Rule — from /alarm-rules)
+// =====================
+export interface AlarmRule {
+  id: number;
+  name: string;
+  deviceType: string;
+  metric: string;
+  condition: string;
+  threshold: number;
+  level: AlarmLevel;
+  enabled: boolean;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// 通知规则 (Notification Rule — from /notification-rules)
+// =====================
+export interface NotificationRule {
+  id: number;
+  name: string;
+  event: string;
+  channels: string[];
+  recipients: string[];
+  enabled: boolean;
+  template: string;
+  createdAt: string;
+  updatedAt: string;
+}

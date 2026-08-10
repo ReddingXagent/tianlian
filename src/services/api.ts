@@ -30,6 +30,8 @@ import {
   AlarmReport,
   Role,
   Permission,
+  AlarmRule,
+  NotificationRule,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -822,6 +824,71 @@ export const reportApi = {
             count: (t.count as number) ?? 0,
           })),
         },
+      };
+    });
+  },
+};
+
+// =====================
+// 告警规则 API (GET /alarm-rules)
+// =====================
+export const alarmRuleApi = {
+  /** GET /alarm-rules — 告警规则列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<AlarmRule>>> {
+    return api.get('/alarm-rules', { params: { page: params?.page, page_size: params?.pageSize } }).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+        id: (it.id as number) ?? 0,
+        name: (it.name as string) ?? '',
+        deviceType: (it.device_type as string) ?? '',
+        metric: (it.metric as string) ?? '',
+        condition: (it.condition as string) ?? '',
+        threshold: (it.threshold as number) ?? 0,
+        level: ((it.level as string) ?? 'warning') as AlarmRule['level'],
+        enabled: (it.enabled as boolean) ?? false,
+        description: (it.description as string) ?? '',
+        createdAt: (it.created_at as string) ?? '',
+        updatedAt: (it.updated_at as string) ?? '',
+      }));
+      return {
+        ...raw,
+        data: {
+          items,
+          total: (d.total as number) ?? 0,
+          page: (d.page as number) ?? params?.page ?? 1,
+          pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+        },
+      };
+    });
+  },
+};
+
+// =====================
+// 通知规则 API (GET /notification-rules)
+// =====================
+export const notificationRuleApi = {
+  /** GET /notification-rules — 通知规则列表 */
+  getList(): Promise<ApiResponse<NotificationRule[]>> {
+    return api.get('/notification-rules').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>[] | unknown>;
+      const items = (Array.isArray(raw.data) ? raw.data : []) as Record<string, unknown>[];
+      return {
+        ...raw,
+        data: items.map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          event: (it.event as string) ?? '',
+          channels: (it.channels as string[]) ?? [],
+          recipients: (it.recipients as string[]) ?? [],
+          enabled: (it.enabled as boolean) ?? false,
+          template: (it.template as string) ?? '',
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        })),
       };
     });
   },
