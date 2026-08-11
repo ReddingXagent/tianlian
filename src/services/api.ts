@@ -1894,6 +1894,27 @@ export const notificationStatsApi = {
   },
 };
 
+// =====================
+// 未读通知计数 API (/notifications/unread-count)
+// =====================
+export const notificationUnreadApi = {
+  /** GET /notifications/unread-count — 未读通知计数 */
+  getUnreadCount(): Promise<ApiResponse<UnreadCount>> {
+    return api
+      .get('/notifications/unread-count')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            unreadCount: (d.unread_count as number) ?? 0,
+          },
+        };
+      });
+  },
+};
+
 export const deviceHealthApi = {
   /** GET /health/devices — 设备健康度排名 */
   getRanking(): Promise<ApiResponse<DeviceHealthRanking>> {

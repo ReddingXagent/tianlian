@@ -680,6 +680,13 @@ export interface NotificationStats {
 }
 
 // =====================
+// 未读通知计数 (UnreadCount — from /notifications/unread-count)
+// =====================
+export interface UnreadCount {
+  unreadCount: number;
+}
+
+// =====================
 // 工单报告 (WorkOrderReport — from /reports/workorders)
 // =====================
 export interface WorkOrderReport {
