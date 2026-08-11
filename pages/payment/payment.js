@@ -89,7 +89,9 @@ Page({
       const res = await api.createPayment(orderId);
 
       if (payMethod === 'wechat') {
-        // 微信支付
+        // 微信支付 — 兼容直连模式和服务商模式(sp_mchid+sub_mchid)
+        // 服务商模式下后端返回相同字段名(timeStamp/nonceStr/package/signType/paySign)
+        // 额外返回 sp_mchid/sub_mchid 供日志追踪，wx.requestPayment 参数不变
         const payParams = res.data?.payParams || res.data;
 
         wx.requestPayment({

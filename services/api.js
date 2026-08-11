@@ -245,6 +245,20 @@ function updateUserInfo(data) {
   return Promise.reject(new Error('未登录'));
 }
 
+// ========== 租户品牌接口 (对齐 GET /tenants/{id}/branding) ==========
+
+/**
+ * 获取租户品牌配置 → GET /tenants/{id}/branding
+ * @param {string|number} tenantId - 租户ID
+ * @returns {Promise} 品牌数据 { operator_name, theme_color, source, logo_url? }
+ */
+function getTenantBranding(tenantId) {
+  return request(`/tenants/${tenantId}/branding`, {
+    data: {},
+    showLoading: false
+  });
+}
+
 // ========== 站点接口 (真云端可用) ==========
 
 /**
@@ -388,6 +402,11 @@ function reviewOrder() {
 
 /**
  * 支付订单 → POST /business/charging-orders/{id}/pay (settled → paid + 积分发放)
+ *
+ * 后端返回 payParams 可能包含:
+ * - 直连模式: timeStamp, nonceStr, package, signType, paySign
+ * - 服务商模式: 额外透传 sp_mchid, sub_mchid 等字段 (前端无需感知, wx.requestPayment 自动处理)
+ *
  * @param {string|number} orderId - 订单ID
  * @param {string} couponCode - 可选优惠券码
  */
@@ -569,6 +588,8 @@ module.exports = {
   redeemPoints,
   // 能源概览
   getEnergySummary,
+  // 租户品牌
+  getTenantBranding,
   // 通知
   getNotifications,
   markNotificationRead,

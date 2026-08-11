@@ -2,10 +2,15 @@
 const {
   DEFAULT_BRANDING,
   FALLBACK_COLOR,
+  TENANT_BRANDING_CACHE_KEY,
   isValidHexColor,
   normalizeBranding,
   getStationBranding,
-  hexToRgba
+  hexToRgba,
+  applyBrandingToApp,
+  getCachedTenantBranding,
+  cacheTenantBranding,
+  loadAndApplyTenantBranding
 } = require('../branding');
 
 describe('Branding Utils', () => {
@@ -160,6 +165,180 @@ describe('Branding Utils', () => {
       const result = normalizeBranding(cloudBranding);
       expect(result.operatorName).toBe('南方电网');
       expect(result.isCustom).toBe(true);
+    });
+  });
+
+  // ========== 租户级品牌测试 ==========
+
+  describe('TENANT_BRANDING_CACHE_KEY', () => {
+    it('导出为非空字符串', () => {
+      expect(typeof TENANT_BRANDING_CACHE_KEY).toBe('string');
+      expect(TENANT_BRANDING_CACHE_KEY.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('applyBrandingToApp', () => {
+    let setNavColorSpy;
+
+    beforeEach(() => {
+      setNavColorSpy = jest.fn();
+      global.wx = { setNavigationBarColor: setNavColorSpy };
+    });
+
+    afterEach(() => {
+      delete global.wx;
+    });
+
+    it('使用有效 themeColor 调用 wx.setNavigationBarColor', () => {
+      applyBrandingToApp({ themeColor: '#1A5276' });
+      expect(setNavColorSpy).toHaveBeenCalledWith({
+        frontColor: '#ffffff',
+        backgroundColor: '#1A5276'
+      });
+    });
+
+    it('使用兜底色当 themeColor 无效', () => {
+      applyBrandingToApp({ themeColor: 'invalid' });
+      expect(setNavColorSpy).toHaveBeenCalledWith({
+        frontColor: '#ffffff',
+        backgroundColor: FALLBACK_COLOR
+      });
+    });
+
+    it('空 branding 静默跳过', () => {
+      applyBrandingToApp(null);
+      applyBrandingToApp(undefined);
+      applyBrandingToApp({});
+      expect(setNavColorSpy).not.toHaveBeenCalled();
+    });
+
+    it('wx 不存在时静默不抛异常', () => {
+      delete global.wx;
+      expect(() => applyBrandingToApp({ themeColor: '#FF0000' })).not.toThrow();
+    });
+  });
+
+  describe('cacheTenantBranding / getCachedTenantBranding', () => {
+    let storage;
+
+    beforeEach(() => {
+      storage = {};
+      global.wx = {
+        setStorageSync: jest.fn((key, val) => { storage[key] = val; }),
+        getStorageSync: jest.fn((key) => storage[key] || '')
+      };
+    });
+
+    afterEach(() => {
+      delete global.wx;
+    });
+
+    it('缓存 → 读回 round-trip', () => {
+      const branding = { operator_name: '测试租户', theme_color: '#123456', source: 'operator' };
+      cacheTenantBranding(branding, 60000);
+      const cached = getCachedTenantBranding();
+      expect(cached).toEqual(branding);
+    });
+
+    it('过期缓存返回 null', () => {
+      cacheTenantBranding({ source: 'test' }, -1000); // 已过期
+      expect(getCachedTenantBranding()).toBeNull();
+    });
+
+    it('无缓存返回 null', () => {
+      expect(getCachedTenantBranding()).toBeNull();
+    });
+
+    it('wx 不存在时 getCachedTenantBranding 返回 null', () => {
+      delete global.wx;
+      expect(getCachedTenantBranding()).toBeNull();
+    });
+
+    it('wx 不存在时 cacheTenantBranding 不抛异常', () => {
+      delete global.wx;
+      expect(() => cacheTenantBranding({ source: 'test' })).not.toThrow();
+    });
+  });
+
+  describe('loadAndApplyTenantBranding', () => {
+    let setNavColorSpy;
+    let storage;
+
+    beforeEach(() => {
+      storage = {};
+      setNavColorSpy = jest.fn();
+      global.wx = {
+        setNavigationBarColor: setNavColorSpy,
+        setStorageSync: jest.fn((key, val) => { storage[key] = val; }),
+        getStorageSync: jest.fn((key) => storage[key] || '')
+      };
+    });
+
+    afterEach(() => {
+      delete global.wx;
+      jest.resetModules();
+    });
+
+    it('空 tenantId 返回 null', async () => {
+      const result = await loadAndApplyTenantBranding(null);
+      expect(result).toBeNull();
+    });
+
+    it('undefined tenantId 返回 null', async () => {
+      const result = await loadAndApplyTenantBranding(undefined);
+      expect(result).toBeNull();
+    });
+
+    it('tenantId=0 不被当作 falsy 跳过（边界）', async () => {
+      jest.resetModules();
+      jest.doMock('../../services/api', () => ({
+        getTenantBranding: jest.fn().mockResolvedValue({
+          data: { operator_name: '租户0', theme_color: '#AABBCC', source: 'operator' }
+        })
+      }));
+      jest.doMock('../../config/index', () => ({ CACHE_TTL: { TENANT_BRANDING: 300000 } }));
+      const brandingMod = require('../branding');
+      const result = await brandingMod.loadAndApplyTenantBranding(0);
+      expect(result).not.toBeNull();
+      expect(result.operatorName).toBe('租户0');
+    });
+
+    it('成功时缓存并应用品牌', async () => {
+      jest.resetModules();
+      const mockGetTenantBranding = jest.fn().mockResolvedValue({
+        data: { operator_name: '南方电网', theme_color: '#1A5276', source: 'operator' }
+      });
+      jest.doMock('../../services/api', () => ({ getTenantBranding: mockGetTenantBranding }));
+      jest.doMock('../../config/index', () => ({ CACHE_TTL: { TENANT_BRANDING: 300000 } }));
+      const brandingMod = require('../branding');
+      const result = await brandingMod.loadAndApplyTenantBranding('t001');
+      expect(mockGetTenantBranding).toHaveBeenCalledWith('t001');
+      expect(result.operatorName).toBe('南方电网');
+      expect(result.themeColor).toBe('#1A5276');
+      expect(result.isCustom).toBe(true);
+      expect(setNavColorSpy).toHaveBeenCalled();
+    });
+
+    it('API 失败时返回 null 不抛异常', async () => {
+      jest.resetModules();
+      jest.doMock('../../services/api', () => ({
+        getTenantBranding: jest.fn().mockRejectedValue(new Error('NETWORK'))
+      }));
+      jest.doMock('../../config/index', () => ({ CACHE_TTL: { TENANT_BRANDING: 300000 } }));
+      const brandingMod = require('../branding');
+      const result = await brandingMod.loadAndApplyTenantBranding('t002');
+      expect(result).toBeNull();
+    });
+
+    it('空 data 返回 null', async () => {
+      jest.resetModules();
+      jest.doMock('../../services/api', () => ({
+        getTenantBranding: jest.fn().mockResolvedValue({ data: null })
+      }));
+      jest.doMock('../../config/index', () => ({ CACHE_TTL: { TENANT_BRANDING: 300000 } }));
+      const brandingMod = require('../branding');
+      const result = await brandingMod.loadAndApplyTenantBranding('t003');
+      expect(result).toBeNull();
     });
   });
 });

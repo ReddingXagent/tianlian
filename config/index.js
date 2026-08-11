@@ -45,7 +45,8 @@ module.exports = {
     POINTS: 30000,        // 积分 30s
     ORDERS: 10000,        // 订单 10s（需较新）
     NOTIFICATIONS: 15000, // 通知 15s
-    USER_INFO: 120000     // 用户信息 120s
+    USER_INFO: 120000,    // 用户信息 120s
+    TENANT_BRANDING: 300000 // 租户品牌 5min
   },
 
   // 订单状态
