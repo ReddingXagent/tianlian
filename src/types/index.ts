@@ -669,6 +669,17 @@ export interface NotificationTemplate {
 }
 
 // =====================
+// 通知统计 (NotificationStats — from /notifications/stats)
+// =====================
+export interface NotificationStats {
+  totalTemplates: number;
+  totalMessages: number;
+  sentToday: number;
+  failedCount: number;
+  channelDistribution: Record<string, number>;
+}
+
+// =====================
 // 工单报告 (WorkOrderReport — from /reports/workorders)
 // =====================
 export interface WorkOrderReport {

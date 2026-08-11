@@ -35,6 +35,7 @@ import {
   AlarmRule,
   NotificationRule,
   NotificationTemplate,
+  NotificationStats,
   WorkOrderReport,
   SparePart,
   ChargerConfig,
@@ -1861,6 +1862,31 @@ export const securityThreatApi = {
             total: (d.total as number) ?? 0,
             page: 1,
             pageSize: items.length,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 通知统计 API (/notifications/stats)
+// =====================
+export const notificationStatsApi = {
+  /** GET /notifications/stats — 通知统计 */
+  getStats(): Promise<ApiResponse<NotificationStats>> {
+    return api
+      .get('/notifications/stats')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            totalTemplates: (d.total_templates as number) ?? 0,
+            totalMessages: (d.total_messages as number) ?? 0,
+            sentToday: (d.sent_today as number) ?? 0,
+            failedCount: (d.failed_count as number) ?? 0,
+            channelDistribution: (d.channel_distribution as Record<string, number>) ?? {},
           },
         };
       });
