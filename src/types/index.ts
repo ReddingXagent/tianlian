@@ -959,3 +959,33 @@ export interface SecurityThreat {
   status: 'blocked' | 'active' | 'resolved';
   timestamp: string;
 }
+
+// =====================
+// 设备健康度排名 (DeviceHealthRanking — from /health/devices)
+// =====================
+export interface DeviceHealthOverall {
+  totalDevices: number;
+  healthyCount: number;
+  warningCount: number;
+  criticalCount: number;
+  pendingEval: number;
+  overallScore: number;
+}
+
+export interface DeviceHealthRankingItem {
+  id: number;
+  deviceName: string;
+  code: string;
+  type: string;
+  stationName: string;
+  score: number;
+  status: string;
+}
+
+export interface DeviceHealthRanking {
+  overall: DeviceHealthOverall;
+  rankings: {
+    best: DeviceHealthRankingItem[];
+    worst: DeviceHealthRankingItem[];
+  };
+}

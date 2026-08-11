@@ -49,6 +49,7 @@ import {
   SecurityLog,
   SecurityPolicy,
   SecurityThreat,
+  DeviceHealthRanking,
   WorkOrderStats,
   RevenueAnalytics,
   KnowledgeArticleItem,
@@ -1890,5 +1891,12 @@ export const notificationStatsApi = {
           },
         };
       });
+  },
+};
+
+export const deviceHealthApi = {
+  /** GET /health/devices — 设备健康度排名 */
+  getRanking(): Promise<ApiResponse<DeviceHealthRanking>> {
+    return api.get('/health/devices').then((res) => res.data as ApiResponse<DeviceHealthRanking>);
   },
 };
