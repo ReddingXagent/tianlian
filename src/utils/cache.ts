@@ -12,8 +12,8 @@ interface CacheEntry<T> {
 const DEFAULT_TTL = 30_000; // 30 秒
 const MAX_ENTRIES = 50;
 
-// internal cache store: heterogeneous values require any at Map level
-const store = new Map<string, CacheEntry<any>>();
+// internal cache store: heterogeneous values; unknown is type-safe (cast at API boundary)
+const store = new Map<string, CacheEntry<unknown>>();
 let lruSeq = 0; // 递增序列号，保证 LRU 淘汰时 lastAccess 唯一
 
 /**
