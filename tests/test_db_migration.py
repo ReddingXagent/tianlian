@@ -397,3 +397,57 @@ class TestMain:
         # Should exit 0 or 1 depending on whether it treats it as not-found vs error
         # /proc/version exists as a file but is not SQLite
         assert exc_info.value.code in (0, 1)
+
+    def test_main_exits_1_on_migration_failure(self, tmp_path):
+        """main() should exit 1 when run_migration raises an exception."""
+        db_path = str(tmp_path / "corrupt.db")
+        # Write invalid SQLite content to trigger a migration error
+        with open(db_path, "wb") as f:
+            f.write(b"not a valid sqlite database file")
+        with pytest.raises(SystemExit) as exc_info:
+            import sys
+            old_argv = sys.argv
+            sys.argv = ["db_migration.py", db_path]
+            try:
+                db_migration.main()
+            finally:
+                sys.argv = old_argv
+        assert exc_info.value.code == 1
+
+
+class TestDbMigrationCoverageGap:
+    """Targeted tests for remaining coverage gaps."""
+
+    def test_add_missing_column_raises_on_non_duplicate_error(self, fresh_db):
+        """Line 149: raise on non-duplicate-column OperationalError."""
+        conn = sqlite3.connect(fresh_db)
+        # Create a table, then try to add a column to a non-existent table
+        # This triggers a different OperationalError (no such table)
+        with pytest.raises(sqlite3.OperationalError):
+            db_migration.add_missing_column(conn, "nonexistent_tbl", "col", "TEXT", 0)
+        conn.close()
+
+    def test_run_migration_prints_already_exists(self, tmp_path, capsys, monkeypatch):
+        """Line 215: else branch where column already exists (skipped message)."""
+        db_path = str(tmp_path / "test.db")
+        Path(db_path).touch()
+        # First run: full migration
+        db_migration.run_migration(db_path)
+        capsys.readouterr()
+        # Monkeypatch get_missing_columns to report a column that already exists
+        # This simulates a race condition or schema detection quirk
+        original = db_migration.detect_missing_columns
+
+        def mock_missing(conn):
+            cols = original(conn)
+            # Force trigger the 'already exists' path by adding an existing column
+            if "alarm_cache" not in cols:
+                cols["alarm_cache"] = []
+            cols["alarm_cache"].append(("priority", "INTEGER DEFAULT 0"))
+            return cols
+
+        monkeypatch.setattr(db_migration, "detect_missing_columns", mock_missing)
+        # Second run with mocked missing columns
+        db_migration.run_migration(db_path)
+        captured = capsys.readouterr()
+        assert "already exists" in captured.out
