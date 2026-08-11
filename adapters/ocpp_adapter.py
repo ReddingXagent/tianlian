@@ -950,7 +950,7 @@ class OCPPAdapter:
                     logger.info("OCPP RemoteStartTransaction received: idTag=%s", id_tag)
                     adapter._is_charging = True
                     adapter._status = "Charging"
-                    return {"status": "Accepted"}
+                    return _ocpp_call_result.RemoteStartTransaction(status="Accepted")
 
                 @on(Action.remote_stop_transaction)
                 async def on_remote_stop_transaction(self, transaction_id, **kwargs):
@@ -958,13 +958,13 @@ class OCPPAdapter:
                     logger.info("OCPP RemoteStopTransaction received: transactionId=%d", transaction_id)
                     adapter._is_charging = False
                     adapter._status = "Available"
-                    return {"status": "Accepted"}
+                    return _ocpp_call_result.RemoteStopTransaction(status="Accepted")
 
                 @on(Action.reset)
                 async def on_reset(self, type, **kwargs):
                     """Handle reset command from CSMS"""
                     logger.info("OCPP Reset received: type=%s", type)
-                    return {"status": "Accepted"}
+                    return _ocpp_call_result.Reset(status="Accepted")
 
             # Parse WebSocket URL
             url = self.config.ws_url

@@ -104,6 +104,7 @@ class MockCSMSServer:
         self._running = False
         self._connections: dict[str, asyncio.Queue] = {}  # cp_id → outgoing queue
         self._ws_connections: dict[str, Any] = {}  # cp_id → websocket connection
+        self._pending_responses: dict[str, asyncio.Future] = {}  # msg_id → future
 
         # Test-accessible state
         self.boot_notifications: list[ReceivedMessage] = []
@@ -276,10 +277,18 @@ class MockCSMSServer:
 
     def _handle_call_result(self, cp_id: str, msg: list) -> None:
         """Handle an OCPP CALL_RESULT message (response to our commands)"""
+        message_id = msg[1] if len(msg) > 1 else ""
+        future = self._pending_responses.pop(message_id, None)
+        if future and not future.done():
+            future.set_result(msg)
         logger.debug("Mock CSMS: CALL_RESULT from %s: %s", cp_id, msg)
 
     def _handle_call_error(self, cp_id: str, msg: list) -> None:
         """Handle an OCPP CALL_ERROR message"""
+        message_id = msg[1] if len(msg) > 1 else ""
+        future = self._pending_responses.pop(message_id, None)
+        if future and not future.done():
+            future.set_exception(RuntimeError(f"CALL_ERROR: {msg}"))
         logger.warning("Mock CSMS: CALL_ERROR from %s: %s", cp_id, msg)
 
     # ── Action Handlers ──────────────────────────────────────────────
@@ -422,6 +431,34 @@ class MockCSMSServer:
         )
 
         return {}
+
+    # ── Send Commands to ChargePoint ─────────────────────────────────
+
+    async def send_to_cp(self, cp_id: str, action: str, payload: dict[str, Any] | None = None) -> asyncio.Future | None:
+        """Queue a CALL message to send to a connected ChargePoint.
+
+        The response will be processed by the connection handler loop.
+        Returns a Future that will be resolved with the CP's response, or None on failure.
+        """
+        ws = self._ws_connections.get(cp_id)
+        if ws is None:
+            logger.warning("Mock CSMS: cannot send to %s – not connected", cp_id)
+            return None
+
+        message_id = str(uuid.uuid4())
+        msg = json.dumps([CALL, message_id, action, payload or {}])
+
+        future: asyncio.Future = asyncio.get_event_loop().create_future()
+        self._pending_responses[message_id] = future
+
+        try:
+            await ws.send(msg)
+        except Exception as e:
+            logger.warning("Mock CSMS: failed to send %s to %s: %s", action, cp_id, e)
+            del self._pending_responses[message_id]
+            return None
+
+        return future
 
     # ── Message Building ─────────────────────────────────────────────
 
