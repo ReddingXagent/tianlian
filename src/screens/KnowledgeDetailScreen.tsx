@@ -24,8 +24,23 @@ const KnowledgeDetailScreen: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await knowledgeApi.getDetail(articleId);
-      setArticle(response.data);
+      // No dedicated detail endpoint; fetch from list and find by id
+      const response = await knowledgeApi.getArticles({ page: 1, page_size: 100 });
+      const item = response.data.items.find((it) => it.id === articleId);
+      if (!item) throw new Error('Article not found');
+      setArticle({
+        id: item.id,
+        title: item.title,
+        summary: item.summary,
+        content: item.content,
+        category: 'other',
+        tags: item.tags,
+        authorId: 0,
+        authorName: item.author,
+        viewCount: item.viewCount,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      });
     } catch {
       setError('加载文章详情失败，请重试');
     } finally {

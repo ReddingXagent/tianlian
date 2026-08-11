@@ -12,9 +12,8 @@ jest.mock('@react-navigation/native', () => ({
 
 jest.mock('../../services/api', () => ({
   knowledgeApi: {
-    getList: jest.fn(),
+    getArticles: jest.fn(),
     search: jest.fn(),
-    getById: jest.fn(),
   },
 }));
 
@@ -24,23 +23,26 @@ import { knowledgeApi } from '../../services/api';
 const MOCK_ARTICLES = {
   data: {
     items: [
-      { id: 1, title: '操作手册', category: 'operation', summary: '摘要', viewCount: 10, createdAt: '2024-01-15T00:00:00Z' },
-      { id: 2, title: '维护指南', category: 'maintenance', summary: '', viewCount: 0, createdAt: '' },
+      { id: 1, title: '操作手册', summary: '摘要', content: '', categoryId: 1, tags: [], author: 'admin', viewCount: 10, status: 'published', createdAt: '2024-01-15T00:00:00Z', updatedAt: '' },
+      { id: 2, title: '维护指南', summary: '', content: '', categoryId: 0, tags: [], author: 'admin', viewCount: 0, status: 'published', createdAt: '', updatedAt: '' },
     ],
+    total: 2,
+    page: 1,
+    pageSize: 50,
   },
 };
 
 describe('KnowledgeScreen.ext3 — refresh & retry callbacks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (knowledgeApi.getList as jest.Mock).mockResolvedValue(MOCK_ARTICLES);
-    (knowledgeApi.search as jest.Mock).mockResolvedValue({ data: [] });
+    (knowledgeApi.getArticles as jest.Mock).mockResolvedValue(MOCK_ARTICLES);
+    (knowledgeApi.search as jest.Mock).mockResolvedValue({ data: { items: [], total: 0, page: 1, pageSize: 50 } });
   });
 
   // Line 166: onAction retry when error & empty articles
   it('triggers fetchArticles via onAction when error with no articles', async () => {
     jest.setTimeout(15000);
-    (knowledgeApi.getList as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+    (knowledgeApi.getArticles as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
     const { findByText } = render(<KnowledgeScreen />);
 
@@ -48,14 +50,14 @@ describe('KnowledgeScreen.ext3 — refresh & retry callbacks', () => {
     const retryButton = await findByText('重新加载');
 
     // Fix mock to succeed on retry
-    (knowledgeApi.getList as jest.Mock).mockResolvedValueOnce(MOCK_ARTICLES);
+    (knowledgeApi.getArticles as jest.Mock).mockResolvedValueOnce(MOCK_ARTICLES);
 
     await act(async () => {
       fireEvent.press(retryButton);
       await new Promise(r => setTimeout(r, 100));
     });
 
-    expect(knowledgeApi.getList).toHaveBeenCalledTimes(2);
+    expect(knowledgeApi.getArticles).toHaveBeenCalledTimes(2);
   });
 
   // Line 177: onRefresh pull-to-refresh with existing data
@@ -87,7 +89,7 @@ describe('KnowledgeScreen.ext3 — refresh & retry callbacks', () => {
         await new Promise(r => setTimeout(r, 100));
       });
       // getList called again (initial + refresh)
-      expect(knowledgeApi.getList).toHaveBeenCalledTimes(2);
+      expect(knowledgeApi.getArticles).toHaveBeenCalledTimes(2);
     }
   });
 });

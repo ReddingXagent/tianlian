@@ -10,20 +10,21 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 jest.mock('../../services/api', () => ({
-  knowledgeApi: { getList: jest.fn(), search: jest.fn() },
+  knowledgeApi: { getArticles: jest.fn(), search: jest.fn() },
 }));
 
-const MOCK_ARTICLES = [
+// KnowledgeArticleItem shape (what API returns)
+const MOCK_ITEMS = [
   {
     id: 1,
     title: '文章一',
     summary: '摘要一',
     content: '',
-    category: 'operation',
+    categoryId: 1,
     tags: [],
-    authorId: 1,
-    authorName: '张三',
+    author: '张三',
     viewCount: 10,
+    status: 'published' as const,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '',
   },
@@ -32,11 +33,11 @@ const MOCK_ARTICLES = [
     title: '文章二',
     summary: '',
     content: '',
-    category: 'other',
+    categoryId: 0,
     tags: [],
-    authorId: 2,
-    authorName: '李四',
+    author: '李四',
     viewCount: 20,
+    status: 'published' as const,
     createdAt: '2024-01-14T10:00:00Z',
     updatedAt: '',
   },
@@ -45,14 +46,14 @@ const MOCK_ARTICLES = [
 describe('KnowledgeScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (knowledgeApi.getList as jest.Mock).mockResolvedValue({
-      data: { items: MOCK_ARTICLES, total: 2, page: 1, pageSize: 50 },
+    (knowledgeApi.getArticles as jest.Mock).mockResolvedValue({
+      data: { items: MOCK_ITEMS, total: 2, page: 1, pageSize: 50 },
     });
-    (knowledgeApi.search as jest.Mock).mockResolvedValue({ data: MOCK_ARTICLES });
+    (knowledgeApi.search as jest.Mock).mockResolvedValue({ data: { items: MOCK_ITEMS, total: 2, page: 1, pageSize: 50 } });
   });
 
   it('shows loading spinner initially', () => {
-    (knowledgeApi.getList as jest.Mock).mockImplementation(
+    (knowledgeApi.getArticles as jest.Mock).mockImplementation(
       () => new Promise(() => {})
     );
     const { getByText } = render(<KnowledgeScreen />);
@@ -79,7 +80,7 @@ describe('KnowledgeScreen', () => {
   });
 
   it('shows empty state when no articles', async () => {
-    (knowledgeApi.getList as jest.Mock).mockResolvedValue({
+    (knowledgeApi.getArticles as jest.Mock).mockResolvedValue({
       data: { items: [], total: 0, page: 1, pageSize: 50 },
     });
     const { findByText } = render(<KnowledgeScreen />);
@@ -87,7 +88,7 @@ describe('KnowledgeScreen', () => {
   });
 
   it('shows error state when load fails', async () => {
-    (knowledgeApi.getList as jest.Mock).mockRejectedValue(new Error('x'));
+    (knowledgeApi.getArticles as jest.Mock).mockRejectedValue(new Error('x'));
     const { findByText } = render(<KnowledgeScreen />);
     expect(await findByText('加载失败')).toBeTruthy();
   });

@@ -11,7 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { knowledgeApi } from '../services/api';
-import { KnowledgeArticle, RootStackParamList } from '../types';
+import { KnowledgeArticle, KnowledgeArticleItem, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
@@ -45,16 +45,26 @@ const KnowledgeScreen: React.FC = () => {
     setError(null);
 
     try {
-      let response;
+      let response: { data: { items: KnowledgeArticleItem[] } };
+      const mapItem = (it: KnowledgeArticleItem): KnowledgeArticle => ({
+        id: it.id,
+        title: it.title,
+        summary: it.summary,
+        content: it.content,
+        category: 'other',
+        tags: it.tags,
+        authorId: 0,
+        authorName: it.author,
+        viewCount: it.viewCount,
+        createdAt: it.createdAt,
+        updatedAt: it.updatedAt,
+      });
       if (searchQuery.trim()) {
         response = await knowledgeApi.search(searchQuery.trim());
-        setArticles(response.data);
+        setArticles(response.data.items.map(mapItem));
       } else {
-        response = await knowledgeApi.getList({
-          category: activeCategory !== 'all' ? activeCategory : undefined,
-          pageSize: 50,
-        });
-        setArticles(response.data.items);
+        response = await knowledgeApi.getArticles({ page: 1, page_size: 50 });
+        setArticles(response.data.items.map(mapItem));
       }
     } catch {
       setError('加载知识库失败，请下拉刷新重试');

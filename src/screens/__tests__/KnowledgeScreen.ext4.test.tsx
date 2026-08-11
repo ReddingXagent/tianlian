@@ -13,25 +13,25 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('../../services/api', () => ({
   knowledgeApi: {
     search: jest.fn(),
-    getList: jest.fn(),
+    getArticles: jest.fn(),
   },
 }));
 
 const ARTICLES = [
-  { id: 1, title: '文章1', summary: '摘要', category: 'guide', viewCount: 10, authorName: 'admin', createdAt: '2024-01-15T10:00:00Z' },
+  { id: 1, title: '文章1', summary: '摘要', content: '', categoryId: 0, tags: [], author: 'admin', viewCount: 10, status: 'published', createdAt: '2024-01-15T10:00:00Z', updatedAt: '' },
 ];
 
 describe('KnowledgeScreen.ext4 search debounce clear', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (knowledgeApi.getList as jest.Mock).mockResolvedValue({ data: { items: ARTICLES } });
-    (knowledgeApi.search as jest.Mock).mockResolvedValue({ data: ARTICLES });
+    (knowledgeApi.getArticles as jest.Mock).mockResolvedValue({ data: { items: ARTICLES } });
+    (knowledgeApi.search as jest.Mock).mockResolvedValue({ data: { items: ARTICLES, total: 1, page: 1, pageSize: 50 } });
   });
 
   it('clears existing timeout when typing rapidly', async () => {
     const { getByPlaceholderText } = render(<KnowledgeScreen />);
     await waitFor(() => {
-      expect(knowledgeApi.getList).toHaveBeenCalled();
+      expect(knowledgeApi.getArticles).toHaveBeenCalled();
     });
 
     const searchInput = getByPlaceholderText('搜索知识库...');
