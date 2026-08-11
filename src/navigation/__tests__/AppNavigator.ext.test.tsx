@@ -71,7 +71,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         const g = global as Record<string, unknown>;
         const icons = g.__capturedIcons as Array<{ label: string; focused: boolean }>;
         if (options && 'tabBarIcon' in options) {
-          const iconFn = options.tabBarIcon as () => unknown;
+          const iconFn = options.tabBarIcon as any;
           icons.push({ label: name, focused: true });
           icons.push({ label: name, focused: false });
           try {

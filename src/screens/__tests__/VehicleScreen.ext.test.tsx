@@ -208,7 +208,7 @@ describe('VehicleScreen — extended coverage', () => {
 
     fireEvent.press(utils.getAllByText('删除')[0]);
     const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
-    const deleteOpt = alertCall[2].find((o: AlertOption) => o.text === '删除');
+    const deleteOpt = alertCall[2].find((o: { text?: string }) => o.text === '删除');
 
     (Alert.alert as jest.Mock).mockClear();
     await act(async () => {

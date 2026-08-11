@@ -71,7 +71,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         const calls = g.__iconCalls as Array<{ focused: boolean; label: string }>;
         const children: React.ReactNode[] = [];
         if (options && 'tabBarIcon' in options) {
-          const iconFn = options.tabBarIcon as () => unknown;
+          const iconFn = options.tabBarIcon as any;
           calls.push({ focused: true, label: name });
           calls.push({ focused: false, label: name });
           // Actually create the icon elements so TabIcon function gets invoked
