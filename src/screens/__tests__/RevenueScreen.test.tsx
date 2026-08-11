@@ -174,13 +174,14 @@ describe('RevenueScreen', () => {
     await findByText('2024-01-01');
 
     expect(mockChartProps).toBeTruthy();
+    const props = mockChartProps as any;
     // labels: date -> M/D
-    expect(mockChartProps.data.labels).toEqual(['1/1', '1/2']);
+    expect(props.data.labels).toEqual(['1/1', '1/2']);
     // datasets: 金额序列 + 曲线颜色回调
-    expect(mockChartProps.data.datasets[0].data).toEqual([123.45, 200]);
-    expect(mockChartProps.data.datasets[0].color()).toBe('#1a73e8');
+    expect(props.data.datasets[0].data).toEqual([123.45, 200]);
+    expect(props.data.datasets[0].color()).toBe('#1a73e8');
     // chartConfig 颜色回调
-    expect(mockChartProps.chartConfig.color(0.5)).toBe('rgba(26, 115, 232, 0.5)');
-    expect(mockChartProps.chartConfig.labelColor()).toBe('#999');
+    expect(props.chartConfig.color(0.5)).toBe('rgba(26, 115, 232, 0.5)');
+    expect(props.chartConfig.labelColor()).toBe('#999');
   });
 });
