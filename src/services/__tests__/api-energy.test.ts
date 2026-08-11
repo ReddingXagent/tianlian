@@ -33,7 +33,7 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
-const mockApi = (axios as any).create();
+const mockApi = jest.mocked(axios.create).mock.results[0].value;
 
 const mockEnergyData = {
   code: 200,

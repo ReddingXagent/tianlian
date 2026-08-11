@@ -3,6 +3,7 @@ import { Alert, FlatList } from 'react-native';
 import { render, waitFor, act, fireEvent } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import WalletScreen from '../WalletScreen';
+import type { WalletRecordType } from '../../types';
 
 // --- mocks ---
 const mockGetRecords = jest.fn();
@@ -226,7 +227,7 @@ describe('WalletScreen extended coverage', () => {
     mockGetRecords.mockResolvedValue({
       data: {
         items: [{
-          id: 1, userId: 1, type: 'unknown_type' as any, amount: 5, balance: 145,
+          id: 1, userId: 1, type: 'unknown_type' as unknown as WalletRecordType, amount: 5, balance: 145,
           description: '神秘操作', createdAt: '2025-01-01T10:00:00Z',
         }],
         page: 1, total: 1,
@@ -404,7 +405,7 @@ describe('WalletScreen extended coverage', () => {
     const { UNSAFE_getByType, getByText } = renderScreen();
     await waitFor(() => expect(getByText('test42')).toBeTruthy());
     const list = UNSAFE_getByType(FlatList);
-    expect(list.props.keyExtractor({ id: 42 } as any)).toBe('42');
+    expect(list.props.keyExtractor({ id: 42 } as { id: number })).toBe('42');
   });
 
   // === 充值中按钮禁用态 ===

@@ -42,7 +42,7 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: (...args: any[]) => mockDeleteItem(...args),
 }));
 
-const mockAxiosInstance = (axios as any).create();
+const mockAxiosInstance = jest.mocked(axios.create).mock.results[0].value;
 
 // Capture interceptor callbacks at module level (before clearAllMocks runs)
 const _requestCalls = (mockAxiosInstance.interceptors.request.use as jest.Mock).mock.calls;
@@ -163,7 +163,7 @@ describe('API Service — interceptor internal logic', () => {
 
     it('rejects errors without response property', async () => {
       const [, errorHandler] = getResponseInterceptor();
-      const networkErr = { message: 'Network Error' } as any;
+      const networkErr: { message: string } = { message: 'Network Error' };
       await expect(errorHandler(networkErr)).rejects.toEqual(networkErr);
       expect(mockDeleteItem).not.toHaveBeenCalled();
     });

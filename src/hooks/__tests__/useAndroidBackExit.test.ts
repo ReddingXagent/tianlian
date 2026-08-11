@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react-native';
 import { BackHandler, ToastAndroid } from 'react-native';
 import { useAndroidBackExit, DOUBLE_BACK_EXIT_MS, EXIT_TOAST_TEXT } from '../useAndroidBackExit';
+import type { BackExitNavigation } from '../useAndroidBackExit';
 
 type BackCb = () => boolean;
 
@@ -16,7 +17,7 @@ function makeNavigation({ tabIndex = 0, parentIndex = 0 }: NavOptions = {}) {
     getState: () => ({ index: tabIndex }),
     navigate,
   };
-  return { navigation: navigation as any, navigate };
+  return { navigation: navigation as BackExitNavigation, navigate };
 }
 
 describe('useAndroidBackExit (Android硬件返回键治理)', () => {
@@ -69,7 +70,7 @@ describe('useAndroidBackExit (Android硬件返回键治理)', () => {
       getState: () => undefined,
       navigate: jest.fn(),
     };
-    renderHook(() => useAndroidBackExit(navigation as any));
+    renderHook(() => useAndroidBackExit(navigation as BackExitNavigation));
     expect(backCb!()).toBe(false);
   });
 
