@@ -47,6 +47,7 @@ import {
   ApiKey,
   SecurityLog,
   SecurityPolicy,
+  WorkOrderStats,
   KnowledgeArticleItem,
   KnowledgeCategoryItem,
 } from '../types';
@@ -321,6 +322,18 @@ export const workOrderApi = {
   },
   dispatch(id: string, auto = true): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/dispatch`, { auto }).then((res) => res.data);
+  },
+  getStats(): Promise<ApiResponse<WorkOrderStats>> {
+    return api.get('/work-orders/stats').then((res) => ({
+      ...res.data,
+      data: {
+        total: res.data.data?.total ?? 0,
+        statusDistribution: res.data.data?.status_distribution ?? {},
+        levelDistribution: res.data.data?.level_distribution ?? {},
+        typeDistribution: res.data.data?.type_distribution ?? {},
+        groups: res.data.data?.groups ?? {},
+      },
+    }));
   },
 };
 

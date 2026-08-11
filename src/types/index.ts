@@ -91,6 +91,17 @@ export type WorkOrderStatus =
   | 'cancelled';
 
 // =====================
+// 工单统计 (WorkOrderStats)
+// =====================
+export interface WorkOrderStats {
+  total: number;
+  statusDistribution: Record<string, number>;
+  levelDistribution: Record<string, number>;
+  typeDistribution: Record<string, number>;
+  groups: Record<string, number>;
+}
+
+// =====================
 // 知识库 (KnowledgeBase)
 // =====================
 export interface KnowledgeArticle {
