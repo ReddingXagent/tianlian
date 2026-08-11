@@ -193,6 +193,51 @@ describe('useAuthStore', () => {
       expect(authApi.getProfile).not.toHaveBeenCalled();
     });
 
+    it('should use username fallback when realName is null', async () => {
+      (tokenStorage.getToken as jest.Mock).mockResolvedValue(TEST_TOKEN);
+      const meWithoutRealName: AuthMe = {
+        ...TEST_AUTH_ME,
+        realName: null,
+        role: null,
+      };
+      (authApi.getProfile as jest.Mock).mockResolvedValue({ data: meWithoutRealName });
+
+      await act(async () => {
+        await useAuthStore.getState().checkAuth();
+      });
+
+      const state = useAuthStore.getState();
+      expect(state.user).toEqual({
+        id: 1,
+        username: 'admin',
+        nickname: 'admin', // realName null → fallback to username
+        email: '',
+        phone: '',
+        role: 'viewer', // role null → fallback to viewer
+        avatar: undefined,
+        stationIds: [],
+        createdAt: '',
+        updatedAt: '',
+      });
+      expect(state.isAuthenticated).toBe(true);
+    });
+
+    it('should use username fallback when realName is undefined', async () => {
+      (tokenStorage.getToken as jest.Mock).mockResolvedValue(TEST_TOKEN);
+      const mePartial: AuthMe = {
+        ...TEST_AUTH_ME,
+        realName: undefined,
+      };
+      (authApi.getProfile as jest.Mock).mockResolvedValue({ data: mePartial });
+
+      await act(async () => {
+        await useAuthStore.getState().checkAuth();
+      });
+
+      const state = useAuthStore.getState();
+      expect(state.user?.nickname).toBe('admin'); // fallback to username
+    });
+
     it('should clear state when profile fetch fails', async () => {
       (tokenStorage.getToken as jest.Mock).mockResolvedValue(TEST_TOKEN);
       (authApi.getProfile as jest.Mock).mockRejectedValue(new Error('Token expired'));
