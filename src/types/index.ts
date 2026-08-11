@@ -920,3 +920,18 @@ export interface ApiKey {
   createdAt: string;
   updatedAt: string;
 }
+
+// =====================
+// 营收分析 (RevenueAnalytics — from /analytics/revenue)
+// =====================
+export interface RevenueAnalyticsSummary {
+  totalRevenue: number;
+  totalKwh: number;
+  totalOrders: number;
+  avgPerOrder: number;
+}
+
+export interface RevenueAnalytics {
+  summary: RevenueAnalyticsSummary;
+  trend: unknown[];
+}

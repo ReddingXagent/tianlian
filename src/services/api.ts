@@ -48,6 +48,7 @@ import {
   SecurityLog,
   SecurityPolicy,
   WorkOrderStats,
+  RevenueAnalytics,
   KnowledgeArticleItem,
   KnowledgeCategoryItem,
 } from '../types';
@@ -1787,6 +1788,45 @@ export const securityPolicyApi = {
             status: (it.status as 'active' | 'inactive') ?? 'active',
             createdAt: (it.created_at as string) ?? '',
             updatedAt: (it.updated_at as string) ?? '',
+          },
+        };
+      });
+  },
+};
+
+/**
+ * 营收分析 API — /analytics/revenue
+ * 支持可选查询参数: start_date, end_date, period, station_id
+ */
+export const analyticsRevenueApi = {
+  /** GET /analytics/revenue — 营收分析汇总 */
+  getSummary(params?: {
+    startDate?: string;
+    endDate?: string;
+    period?: string;
+    stationId?: number;
+  }): Promise<ApiResponse<RevenueAnalytics>> {
+    const query: Record<string, string> = {};
+    if (params?.startDate) query.start_date = params.startDate;
+    if (params?.endDate) query.end_date = params.endDate;
+    if (params?.period) query.period = params.period;
+    if (params?.stationId != null) query.station_id = String(params.stationId);
+    return api
+      .get('/analytics/revenue', { params: query })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const s = (d.summary as Record<string, unknown>) ?? {};
+        return {
+          ...raw,
+          data: {
+            summary: {
+              totalRevenue: (s.total_revenue as number) ?? 0,
+              totalKwh: (s.total_kwh as number) ?? 0,
+              totalOrders: (s.total_orders as number) ?? 0,
+              avgPerOrder: (s.avg_per_order as number) ?? 0,
+            },
+            trend: (d.trend as unknown[]) ?? [],
           },
         };
       });
