@@ -801,6 +801,41 @@ export interface HealingRule {
 }
 
 // =====================
+// 安全审计日志 (SecurityLog — from /security/logs)
+// =====================
+export interface SecurityLog {
+  id: number;
+  timestamp: string;
+  userId: number;
+  username: string;
+  userRole: string | null;
+  action: string;
+  module: string;
+  targetId: string;
+  targetDesc: string;
+  detail: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  result: 'success' | 'failure';
+  errorMsg: string | null;
+}
+
+// =====================
+// 安全策略 (SecurityPolicy — from /security/policies)
+// =====================
+export interface SecurityPolicy {
+  id: number;
+  policyKey: string;
+  policyConfig: Record<string, unknown>;
+  description: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
 // API密钥 (ApiKey — from /api-keys)
 // ====================
 export interface ApiKey {

@@ -44,6 +44,8 @@ import {
   Webhook,
   HealingRule,
   ApiKey,
+  SecurityLog,
+  SecurityPolicy,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -1461,6 +1463,85 @@ export const apiKeyApi = {
             total: (d.total as number) ?? 0,
             page: (d.page as number) ?? params?.page ?? 1,
             pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+// =====================
+// 安全审计日志 API (/security/logs)
+// =====================
+export const securityLogApi = {
+  /** GET /security/logs — 安全审计日志列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<SecurityLog>>> {
+    return api
+      .get('/security/logs', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          timestamp: (it.timestamp as string) ?? '',
+          userId: (it.user_id as number) ?? 0,
+          username: (it.username as string) ?? '',
+          userRole: (it.user_role as string | null) ?? null,
+          action: (it.action as string) ?? '',
+          module: (it.module as string) ?? '',
+          targetId: (it.target_id as string) ?? '',
+          targetDesc: (it.target_desc as string) ?? '',
+          detail: (it.detail as string | null) ?? null,
+          oldValue: (it.old_value as string | null) ?? null,
+          newValue: (it.new_value as string | null) ?? null,
+          ipAddress: (it.ip_address as string | null) ?? null,
+          userAgent: (it.user_agent as string | null) ?? null,
+          result: (it.result as 'success' | 'failure') ?? 'success',
+          errorMsg: (it.error_msg as string | null) ?? null,
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 安全策略 API (/security/policies)
+// =====================
+export const securityPolicyApi = {
+  /** GET /security/policies — 安全策略列表 */
+  getList(): Promise<ApiResponse<PaginatedData<SecurityPolicy>>> {
+    return api
+      .get('/security/policies')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          policyKey: (it.policy_key as string) ?? '',
+          policyConfig: (it.policy_config as Record<string, unknown>) ?? {},
+          description: (it.description as string) ?? '',
+          status: (it.status as 'active' | 'inactive') ?? 'active',
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: 1,
+            pageSize: items.length,
           },
         };
       });
