@@ -201,7 +201,7 @@ describe('workbenchApi', () => {
   });
 
   it('getPendingOrders should GET /workbench/pending-orders with limit', async () => {
-    const orders: Record<string, unknown>[] = [] = [];
+    const orders: Record<string, unknown>[] = [];
     const apiResponse = { code: 0, message: 'success', data: orders };
     mockAxios.onGet('/workbench/pending-orders', { params: { limit: 5 } }).reply(200, apiResponse);
 
@@ -210,7 +210,7 @@ describe('workbenchApi', () => {
   });
 
   it('getRecentAlarms should GET /workbench/recent-alarms with limit', async () => {
-    const alarms: Record<string, unknown>[] = [] = [];
+    const alarms: Record<string, unknown>[] = [];
     const apiResponse = { code: 0, message: 'success', data: alarms };
     mockAxios.onGet('/workbench/recent-alarms', { params: { limit: 5 } }).reply(200, apiResponse);
 
@@ -546,44 +546,49 @@ describe('knowledgeApi', () => {
     mockAxios.reset();
   });
 
-  it('getList should GET /knowledge', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/knowledge').reply(200, apiResponse);
-
-    const result = await knowledgeApi.getList();
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getList should pass category and search params', async () => {
-    const paginatedData = { items: [], total: 0, page: 1, pageSize: 10 };
-    const apiResponse = { code: 0, message: 'success', data: paginatedData };
-    mockAxios.onGet('/knowledge', { params: { category: 'operation', search: '充电', page: 1, pageSize: 10 } }).reply(200, apiResponse);
-
-    const result = await knowledgeApi.getList({ category: 'operation', search: '充电', page: 1, pageSize: 10 });
-    expect(result).toEqual(apiResponse);
-  });
-
-  it('getDetail should GET /knowledge/:id', async () => {
-    const article = {
-      id: 1, title: '操作手册', summary: '操作说明', content: '详细内容...',
-      category: 'operation' as const, tags: ['操作'], authorId: 1, authorName: 'admin',
-      viewCount: 100, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
+  it('getArticles should GET /knowledge/articles with default pagination', async () => {
+    const apiResponse = {
+      code: 200, message: 'success',
+      data: { items: [], total: 0, page: 1, page_size: 20 },
+      timestamp: 0,
     };
-    const apiResponse = { code: 0, message: 'success', data: article };
-    mockAxios.onGet('/knowledge/1').reply(200, apiResponse);
+    mockAxios.onGet('/knowledge/articles').reply(200, apiResponse);
 
-    const result = await knowledgeApi.getDetail(1);
-    expect(result).toEqual(apiResponse);
+    const result = await knowledgeApi.getArticles();
+    expect(result.data.items).toHaveLength(0);
+    expect(result.data.total).toBe(0);
   });
 
-  it('search should GET /knowledge/search with query', async () => {
-    const articles: Record<string, unknown>[] = [] = [];
-    const apiResponse = { code: 0, message: 'success', data: articles };
-    mockAxios.onGet('/knowledge/search', { params: { q: '充电' } }).reply(200, apiResponse);
+  it('getArticles should pass pagination params', async () => {
+    const apiResponse = {
+      code: 200, message: 'success',
+      data: { items: [], total: 0, page: 2, page_size: 5 },
+      timestamp: 0,
+    };
+    mockAxios.onGet('/knowledge/articles?page=2&page_size=5').reply(200, apiResponse);
+
+    const result = await knowledgeApi.getArticles({ page: 2, page_size: 5 });
+    expect(result.data.page).toBe(2);
+  });
+
+  it('getCategories should GET /knowledge/categories', async () => {
+    const apiResponse = { code: 200, message: 'success', data: [], timestamp: 0 };
+    mockAxios.onGet('/knowledge/categories').reply(200, apiResponse);
+
+    const result = await knowledgeApi.getCategories();
+    expect(result.data).toHaveLength(0);
+  });
+
+  it('search should GET /knowledge/search with encoded query', async () => {
+    const apiResponse = {
+      code: 200, message: 'success',
+      data: { items: [], total: 0, page: 1, page_size: 20 },
+      timestamp: 0,
+    };
+    mockAxios.onGet('/knowledge/search?q=%E5%85%85%E7%94%B5&page=1&page_size=20').reply(200, apiResponse);
 
     const result = await knowledgeApi.search('充电');
-    expect(result).toEqual(apiResponse);
+    expect(result.data.items).toHaveLength(0);
   });
 });
 
@@ -681,7 +686,7 @@ describe('dashboardApi', () => {
   });
 
   it('getAlarmTrends should GET /dashboard/alarm-trends with days', async () => {
-    const trends: Record<string, unknown>[] = [] = [];
+    const trends: Record<string, unknown>[] = [];
     const apiResponse = { code: 0, message: 'success', data: trends };
     mockAxios.onGet('/dashboard/alarm-trends', { params: { days: 7 } }).reply(200, apiResponse);
 
@@ -690,7 +695,7 @@ describe('dashboardApi', () => {
   });
 
   it('getWorkOrderTrends should GET /dashboard/workorder-trends', async () => {
-    const trends: Record<string, unknown>[] = [] = [];
+    const trends: Record<string, unknown>[] = [];
     const apiResponse = { code: 0, message: 'success', data: trends };
     mockAxios.onGet('/dashboard/workorder-trends', { params: { days: 30 } }).reply(200, apiResponse);
 

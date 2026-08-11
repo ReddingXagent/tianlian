@@ -836,6 +836,36 @@ export interface SecurityPolicy {
 }
 
 // =====================
+// 知识库文章 (KnowledgeArticleItem — from /knowledge/articles API)
+// =====================
+export interface KnowledgeArticleItem {
+  id: number;
+  title: string;
+  content: string;
+  summary: string;
+  categoryId: number;
+  categoryName?: string;
+  tags: string[];
+  author: string;
+  viewCount: number;
+  status: 'published' | 'draft' | 'archived';
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// 知识库分类 (KnowledgeCategoryItem — from /knowledge/categories API)
+// =====================
+export interface KnowledgeCategoryItem {
+  id: number;
+  name: string;
+  description: string;
+  articleCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
 // API密钥 (ApiKey — from /api-keys)
 // ====================
 export interface ApiKey {

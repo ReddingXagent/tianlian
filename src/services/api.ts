@@ -10,7 +10,6 @@ import {
   DeviceMetrics,
   DeviceHealth,
   MonitorSummary,
-  KnowledgeArticle,
   ScanResult,
   PaginatedData,
   WorkbenchStats,
@@ -46,6 +45,8 @@ import {
   ApiKey,
   SecurityLog,
   SecurityPolicy,
+  KnowledgeArticleItem,
+  KnowledgeCategoryItem,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -446,22 +447,95 @@ export const scanApi = {
 };
 
 // =====================
-// 知识库 API
+// 知识库 API (knowledge — /knowledge/articles, /knowledge/categories, /knowledge/search)
 // =====================
 export const knowledgeApi = {
-  getList(params?: {
-    category?: string;
-    search?: string;
-    page?: number;
-    pageSize?: number;
-  }): Promise<ApiResponse<PaginatedData<KnowledgeArticle>>> {
-    return api.get('/knowledge', { params }).then((res) => res.data);
+  /** GET /knowledge/articles — 知识库文章列表 */
+  getArticles(params?: { page?: number; page_size?: number }): Promise<ApiResponse<PaginatedData<KnowledgeArticleItem>>> {
+    const query = params ? `?page=${params.page ?? 1}&page_size=${params.page_size ?? 20}` : '';
+    return api
+      .get(`/knowledge/articles${query}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          title: (it.title as string) ?? '',
+          content: (it.content as string) ?? '',
+          summary: (it.summary as string) ?? '',
+          categoryId: (it.category_id as number) ?? 0,
+          categoryName: (it.category_name as string) ?? undefined,
+          tags: ((it.tags as string[]) ?? []),
+          author: (it.author as string) ?? '',
+          viewCount: (it.view_count as number) ?? 0,
+          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? 1,
+            pageSize: (d.page_size as number) ?? 20,
+          },
+        };
+      });
   },
-  getDetail(id: number): Promise<ApiResponse<KnowledgeArticle>> {
-    return api.get(`/knowledge/${id}`).then((res) => res.data);
+
+  /** GET /knowledge/categories — 知识库分类列表 */
+  getCategories(): Promise<ApiResponse<KnowledgeCategoryItem[]>> {
+    return api
+      .get('/knowledge/categories')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>[] | Record<string, unknown>>;
+        const items = (Array.isArray(raw.data) ? raw.data : (raw.data as Record<string, unknown>)?.items ?? []) as Record<string, unknown>[];
+        const mapped = items.map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          description: (it.description as string) ?? '',
+          articleCount: (it.article_count as number) ?? 0,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return { ...raw, data: mapped };
+      });
   },
-  search(query: string): Promise<ApiResponse<KnowledgeArticle[]>> {
-    return api.get('/knowledge/search', { params: { q: query } }).then((res) => res.data);
+
+  /** GET /knowledge/search?q=keyword — 知识库搜索 */
+  search(keyword: string, params?: { page?: number; page_size?: number }): Promise<ApiResponse<PaginatedData<KnowledgeArticleItem>>> {
+    const page = params?.page ?? 1;
+    const pageSize = params?.page_size ?? 20;
+    return api
+      .get(`/knowledge/search?q=${encodeURIComponent(keyword)}&page=${page}&page_size=${pageSize}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          title: (it.title as string) ?? '',
+          content: (it.content as string) ?? '',
+          summary: (it.summary as string) ?? '',
+          categoryId: (it.category_id as number) ?? 0,
+          categoryName: (it.category_name as string) ?? undefined,
+          tags: ((it.tags as string[]) ?? []),
+          author: (it.author as string) ?? '',
+          viewCount: (it.view_count as number) ?? 0,
+          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? 1,
+            pageSize: (d.page_size as number) ?? 20,
+          },
+        };
+      });
   },
 };
 
@@ -646,6 +720,25 @@ export const roleApi = {
           isSystem: (it.is_system as boolean) ?? false,
           permissions: (it.permissions as string[]) ?? [],
         })),
+      };
+    });
+  },
+
+  /** GET /roles/{id} — 角色详情 (含完整权限列表) */
+  getById(id: number): Promise<ApiResponse<Role>> {
+    return api.get(`/roles/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const it = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          displayName: (it.display_name as string) ?? '',
+          description: (it.description as string) ?? '',
+          isSystem: (it.is_system as boolean) ?? false,
+          permissions: (it.permissions as string[]) ?? [],
+        },
       };
     });
   },
@@ -1427,6 +1520,32 @@ export const healingRuleApi = {
         };
       });
   },
+
+  /** GET /healing/rules/{id} — 自愈规则详情 */
+  getById(id: number): Promise<ApiResponse<HealingRule>> {
+    return api
+      .get(`/healing/rules/${id}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            deviceType: (it.device_type as string) ?? '',
+            faultCode: (it.fault_code as string) ?? '',
+            action: (it.action as string) ?? '',
+            conditions: (it.conditions as Record<string, unknown>) ?? {},
+            enabled: (it.enabled as boolean) ?? false,
+            successRate: (it.success_rate as number) ?? 0,
+            lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
+          },
+        };
+      });
+  },
 };
 
 // =====================
@@ -1542,6 +1661,28 @@ export const securityPolicyApi = {
             total: (d.total as number) ?? 0,
             page: 1,
             pageSize: items.length,
+          },
+        };
+      });
+  },
+
+  /** GET /security/policies/{key} — 单个安全策略详情 */
+  getByKey(key: string): Promise<ApiResponse<SecurityPolicy>> {
+    return api
+      .get(`/security/policies/${key}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            policyKey: (it.policy_key as string) ?? '',
+            policyConfig: (it.policy_config as Record<string, unknown>) ?? {},
+            description: (it.description as string) ?? '',
+            status: (it.status as 'active' | 'inactive') ?? 'active',
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
           },
         };
       });
