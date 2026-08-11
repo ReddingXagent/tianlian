@@ -148,9 +148,7 @@ function loadAndApplyTenantBranding(tenantId) {
   if (!tenantId && tenantId !== 0) return Promise.resolve(null);
 
   // 懒加载避免循环依赖 (branding.js ↔ api.js)
-  // eslint-disable-next-line global-require
   const lazyApi = require('../services/api');
-  // eslint-disable-next-line global-require
   const lazyConfig = require('../config/index');
 
   return lazyApi.getTenantBranding(tenantId)
