@@ -9,6 +9,7 @@ import {
   Device,
   DeviceMetrics,
   DeviceHealth,
+  DeviceHealthHistory,
   MonitorSummary,
   ScanResult,
   PaginatedData,
@@ -382,6 +383,21 @@ export const deviceApi = {
           lastHealthCheck: (d.last_health_check as string | null) ?? null,
         },
       };
+    });
+  },
+  /** GET /devices/{id}/health/history — 设备健康历史记录 */
+  getHealthHistory(id: number): Promise<ApiResponse<DeviceHealthHistory[]>> {
+    return api.get(`/devices/${id}/health/history`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>[]>;
+      const items = ((raw.data ?? []) as Record<string, unknown>[]).map((d) => ({
+        deviceId: (d.device_id as number) ?? id,
+        healthScore: (d.health_score as number) ?? 0,
+        healthStatus: (d.health_status as string) ?? '',
+        healthStatusDisplay: (d.health_status_display as string) ?? '',
+        dimensionScores: (d.dimension_scores as Record<string, number>) ?? {},
+        checkedAt: (d.checked_at as string) ?? (d.created_at as string) ?? '',
+      }));
+      return { ...raw, data: items };
     });
   },
   /** GET /devices/{id}/config — 充电桩设备配置 */

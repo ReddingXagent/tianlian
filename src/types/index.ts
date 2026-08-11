@@ -540,6 +540,16 @@ export interface DeviceHealth {
   lastHealthCheck: string | null;
 }
 
+// 设备健康历史记录 (Device Health History — from /devices/{id}/health/history)
+export interface DeviceHealthHistory {
+  deviceId: number;
+  healthScore: number;
+  healthStatus: string;
+  healthStatusDisplay: string;
+  dimensionScores: Record<string, number>;
+  checkedAt: string;
+}
+
 // =====================
 // 设备报告 (Device Report — from /reports/devices)
 // =====================
