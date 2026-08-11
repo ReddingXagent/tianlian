@@ -800,6 +800,26 @@ export interface HealingRule {
   updatedAt: string;
 }
 
+// ====================
+// 自愈执行记录 (HealingExecution — from /healing/executions)
+// ====================
+export interface HealingExecution {
+  id: number;
+  ruleId: number;
+  ruleName: string;
+  deviceId: number;
+  deviceName: string;
+  stationId: number;
+  stationName: string;
+  triggeredAt: string;
+  status: string; // success | failed | pending | running
+  actionTaken: string;
+  result: string | null;
+  duration: number; // seconds
+  errorMessage: string | null;
+  createdAt: string;
+}
+
 // =====================
 // 安全审计日志 (SecurityLog — from /security/logs)
 // =====================

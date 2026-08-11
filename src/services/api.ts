@@ -42,6 +42,7 @@ import {
   Engineer,
   Webhook,
   HealingRule,
+  HealingExecution,
   ApiKey,
   SecurityLog,
   SecurityPolicy,
@@ -1542,6 +1543,80 @@ export const healingRuleApi = {
             lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
             createdAt: (it.created_at as string) ?? '',
             updatedAt: (it.updated_at as string) ?? '',
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 自愈执行记录 API (/healing/executions)
+// =====================
+export const healingExecutionApi = {
+  /** GET /healing/executions — 自愈执行记录列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<HealingExecution>>> {
+    return api
+      .get('/healing/executions', {
+        params: { page: params?.page, page_size: params?.pageSize },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          ruleId: (it.rule_id as number) ?? 0,
+          ruleName: (it.rule_name as string) ?? '',
+          deviceId: (it.device_id as number) ?? 0,
+          deviceName: (it.device_name as string) ?? '',
+          stationId: (it.station_id as number) ?? 0,
+          stationName: (it.station_name as string) ?? '',
+          triggeredAt: (it.triggered_at as string) ?? '',
+          status: (it.status as string) ?? '',
+          actionTaken: (it.action_taken as string) ?? '',
+          result: (it.result as string | null) ?? null,
+          duration: (it.duration as number) ?? 0,
+          errorMessage: (it.error_message as string | null) ?? null,
+          createdAt: (it.created_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+
+  /** GET /healing/executions/{id} — 自愈执行记录详情 */
+  getById(id: number): Promise<ApiResponse<HealingExecution>> {
+    return api
+      .get(`/healing/executions/${id}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            ruleId: (it.rule_id as number) ?? 0,
+            ruleName: (it.rule_name as string) ?? '',
+            deviceId: (it.device_id as number) ?? 0,
+            deviceName: (it.device_name as string) ?? '',
+            stationId: (it.station_id as number) ?? 0,
+            stationName: (it.station_name as string) ?? '',
+            triggeredAt: (it.triggered_at as string) ?? '',
+            status: (it.status as string) ?? '',
+            actionTaken: (it.action_taken as string) ?? '',
+            result: (it.result as string | null) ?? null,
+            duration: (it.duration as number) ?? 0,
+            errorMessage: (it.error_message as string | null) ?? null,
+            createdAt: (it.created_at as string) ?? '',
           },
         };
       });
