@@ -81,6 +81,57 @@ describe('brandingStore', () => {
     });
   });
 
+  describe('loadFromCache', () => {
+    it('should return cached branding when valid', async () => {
+      const cached = { data: mockBranding, cachedAt: Date.now(), expiredAt: Date.now() + 60000 };
+      (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue(JSON.stringify(cached));
+
+      const result = await useBrandingStore.getState().loadFromCache();
+      expect(result).toEqual(mockBranding);
+    });
+
+    it('should return null when cache expired', async () => {
+      const expired = { data: mockBranding, cachedAt: 0, expiredAt: 1 };
+      (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue(JSON.stringify(expired));
+
+      const result = await useBrandingStore.getState().loadFromCache();
+      expect(result).toBeNull();
+    });
+
+    it('should return null on JSON parse error', async () => {
+      (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue('invalid-json');
+
+      const result = await useBrandingStore.getState().loadFromCache();
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('loadBranding cache fallback', () => {
+    it('should use cached branding when API fails and cache exists', async () => {
+      const cached = { data: mockBranding, cachedAt: Date.now(), expiredAt: Date.now() + 60000 };
+      (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue(JSON.stringify(cached));
+      (tenantApi.getBranding as jest.Mock).mockRejectedValue(new Error('网络错误'));
+
+      await useBrandingStore.getState().loadBranding('tenant-001');
+
+      const state = useBrandingStore.getState();
+      expect(state.branding).toEqual(mockBranding);
+      expect(state.error).toBeNull();
+      expect(state.loading).toBe(false);
+    });
+
+    it('should silently handle setItemAsync failure', async () => {
+      (require('expo-secure-store').setItemAsync as jest.Mock).mockRejectedValue(new Error('disk full'));
+      (tenantApi.getBranding as jest.Mock).mockResolvedValue({ data: mockBranding });
+
+      await useBrandingStore.getState().loadBranding('tenant-001');
+
+      const state = useBrandingStore.getState();
+      expect(state.branding).toEqual(mockBranding);
+      expect(state.loading).toBe(false);
+    });
+  });
+
   describe('reset', () => {
     it('should clear branding and loading state', () => {
       useBrandingStore.setState({ branding: mockBranding, loading: true, error: 'some error' });
@@ -91,6 +142,15 @@ describe('brandingStore', () => {
       expect(state.branding).toBeNull();
       expect(state.loading).toBe(false);
       expect(state.error).toBeNull();
+    });
+
+    it('should silently handle deleteItemAsync failure', () => {
+      (require('expo-secure-store').deleteItemAsync as jest.Mock).mockRejectedValue(new Error('permission'));
+
+      expect(() => useBrandingStore.getState().reset()).not.toThrow();
+
+      const state = useBrandingStore.getState();
+      expect(state.branding).toBeNull();
     });
   });
 });

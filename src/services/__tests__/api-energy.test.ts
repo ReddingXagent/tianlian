@@ -122,6 +122,45 @@ describe('energyApi contract', () => {
     expect(mockApi.get).toHaveBeenCalledWith('/energy/summary');
   });
 
+  it('returns raw res when data.data is null', async () => {
+    mockApi.get.mockResolvedValueOnce({
+      data: { code: 200, message: 'success', data: null },
+    });
+
+    const res = await energyApi.getSummary();
+    expect(res.code).toBe(200);
+    // data is null so the if(!d) guard returns res.data directly
+    expect(res.data).toBeNull();
+  });
+
+  it('handles missing yoy object with defaults', async () => {
+    mockApi.get.mockResolvedValueOnce({
+      data: {
+        code: 200,
+        data: { pv_generation: 100, total_revenue: 50 },
+      },
+    });
+
+    const res = await energyApi.getSummary();
+    expect(res.data.pvGeneration).toBe(100);
+    expect(res.data.yoy.pvGenerationYoY).toBe(0);
+    expect(res.data.yoy.chargingAmountYoY).toBe(0);
+  });
+
+  it('handles missing price_info object with defaults', async () => {
+    mockApi.get.mockResolvedValueOnce({
+      data: {
+        code: 200,
+        data: { total_revenue: 200 },
+      },
+    });
+
+    const res = await energyApi.getSummary();
+    expect(res.data.priceInfo.feedInTariff).toBe(0);
+    expect(res.data.priceInfo.chargingPrice).toBe(0);
+    expect(res.data.priceInfo.dischargePrice).toBe(0);
+  });
+
   it('rejects on network error', async () => {
     mockApi.get.mockRejectedValueOnce(new Error('Network Error'));
 
