@@ -24,7 +24,7 @@ jest.mock('../../store/stationStore', () => ({
 
 // Mock child components
 jest.mock('../../components/LoadingSpinner', () => {
-  const MockLoadingSpinner = (props: any) => {
+  const MockLoadingSpinner = (props: { text?: string; size?: 'small' | 'large'; color?: string }) => {
     const React = require('react');
     const { Text } = require('react-native');
     return React.createElement(Text, null, props.text || '加载中...');
@@ -32,7 +32,7 @@ jest.mock('../../components/LoadingSpinner', () => {
   return MockLoadingSpinner;
 });
 jest.mock('../../components/StatusBadge', () => {
-  const MockStatusBadge = (props: any) => {
+  const MockStatusBadge = (props: { status: string; label?: string }) => {
     const React = require('react');
     const { Text } = require('react-native');
     return React.createElement(Text, null, props.label || props.status || 'badge');
@@ -40,7 +40,7 @@ jest.mock('../../components/StatusBadge', () => {
   return MockStatusBadge;
 });
 jest.mock('../../components/EmptyState', () => {
-  const MockEmptyState = (props: any) => {
+  const MockEmptyState = (props: { icon?: string; title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => {
     const React = require('react');
     const { View, Text, TouchableOpacity } = require('react-native');
     const elements = [React.createElement(Text, { key: 'title' }, props.title || '')];

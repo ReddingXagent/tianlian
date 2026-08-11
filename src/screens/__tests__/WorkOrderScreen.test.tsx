@@ -23,7 +23,7 @@ jest.mock('../../services/api', () => ({
 
 // Mock child components
 jest.mock('../../components/LoadingSpinner', () => {
-  const MockLoadingSpinner = (props: any) => {
+  const MockLoadingSpinner = (props: { text?: string; size?: 'small' | 'large'; color?: string }) => {
     const React = require('react');
     const { Text } = require('react-native');
     return React.createElement(Text, null, props.text || '加载中...');
@@ -31,7 +31,7 @@ jest.mock('../../components/LoadingSpinner', () => {
   return MockLoadingSpinner;
 });
 jest.mock('../../components/StatusBadge', () => {
-  const MockStatusBadge = (props: any) => {
+  const MockStatusBadge = (props: { status: string; label?: string }) => {
     const React = require('react');
     const { Text } = require('react-native');
     return React.createElement(Text, null, props.label || props.status || 'badge');
@@ -39,7 +39,7 @@ jest.mock('../../components/StatusBadge', () => {
   return MockStatusBadge;
 });
 jest.mock('../../components/EmptyState', () => {
-  const MockEmptyState = (props: any) => {
+  const MockEmptyState = (props: { icon?: string; title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => {
     const React = require('react');
     const { View, Text, TouchableOpacity } = require('react-native');
     const elements = [React.createElement(Text, { key: 'title' }, props.title || '')];
@@ -453,7 +453,7 @@ describe('WorkOrderScreen', () => {
 
     // Get the "确定完成" button handler
     const buttons = completeAlertCall[2];
-    const confirmBtn = buttons.find((b: any) => b.text === '确定完成');
+    const confirmBtn = buttons.find((b: { text?: string; onPress?: () => void; style?: string }) => b.text === '确定完成');
 
     // Execute confirm
     (workOrderApi.getList as jest.Mock).mockResolvedValue({
@@ -484,7 +484,7 @@ describe('WorkOrderScreen', () => {
       (c) => c[0] === '完成工单'
     );
     const buttons = completeAlertCall[2];
-    const confirmBtn = buttons.find((b: any) => b.text === '确定完成');
+    const confirmBtn = buttons.find((b: { text?: string; onPress?: () => void; style?: string }) => b.text === '确定完成');
 
     await act(async () => {
       await confirmBtn.onPress();

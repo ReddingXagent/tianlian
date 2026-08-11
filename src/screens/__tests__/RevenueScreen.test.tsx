@@ -5,13 +5,13 @@ import RevenueScreen from '../RevenueScreen';
 import { revenueApi } from '../../services/api';
 
 // 捕获 LineChart props, 便于测试中直接调用图表回调(color/labelColor/datasets.color)
-let mockChartProps: any = null;
+let mockChartProps: Record<string, unknown> | null = null;
 
 jest.mock('react-native-chart-kit', () => {
   const React = require('react');
   const { Text } = require('react-native');
   return {
-    LineChart: (props: any) => {
+    LineChart: (props: Record<string, unknown>) => {
       mockChartProps = props;
       return React.createElement(Text, { testID: 'line-chart' }, 'chart');
     },
@@ -26,7 +26,7 @@ jest.mock('../../services/api', () => ({
 }));
 
 jest.mock('../../components/LoadingSpinner', () => {
-  const MockLoadingSpinner = (props: any) => {
+  const MockLoadingSpinner = (props: { text?: string; size?: 'small' | 'large'; color?: string }) => {
     const React = require('react');
     const { Text } = require('react-native');
     return React.createElement(Text, null, props.text || '加载中...');
@@ -35,7 +35,7 @@ jest.mock('../../components/LoadingSpinner', () => {
 });
 
 jest.mock('../../components/EmptyState', () => {
-  const MockEmptyState = (props: any) => {
+  const MockEmptyState = (props: { icon?: string; title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => {
     const React = require('react');
     const { View, Text, TouchableOpacity } = require('react-native');
     const elements = [React.createElement(Text, { key: 'title' }, props.title || '')];
