@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-type StatusType = 'online' | 'offline' | 'fault' | 'maintenance' | 'warning' | 'critical' | 'info' | 'unhandled' | 'processing' | 'resolved' | 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'high' | 'normal' | 'low' | 'urgent' | 'idle' | 'connected' | 'charging' | 'suspended';
+export type StatusType = 'online' | 'offline' | 'fault' | 'maintenance' | 'warning' | 'critical' | 'info' | 'unhandled' | 'processing' | 'resolved' | 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'high' | 'normal' | 'low' | 'urgent' | 'idle' | 'connected' | 'charging' | 'suspended';
 
 interface StatusBadgeProps {
   status: StatusType;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import ChargerMonitorScreen from '../ChargerMonitorScreen';
+import type { ConnectorStatus } from '../../types';
 import { chargerApi } from '../../services/api';
 
 // Mock navigation and route
@@ -263,7 +264,7 @@ describe('ChargerMonitorScreen', () => {
     (chargerApi.getMonitorList as jest.Mock).mockResolvedValue({
       data: [{
         ...MOCK_CHARGERS[0],
-        connectorStatus: 'unknown_status' as any,
+        connectorStatus: 'unknown_status' as unknown as ConnectorStatus,
         deviceName: '未知桩',
       }],
     });

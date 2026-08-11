@@ -65,9 +65,9 @@ describe('RevenueScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockChartProps = null;
-    jest.spyOn(Share, 'share').mockResolvedValue({ action: 'shared.action' } as any);
+    jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
     // 让图表入场动画同步完成，避免 600ms 定时器泄漏到其它测试套件
-    jest.spyOn(Animated, 'timing').mockReturnValue({ start: jest.fn() } as any);
+    jest.spyOn(Animated, 'timing').mockReturnValue({ start: jest.fn() } as unknown as ReturnType<typeof Animated.timing>);
     (revenueApi.getRecords as jest.Mock).mockResolvedValue({ data: MOCK_RECORDS });
     (revenueApi.getSummary as jest.Mock).mockResolvedValue({ data: MOCK_SUMMARY });
   });

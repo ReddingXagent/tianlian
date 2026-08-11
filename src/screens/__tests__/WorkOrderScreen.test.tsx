@@ -213,7 +213,7 @@ describe('WorkOrderScreen', () => {
     const initialCallCount = (workOrderApi.getList as jest.Mock).mock.calls.length;
 
     await act(async () => {
-      fireEvent.press(findByText('待处理' as any));
+      fireEvent.press(await findByText('待处理'));
       await new Promise((r) => setTimeout(r, 500));
     });
 

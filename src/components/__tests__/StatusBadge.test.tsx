@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import StatusBadge from '../StatusBadge';
+import type { StatusType } from '../StatusBadge';
 
 describe('StatusBadge', () => {
   it('should render with default label for online status', () => {
@@ -120,7 +121,7 @@ describe('StatusBadge', () => {
   });
 
   it('should render unknown status with fallback', () => {
-    const { getByText } = render(<StatusBadge status={"unknown" as any} />);
+    const { getByText } = render(<StatusBadge status={"unknown" as unknown as StatusType} />);
     expect(getByText('unknown')).toBeTruthy();
   });
 });
