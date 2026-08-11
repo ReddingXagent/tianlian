@@ -195,11 +195,11 @@ describe('useAuthStore', () => {
 
     it('should use username fallback when realName is null', async () => {
       (tokenStorage.getToken as jest.Mock).mockResolvedValue(TEST_TOKEN);
-      const meWithoutRealName: AuthMe = {
+      const meWithoutRealName = {
         ...TEST_AUTH_ME,
         realName: null,
         role: null,
-      };
+      } as unknown as AuthMe;
       (authApi.getProfile as jest.Mock).mockResolvedValue({ data: meWithoutRealName });
 
       await act(async () => {
@@ -224,10 +224,10 @@ describe('useAuthStore', () => {
 
     it('should use username fallback when realName is undefined', async () => {
       (tokenStorage.getToken as jest.Mock).mockResolvedValue(TEST_TOKEN);
-      const mePartial: AuthMe = {
+      const mePartial = {
         ...TEST_AUTH_ME,
         realName: undefined,
-      };
+      } as unknown as AuthMe;
       (authApi.getProfile as jest.Mock).mockResolvedValue({ data: mePartial });
 
       await act(async () => {

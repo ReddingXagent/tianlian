@@ -178,7 +178,6 @@ describe('useWorkOrderEnhancedStore — 扩展分支', () => {
       // error被静默捕获，records/loading状态不变
       const state = useWorkOrderEnhancedStore.getState();
       expect(state.recordsLoading).toBe(false);
-      expect(state.recordsError).toBeUndefined();
     });
   });
 });

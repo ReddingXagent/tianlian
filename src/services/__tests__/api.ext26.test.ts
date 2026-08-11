@@ -3,7 +3,7 @@ import type { NotificationStats } from '../../types';
 
 // Mock axios
 jest.mock('axios', () => {
-  const mockAxios = {
+  const mockAxios: Record<string, any> = {
     create: jest.fn(() => mockAxios),
     get: jest.fn(),
     post: jest.fn(),

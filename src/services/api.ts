@@ -54,6 +54,7 @@ import {
   RevenueAnalytics,
   KnowledgeArticleItem,
   KnowledgeCategoryItem,
+  UnreadCount,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';

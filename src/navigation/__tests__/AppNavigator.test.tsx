@@ -67,7 +67,7 @@ describe('AppNavigator', () => {
   });
 
   it('renders loading indicator when isLoading is true', () => {
-    mockedUseAuthStore.mockImplementation((selector: (s: AuthState) => AuthState[keyof AuthState]) => {
+    mockedUseAuthStore.mockImplementation((selector: any) => {
       return selector({
         isAuthenticated: false,
         isLoading: true,
@@ -80,7 +80,7 @@ describe('AppNavigator', () => {
   });
 
   it('renders Auth navigator (Login) when not authenticated', async () => {
-    mockedUseAuthStore.mockImplementation((selector: (s: AuthState) => AuthState[keyof AuthState]) => {
+    mockedUseAuthStore.mockImplementation((selector: any) => {
       return selector({
         isAuthenticated: false,
         isLoading: false,
@@ -95,7 +95,7 @@ describe('AppNavigator', () => {
   });
 
   it('renders Main navigator (Workbench) when authenticated', async () => {
-    mockedUseAuthStore.mockImplementation((selector: (s: AuthState) => AuthState[keyof AuthState]) => {
+    mockedUseAuthStore.mockImplementation((selector: any) => {
       return selector({
         isAuthenticated: true,
         isLoading: false,
@@ -110,7 +110,7 @@ describe('AppNavigator', () => {
   });
 
   it('calls checkAuth on mount', () => {
-    mockedUseAuthStore.mockImplementation((selector: (s: AuthState) => AuthState[keyof AuthState]) => {
+    mockedUseAuthStore.mockImplementation((selector: any) => {
       return selector({
         isAuthenticated: false,
         isLoading: true,

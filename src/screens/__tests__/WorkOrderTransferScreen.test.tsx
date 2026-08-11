@@ -96,7 +96,7 @@ describe('WorkOrderTransferScreen', () => {
     fireEvent.press(getByText('催促处理'));
     const confirm = buttons.find((b) => b.text === '确定催单');
     act(() => {
-      confirm.onPress();
+      confirm?.onPress?.();
     });
     expect(mockUrgeOrder).toHaveBeenCalledWith('WO-1', '请尽快处理');
     alertSpy.mockRestore();

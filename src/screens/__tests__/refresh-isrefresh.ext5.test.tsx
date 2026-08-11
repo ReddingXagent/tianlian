@@ -84,8 +84,8 @@ const ORDER_DETAIL = {
 };
 
 /** Traverse rendered tree to find RefreshControl via refreshControl prop */
-function getOnRefresh(root: React.ReactElement | null, containerType: string): (() => void) | null {
-  const all = root.findAllByType ? root.findAllByType(containerType) : [];
+function getOnRefresh(root: React.ReactElement | null, containerType: any): (() => void) | null {
+  const all = (root && (root as any).findAllByType) ? (root as any).findAllByType(containerType) : [];
   for (const node of all) {
     const rc = node.props?.refreshControl;
     if (rc?.props?.onRefresh) return rc.props.onRefresh;

@@ -2,7 +2,7 @@
  * WorkOrderCreateScreen ext2 — lines 73-79: order success Alert buttons
  * Cover: "查看详情" (navigation.replace) and "继续创建" (form reset)
  */
-import { Alert, type AlertButton } from 'react-native';
+import { Alert, type AlertButton, type AlertOptions } from 'react-native';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import WorkOrderCreateScreen from '../WorkOrderCreateScreen';
 import { useWorkOrderEnhancedStore } from '../../store/workOrderEnhancedStore';
@@ -31,7 +31,7 @@ describe('WorkOrderCreateScreen.ext2 — success alert buttons', () => {
 
   // Line 75: "查看详情" button → navigation.replace('WorkOrderDetail', { orderId })
   it('success alert "查看详情" calls navigation.replace', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       if (buttons && buttons[0] && buttons[0].onPress) {
         buttons[0].onPress();
       }
@@ -58,7 +58,7 @@ describe('WorkOrderCreateScreen.ext2 — success alert buttons', () => {
 
   // Lines 76-79: "继续创建" button → reset form fields
   it('success alert "继续创建" resets form fields', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       if (buttons && buttons[1] && buttons[1].onPress) {
         buttons[1].onPress();
       }

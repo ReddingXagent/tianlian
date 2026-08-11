@@ -83,7 +83,7 @@ describe('ProfileScreen', () => {
     fireEvent.press(getByText('退出登录'));
     const confirm = buttons.find((b) => b.text === '退出');
     act(() => {
-      confirm.onPress();
+      confirm?.onPress?.();
     });
     expect(mockLogout).toHaveBeenCalled();
     alertSpy.mockRestore();

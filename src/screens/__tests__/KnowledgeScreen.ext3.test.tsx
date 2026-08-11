@@ -73,8 +73,8 @@ describe('KnowledgeScreen.ext3 — refresh & retry callbacks', () => {
       if (!node) return null;
       if (node.type === RefreshControl) return node;
       if (node.props?.refreshControl?.type === RefreshControl) return node.props.refreshControl;
-      if (node.children) {
-        for (const child of node.children) {
+      if ((node.props as any)?.children) {
+        for (const child of (node.props as any).children) {
           const found = findRefreshControl(child);
           if (found) return found;
         }

@@ -3,7 +3,7 @@
  * 目标: 73.9% → 95%+ branches
  * 覆盖: assigneeId NaN, transferring render, urge success/fail, localError clear
  */
-import { Alert, type AlertButton } from 'react-native';
+import { Alert, type AlertButton, type AlertOptions } from 'react-native';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import WorkOrderTransferScreen from '../WorkOrderTransferScreen';
 import { useWorkOrderEnhancedStore } from '../../store/workOrderEnhancedStore';
@@ -103,7 +103,7 @@ describe('WorkOrderTransferScreen.ext', () => {
   });
 
   it('urge flow: success shows alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t: string, _m: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       // First call: confirm dialog, press 确定催单
       const confirm = buttons?.find((b: AlertButton) => b.text === '确定催单');
       if (confirm) {
@@ -125,7 +125,7 @@ describe('WorkOrderTransferScreen.ext', () => {
   });
 
   it('urge flow: failure (null result) does not show success alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t: string, _m: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       const confirm = buttons?.find((b: AlertButton) => b.text === '确定催单');
       if (confirm) {
         confirm.onPress?.();
@@ -146,7 +146,7 @@ describe('WorkOrderTransferScreen.ext', () => {
   });
 
   it('urge flow: cancel does not call urgeOrder', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t: string, _m: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       const cancel = buttons?.find((b: AlertButton) => b.text === '取消');
       if (cancel) {
         cancel.onPress?.();

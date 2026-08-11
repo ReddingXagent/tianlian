@@ -4,7 +4,7 @@
  * 覆盖: network error, signIn flow (success/fail), reportFault, quickInput clears error,
  *       resultIcon/resultTypeLabel default, signInMode render, onChangeText clears error
  */
-import { Alert, type AlertButton } from 'react-native';
+import { Alert, type AlertButton, type AlertOptions } from 'react-native';
 import { render, fireEvent, act } from '@testing-library/react-native';
 import ScanScreen from '../ScanScreen';
 import { scanApi } from '../../services/api';
@@ -144,7 +144,7 @@ describe('ScanScreen.ext', () => {
   // ── signIn success flow ─────────────────────────────────────
 
   it('signIn flow: Alert confirm → checkIn success → success alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       // Simulate pressing "签到" button
       if (buttons && buttons[1]) {
         buttons[1].onPress?.();
@@ -174,7 +174,7 @@ describe('ScanScreen.ext', () => {
   // ── signIn failure flow ─────────────────────────────────────
 
   it('signIn flow: Alert confirm → checkIn failure → failure alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       if (buttons && buttons[1]) {
         buttons[1].onPress?.();
       }
@@ -200,7 +200,7 @@ describe('ScanScreen.ext', () => {
   // ── signIn cancel ───────────────────────────────────────────
 
   it('signIn flow: Alert cancel → setSignInMode(false)', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       // Press cancel
       if (buttons && buttons[0]) {
         buttons[0].onPress?.();
@@ -233,7 +233,7 @@ describe('ScanScreen.ext', () => {
   // ── reportFault flow ────────────────────────────────────────
 
   it('reportFault: shows confirm alert then success on submit', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       // First call: confirm, press "提交"
       if (buttons && buttons[1]) {
         buttons[1].onPress?.();
@@ -260,7 +260,7 @@ describe('ScanScreen.ext', () => {
   // ── reportFault cancel ──────────────────────────────────────
 
   it('reportFault: cancel does nothing', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title: string, _msg: string, buttons?: AlertButton[]) => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) => {
       if (buttons && buttons[0]) {
         buttons[0].onPress?.();
       }

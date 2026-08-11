@@ -33,8 +33,8 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         let iconElements: React.ReactNode[] = [];
         if (options?.tabBarIcon) {
           try {
-            iconElements.push(options.tabBarIcon({ focused: true }));
-            iconElements.push(options.tabBarIcon({ focused: false }));
+            iconElements.push((options.tabBarIcon as any)({ focused: true }));
+            iconElements.push((options.tabBarIcon as any)({ focused: false }));
           } catch {
             // ignore
           }
