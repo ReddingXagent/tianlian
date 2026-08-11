@@ -1,6 +1,30 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 
 // =====================
+// 多租户品牌 (Tenant Branding — GET /tenants/{id}/branding)
+// =====================
+export interface TenantBranding {
+  tenantId: string;
+  operatorName: string;
+  logoUrl?: string;
+  themeColor: string;         // #RRGGBB
+  source: 'default' | 'operator' | 'custom';
+}
+
+// =====================
+// 微信服务商支付 (WeChat Service Provider Payment)
+// =====================
+export interface WeChatServiceProviderPayment {
+  spMchid: string;
+  subMchid: string;
+  timeStamp: string;
+  nonceStr: string;
+  package: string;
+  signType: string;
+  paySign: string;
+}
+
+// =====================
 // 站点 (Station)
 // =====================
 export interface Station {
@@ -230,6 +254,8 @@ export interface PaymentResult {
   amount: number;
   paidAmount: number;
   tradeNo?: string;
+  /** 服务商模式支付参数（微信服务商支付时后端返回） */
+  payParams?: WeChatServiceProviderPayment;
 }
 
 // =====================
