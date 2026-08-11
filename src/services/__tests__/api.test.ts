@@ -38,9 +38,9 @@ const mockDeleteItem = jest.fn();
 
 jest.mock('expo-secure-store', () => ({
   __esModule: true,
-  getItemAsync: (...args: any[]) => mockGetItem(...args),
-  setItemAsync: (...args: any[]) => mockSetItem(...args),
-  deleteItemAsync: (...args: any[]) => mockDeleteItem(...args),
+  getItemAsync: (...args: unknown[]) => mockGetItem(...args as []),
+  setItemAsync: (...args: unknown[]) => mockSetItem(...args as []),
+  deleteItemAsync: (...args: unknown[]) => mockDeleteItem(...args as []),
 }));
 
 import axios from 'axios';
@@ -49,10 +49,10 @@ import axios from 'axios';
 const mockAxiosInstance = jest.mocked(axios.create).mock.results[0].value;
 
 // Helper to create AxiosResponse-like mock
-const mockResponse = (data: any) => ({ data });
+const mockResponse = (data: unknown) => ({ data });
 
 // Helper to create AxiosError-like mock
-const mockAxiosError = (status: number, data?: any) => ({
+const mockAxiosError = (status: number, data?: unknown) => ({
   response: { status, data },
   message: 'Request failed',
 });

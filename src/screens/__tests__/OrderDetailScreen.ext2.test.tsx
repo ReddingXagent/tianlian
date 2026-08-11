@@ -34,7 +34,8 @@ jest.mock('../../components/StatusBadge', () => 'StatusBadge');
 jest.mock('../../components/EmptyState', () => {
   const React = jest.requireActual('react');
   const { Text, TouchableOpacity } = jest.requireActual('react-native');
-  const Empty = ({ title, message, actionLabel, onAction }: any) =>
+  
+  const Empty = ({ title, message, actionLabel, onAction }: { title?: string; message?: string; actionLabel?: string; onAction?: () => void }) =>
     React.createElement(
       React.Fragment,
       null,

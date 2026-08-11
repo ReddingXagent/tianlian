@@ -41,7 +41,8 @@ jest.mock('../../components/LoadingSpinner', () => {
 jest.mock('../../components/StatusBadge', () => 'StatusBadge');
 jest.mock('../../components/EmptyState', () => {
   const { Text, TouchableOpacity } = require('react-native');
-  const Empty = ({ title, message, actionLabel, onAction }: any) => (
+  
+  const Empty = ({ title, message, actionLabel, onAction }: { title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => (
     <>
       <Text>{title}</Text>
       <Text>{message}</Text>
@@ -109,9 +110,10 @@ describe('OrderDetailScreen.ext — 分支覆盖', () => {
 
   // 5. cancel order success flow (Alert.alert onPress)
   it('cancel order success: calls cancelOrder and shows success alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons) => {
+    type AlertButton = { text?: string; style?: string; onPress?: () => void };
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _msg, buttons) => {
       // Simulate pressing "确定"
-      const destructiveBtn = buttons?.find((b: any) => b.style === 'destructive');
+      const destructiveBtn = buttons?.find((b: AlertButton) => b.style === 'destructive');
       destructiveBtn?.onPress?.();
     });
     mockCancelOrder.mockResolvedValue(undefined);
@@ -129,8 +131,9 @@ describe('OrderDetailScreen.ext — 分支覆盖', () => {
 
   // 6. cancel order failure shows error alert
   it('cancel order failure: shows failure alert', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((title, msg, buttons) => {
-      const destructiveBtn = buttons?.find((b: any) => b.style === 'destructive');
+    type AlertButton2 = { text?: string; style?: string; onPress?: () => void };
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_title, _msg, buttons) => {
+      const destructiveBtn = buttons?.find((b: AlertButton2) => b.style === 'destructive');
       destructiveBtn?.onPress?.();
     });
     mockCancelOrder.mockRejectedValue(new Error('cancel failed'));

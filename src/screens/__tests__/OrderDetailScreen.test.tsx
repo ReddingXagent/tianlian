@@ -40,7 +40,8 @@ jest.mock('../../components/LoadingSpinner', () => {
 jest.mock('../../components/StatusBadge', () => 'StatusBadge');
 jest.mock('../../components/EmptyState', () => {
   const { Text } = require('react-native');
-  const Empty = ({ title, message }: any) => (<><Text>{title}</Text><Text>{message}</Text></>);
+  
+  const Empty = ({ title, message }: { title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => (<><Text>{title}</Text><Text>{message}</Text></>);
   Empty.displayName = 'EmptyState';
   return Empty;
 });

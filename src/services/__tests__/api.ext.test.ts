@@ -37,9 +37,9 @@ const mockDeleteItem = jest.fn();
 
 jest.mock('expo-secure-store', () => ({
   __esModule: true,
-  getItemAsync: (...args: any[]) => mockGetItem(...args),
-  setItemAsync: (...args: any[]) => mockSetItem(...args),
-  deleteItemAsync: (...args: any[]) => mockDeleteItem(...args),
+  getItemAsync: (...args: unknown[]) => mockGetItem(...args as []),
+  setItemAsync: (...args: unknown[]) => mockSetItem(...args as []),
+  deleteItemAsync: (...args: unknown[]) => mockDeleteItem(...args as []),
 }));
 
 const mockAxiosInstance = jest.mocked(axios.create).mock.results[0].value;

@@ -25,7 +25,8 @@ jest.mock('../../components/LoadingSpinner', () => {
 });
 jest.mock('../../components/EmptyState', () => {
   const { Text, TouchableOpacity } = require('react-native');
-  const Empty = ({ icon, title, message, actionLabel, onAction }: any) => (
+  
+  const Empty = ({ icon: _icon, title, message, actionLabel, onAction }: { icon?: React.ReactNode; title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => (
     <>
       <Text>{title}</Text>
       <Text>{message}</Text>

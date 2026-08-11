@@ -31,7 +31,8 @@ jest.mock('../../components/LoadingSpinner', () => {
 
 jest.mock('../../components/EmptyState', () => {
   const { Text, TouchableOpacity } = require('react-native');
-  const Empty = ({ icon, title, message, actionLabel, onAction }: any) => (
+  
+  const Empty = ({ icon: _icon, title, message, actionLabel, onAction }: { icon?: React.ReactNode; title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => (
     <>
       <Text>{title}</Text>
       <Text>{message}</Text>
@@ -188,7 +189,8 @@ describe('VehicleScreen — extended coverage', () => {
 
     // Extract the onPress callback from the alert call
     const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
-    const deleteOption = alertCall[2].find((o: any) => o.text === '删除');
+    type AlertOption = { text?: string; onPress?: () => Promise<void> | void };
+    const deleteOption = alertCall[2].find((o: AlertOption) => o.text === '删除');
     await act(async () => {
       await deleteOption.onPress();
     });
@@ -206,11 +208,11 @@ describe('VehicleScreen — extended coverage', () => {
 
     fireEvent.press(utils.getAllByText('删除')[0]);
     const alertCall = (Alert.alert as jest.Mock).mock.calls[0];
-    const deleteOption = alertCall[2].find((o: any) => o.text === '删除');
+    const deleteOpt = alertCall[2].find((o: AlertOption) => o.text === '删除');
 
     (Alert.alert as jest.Mock).mockClear();
     await act(async () => {
-      await deleteOption.onPress();
+      await deleteOpt.onPress();
     });
 
     expect(Alert.alert).toHaveBeenCalledWith('删除失败', '请重试');
