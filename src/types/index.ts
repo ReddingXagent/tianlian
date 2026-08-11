@@ -935,3 +935,16 @@ export interface RevenueAnalytics {
   summary: RevenueAnalyticsSummary;
   trend: unknown[];
 }
+
+// =====================
+// 安全威胁 (SecurityThreat — from /security/threats)
+// =====================
+export interface SecurityThreat {
+  id: number;
+  type: string;
+  sourceIp: string;
+  target: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  status: 'blocked' | 'active' | 'resolved';
+  timestamp: string;
+}

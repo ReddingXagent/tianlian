@@ -47,6 +47,7 @@ import {
   ApiKey,
   SecurityLog,
   SecurityPolicy,
+  SecurityThreat,
   WorkOrderStats,
   RevenueAnalytics,
   KnowledgeArticleItem,
@@ -1827,6 +1828,39 @@ export const analyticsRevenueApi = {
               avgPerOrder: (s.avg_per_order as number) ?? 0,
             },
             trend: (d.trend as unknown[]) ?? [],
+          },
+        };
+      });
+  },
+};
+
+// =====================
+// 安全威胁 API (/security/threats)
+// =====================
+export const securityThreatApi = {
+  /** GET /security/threats — 安全威胁列表 */
+  getList(): Promise<ApiResponse<PaginatedData<SecurityThreat>>> {
+    return api
+      .get('/security/threats')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          type: (it.type as string) ?? '',
+          sourceIp: (it.source_ip as string) ?? '',
+          target: (it.target as string) ?? '',
+          severity: (it.severity as 'low' | 'medium' | 'high' | 'critical') ?? 'low',
+          status: (it.status as 'blocked' | 'active' | 'resolved') ?? 'active',
+          timestamp: (it.timestamp as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: 1,
+            pageSize: items.length,
           },
         };
       });
