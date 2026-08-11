@@ -8,15 +8,16 @@ to trigger the @on decorated handlers inside _run_real_charger's TianlianChargeP
 import asyncio
 import sys
 from pathlib import Path
+
 import pytest
 
 # Ensure tests/ dir on path for mock_csms_server import
 sys.path.insert(0, str(Path(__file__).parent))
 
-from mock_csms_server import MockCSMSServer  # noqa: E402
+from mock_csms_server import MockCSMSServer
 
-from adapters.ocpp_adapter import OCPPAdapter  # noqa: E402
-from config import OCPPConfig  # noqa: E402
+from adapters.ocpp_adapter import OCPPAdapter
+from config import OCPPConfig
 
 
 class TestRealChargerOnHandlers:
@@ -66,7 +67,7 @@ class TestRealChargerOnHandlers:
             else:
                 pytest.fail("BootNotification not received within 3s")
 
-            cp_id = list(server.connected_charge_points.keys())[0]
+            cp_id = next(iter(server.connected_charge_points.keys()))
 
             # Wait a bit for heartbeat to fire (covers after_heartbeat)
             await asyncio.sleep(0.3)
@@ -152,7 +153,7 @@ class TestRealChargerOnHandlers:
                 await asyncio.sleep(0.05)
 
             # Forcefully close the connection from server side
-            for cp_id, ws in list(server._ws_connections.items()):
+            for _cp_id, ws in list(server._ws_connections.items()):
                 await ws.close(code=1011, reason="Test forced closure")
 
             # Wait for adapter to detect closure and attempt reconnect/fallback
