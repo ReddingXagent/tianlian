@@ -60,13 +60,12 @@ describe('vppApi.getDispatchHistory — GET /vpp/dispatch/history', () => {
   ];
 
   it('maps snake_case fields to camelCase correctly', async () => {
-    const mockInstance = axios.create();
-    mockInstance.get.mockResolvedValue({
-      data: { success: true, data: mockHistoryItems },
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { code: 200, message: 'success', data: mockHistoryItems },
     });
 
     const result = await vppApi.getDispatchHistory();
-    expect(result.success).toBe(true);
+    expect(result.code).toBe(200);
     expect(result.data).toHaveLength(2);
 
     const first = result.data[0];
@@ -84,9 +83,8 @@ describe('vppApi.getDispatchHistory — GET /vpp/dispatch/history', () => {
   });
 
   it('handles executed=true correctly', async () => {
-    const mockInstance = axios.create();
-    mockInstance.get.mockResolvedValue({
-      data: { success: true, data: [mockHistoryItems[1]] },
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { code: 200, message: 'success', data: [mockHistoryItems[1]] },
     });
 
     const result = await vppApi.getDispatchHistory();
@@ -96,9 +94,8 @@ describe('vppApi.getDispatchHistory — GET /vpp/dispatch/history', () => {
   });
 
   it('handles empty data array', async () => {
-    const mockInstance = axios.create();
-    mockInstance.get.mockResolvedValue({
-      data: { success: true, data: [] },
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { code: 200, message: 'success', data: [] },
     });
 
     const result = await vppApi.getDispatchHistory();
@@ -106,9 +103,8 @@ describe('vppApi.getDispatchHistory — GET /vpp/dispatch/history', () => {
   });
 
   it('handles null data gracefully', async () => {
-    const mockInstance = axios.create();
-    mockInstance.get.mockResolvedValue({
-      data: { success: true, data: null },
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { code: 200, message: 'success', data: null },
     });
 
     const result = await vppApi.getDispatchHistory();
@@ -116,9 +112,8 @@ describe('vppApi.getDispatchHistory — GET /vpp/dispatch/history', () => {
   });
 
   it('applies defaults for missing fields', async () => {
-    const mockInstance = axios.create();
-    mockInstance.get.mockResolvedValue({
-      data: { success: true, data: [{}] },
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { code: 200, message: 'success', data: [{}] },
     });
 
     const result = await vppApi.getDispatchHistory();
@@ -137,12 +132,11 @@ describe('vppApi.getDispatchHistory — GET /vpp/dispatch/history', () => {
   });
 
   it('calls correct endpoint', async () => {
-    const mockInstance = axios.create();
-    mockInstance.get.mockResolvedValue({
-      data: { success: true, data: [] },
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { code: 200, message: 'success', data: [] },
     });
 
     await vppApi.getDispatchHistory();
-    expect(mockInstance.get).toHaveBeenCalledWith('/vpp/dispatch/history');
+    expect(mockedAxios.get).toHaveBeenCalledWith('/vpp/dispatch/history');
   });
 });

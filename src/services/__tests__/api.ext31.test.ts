@@ -35,7 +35,7 @@ describe('vppApi.getResources', () => {
   it('should map snake_case to camelCase correctly', async () => {
     mockedAxios.get.mockResolvedValueOnce({
       data: {
-        success: true,
+        code: 200, message: 'success',
         data: [
           {
             resource_id: 'ST-001-PV',
@@ -66,7 +66,7 @@ describe('vppApi.getResources', () => {
     });
 
     const res = await vppApi.getResources();
-    expect(res.success).toBe(true);
+    expect(res.code).toBe(200);
     expect(res.data).toHaveLength(2);
 
     const pv = res.data[0];
@@ -88,7 +88,7 @@ describe('vppApi.getResources', () => {
 
   it('should handle empty data array', async () => {
     mockedAxios.get.mockResolvedValueOnce({
-      data: { success: true, data: [] },
+      data: { code: 200, message: 'success', data: [] },
     });
     const res = await vppApi.getResources();
     expect(res.data).toEqual([]);
@@ -96,7 +96,7 @@ describe('vppApi.getResources', () => {
 
   it('should handle null data with empty fallback', async () => {
     mockedAxios.get.mockResolvedValueOnce({
-      data: { success: true, data: null },
+      data: { code: 200, message: 'success', data: null },
     });
     const res = await vppApi.getResources();
     expect(res.data).toEqual([]);
@@ -105,7 +105,7 @@ describe('vppApi.getResources', () => {
   it('should provide defaults for missing fields', async () => {
     mockedAxios.get.mockResolvedValueOnce({
       data: {
-        success: true,
+        code: 200, message: 'success',
         data: [{}],
       },
     });
@@ -120,7 +120,7 @@ describe('vppApi.getResources', () => {
 
   it('should call correct endpoint', async () => {
     mockedAxios.get.mockResolvedValueOnce({
-      data: { success: true, data: [] },
+      data: { code: 200, message: 'success', data: [] },
     });
     await vppApi.getResources();
     expect(mockedAxios.get).toHaveBeenCalledWith('/vpp/resources');
@@ -135,7 +135,7 @@ describe('vppApi.dispatch', () => {
   it('should map dispatch plan snake_case to camelCase', async () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: {
-        success: true,
+        code: 200, message: 'success',
         data: {
           plan_id: 'ps_20260813020358_679a0c',
           mode: 'peak_shaving',
@@ -164,7 +164,7 @@ describe('vppApi.dispatch', () => {
     });
 
     const res = await vppApi.dispatch();
-    expect(res.success).toBe(true);
+    expect(res.code).toBe(200);
 
     const plan = res.data;
     expect(plan.planId).toBe('ps_20260813020358_679a0c');
@@ -191,7 +191,7 @@ describe('vppApi.dispatch', () => {
   it('should handle empty commands array', async () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: {
-        success: true,
+        code: 200, message: 'success',
         data: {
           plan_id: 'ps_empty',
           mode: 'valley_filling',
@@ -213,7 +213,7 @@ describe('vppApi.dispatch', () => {
 
   it('should handle null data with defaults', async () => {
     mockedAxios.post.mockResolvedValueOnce({
-      data: { success: true, data: null },
+      data: { code: 200, message: 'success', data: null },
     });
     const res = await vppApi.dispatch();
     expect(res.data.planId).toBe('');
@@ -225,7 +225,7 @@ describe('vppApi.dispatch', () => {
   it('should provide defaults for missing command fields', async () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: {
-        success: true,
+        code: 200, message: 'success',
         data: {
           commands: [{}],
         },
@@ -242,7 +242,7 @@ describe('vppApi.dispatch', () => {
 
   it('should call POST /vpp/dispatch with empty body when no args', async () => {
     mockedAxios.post.mockResolvedValueOnce({
-      data: { success: true, data: { commands: [] } },
+      data: { code: 200, message: 'success', data: { commands: [] } },
     });
     await vppApi.dispatch();
     expect(mockedAxios.post).toHaveBeenCalledWith('/vpp/dispatch', {});
@@ -250,7 +250,7 @@ describe('vppApi.dispatch', () => {
 
   it('should pass through body when provided', async () => {
     mockedAxios.post.mockResolvedValueOnce({
-      data: { success: true, data: { commands: [] } },
+      data: { code: 200, message: 'success', data: { commands: [] } },
     });
     await vppApi.dispatch({ station_id: 1 });
     expect(mockedAxios.post).toHaveBeenCalledWith('/vpp/dispatch', { station_id: 1 });
@@ -259,7 +259,7 @@ describe('vppApi.dispatch', () => {
   it('should handle all resource types in commands', async () => {
     mockedAxios.post.mockResolvedValueOnce({
       data: {
-        success: true,
+        code: 200, message: 'success',
         data: {
           commands: [
             { resource_type: 'pv', dispatch_mode: 'peak_shaving' },

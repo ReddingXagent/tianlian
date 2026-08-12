@@ -32,6 +32,7 @@ import {
   AlarmReport,
   Role,
   Permission,
+  PermissionTreeNode,
   AlarmRule,
   NotificationRule,
   NotificationTemplate,
@@ -2093,7 +2094,7 @@ export const vppApi = {
   getResources(): Promise<ApiResponse<VppResource[]>> {
     return api.get('/vpp/resources').then((res) => {
       const raw = res.data as ApiResponse<Record<string, unknown>>;
-      const items = (raw.data as Record<string, unknown>[]) ?? [];
+      const items = (raw.data as unknown as Record<string, unknown>[]) ?? [];
       return {
         ...raw,
         data: items.map((item): VppResource => ({
@@ -2150,7 +2151,7 @@ export const vppApi = {
   getDispatchHistory(): Promise<ApiResponse<VppDispatchHistory[]>> {
     return api.get('/vpp/dispatch/history').then((res) => {
       const raw = res.data as ApiResponse<Record<string, unknown>>;
-      const items = (raw.data as Record<string, unknown>[]) ?? [];
+      const items = (raw.data as unknown as Record<string, unknown>[]) ?? [];
       return {
         ...raw,
         data: items.map((item): VppDispatchHistory => ({

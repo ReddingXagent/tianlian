@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { monitorApi, deviceMonitorApi } from '../services/api';
 import { MonitorSummary, Device, Alarm, RealtimeOverview, RealtimeDeviceStatus } from '../types';
+import { type StatusType } from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
@@ -227,7 +228,7 @@ const MonitorScreen: React.FC = () => {
                       <Text style={styles.deviceName} numberOfLines={1}>
                         {device.name}
                       </Text>
-                      <StatusBadge status={rt?.status || device.status} />
+                      <StatusBadge status={(rt?.status || device.status) as StatusType} />
                     </View>
                     <Text style={styles.deviceMeta}>
                       {device.stationName || `站点#${device.stationId}`} · {device.model}
@@ -488,6 +489,13 @@ const styles = StyleSheet.create({
   itemTime: {
     fontSize: 12,
     color: '#bbb',
+  },
+  realtimeOverviewBar: {
+    flexDirection: 'row',
+    backgroundColor: '#f5f7fa',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
   },
 });
 

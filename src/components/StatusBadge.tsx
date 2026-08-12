@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-type StatusType =
+export type StatusType =
   | 'online'
   | 'offline'
   | 'fault'
