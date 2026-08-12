@@ -57,8 +57,6 @@ import { useAuthStore } from '../../store/authStore';
 
 const mockedUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
 
-type AuthState = { isAuthenticated: boolean; isLoading: boolean; checkAuth: jest.Mock };
-
 describe('AppNavigator', () => {
   const mockCheckAuth = jest.fn();
 

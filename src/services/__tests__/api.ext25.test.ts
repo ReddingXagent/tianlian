@@ -1,5 +1,8 @@
 import { securityThreatApi } from '../api';
 import type { SecurityThreat } from '../../types';
+import axios from 'axios';
+
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock axios
 jest.mock('axios', () => {
@@ -32,8 +35,7 @@ describe('securityThreatApi', () => {
 
   describe('getList', () => {
     it('should map snake_case fields to camelCase', async () => {
-      const axios = require('axios');
-      axios.get.mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         data: {
           code: 200,
           message: 'success',
@@ -79,8 +81,7 @@ describe('securityThreatApi', () => {
     });
 
     it('should handle empty data', async () => {
-      const axios = require('axios');
-      axios.get.mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         data: {
           code: 200,
           message: 'success',
@@ -94,8 +95,7 @@ describe('securityThreatApi', () => {
     });
 
     it('should handle null/missing data gracefully', async () => {
-      const axios = require('axios');
-      axios.get.mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         data: {
           code: 200,
           message: 'success',
@@ -109,15 +109,13 @@ describe('securityThreatApi', () => {
     });
 
     it('should handle missing fields with defaults', async () => {
-      const axios = require('axios');
-      axios.get.mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         data: {
           code: 200,
           message: 'success',
           data: {
             items: [
-              { id: 5 },
-            ],
+              { id: 5 }],
             total: 1,
           },
         },
@@ -136,18 +134,16 @@ describe('securityThreatApi', () => {
     });
 
     it('should call correct endpoint', async () => {
-      const axios = require('axios');
-      axios.get.mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         data: { code: 200, message: 'success', data: { items: [], total: 0 } },
       });
 
       await securityThreatApi.getList();
-      expect(axios.get).toHaveBeenCalledWith('/security/threats');
+      expect(mockedAxios.get).toHaveBeenCalledWith('/security/threats');
     });
 
     it('should handle partial items with null fields', async () => {
-      const axios = require('axios');
-      axios.get.mockResolvedValueOnce({
+      mockedAxios.get.mockResolvedValueOnce({
         data: {
           code: 200,
           message: 'success',

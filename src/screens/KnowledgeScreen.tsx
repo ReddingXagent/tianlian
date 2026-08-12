@@ -72,7 +72,7 @@ const KnowledgeScreen: React.FC = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [searchQuery, activeCategory]);
+  }, [searchQuery]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

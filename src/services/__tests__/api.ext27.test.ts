@@ -1,5 +1,4 @@
 import { deviceHealthApi } from '../api';
-import type { DeviceHealthRanking } from '../../types';
 
 // Mock axios
 jest.mock('axios', () => {

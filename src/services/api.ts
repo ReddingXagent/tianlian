@@ -62,7 +62,6 @@ import {
   ChatSource,
   ChatAction,
   ChatResponse,
-  ChatUsage,
   NotificationSendResult,
   VppResource,
   VppResourceType,
