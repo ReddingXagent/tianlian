@@ -69,6 +69,7 @@ import {
   VppDispatchCommand,
   VppDispatchPlan,
   VppDispatchHistory,
+  FleetDriver,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -2245,6 +2246,44 @@ export const notificationSendApi = {
           messageId: (d.message_id as string) ?? null,
           channel: (d.channel as string) ?? null,
           sentAt: (d.sent_at as string) ?? null,
+        },
+      };
+    });
+  },
+};
+
+// =====================
+// 车队 API (GET /fleet/drivers)
+// =====================
+export const fleetApi = {
+  /** GET /fleet/drivers — 司机列表 */
+  getDrivers(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<FleetDriver>>> {
+    const query: Record<string, unknown> = {};
+    if (params?.page) query.page = params.page;
+    if (params?.pageSize) query.page_size = params.pageSize;
+    return api.get('/fleet/drivers', { params: query }).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = (d.items as unknown as Record<string, unknown>[]) ?? [];
+      return {
+        ...raw,
+        data: {
+          items: items.map((item): FleetDriver => ({
+            id: (item.id as number) ?? 0,
+            name: (item.name as string) ?? '',
+            phone: (item.phone as string) ?? null,
+            licenseNumber: (item.license_number as string) ?? null,
+            vehiclePlate: (item.vehicle_plate as string) ?? null,
+            status: (item.status as string) ?? 'unknown',
+            createdAt: (item.created_at as string) ?? null,
+            updatedAt: (item.updated_at as string) ?? null,
+          })),
+          total: (d.total as number) ?? 0,
+          page: (d.page as number) ?? 1,
+          pageSize: (d.page_size as number) ?? 20,
         },
       };
     });

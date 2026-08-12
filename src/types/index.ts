@@ -1167,3 +1167,17 @@ export interface NotificationSendResult {
   channel: string | null;
   sentAt: string | null;
 }
+
+// =====================
+// 车队司机 (from GET /fleet/drivers)
+// =====================
+export interface FleetDriver {
+  id: number;
+  name: string;
+  phone: string | null;
+  licenseNumber: string | null;
+  vehiclePlate: string | null;
+  status: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
