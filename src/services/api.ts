@@ -63,6 +63,12 @@ import {
   ChatResponse,
   ChatUsage,
   NotificationSendResult,
+  VppResource,
+  VppResourceType,
+  VppDispatchMode,
+  VppDispatchCommand,
+  VppDispatchPlan,
+  VppDispatchHistory,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -2136,6 +2142,30 @@ export const vppApi = {
           })),
           createdAt: (d.created_at as string) ?? '',
         },
+      };
+    });
+  },
+
+  /** GET /vpp/dispatch/history — VPP调度历史记录 */
+  getDispatchHistory(): Promise<ApiResponse<VppDispatchHistory[]>> {
+    return api.get('/vpp/dispatch/history').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const items = (raw.data as Record<string, unknown>[]) ?? [];
+      return {
+        ...raw,
+        data: items.map((item): VppDispatchHistory => ({
+          planId: (item.plan_id as string) ?? '',
+          mode: (item.mode as VppDispatchMode) ?? 'peak_shaving',
+          trigger: (item.trigger as string) ?? '',
+          stationsInvolved: (item.stations_involved as string[]) ?? [],
+          totalDispatchKw: (item.total_dispatch_kw as number) ?? 0,
+          estimatedRevenue: (item.estimated_revenue as number) ?? 0,
+          estimatedCost: (item.estimated_cost as number) ?? 0,
+          netProfit: (item.net_profit as number) ?? 0,
+          commandsCount: (item.commands_count as number) ?? 0,
+          createdAt: (item.created_at as string) ?? '',
+          executed: (item.executed as boolean) ?? false,
+        })),
       };
     });
   },

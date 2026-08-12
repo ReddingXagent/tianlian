@@ -1102,6 +1102,20 @@ export interface VppDispatchPlan {
   createdAt: string;
 }
 
+export interface VppDispatchHistory {
+  planId: string;
+  mode: VppDispatchMode;
+  trigger: string;
+  stationsInvolved: string[];
+  totalDispatchKw: number;
+  estimatedRevenue: number;
+  estimatedCost: number;
+  netProfit: number;
+  commandsCount: number;
+  createdAt: string;
+  executed: boolean;
+}
+
 // =====================
 // 租户 (Tenant — from /tenants)
 // =====================
