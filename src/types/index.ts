@@ -791,18 +791,20 @@ export interface PricingRule {
 // =====================
 export interface SparePart {
   id: number;
-  name: string;
-  model: string;
-  manufacturer: string;
-  stockQty: number;
-  unit: string;
-  price: number;
+  partName: string;
+  partModel: string | null;
+  totalQuantity: number;
+  availableQuantity: number;
   warehouse: string;
-  location: string;
-  safetyStock: number;
-  status: string;
   createdAt: string;
-  updatedAt: string;
+}
+
+export interface SparePartCreate {
+  partName: string;
+  partModel?: string | null;
+  totalQuantity?: number;
+  availableQuantity?: number;
+  warehouse?: string;
 }
 
 // =====================
@@ -1245,6 +1247,52 @@ export interface SystemHealth {
 export interface LivenessProbe {
   status: string;
   uptimeSeconds: number;
+}
+
+// =====================
+// Runbook 模板步骤 (from GET /runbooks/templates/{id})
+// ====================
+export interface RunbookStep {
+  stepId: number;
+  actionType: string;
+  description: string;
+  command: string;
+  params: Record<string, unknown>;
+  riskLevel: string;
+  timeoutSec: number;
+  rollbackCommand: string;
+  preCheck: string;
+  postCheck: string;
+  autoExecute: boolean;
+  status: string;
+  result: string;
+  durationMs: number;
+  errorMessage: string;
+}
+
+// =====================
+// Runbook 模板摘要 (from GET /runbooks/templates list)
+// =====================
+export interface RunbookTemplateSummary {
+  id: number;
+  name: string;
+  category: string;
+  alarmType: string;
+  description: string;
+  stepCount: number;
+  autoSteps: number;
+  manualSteps: number;
+  status: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// =====================
+// Runbook 模板详情 (from GET /runbooks/templates/{id})
+// =====================
+export interface RunbookTemplateDetail extends RunbookTemplateSummary {
+  steps: RunbookStep[];
 }
 
 // =====================

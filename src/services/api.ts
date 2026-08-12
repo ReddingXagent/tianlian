@@ -40,6 +40,7 @@ import {
   NotificationStats,
   WorkOrderReport,
   SparePart,
+  SparePartCreate,
   ChargerConfig,
   PricingRule,
   EfficiencyReport,
@@ -72,6 +73,8 @@ import {
   VppDispatchPlan,
   VppDispatchHistory,
   FleetDriver,
+  RunbookTemplateSummary,
+  RunbookTemplateDetail,
   HealthStatus,
   SystemHealth,
   LivenessProbe,
@@ -1246,18 +1249,12 @@ export const sparePartApi = {
         const d = (raw.data ?? {}) as Record<string, unknown>;
         const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
           id: (it.id as number) ?? 0,
-          name: (it.name as string) ?? '',
-          model: (it.model as string) ?? '',
-          manufacturer: (it.manufacturer as string) ?? '',
-          stockQty: (it.stock_qty as number) ?? 0,
-          unit: (it.unit as string) ?? '',
-          price: (it.price as number) ?? 0,
+          partName: (it.part_name as string) ?? '',
+          partModel: (it.part_model as string | null) ?? null,
+          totalQuantity: (it.total_quantity as number) ?? 0,
+          availableQuantity: (it.available_quantity as number) ?? 0,
           warehouse: (it.warehouse as string) ?? '',
-          location: (it.location as string) ?? '',
-          safetyStock: (it.safety_stock as number) ?? 0,
-          status: (it.status as string) ?? '',
           createdAt: (it.created_at as string) ?? '',
-          updatedAt: (it.updated_at as string) ?? '',
         }));
         return {
           ...raw,
@@ -1269,6 +1266,51 @@ export const sparePartApi = {
           },
         };
       });
+  },
+
+  /** GET /spare-parts/{id} — 备件详情 */
+  getById(id: number): Promise<ApiResponse<SparePart>> {
+    return api.get(`/spare-parts/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (d.id as number) ?? 0,
+          partName: (d.part_name as string) ?? '',
+          partModel: (d.part_model as string | null) ?? null,
+          totalQuantity: (d.total_quantity as number) ?? 0,
+          availableQuantity: (d.available_quantity as number) ?? 0,
+          warehouse: (d.warehouse as string) ?? '',
+          createdAt: (d.created_at as string) ?? '',
+        },
+      };
+    });
+  },
+
+  /** POST /spare-parts — 创建备件 (登记入库) */
+  create(body: SparePartCreate): Promise<ApiResponse<SparePart>> {
+    return api.post('/spare-parts', body).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (d.id as number) ?? 0,
+          partName: (d.part_name as string) ?? '',
+          partModel: (d.part_model as string | null) ?? null,
+          totalQuantity: (d.total_quantity as number) ?? 0,
+          availableQuantity: (d.available_quantity as number) ?? 0,
+          warehouse: (d.warehouse as string) ?? '',
+          createdAt: (d.created_at as string) ?? '',
+        },
+      };
+    });
+  },
+
+  /** DELETE /spare-parts/{id} — 删除备件 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/spare-parts/${id}`).then((res) => res.data);
   },
 };
 
@@ -2338,6 +2380,89 @@ export const fleetApi = {
         },
       };
     });
+  },
+};
+
+// =====================
+// Runbook 模板 API (GET /runbooks/templates)
+// =====================
+export const runbookTemplateApi = {
+  /** GET /runbooks/templates — Runbook 模板列表 */
+  getList(): Promise<ApiResponse<PaginatedData<RunbookTemplateSummary>>> {
+    return api
+      .get('/runbooks/templates')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          category: (it.category as string) ?? '',
+          alarmType: (it.alarm_type as string) ?? '',
+          description: (it.description as string) ?? '',
+          stepCount: (it.step_count as number) ?? 0,
+          autoSteps: (it.auto_steps as number) ?? 0,
+          manualSteps: (it.manual_steps as number) ?? 0,
+          status: (it.status as string) ?? 'active',
+          version: (it.version as number) ?? 1,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? items.length,
+            page: (d.page as number) ?? 1,
+            pageSize: (d.page_size as number) ?? items.length,
+          },
+        };
+      });
+  },
+
+  /** GET /runbooks/templates/{id} — Runbook 模板详情 (含步骤) */
+  getById(id: number): Promise<ApiResponse<RunbookTemplateDetail>> {
+    return api
+      .get(`/runbooks/templates/${id}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        const rawSteps = (it.steps as Record<string, unknown>[]) ?? [];
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            category: (it.category as string) ?? '',
+            alarmType: (it.alarm_type as string) ?? '',
+            description: (it.description as string) ?? '',
+            stepCount: (it.step_count as number) ?? 0,
+            autoSteps: (it.auto_steps as number) ?? 0,
+            manualSteps: (it.manual_steps as number) ?? 0,
+            status: (it.status as string) ?? 'active',
+            version: (it.version as number) ?? 1,
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
+            steps: rawSteps.map((s) => ({
+              stepId: (s.step_id as number) ?? 0,
+              actionType: (s.action_type as string) ?? '',
+              description: (s.description as string) ?? '',
+              command: (s.command as string) ?? '',
+              params: (s.params as Record<string, unknown>) ?? {},
+              riskLevel: (s.risk_level as string) ?? 'low',
+              timeoutSec: (s.timeout_sec as number) ?? 0,
+              rollbackCommand: (s.rollback_command as string) ?? '',
+              preCheck: (s.pre_check as string) ?? '',
+              postCheck: (s.post_check as string) ?? '',
+              autoExecute: (s.auto_execute as boolean) ?? false,
+              status: (s.status as string) ?? 'pending',
+              result: (s.result as string) ?? '',
+              durationMs: (s.duration_ms as number) ?? 0,
+              errorMessage: (s.error_message as string) ?? '',
+            })),
+          },
+        };
+      });
   },
 };
 

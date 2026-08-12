@@ -1,5 +1,5 @@
 /**
- * api ext12 — SparePart API (GET /spare-parts)
+ * api ext12 — SparePart API (GET /spare-parts, GET /spare-parts/{id}, POST, DELETE)
  * Target: snake_case → camelCase mapping for spare parts inventory
  */
 import { sparePartApi } from '../api';
@@ -28,7 +28,11 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const api = require('../api').default as jest.Mocked<{ get: jest.Mock }>;
+const api = require('../api').default as jest.Mocked<{
+  get: jest.Mock;
+  post: jest.Mock;
+  delete: jest.Mock;
+}>;
 
 describe('sparePartApi.getList() — GET /spare-parts', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -42,18 +46,12 @@ describe('sparePartApi.getList() — GET /spare-parts', () => {
           items: [
             {
               id: 1,
-              name: '继电器',
-              model: 'JQC-3FF',
-              manufacturer: '松下',
-              stock_qty: 50,
-              unit: '个',
-              price: 12.5,
+              part_name: '继电器',
+              part_model: 'JQC-3FF',
+              total_quantity: 50,
+              available_quantity: 45,
               warehouse: '北京仓',
-              location: 'A-3-01',
-              safety_stock: 10,
-              status: 'normal',
               created_at: '2026-01-01T00:00:00Z',
-              updated_at: '2026-02-01T00:00:00Z',
             },
           ],
           total: 1,
@@ -76,18 +74,12 @@ describe('sparePartApi.getList() — GET /spare-parts', () => {
 
     const item = res.data.items[0];
     expect(item.id).toBe(1);
-    expect(item.name).toBe('继电器');
-    expect(item.model).toBe('JQC-3FF');
-    expect(item.manufacturer).toBe('松下');
-    expect(item.stockQty).toBe(50);
-    expect(item.unit).toBe('个');
-    expect(item.price).toBe(12.5);
+    expect(item.partName).toBe('继电器');
+    expect(item.partModel).toBe('JQC-3FF');
+    expect(item.totalQuantity).toBe(50);
+    expect(item.availableQuantity).toBe(45);
     expect(item.warehouse).toBe('北京仓');
-    expect(item.location).toBe('A-3-01');
-    expect(item.safetyStock).toBe(10);
-    expect(item.status).toBe('normal');
     expect(item.createdAt).toBe('2026-01-01T00:00:00Z');
-    expect(item.updatedAt).toBe('2026-02-01T00:00:00Z');
   });
 
   it('handles empty items array', async () => {
@@ -122,18 +114,12 @@ describe('sparePartApi.getList() — GET /spare-parts', () => {
 
     const item = res.data.items[0];
     expect(item.id).toBe(0);
-    expect(item.name).toBe('');
-    expect(item.model).toBe('');
-    expect(item.manufacturer).toBe('');
-    expect(item.stockQty).toBe(0);
-    expect(item.unit).toBe('');
-    expect(item.price).toBe(0);
+    expect(item.partName).toBe('');
+    expect(item.partModel).toBeNull();
+    expect(item.totalQuantity).toBe(0);
+    expect(item.availableQuantity).toBe(0);
     expect(item.warehouse).toBe('');
-    expect(item.location).toBe('');
-    expect(item.safetyStock).toBe(0);
-    expect(item.status).toBe('');
     expect(item.createdAt).toBe('');
-    expect(item.updatedAt).toBe('');
   });
 
   it('handles null data gracefully', async () => {
@@ -160,5 +146,120 @@ describe('sparePartApi.getList() — GET /spare-parts', () => {
     expect(api.get).toHaveBeenCalledWith('/spare-parts', {
       params: { page: 3, page_size: 50 },
     });
+  });
+});
+
+describe('sparePartApi.getById() — GET /spare-parts/{id}', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('maps snake_case → camelCase for single item', async () => {
+    api.get.mockResolvedValue({
+      data: {
+        code: 200,
+        message: 'success',
+        data: {
+          id: 5,
+          part_name: '电容',
+          part_model: 'CD-100UF',
+          total_quantity: 100,
+          available_quantity: 80,
+          warehouse: '上海仓',
+          created_at: '2026-03-01T00:00:00Z',
+        },
+        timestamp: 0,
+      },
+    });
+
+    const res = await sparePartApi.getById(5);
+
+    expect(api.get).toHaveBeenCalledWith('/spare-parts/5');
+    expect(res.data.id).toBe(5);
+    expect(res.data.partName).toBe('电容');
+    expect(res.data.partModel).toBe('CD-100UF');
+    expect(res.data.totalQuantity).toBe(100);
+    expect(res.data.availableQuantity).toBe(80);
+    expect(res.data.warehouse).toBe('上海仓');
+  });
+
+  it('applies defaults for empty object', async () => {
+    api.get.mockResolvedValue({
+      data: { code: 200, data: {} },
+    });
+
+    const res = await sparePartApi.getById(1);
+
+    expect(res.data.id).toBe(0);
+    expect(res.data.partName).toBe('');
+    expect(res.data.partModel).toBeNull();
+    expect(res.data.totalQuantity).toBe(0);
+    expect(res.data.availableQuantity).toBe(0);
+  });
+});
+
+describe('sparePartApi.create() — POST /spare-parts', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('sends partName in body and maps response', async () => {
+    api.post.mockResolvedValue({
+      data: {
+        code: 200,
+        message: '备件已登记入库',
+        data: {
+          id: 10,
+          part_name: '电阻',
+          part_model: null,
+          total_quantity: 0,
+          available_quantity: 0,
+          warehouse: 'WH-01',
+          created_at: '2026-08-13T06:15:42+08:00',
+        },
+        timestamp: 0,
+      },
+    });
+
+    const res = await sparePartApi.create({
+      partName: '电阻',
+      warehouse: 'WH-01',
+    });
+
+    expect(api.post).toHaveBeenCalledWith('/spare-parts', {
+      partName: '电阻',
+      warehouse: 'WH-01',
+    });
+    expect(res.data.id).toBe(10);
+    expect(res.data.partName).toBe('电阻');
+    expect(res.data.warehouse).toBe('WH-01');
+  });
+
+  it('handles null data response', async () => {
+    api.post.mockResolvedValue({
+      data: { code: 200, data: null },
+    });
+
+    const res = await sparePartApi.create({ partName: 'test' });
+
+    expect(res.data.id).toBe(0);
+    expect(res.data.partName).toBe('');
+  });
+});
+
+describe('sparePartApi.delete() — DELETE /spare-parts/{id}', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('calls DELETE with correct id', async () => {
+    api.delete.mockResolvedValue({
+      data: {
+        code: 200,
+        message: '备件已删除',
+        data: null,
+        timestamp: 0,
+      },
+    });
+
+    const res = await sparePartApi.delete(3);
+
+    expect(api.delete).toHaveBeenCalledWith('/spare-parts/3');
+    expect(res.code).toBe(200);
+    expect(res.data).toBeNull();
   });
 });

@@ -319,9 +319,8 @@ describe('adapter empty-field fallback coverage', () => {
       api.get.mockResolvedValueOnce(makeEmptyResponse({ items: [{ id: 1 }, {}] }));
       const res = await sparePartApi.getList({ page: 1, pageSize: 10 });
       expect(res.data.items[0]).toEqual({
-        id: 1, name: '', model: '', manufacturer: '', stockQty: 0,
-        unit: '', price: 0, warehouse: '', location: '',
-        safetyStock: 0, status: '', createdAt: '', updatedAt: '',
+        id: 1, partName: '', partModel: null, totalQuantity: 0,
+        availableQuantity: 0, warehouse: '', createdAt: '',
       });
       expect(res.data.items[1].id).toBe(0);
     });
