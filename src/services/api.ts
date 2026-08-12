@@ -2564,3 +2564,25 @@ export const healthApi = {
     });
   },
 };
+
+// =====================
+// 缓存统计 API (GET /cache/stats)
+// =====================
+export const cacheApi = {
+  /** GET /cache/stats — Redis 缓存统计 (命中率/键数/内存/后端) */
+  getStats(): Promise<ApiResponse<CacheStats>> {
+    return api.get('/cache/stats').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          hitRate: (d.hit_rate as number) ?? 0,
+          totalKeys: (d.total_keys as number) ?? 0,
+          usedMemoryMb: (d.used_memory_mb as number) ?? 0,
+          backend: (d.backend as string) ?? 'unknown',
+        },
+      };
+    });
+  },
+};

@@ -1296,6 +1296,16 @@ export interface RunbookTemplateDetail extends RunbookTemplateSummary {
 }
 
 // =====================
+// 缓存统计 (from GET /cache/stats)
+// =====================
+export interface CacheStats {
+  hitRate: number;
+  totalKeys: number;
+  usedMemoryMb: number;
+  backend: string;
+}
+
+// =====================
 // 车队司机 (from GET /fleet/drivers)
 // =====================
 export interface FleetDriver {
