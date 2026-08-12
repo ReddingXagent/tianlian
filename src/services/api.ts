@@ -2393,6 +2393,20 @@ export const healthApi = {
     });
   },
 
+  /** GET /ping — 连通性检查 (返回pong) */
+  getPing(): Promise<ApiResponse<{ message: string }>> {
+    return api.get('/ping').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          message: (d.message as string) ?? '',
+        },
+      };
+    });
+  },
+
   /** GET /health — 简要健康信息 */
   getHealth(): Promise<ApiResponse<HealthInfo>> {
     return api.get('/health').then((res) => {
