@@ -93,13 +93,14 @@ describe('api.ext20 — 详情端点对接', () => {
           data: {
             id: 1,
             name: '充电桩重启规则',
-            device_type: 'charger',
-            fault_code: 'E001',
-            action: 'restart',
-            conditions: { temperature: '>80' },
+            description: '高温自动重启',
+            alarm_pattern: { temperature: '>80' },
+            runbook_template: 'restart_runbook',
+            auto_approve: true,
+            max_retries: 2,
+            cooldown_minutes: 45,
+            priority: 5,
             enabled: true,
-            success_rate: 0.92,
-            last_triggered_at: '2026-08-01T10:00:00Z',
             created_at: '2026-07-01T00:00:00Z',
             updated_at: '2026-08-01T10:00:00Z',
           },
@@ -109,12 +110,14 @@ describe('api.ext20 — 详情端点对接', () => {
       const res = await healingRuleApi.getById(1);
       expect(res.data.id).toBe(1);
       expect(res.data.name).toBe('充电桩重启规则');
-      expect(res.data.deviceType).toBe('charger');
-      expect(res.data.faultCode).toBe('E001');
-      expect(res.data.action).toBe('restart');
+      expect(res.data.description).toBe('高温自动重启');
+      expect(res.data.alarmPattern).toEqual({ temperature: '>80' });
+      expect(res.data.runbookTemplate).toBe('restart_runbook');
+      expect(res.data.autoApprove).toBe(true);
+      expect(res.data.maxRetries).toBe(2);
+      expect(res.data.cooldownMinutes).toBe(45);
+      expect(res.data.priority).toBe(5);
       expect(res.data.enabled).toBe(true);
-      expect(res.data.successRate).toBe(0.92);
-      expect(res.data.lastTriggeredAt).toBe('2026-08-01T10:00:00Z');
     });
 
     it('规则不存在返回404 data=null', async () => {

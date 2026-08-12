@@ -863,15 +863,29 @@ export interface Webhook {
 export interface HealingRule {
   id: number;
   name: string;
-  deviceType: string;
-  faultCode: string;
-  action: string;
-  conditions: Record<string, unknown>;
+  description: string;
+  alarmPattern: Record<string, unknown>;
+  runbookTemplate: string | null;
+  autoApprove: boolean;
+  maxRetries: number;
+  cooldownMinutes: number;
+  priority: number;
   enabled: boolean;
-  successRate: number;
-  lastTriggeredAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// HealingRule 创建请求
+export interface HealingRuleCreate {
+  name: string;
+  alarmPattern: Record<string, unknown>;
+  description?: string;
+  runbookTemplate?: string | null;
+  autoApprove?: boolean;
+  maxRetries?: number;
+  cooldownMinutes?: number;
+  priority?: number;
+  enabled?: boolean;
 }
 
 // ====================
@@ -1166,6 +1180,64 @@ export interface NotificationSendResult {
   messageId: string | null;
   channel: string | null;
   sentAt: string | null;
+}
+
+// =====================
+// 系统健康检查 (from GET /readyz + GET /livez)
+// =====================
+export type HealthStatus = 'ok' | 'degraded' | 'error';
+
+export interface DatabaseHealthCheck {
+  status: HealthStatus;
+  poolSize: number;
+  activeConnections: number;
+  idleConnections: number;
+  waitingConnections: number;
+  dbType: string;
+}
+
+export interface RedisHealthCheck {
+  status: HealthStatus;
+  version: string;
+  usedMemoryHuman: string;
+  connectedClients: number;
+}
+
+export interface MqttHealthCheck {
+  status: HealthStatus;
+  host: string;
+  port: number;
+  error: string | null;
+}
+
+export interface FilesystemPathInfo {
+  totalGb: number;
+  freeGb: number;
+  freePct: number;
+}
+
+export interface FilesystemHealthCheck {
+  paths: Record<string, FilesystemPathInfo>;
+}
+
+export interface SystemHealthChecks {
+  database: DatabaseHealthCheck;
+  redis: RedisHealthCheck;
+  mqttBroker: MqttHealthCheck;
+  filesystem: FilesystemHealthCheck;
+  [key: string]: unknown;
+}
+
+export interface SystemHealth {
+  status: HealthStatus;
+  checks: SystemHealthChecks;
+  uptimeSeconds: number;
+  unhealthyChecks: string[];
+}
+
+export interface LivenessProbe {
+  status: string;
+  uptimeSeconds: number;
 }
 
 // =====================

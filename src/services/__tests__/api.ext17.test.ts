@@ -180,46 +180,62 @@ describe('healingRuleApi.getList', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('maps healing rule fields correctly', async () => {
-    api.get.mockResolvedValueOnce(makeResponse({
-      items: [{
+    api.get.mockResolvedValueOnce(makeResponse([
+      {
         id: 1,
         name: '离线重启',
-        device_type: 'charger',
-        fault_code: 'E001',
-        action: 'restart',
-        conditions: { retry_count: 3, interval_sec: 60 },
+        description: '设备离线时自动重启',
+        alarm_pattern: { severity: 'critical', device_type: 'charger' },
+        runbook_template: null,
+        auto_approve: false,
+        max_retries: 3,
+        cooldown_minutes: 60,
+        priority: 1,
         enabled: true,
-        success_rate: 0.95,
-        last_triggered_at: '2026-08-05T14:30:00+08:00',
         created_at: '2026-07-01T00:00:00+08:00',
         updated_at: '2026-08-05T14:30:00+08:00',
-      }],
-      total: 1,
-      page: 1,
-      page_size: 20,
-    }));
+      },
+    ]));
 
     const res = await healingRuleApi.getList();
-    expect(res.data.items).toHaveLength(1);
-    const h = res.data.items[0];
+    expect(res.data).toHaveLength(1);
+    const h = res.data[0];
     expect(h.id).toBe(1);
     expect(h.name).toBe('离线重启');
-    expect(h.deviceType).toBe('charger');
-    expect(h.faultCode).toBe('E001');
-    expect(h.action).toBe('restart');
-    expect(h.conditions).toEqual({ retry_count: 3, interval_sec: 60 });
+    expect(h.description).toBe('设备离线时自动重启');
+    expect(h.alarmPattern).toEqual({ severity: 'critical', device_type: 'charger' });
+    expect(h.runbookTemplate).toBeNull();
+    expect(h.autoApprove).toBe(false);
+    expect(h.maxRetries).toBe(3);
+    expect(h.cooldownMinutes).toBe(60);
+    expect(h.priority).toBe(1);
     expect(h.enabled).toBe(true);
-    expect(h.successRate).toBe(0.95);
-    expect(h.lastTriggeredAt).toBe('2026-08-05T14:30:00+08:00');
+    expect(h.createdAt).toBe('2026-07-01T00:00:00+08:00');
+    expect(h.updatedAt).toBe('2026-08-05T14:30:00+08:00');
   });
 
-  it('handles empty list', async () => {
-    api.get.mockResolvedValueOnce(makeResponse({
-      items: [], total: 0, page: 1, page_size: 20,
-    }));
+  it('handles empty array', async () => {
+    api.get.mockResolvedValueOnce(makeResponse([]));
     const res = await healingRuleApi.getList();
-    expect(res.data.items).toHaveLength(0);
-    expect(res.data.total).toBe(0);
+    expect(res.data).toHaveLength(0);
+  });
+
+  it('handles null-safe defaults', async () => {
+    api.get.mockResolvedValueOnce(makeResponse([
+      { id: 2, name: 'rule2' },
+    ]));
+    const res = await healingRuleApi.getList();
+    const h = res.data[0];
+    expect(h.id).toBe(2);
+    expect(h.name).toBe('rule2');
+    expect(h.description).toBe('');
+    expect(h.alarmPattern).toEqual({});
+    expect(h.runbookTemplate).toBeNull();
+    expect(h.autoApprove).toBe(false);
+    expect(h.maxRetries).toBe(0);
+    expect(h.cooldownMinutes).toBe(0);
+    expect(h.priority).toBe(0);
+    expect(h.enabled).toBe(false);
   });
 });
 

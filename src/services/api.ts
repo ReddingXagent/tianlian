@@ -45,6 +45,7 @@ import {
   Engineer,
   Webhook,
   HealingRule,
+  HealingRuleCreate,
   HealingExecution,
   ApiKey,
   SecurityLog,
@@ -70,7 +71,17 @@ import {
   VppDispatchPlan,
   VppDispatchHistory,
   FleetDriver,
+  HealthStatus,
+  SystemHealth,
+  LivenessProbe,
 } from '../types';
+
+/** health端点返回类型 */
+export type HealthInfo = {
+  status: HealthStatus;
+  version: string;
+  service: string;
+};
 
 const TOKEN_KEY = 'auth_token';
 const BASE_URL =
@@ -1583,39 +1594,29 @@ export const webhookApi = {
 // 自愈规则 API (/healing/rules)
 // =====================
 export const healingRuleApi = {
-  /** GET /healing/rules — 自愈规则列表 (分页) */
-  getList(params?: {
-    page?: number;
-    pageSize?: number;
-  }): Promise<ApiResponse<PaginatedData<HealingRule>>> {
+  /** GET /healing/rules — 自愈规则列表 (返回数组) */
+  getList(): Promise<ApiResponse<HealingRule[]>> {
     return api
-      .get('/healing/rules', {
-        params: { page: params?.page, page_size: params?.pageSize },
-      })
+      .get('/healing/rules')
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
-        const d = (raw.data ?? {}) as Record<string, unknown>;
-        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
-          id: (it.id as number) ?? 0,
-          name: (it.name as string) ?? '',
-          deviceType: (it.device_type as string) ?? '',
-          faultCode: (it.fault_code as string) ?? '',
-          action: (it.action as string) ?? '',
-          conditions: (it.conditions as Record<string, unknown>) ?? {},
-          enabled: (it.enabled as boolean) ?? false,
-          successRate: (it.success_rate as number) ?? 0,
-          lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
-          createdAt: (it.created_at as string) ?? '',
-          updatedAt: (it.updated_at as string) ?? '',
-        }));
+        const arr = (Array.isArray(raw.data) ? raw.data : []) as Record<string, unknown>[];
         return {
           ...raw,
-          data: {
-            items,
-            total: (d.total as number) ?? 0,
-            page: (d.page as number) ?? params?.page ?? 1,
-            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
-          },
+          data: arr.map((it) => ({
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            description: (it.description as string) ?? '',
+            alarmPattern: (it.alarm_pattern as Record<string, unknown>) ?? {},
+            runbookTemplate: (it.runbook_template as string | null) ?? null,
+            autoApprove: (it.auto_approve as boolean) ?? false,
+            maxRetries: (it.max_retries as number) ?? 0,
+            cooldownMinutes: (it.cooldown_minutes as number) ?? 0,
+            priority: (it.priority as number) ?? 0,
+            enabled: (it.enabled as boolean) ?? false,
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
+          })),
         };
       });
   },
@@ -1632,18 +1633,52 @@ export const healingRuleApi = {
           data: {
             id: (it.id as number) ?? 0,
             name: (it.name as string) ?? '',
-            deviceType: (it.device_type as string) ?? '',
-            faultCode: (it.fault_code as string) ?? '',
-            action: (it.action as string) ?? '',
-            conditions: (it.conditions as Record<string, unknown>) ?? {},
+            description: (it.description as string) ?? '',
+            alarmPattern: (it.alarm_pattern as Record<string, unknown>) ?? {},
+            runbookTemplate: (it.runbook_template as string | null) ?? null,
+            autoApprove: (it.auto_approve as boolean) ?? false,
+            maxRetries: (it.max_retries as number) ?? 0,
+            cooldownMinutes: (it.cooldown_minutes as number) ?? 0,
+            priority: (it.priority as number) ?? 0,
             enabled: (it.enabled as boolean) ?? false,
-            successRate: (it.success_rate as number) ?? 0,
-            lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
             createdAt: (it.created_at as string) ?? '',
             updatedAt: (it.updated_at as string) ?? '',
           },
         };
       });
+  },
+
+  /** POST /healing/rules — 创建自愈规则 */
+  create(body: HealingRuleCreate): Promise<ApiResponse<{ id: number; name: string; message: string }>> {
+    return api
+      .post('/healing/rules', {
+        name: body.name,
+        alarm_pattern: body.alarmPattern,
+        description: body.description ?? '',
+        runbook_template: body.runbookTemplate ?? null,
+        auto_approve: body.autoApprove ?? false,
+        max_retries: body.maxRetries ?? 1,
+        cooldown_minutes: body.cooldownMinutes ?? 30,
+        priority: body.priority ?? 0,
+        enabled: body.enabled ?? true,
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (d.id as number) ?? 0,
+            name: (d.name as string) ?? '',
+            message: (d.message as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** DELETE /healing/rules/{id} — 删除自愈规则 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/healing/rules/${id}`).then((res) => res.data);
   },
 };
 
@@ -2284,6 +2319,91 @@ export const fleetApi = {
           total: (d.total as number) ?? 0,
           page: (d.page as number) ?? 1,
           pageSize: (d.page_size as number) ?? 20,
+        },
+      };
+    });
+  },
+};
+
+// =====================
+// 系统健康检查 API (GET /readyz + GET /livez + GET /health)
+// =====================
+export const healthApi = {
+  /** GET /readyz — 详细就绪检查 (数据库/Redis/MQTT/文件系统) */
+  getReadyz(): Promise<ApiResponse<SystemHealth>> {
+    return api.get('/readyz').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const checks = (d.checks ?? {}) as Record<string, unknown>;
+      const db = (checks.database ?? {}) as Record<string, unknown>;
+      const redis = (checks.redis ?? {}) as Record<string, unknown>;
+      const mqtt = (checks.mqtt_broker ?? {}) as Record<string, unknown>;
+      const fs = (checks.filesystem ?? {}) as Record<string, unknown>;
+      const fsPaths = (fs.paths ?? {}) as Record<string, Record<string, unknown>>;
+      const paths: Record<string, { totalGb: number; freeGb: number; freePct: number }> = {};
+      for (const [k, v] of Object.entries(fsPaths)) {
+        paths[k] = {
+          totalGb: (v.total_gb as number) ?? 0,
+          freeGb: (v.free_gb as number) ?? 0,
+          freePct: (v.free_pct as number) ?? 0,
+        };
+      }
+      return {
+        ...raw,
+        data: {
+          status: (d.status as HealthStatus) ?? 'error',
+          checks: {
+            database: {
+              status: (db.status as HealthStatus) ?? 'error',
+              poolSize: (db.pool_size as number) ?? 0,
+              activeConnections: (db.active_connections as number) ?? 0,
+              idleConnections: (db.idle_connections as number) ?? 0,
+              waitingConnections: (db.waiting_connections as number) ?? 0,
+              dbType: (db.db_type as string) ?? 'unknown',
+            },
+            redis: {
+              status: (redis.status as HealthStatus) ?? 'error',
+              version: (redis.version as string) ?? 'unknown',
+              usedMemoryHuman: (redis.used_memory_human as string) ?? '0',
+              connectedClients: (redis.connected_clients as number) ?? 0,
+            },
+            mqttBroker: {
+              status: (mqtt.status as HealthStatus) ?? 'error',
+              host: (mqtt.host as string) ?? 'unknown',
+              port: (mqtt.port as number) ?? 0,
+              error: (mqtt.error as string) ?? null,
+            },
+            filesystem: { paths },
+          },
+          uptimeSeconds: (d.uptime_seconds as number) ?? 0,
+          unhealthyChecks: (d.unhealthy_checks as string[]) ?? [],
+        },
+      };
+    });
+  },
+
+  /** GET /livez — 存活探针 */
+  getLivez(): Promise<LivenessProbe> {
+    return api.get('/livez').then((res) => {
+      const d = (res.data ?? {}) as Record<string, unknown>;
+      return {
+        status: (d.status as string) ?? 'unknown',
+        uptimeSeconds: (d.uptime_seconds as number) ?? 0,
+      };
+    });
+  },
+
+  /** GET /health — 简要健康信息 */
+  getHealth(): Promise<ApiResponse<HealthInfo>> {
+    return api.get('/health').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          status: (d.status as string) as HealthStatus ?? 'error',
+          version: (d.version as string) ?? 'unknown',
+          service: (d.service as string) ?? 'unknown',
         },
       };
     });
