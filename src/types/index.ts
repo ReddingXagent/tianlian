@@ -251,6 +251,13 @@ export interface LoginResponse {
   user: User;
 }
 
+/** POST /auth/refresh — 刷新令牌响应 */
+export interface RefreshTokenResponse {
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+}
+
 // =====================
 // 工作台统计
 // =====================

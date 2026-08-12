@@ -4,6 +4,7 @@ import {
   ApiResponse,
   LoginRequest,
   LoginResponse,
+  RefreshTokenResponse,
   WorkOrder,
   Alarm,
   Device,
@@ -156,6 +157,21 @@ export const authApi = {
   },
   logout(): Promise<ApiResponse<null>> {
     return api.post('/auth/logout').then((res) => res.data);
+  },
+  /** POST /auth/refresh — 刷新访问令牌 */
+  refreshToken(): Promise<ApiResponse<RefreshTokenResponse>> {
+    return api.post('/auth/refresh').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          accessToken: (d.access_token as string) ?? '',
+          tokenType: (d.token_type as string) ?? 'bearer',
+          expiresIn: (d.expires_in as number) ?? 0,
+        },
+      };
+    });
   },
   /** GET /auth/me — 当前登录用户信息 + 权限列表 */
   getProfile(): Promise<ApiResponse<AuthMe>> {
