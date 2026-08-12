@@ -56,6 +56,8 @@ import {
   KnowledgeCategoryItem,
   UnreadCount,
   RealtimeOverview,
+  Gateway,
+  Tenant,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -1970,5 +1972,104 @@ export const deviceHealthApi = {
   /** GET /health/devices — 设备健康度排名 */
   getRanking(): Promise<ApiResponse<DeviceHealthRanking>> {
     return api.get('/health/devices').then((res) => res.data as ApiResponse<DeviceHealthRanking>);
+  },
+};
+
+// =====================
+// 网关管理 API (/gateways)
+// =====================
+export const gatewayApi = {
+  /** GET /gateways — 网关列表 */
+  getList(): Promise<ApiResponse<PaginatedData<Gateway>>> {
+    return api.get('/gateways').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = (d.items as Record<string, unknown>[]) ?? [];
+      return {
+        ...raw,
+        data: {
+          items: items.map((item): Gateway => ({
+            id: item.id as number,
+            sn: (item.sn as string) ?? '',
+            name: (item.name as string) ?? '',
+            model: (item.model as string) ?? null,
+            manufacturer: (item.manufacturer as string) ?? null,
+            stationId: (item.station_id as number) ?? null,
+            status: (item.status as Gateway['status']) ?? 'offline',
+            firmwareVersion: (item.firmware_version as string) ?? null,
+            lastOnline: (item.last_online as string) ?? null,
+            ipAddress: (item.ip_address as string) ?? null,
+            macAddress: (item.mac_address as string) ?? null,
+            location: (item.location as string) ?? null,
+            healthScore: (item.health_score as number) ?? 0,
+            createdAt: (item.created_at as string) ?? '',
+            updatedAt: (item.updated_at as string) ?? '',
+            notes: (item.notes as string) ?? null,
+          })),
+          total: (d.total as number) ?? 0,
+          page: (d.page as number) ?? 1,
+          pageSize: (d.page_size as number) ?? 20,
+        },
+      };
+    });
+  },
+
+  /** GET /gateways/{id} — 网关详情 */
+  getById(id: number): Promise<ApiResponse<Gateway>> {
+    return api.get(`/gateways/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const item = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: item.id as number,
+          sn: (item.sn as string) ?? '',
+          name: (item.name as string) ?? '',
+          model: (item.model as string) ?? null,
+          manufacturer: (item.manufacturer as string) ?? null,
+          stationId: (item.station_id as number) ?? null,
+          status: (item.status as Gateway['status']) ?? 'offline',
+          firmwareVersion: (item.firmware_version as string) ?? null,
+          lastOnline: (item.last_online as string) ?? null,
+          ipAddress: (item.ip_address as string) ?? null,
+          macAddress: (item.mac_address as string) ?? null,
+          location: (item.location as string) ?? null,
+          healthScore: (item.health_score as number) ?? 0,
+          createdAt: (item.created_at as string) ?? '',
+          updatedAt: (item.updated_at as string) ?? '',
+          notes: (item.notes as string) ?? null,
+        },
+      };
+    });
+  },
+};
+
+// =====================
+// 租户管理 API (/tenants)
+// =====================
+export const tenantListApi = {
+  /** GET /tenants — 租户列表 */
+  getList(): Promise<ApiResponse<PaginatedData<Tenant>>> {
+    return api.get('/tenants').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = (d.items as Record<string, unknown>[]) ?? [];
+      return {
+        ...raw,
+        data: {
+          items: items.map((item): Tenant => ({
+            id: item.id as number,
+            name: (item.name as string) ?? '',
+            code: (item.code as string) ?? '',
+            status: (item.status as string) ?? 'active',
+            createdAt: (item.created_at as string) ?? '',
+            updatedAt: (item.updated_at as string) ?? '',
+          })),
+          total: (d.total as number) ?? 0,
+          page: (d.page as number) ?? 1,
+          pageSize: (d.page_size as number) ?? 20,
+        },
+      };
+    });
   },
 };

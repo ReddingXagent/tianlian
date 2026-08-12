@@ -1031,3 +1031,37 @@ export interface DeviceHealthRanking {
     worst: DeviceHealthRankingItem[];
   };
 }
+
+// =====================
+// 网关 (Gateway — from /gateways)
+// =====================
+export interface Gateway {
+  id: number;
+  sn: string;
+  name: string;
+  model: string | null;
+  manufacturer: string | null;
+  stationId: number | null;
+  status: 'online' | 'offline' | 'warning';
+  firmwareVersion: string | null;
+  lastOnline: string | null;
+  ipAddress: string | null;
+  macAddress: string | null;
+  location: string | null;
+  healthScore: number;
+  createdAt: string;
+  updatedAt: string;
+  notes: string | null;
+}
+
+// =====================
+// 租户 (Tenant — from /tenants)
+// =====================
+export interface Tenant {
+  id: number;
+  name: string;
+  code: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
