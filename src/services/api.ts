@@ -2073,3 +2073,65 @@ export const tenantListApi = {
     });
   },
 };
+
+// =====================
+// VPP 虚拟电厂 API (/vpp/resources, POST /vpp/dispatch)
+// =====================
+export const vppApi = {
+  /** GET /vpp/resources — VPP资源清单(光伏/储能/EV/负荷) */
+  getResources(): Promise<ApiResponse<VppResource[]>> {
+    return api.get('/vpp/resources').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const items = (raw.data as Record<string, unknown>[]) ?? [];
+      return {
+        ...raw,
+        data: items.map((item): VppResource => ({
+          resourceId: (item.resource_id as string) ?? '',
+          resourceType: (item.resource_type as VppResourceType) ?? 'pv',
+          stationId: (item.station_id as string) ?? '',
+          ratedPowerKw: (item.rated_power_kw as number) ?? 0,
+          currentPowerKw: (item.current_power_kw as number) ?? 0,
+          availablePowerKw: (item.available_power_kw as number) ?? 0,
+          soc: item.soc !== undefined && item.soc !== null ? (item.soc as number) : null,
+          efficiency: (item.efficiency as number) ?? 0,
+          priority: (item.priority as number) ?? 0,
+          costPerKwh: (item.cost_per_kwh as number) ?? 0,
+        })),
+      };
+    });
+  },
+
+  /** POST /vpp/dispatch — 触发VPP调度(削峰/填谷/调频/需求响应) */
+  dispatch(body?: Record<string, unknown>): Promise<ApiResponse<VppDispatchPlan>> {
+    return api.post('/vpp/dispatch', body ?? {}).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const commands = (d.commands as Record<string, unknown>[]) ?? [];
+      return {
+        ...raw,
+        data: {
+          planId: (d.plan_id as string) ?? '',
+          mode: (d.mode as VppDispatchMode) ?? 'peak_shaving',
+          trigger: (d.trigger as string) ?? '',
+          stationsInvolved: (d.stations_involved as string[]) ?? [],
+          totalDispatchKw: (d.total_dispatch_kw as number) ?? 0,
+          estimatedRevenue: (d.estimated_revenue as number) ?? 0,
+          estimatedCost: (d.estimated_cost as number) ?? 0,
+          netProfit: (d.net_profit as number) ?? 0,
+          commands: commands.map((c): VppDispatchCommand => ({
+            resourceId: (c.resource_id as string) ?? '',
+            stationId: (c.station_id as string) ?? '',
+            resourceType: (c.resource_type as VppResourceType) ?? 'battery',
+            targetPowerKw: (c.target_power_kw as number) ?? 0,
+            durationMin: (c.duration_min as number) ?? 0,
+            priority: (c.priority as number) ?? 0,
+            estimatedRevenue: (c.estimated_revenue as number) ?? 0,
+            estimatedCost: (c.estimated_cost as number) ?? 0,
+            dispatchMode: (c.dispatch_mode as VppDispatchMode) ?? 'peak_shaving',
+          })),
+          createdAt: (d.created_at as string) ?? '',
+        },
+      };
+    });
+  },
+};

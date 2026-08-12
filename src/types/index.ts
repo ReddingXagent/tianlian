@@ -1055,6 +1055,54 @@ export interface Gateway {
 }
 
 // =====================
+// VPP 虚拟电厂资源 (from /vpp/resources)
+// =====================
+export type VppResourceType = 'pv' | 'battery' | 'ev' | 'load';
+
+export interface VppResource {
+  resourceId: string;
+  resourceType: VppResourceType;
+  stationId: string;
+  ratedPowerKw: number;
+  currentPowerKw: number;
+  availablePowerKw: number;
+  soc: number | null;
+  efficiency: number;
+  priority: number;
+  costPerKwh: number;
+}
+
+// =====================
+// VPP 调度计划 (from POST /vpp/dispatch)
+// =====================
+export type VppDispatchMode = 'peak_shaving' | 'valley_filling' | 'frequency_regulation' | 'demand_response';
+
+export interface VppDispatchCommand {
+  resourceId: string;
+  stationId: string;
+  resourceType: VppResourceType;
+  targetPowerKw: number;
+  durationMin: number;
+  priority: number;
+  estimatedRevenue: number;
+  estimatedCost: number;
+  dispatchMode: VppDispatchMode;
+}
+
+export interface VppDispatchPlan {
+  planId: string;
+  mode: VppDispatchMode;
+  trigger: string;
+  stationsInvolved: string[];
+  totalDispatchKw: number;
+  estimatedRevenue: number;
+  estimatedCost: number;
+  netProfit: number;
+  commands: VppDispatchCommand[];
+  createdAt: string;
+}
+
+// =====================
 // 租户 (Tenant — from /tenants)
 // =====================
 export interface Tenant {
