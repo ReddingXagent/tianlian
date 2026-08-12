@@ -55,6 +55,7 @@ import {
   KnowledgeArticleItem,
   KnowledgeCategoryItem,
   UnreadCount,
+  RealtimeOverview,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -651,8 +652,36 @@ export const workOrderActionApi = {
 // 设备实时监控 API
 // =====================
 export const deviceMonitorApi = {
-  getRealtimeMetrics(deviceIds?: number[]): Promise<ApiResponse<DeviceMetrics[]>> {
-    return api.get('/monitor/realtime', { params: { deviceIds: deviceIds?.join(',') } }).then((res) => res.data);
+  /** GET /monitor/realtime — 实时监控总览 (含设备列表) */
+  getRealtimeOverview(): Promise<ApiResponse<RealtimeOverview>> {
+    return api.get('/monitor/realtime').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          totalPower: (d.totalPower as number) ?? 0,
+          powerTrend: (d.powerTrend as number) ?? 0,
+          todayGeneration: (d.todayGeneration as number) ?? 0,
+          todayConsumption: (d.todayConsumption as number) ?? 0,
+          gridImport: (d.gridImport as number) ?? 0,
+          gridExport: (d.gridExport as number) ?? 0,
+          efficiency: (d.efficiency as number) ?? 0,
+          updateTime: (d.update_time as string) ?? '',
+          devices: ((d.devices as Record<string, unknown>[]) ?? []).map((it) => ({
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            type: (it.type as string) ?? '',
+            power: (it.power as number) ?? 0,
+            status: (it.status as string) ?? '',
+          })),
+        } as RealtimeOverview,
+      };
+    });
+  },
+  /** @deprecated Use getRealtimeOverview() instead */
+  getRealtimeMetrics(_deviceIds?: number[]): Promise<ApiResponse<DeviceMetrics[]>> {
+    return Promise.resolve({ code: 200, message: 'deprecated', data: [] });
   },
   getDeviceStatusList(params?: {
     status?: string;
@@ -775,6 +804,27 @@ export const roleApi = {
           permissions: (it.permissions as string[]) ?? [],
         },
       };
+    });
+  },
+
+  /** GET /roles/tree — 权限树 (按 resource 分组的层级结构) */
+  getTree(): Promise<ApiResponse<PermissionTreeNode[]>> {
+    return api.get('/roles/tree').then((res) => {
+      const raw = res.data as ApiResponse<{ tree?: Record<string, unknown>[] }>;
+      const items = (raw.data?.tree ?? []) as Record<string, unknown>[];
+      const mapNode = (it: Record<string, unknown>): PermissionTreeNode => ({
+        key: (it.key as string) ?? '',
+        title: (it.title as string) ?? '',
+        resource: (it.resource as string) ?? '',
+        name: it.name as string | undefined,
+        action: it.action as string | undefined,
+        label: it.label as string | undefined,
+        isLeaf: (it.is_leaf as boolean) ?? false,
+        children: Array.isArray(it.children)
+          ? (it.children as Record<string, unknown>[]).map(mapNode)
+          : undefined,
+      });
+      return { ...raw, data: items.map(mapNode) };
     });
   },
 };

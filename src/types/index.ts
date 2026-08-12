@@ -159,6 +159,27 @@ export interface MonitorSummary {
   criticalAlarms: number;
 }
 
+/** GET /monitor/realtime — 实时监控总览 */
+export interface RealtimeOverview {
+  totalPower: number;
+  powerTrend: number;
+  todayGeneration: number;
+  todayConsumption: number;
+  gridImport: number;
+  gridExport: number;
+  efficiency: number;
+  updateTime: string;
+  devices: RealtimeDeviceStatus[];
+}
+
+export interface RealtimeDeviceStatus {
+  id: number;
+  name: string;
+  type: string;
+  power: number;
+  status: string;
+}
+
 // =====================
 // 用户 (User)
 // =====================
@@ -611,8 +632,22 @@ export interface Role {
 }
 
 // =====================
-// 权限项 (Permission — from /permissions)
+// 权限树节点 (Permission Tree Node — from /roles/tree)
 // =====================
+export interface PermissionTreeNode {
+  key: string;
+  title: string;
+  resource: string;
+  name?: string;
+  action?: string;
+  label?: string;
+  isLeaf?: boolean;
+  children?: PermissionTreeNode[];
+}
+
+// =====================
+// 权限项 (Permission — from /permissions)
+// ====================
 export interface Permission {
   name: string;
   resource: string;

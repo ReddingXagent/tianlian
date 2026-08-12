@@ -172,25 +172,18 @@ describe('api.ext — deviceMonitorApi remaining branches', () => {
     mockAxios.reset();
   });
 
-  it('getRealtimeMetrics with undefined deviceIds sends undefined param', async () => {
-    mockAxios.onGet('/monitor/realtime').reply(200, {
-      code: 0, message: 'ok', data: [],
-    });
-    await deviceMonitorApi.getRealtimeMetrics();
-    // deviceIds?.join(',') with undefined → params.deviceIds is undefined
-    expect(mockAxios.history.get[0].params).toHaveProperty('deviceIds');
-    expect(mockAxios.history.get[0].params.deviceIds).toBeUndefined();
+  it('getRealtimeMetrics is deprecated and returns empty array without API call', async () => {
+    const result = await deviceMonitorApi.getRealtimeMetrics();
+    expect(result.code).toBe(200);
+    expect(result.message).toBe('deprecated');
+    expect(result.data).toEqual([]);
+    expect(mockAxios.history.get.length).toBe(0);
   });
 
-  it('getRealtimeMetrics with deviceIds sends joined string', async () => {
-    mockAxios.onGet('/monitor/realtime').reply(200, {
-      code: 0, message: 'ok', data: [
-        { deviceId: 1, deviceName: 'D1', status: 'online' },
-      ],
-    });
+  it('getRealtimeMetrics accepts deviceIds arg but still returns empty (deprecated)', async () => {
     const result = await deviceMonitorApi.getRealtimeMetrics([1, 2, 3]);
-    expect(mockAxios.history.get[0].params.deviceIds).toBe('1,2,3');
-    expect(result.data[0].deviceId).toBe(1);
+    expect(result.data).toEqual([]);
+    expect(mockAxios.history.get.length).toBe(0);
   });
 
   it('getDeviceStatusList with params', async () => {

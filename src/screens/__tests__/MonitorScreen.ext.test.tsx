@@ -15,6 +15,7 @@ jest.mock('../../services/api', () => ({
   deviceMonitorApi: {
     getDeviceStatusList: jest.fn(),
     getRealtimeMetrics: jest.fn(),
+    getRealtimeOverview: jest.fn(),
   },
 }));
 
@@ -36,13 +37,23 @@ const CRITICAL_ALARM = {
   level: 'critical', title: '严重告警A', description: '严重告警描述',
   status: 'unhandled', createdAt: '2024-01-15T10:00:00Z', updatedAt: '',
 };
-const METRICS = {
-  deviceId: 1, deviceName: '设备一', temperature: 45, voltage: 220,
-  current: 10, power: 2200, status: 'online', lastUpdated: '2024-01-15T10:05:00Z',
+const REALTIME_OVERVIEW = {
+  totalPower: 2200,
+  powerTrend: 5.2,
+  todayGeneration: 100,
+  todayConsumption: 50,
+  gridImport: 10,
+  gridExport: 20,
+  efficiency: 95.3,
+  updateTime: '2024-01-15T10:05:00Z',
+  devices: [
+    { id: 1, name: '设备一', type: 'charger', power: 2200, status: 'online' },
+  ],
 };
 
 function setupMocks(opts?: {
-  devices?: Record<string, unknown>[]; faults?: Record<string, unknown>[]; alarms?: Record<string, unknown>[]; metrics?: Record<string, unknown>[];
+  devices?: Record<string, unknown>[]; faults?: Record<string, unknown>[]; alarms?: Record<string, unknown>[];
+  overview?: Record<string, unknown> | null;
   summaryError?: boolean;
 }) {
   if (opts?.summaryError) {
@@ -60,9 +71,13 @@ function setupMocks(opts?: {
   (monitorApi.getCriticalAlarms as jest.Mock).mockResolvedValue({
     data: { items: opts?.alarms ?? [CRITICAL_ALARM], total: (opts?.alarms ?? [CRITICAL_ALARM]).length, page: 1, pageSize: 20 },
   });
-  (deviceMonitorApi.getRealtimeMetrics as jest.Mock).mockResolvedValue({
-    data: opts?.metrics ?? [METRICS],
-  });
+  if (opts?.overview === null) {
+    (deviceMonitorApi.getRealtimeOverview as jest.Mock).mockRejectedValue(new Error('overview fail'));
+  } else {
+    (deviceMonitorApi.getRealtimeOverview as jest.Mock).mockResolvedValue({
+      data: opts?.overview ?? REALTIME_OVERVIEW,
+    });
+  }
 }
 
 describe('MonitorScreen.ext', () => {
@@ -71,29 +86,29 @@ describe('MonitorScreen.ext', () => {
     setupMocks();
   });
 
-  it('renders metrics with realtime data', async () => {
+  it('renders realtime overview data', async () => {
     const { findByText } = render(<MonitorScreen />);
     await findByText('设备一');
     await waitFor(() => {
-      expect(deviceMonitorApi.getRealtimeMetrics).toHaveBeenCalled();
+      expect(deviceMonitorApi.getRealtimeOverview).toHaveBeenCalled();
     });
   });
 
-  it('renders high temperature metric (>65)', async () => {
-    setupMocks({ metrics: [{ ...METRICS, temperature: 70 }] });
+  it('renders positive power trend with up arrow', async () => {
+    setupMocks({ overview: { ...REALTIME_OVERVIEW, powerTrend: 3.5 } });
     const { findByText } = render(<MonitorScreen />);
     await findByText('设备一');
     await waitFor(() => {
-      expect(deviceMonitorApi.getRealtimeMetrics).toHaveBeenCalled();
+      expect(deviceMonitorApi.getRealtimeOverview).toHaveBeenCalled();
     });
   });
 
-  it('renders medium temperature (>50)', async () => {
-    setupMocks({ metrics: [{ ...METRICS, temperature: 55 }] });
+  it('renders negative power trend with down arrow', async () => {
+    setupMocks({ overview: { ...REALTIME_OVERVIEW, powerTrend: -2.1 } });
     const { findByText } = render(<MonitorScreen />);
     await findByText('设备一');
     await waitFor(() => {
-      expect(deviceMonitorApi.getRealtimeMetrics).toHaveBeenCalled();
+      expect(deviceMonitorApi.getRealtimeOverview).toHaveBeenCalled();
     });
   });
 

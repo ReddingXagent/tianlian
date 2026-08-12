@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { monitorApi, deviceMonitorApi } from '../services/api';
-import { MonitorSummary, Device, Alarm, DeviceMetrics } from '../types';
+import { MonitorSummary, Device, Alarm, RealtimeOverview, RealtimeDeviceStatus } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
@@ -24,7 +24,7 @@ const TABS: { key: MonitorTab; label: string }[] = [
 const MonitorScreen: React.FC = () => {
   const [summary, setSummary] = useState<MonitorSummary | null>(null);
   const [devices, setDevices] = useState<Device[]>([]);
-  const [deviceMetrics, setDeviceMetrics] = useState<Record<number, DeviceMetrics>>({});
+  const [realtimeOverview, setRealtimeOverview] = useState<RealtimeOverview | null>(null);
   const [faultDevices, setFaultDevices] = useState<Device[]>([]);
   const [criticalAlarms, setCriticalAlarms] = useState<Alarm[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,13 +63,8 @@ const MonitorScreen: React.FC = () => {
   const fetchRealtimeMetrics = useCallback(async () => {
     if (devices.length === 0) return;
     try {
-      const deviceIds = devices.slice(0, 20).map((d) => d.id);
-      const res = await deviceMonitorApi.getRealtimeMetrics(deviceIds);
-      const metricsMap: Record<number, DeviceMetrics> = {};
-      res.data.forEach((m) => {
-        metricsMap[m.deviceId] = m;
-      });
-      setDeviceMetrics(metricsMap);
+      const res = await deviceMonitorApi.getRealtimeOverview();
+      setRealtimeOverview(res.data);
     } catch {
       // 实时数据获取失败，静默处理
     }
@@ -110,50 +105,21 @@ const MonitorScreen: React.FC = () => {
     );
   }
 
-  const getMetricsDisplay = (deviceId: number): DeviceMetrics | undefined => {
-    return deviceMetrics[deviceId];
+  const getRealtimeDevice = (deviceId: number): RealtimeDeviceStatus | undefined => {
+    return realtimeOverview?.devices.find((d) => d.id === deviceId);
   };
 
-  const renderMetricsBar = (metrics?: DeviceMetrics) => {
-    if (!metrics) {
+  const renderMetricsBar = (rt?: RealtimeDeviceStatus) => {
+    if (!rt) {
       return <Text style={styles.metricsNoData}>遥测数据加载中...</Text>;
     }
     return (
       <View style={styles.metricsRow}>
-        {metrics.power !== undefined && (
-          <View style={styles.metricItem}>
-            <Text style={styles.metricValue}>{metrics.power.toFixed(1)}</Text>
-            <Text style={styles.metricUnit}>kW</Text>
-            <Text style={styles.metricLabel}>功率</Text>
-          </View>
-        )}
-        {metrics.voltage !== undefined && (
-          <View style={styles.metricItem}>
-            <Text style={styles.metricValue}>{metrics.voltage.toFixed(1)}</Text>
-            <Text style={styles.metricUnit}>V</Text>
-            <Text style={styles.metricLabel}>电压</Text>
-          </View>
-        )}
-        {metrics.current !== undefined && (
-          <View style={styles.metricItem}>
-            <Text style={styles.metricValue}>{metrics.current.toFixed(1)}</Text>
-            <Text style={styles.metricUnit}>A</Text>
-            <Text style={styles.metricLabel}>电流</Text>
-          </View>
-        )}
-        {metrics.temperature !== undefined && (
-          <View style={styles.metricItem}>
-            <Text style={[
-              styles.metricValue,
-              metrics.temperature > 65 && { color: '#c62828' },
-              metrics.temperature > 50 && metrics.temperature <= 65 && { color: '#e65100' },
-            ]}>
-              {metrics.temperature.toFixed(1)}
-            </Text>
-            <Text style={styles.metricUnit}>°C</Text>
-            <Text style={styles.metricLabel}>温度</Text>
-          </View>
-        )}
+        <View style={styles.metricItem}>
+          <Text style={styles.metricValue}>{rt.power.toFixed(1)}</Text>
+          <Text style={styles.metricUnit}>kW</Text>
+          <Text style={styles.metricLabel}>功率</Text>
+        </View>
       </View>
     );
   };
@@ -221,6 +187,28 @@ const MonitorScreen: React.FC = () => {
           ))}
         </View>
 
+        {/* 实时总览 */}
+        {activeTab === 'devices' && realtimeOverview && (
+          <View style={styles.realtimeOverviewBar}>
+            <View style={styles.metricItem}>
+              <Text style={styles.metricValue}>{realtimeOverview.totalPower.toFixed(1)}</Text>
+              <Text style={styles.metricUnit}>kW</Text>
+              <Text style={styles.metricLabel}>总功率</Text>
+            </View>
+            <View style={styles.metricItem}>
+              <Text style={[styles.metricValue, { color: realtimeOverview.powerTrend >= 0 ? '#2e7d32' : '#e65100' }]}>
+                {realtimeOverview.powerTrend >= 0 ? '↑' : '↓'} {Math.abs(realtimeOverview.powerTrend).toFixed(1)}%
+              </Text>
+              <Text style={styles.metricLabel}>趋势</Text>
+            </View>
+            <View style={styles.metricItem}>
+              <Text style={styles.metricValue}>{realtimeOverview.efficiency.toFixed(1)}</Text>
+              <Text style={styles.metricUnit}>%</Text>
+              <Text style={styles.metricLabel}>效率</Text>
+            </View>
+          </View>
+        )}
+
         {/* 实时监控列表 */}
         {activeTab === 'devices' && (
           devices.length === 0 ? (
@@ -231,7 +219,7 @@ const MonitorScreen: React.FC = () => {
             />
           ) : (
             devices.map((device) => {
-              const metrics = getMetricsDisplay(device.id);
+              const rt = getRealtimeDevice(device.id);
               return (
                 <View key={device.id} style={styles.deviceCard}>
                   <View style={styles.deviceHeader}>
@@ -239,16 +227,16 @@ const MonitorScreen: React.FC = () => {
                       <Text style={styles.deviceName} numberOfLines={1}>
                         {device.name}
                       </Text>
-                      <StatusBadge status={metrics?.status || device.status} />
+                      <StatusBadge status={rt?.status || device.status} />
                     </View>
                     <Text style={styles.deviceMeta}>
                       {device.stationName || `站点#${device.stationId}`} · {device.model}
                     </Text>
                   </View>
-                  {renderMetricsBar(metrics)}
+                  {renderMetricsBar(rt)}
                   <Text style={styles.deviceUpdateTime}>
-                    最后更新: {metrics?.lastUpdated
-                      ? new Date(metrics.lastUpdated).toLocaleTimeString('zh-CN')
+                    最后更新: {realtimeOverview?.updateTime
+                      ? new Date(realtimeOverview.updateTime).toLocaleTimeString('zh-CN')
                       : device.lastHeartbeat
                         ? new Date(device.lastHeartbeat).toLocaleTimeString('zh-CN')
                         : '-'}
