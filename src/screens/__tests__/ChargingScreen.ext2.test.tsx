@@ -3,6 +3,9 @@ import { render, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Alert } from 'react-native';
 
+// Import after mocks
+import ChargingScreen from '../ChargingScreen';
+
 // Mock navigation
 const mockReplace = jest.fn();
 jest.mock('@react-navigation/native', () => ({
@@ -34,9 +37,6 @@ jest.mock('../../hooks/useChargingPolling', () => ({
 }));
 
 jest.spyOn(Alert, 'alert');
-
-// Import after mocks
-import ChargingScreen from '../ChargingScreen';
 
 describe('ChargingScreen.ext2 — remaining branches', () => {
   beforeEach(() => {

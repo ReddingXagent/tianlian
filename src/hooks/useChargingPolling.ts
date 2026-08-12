@@ -98,11 +98,16 @@ export function useChargingPolling({
     if (!active) return;
 
     // active 由 false→true (回前台/恢复联网) 时立即补拉一次再续轮询
-    fetchStatus();
+    // fire-and-forget via microtask to avoid set-state-in-effect warning
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (!cancelled) fetchStatus();
+    });
 
     intervalRef.current = setInterval(fetchStatus, interval);
 
     return () => {
+      cancelled = true;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -141,7 +146,12 @@ export function useActiveCharging() {
   }, []);
 
   useEffect(() => {
-    checkActive();
+    // fire-and-forget via microtask to avoid set-state-in-effect warning
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (!cancelled) checkActive();
+    });
+    return () => { cancelled = true; };
   }, [checkActive]);
 
   return { activeOrderId, loading, error, checkActive };

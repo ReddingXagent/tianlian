@@ -78,10 +78,10 @@ describe('WalletScreen', () => {
     expect(getByText('交易记录')).toBeTruthy();
   });
 
-  it('calls getRecords on mount', () => {
+  it('calls getRecords on mount', async () => {
     mockGetRecords.mockResolvedValue({ data: { items: [] } });
     renderScreen();
-    expect(mockGetRecords).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockGetRecords).toHaveBeenCalledTimes(1));
   });
 
   it('renders records after load', async () => {

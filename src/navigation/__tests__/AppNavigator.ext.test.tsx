@@ -2,6 +2,8 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AppNavigator } from '../AppNavigator';
+
 // Use global to collect callbacks from inside jest.mock factories
 (global as Record<string, unknown>).__capturedIcons = [];
 (global as Record<string, unknown>).__capturedHeaderLefts = [];
@@ -29,6 +31,7 @@ jest.mock('../../store/authStore', () => {
 });
 
 jest.mock('@react-navigation/native', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     NavigationContainer: ({ children }: { children: React.ReactNode }) =>
@@ -42,6 +45,7 @@ jest.mock('@react-navigation/native', () => {
 });
 
 jest.mock('@react-navigation/native-stack', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     createNativeStackNavigator: () => ({
@@ -49,7 +53,7 @@ jest.mock('@react-navigation/native-stack', () => {
         React.createElement(React.Fragment, null, children),
       Screen: ({ name, component: Comp, options }: { name: string; component: React.FC; options?: Record<string, unknown> }) => {
         const g = global as Record<string, unknown>;
-        const hl = g.__capturedHeaderLefts as Array<() => null>;
+        const hl = g.__capturedHeaderLefts as (() => null)[];
         if (options && 'headerLeft' in options && typeof options.headerLeft === 'function') {
           hl.push(options.headerLeft as () => null);
         }
@@ -61,7 +65,9 @@ jest.mock('@react-navigation/native-stack', () => {
 });
 
 jest.mock('@react-navigation/bottom-tabs', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text, View } = require('react-native');
   return {
     createBottomTabNavigator: () => ({
@@ -69,7 +75,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         React.createElement(View, { testID: 'tab-navigator' }, children),
       Screen: ({ name, options }: { name: string; options?: Record<string, unknown> }) => {
         const g = global as Record<string, unknown>;
-        const icons = g.__capturedIcons as Array<{ label: string; focused: boolean }>;
+        const icons = g.__capturedIcons as { label: string; focused: boolean }[];
         if (options && 'tabBarIcon' in options) {
           const iconFn = options.tabBarIcon as any;
           icons.push({ label: name, focused: true });
@@ -89,7 +95,9 @@ jest.mock('@react-navigation/bottom-tabs', () => {
 
 // ── Mock screens ─────────────────────────────────────────────
 jest.mock('../../screens/LoginScreen', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text } = require('react-native');
   const LoginScreenStub = () => React.createElement(Text, null, 'LoginScreen');
   LoginScreenStub.displayName = 'LoginScreen';
@@ -120,8 +128,6 @@ const mockAuthState = authMod.__mockAuthState as {
   checkAuth: jest.Mock;
 };
 
-import { AppNavigator } from '../AppNavigator';
-
 const renderNavigator = () =>
   render(
     <SafeAreaProvider>
@@ -147,7 +153,7 @@ describe('AppNavigator.ext — coverage lift 79% → 95%+', () => {
   it('invokes tabBarIcon for all 4 tabs with focused=true and focused=false', () => {
     mockAuthState.isAuthenticated = true;
     renderNavigator();
-    const icons = (global as Record<string, unknown>).__capturedIcons as Array<{ label: string; focused: boolean }>;
+    const icons = (global as Record<string, unknown>).__capturedIcons as { label: string; focused: boolean }[];
     expect(icons.length).toBe(8);
     const labels = icons.map((c) => c.label);
     expect(labels).toContain('Home');
@@ -159,7 +165,7 @@ describe('AppNavigator.ext — coverage lift 79% → 95%+', () => {
   it('captures and invokes headerLeft callback for Charging screen', () => {
     mockAuthState.isAuthenticated = true;
     renderNavigator();
-    const hls = (global as Record<string, unknown>).__capturedHeaderLefts as Array<() => null>;
+    const hls = (global as Record<string, unknown>).__capturedHeaderLefts as (() => null)[];
     expect(hls.length).toBeGreaterThanOrEqual(1);
     const result = hls[0]();
     expect(result).toBeNull();

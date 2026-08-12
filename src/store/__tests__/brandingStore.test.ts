@@ -84,6 +84,7 @@ describe('brandingStore', () => {
   describe('loadFromCache', () => {
     it('should return cached branding when valid', async () => {
       const cached = { data: mockBranding, cachedAt: Date.now(), expiredAt: Date.now() + 60000 };
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue(JSON.stringify(cached));
 
       const result = await useBrandingStore.getState().loadFromCache();
@@ -92,6 +93,7 @@ describe('brandingStore', () => {
 
     it('should return null when cache expired', async () => {
       const expired = { data: mockBranding, cachedAt: 0, expiredAt: 1 };
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue(JSON.stringify(expired));
 
       const result = await useBrandingStore.getState().loadFromCache();
@@ -99,6 +101,7 @@ describe('brandingStore', () => {
     });
 
     it('should return null on JSON parse error', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue('invalid-json');
 
       const result = await useBrandingStore.getState().loadFromCache();
@@ -109,6 +112,7 @@ describe('brandingStore', () => {
   describe('loadBranding cache fallback', () => {
     it('should use cached branding when API fails and cache exists', async () => {
       const cached = { data: mockBranding, cachedAt: Date.now(), expiredAt: Date.now() + 60000 };
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require('expo-secure-store').getItemAsync as jest.Mock).mockResolvedValue(JSON.stringify(cached));
       (tenantApi.getBranding as jest.Mock).mockRejectedValue(new Error('网络错误'));
 
@@ -121,6 +125,7 @@ describe('brandingStore', () => {
     });
 
     it('should silently handle setItemAsync failure', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require('expo-secure-store').setItemAsync as jest.Mock).mockRejectedValue(new Error('disk full'));
       (tenantApi.getBranding as jest.Mock).mockResolvedValue({ data: mockBranding });
 
@@ -145,6 +150,7 @@ describe('brandingStore', () => {
     });
 
     it('should silently handle deleteItemAsync failure', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require('expo-secure-store').deleteItemAsync as jest.Mock).mockRejectedValue(new Error('permission'));
 
       expect(() => useBrandingStore.getState().reset()).not.toThrow();

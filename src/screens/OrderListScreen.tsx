@@ -41,13 +41,13 @@ const OrderListScreen: React.FC = () => {
     if (isFocused) {
       fetchOrders({ status: activeFilter || undefined });
     }
-  }, [isFocused, activeFilter]);
+  }, [isFocused, activeFilter, fetchOrders]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchOrders({ status: activeFilter || undefined });
     setRefreshing(false);
-  }, [activeFilter]);
+  }, [activeFilter, fetchOrders]);
 
   const handleOrderPress = (order: Order) => {
     if (order.status === 'charging') {

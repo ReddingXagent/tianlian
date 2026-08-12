@@ -57,7 +57,7 @@ const HomeScreen: React.FC = () => {
     setIsSearching(true);
     await searchStations(keyword);
     setIsSearching(false);
-  }, [searchText]);
+  }, [searchText, fetchStations, searchStations]);
 
   const handleStationPress = useCallback((station: Station) => {
     navigation.navigate('StationDetail', { stationId: station.id });
@@ -69,7 +69,7 @@ const HomeScreen: React.FC = () => {
     } else {
       refreshStations();
     }
-  }, [searchText]);
+  }, [searchText, searchStations, refreshStations]);
 
   return (
     <View style={styles.container}>

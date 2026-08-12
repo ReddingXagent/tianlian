@@ -50,7 +50,11 @@ const StationDetailScreen: React.FC = () => {
   const isFocused = useIsFocused();
   useEffect(() => {
     if (isFocused) {
-      loadData();
+      let cancelled = false;
+      Promise.resolve().then(() => {
+        if (!cancelled) loadData();
+      });
+      return () => { cancelled = true; };
     }
   }, [isFocused, loadData]);
 

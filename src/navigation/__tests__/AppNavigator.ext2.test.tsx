@@ -2,6 +2,8 @@ import React from 'react';
 import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AppNavigator } from '../AppNavigator';
+
 // Use global to collect icon calls from inside jest.mock factories
 (global as Record<string, unknown>).__iconCalls = [];
 
@@ -28,6 +30,7 @@ jest.mock('../../store/authStore', () => {
 });
 
 jest.mock('@react-navigation/native', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     NavigationContainer: ({ children }: { children: React.ReactNode }) =>
@@ -41,6 +44,7 @@ jest.mock('@react-navigation/native', () => {
 });
 
 jest.mock('@react-navigation/native-stack', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     createNativeStackNavigator: () => ({
@@ -48,7 +52,7 @@ jest.mock('@react-navigation/native-stack', () => {
         React.createElement(React.Fragment, null, children),
       Screen: ({ name, component: Comp, options }: { name: string; component: React.FC; options?: Record<string, unknown> }) => {
         const g = global as Record<string, unknown>;
-        const hl = g.__capturedHeaderLefts as Array<() => null>;
+        const hl = g.__capturedHeaderLefts as (() => null)[];
         if (options && 'headerLeft' in options && typeof options.headerLeft === 'function') {
           hl.push(options.headerLeft as () => null);
         }
@@ -60,6 +64,7 @@ jest.mock('@react-navigation/native-stack', () => {
 });
 
 jest.mock('@react-navigation/bottom-tabs', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   const { View, Text } = require('react-native');
   return {
@@ -68,7 +73,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         React.createElement(View, { testID: 'tab-navigator' }, children),
       Screen: ({ name, options }: { name: string; options?: Record<string, unknown> }) => {
         const g = global as Record<string, unknown>;
-        const calls = g.__iconCalls as Array<{ focused: boolean; label: string }>;
+        const calls = g.__iconCalls as { focused: boolean; label: string }[];
         const children: React.ReactNode[] = [];
         if (options && 'tabBarIcon' in options) {
           const iconFn = options.tabBarIcon as any;
@@ -114,8 +119,6 @@ const mockState = authMod.__mockAuthState as {
   checkAuth: jest.Mock;
 };
 
-import { AppNavigator } from '../AppNavigator';
-
 const renderNavigator = () =>
   render(
     <SafeAreaProvider>
@@ -140,7 +143,7 @@ describe('AppNavigator.ext2 — TabIcon branch coverage', () => {
     expect(tree).toContain('📋');
     expect(tree).toContain('📷');
     expect(tree).toContain('👤');
-    const calls = (global as Record<string, unknown>).__iconCalls as Array<{ focused: boolean; label: string }>;
+    const calls = (global as Record<string, unknown>).__iconCalls as { focused: boolean; label: string }[];
     const focused = calls.filter(c => c.focused);
     expect(focused.length).toBe(4);
     expect(focused.map(c => c.label)).toEqual(expect.arrayContaining(['Home', 'Orders', 'Scan', 'Profile']));
@@ -148,7 +151,7 @@ describe('AppNavigator.ext2 — TabIcon branch coverage', () => {
 
   it('invokes TabIcon with focused=false for all 4 tabs', () => {
     renderNavigator();
-    const calls = (global as Record<string, unknown>).__iconCalls as Array<{ focused: boolean; label: string }>;
+    const calls = (global as Record<string, unknown>).__iconCalls as { focused: boolean; label: string }[];
     const unfocused = calls.filter(c => !c.focused);
     expect(unfocused.length).toBe(4);
     expect(unfocused.map(c => c.label)).toEqual(expect.arrayContaining(['Home', 'Orders', 'Scan', 'Profile']));

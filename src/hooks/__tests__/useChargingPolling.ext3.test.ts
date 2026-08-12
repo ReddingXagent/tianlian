@@ -1,4 +1,6 @@
 import { renderHook, act } from '@testing-library/react-native';
+import { useChargingPolling } from '../useChargingPolling';
+import { chargingApi } from '../../services/api';
 
 // Mock useAppLifecycle
 jest.mock('../useAppLifecycle', () => ({
@@ -16,9 +18,6 @@ jest.mock('../../services/api', () => ({
   },
 }));
 
-// eslint-disable-next-line import/first
-import { useChargingPolling } from '../useChargingPolling';
-
 describe('useChargingPolling.ext3 — L76 non-Error throw in fetchStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +30,6 @@ describe('useChargingPolling.ext3 — L76 non-Error throw in fetchStatus', () =>
 
   // L76: `if (err instanceof Error)` false branch — non-Error throw
   it('sets fallback error message when fetchStatus throws non-Error', async () => {
-    const { chargingApi } = require('../../services/api');
     chargingApi.getStatus.mockRejectedValue('network down');
 
     const { result, unmount } = renderHook(() =>

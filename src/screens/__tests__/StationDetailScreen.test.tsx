@@ -129,14 +129,14 @@ describe('StationDetailScreen', () => {
     expect(getByText('2号桩')).toBeTruthy();
   });
 
-  it('calls fetchStationDetail on mount', () => {
+  it('calls fetchStationDetail on mount', async () => {
     renderScreen();
-    expect(mockFetchStationDetail).toHaveBeenCalledWith(1);
+    await waitFor(() => expect(mockFetchStationDetail).toHaveBeenCalledWith(1));
   });
 
-  it('calls fetchChargers on mount', () => {
+  it('calls fetchChargers on mount', async () => {
     renderScreen();
-    expect(mockFetchChargers).toHaveBeenCalledWith(1);
+    await waitFor(() => expect(mockFetchChargers).toHaveBeenCalledWith(1));
   });
 
   it('renders charger count from chargers array', () => {
@@ -144,10 +144,10 @@ describe('StationDetailScreen', () => {
     expect(getByText('总枪数')).toBeTruthy();
   });
 
-  it('refetches station + chargers when screen regains focus (回焦刷新)', () => {
+  it('refetches station + chargers when screen regains focus (回焦刷新)', async () => {
     const utils = renderScreen();
-    expect(mockFetchStationDetail).toHaveBeenCalledTimes(1);
-    expect(mockFetchChargers).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockFetchStationDetail).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockFetchChargers).toHaveBeenCalledTimes(1));
 
     mockFocused = false;
     utils.rerender(<SafeAreaProvider><StationDetailScreen /></SafeAreaProvider>);
@@ -155,8 +155,8 @@ describe('StationDetailScreen', () => {
 
     mockFocused = true;
     utils.rerender(<SafeAreaProvider><StationDetailScreen /></SafeAreaProvider>);
-    expect(mockFetchStationDetail).toHaveBeenCalledTimes(2);
-    expect(mockFetchChargers).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(mockFetchStationDetail).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(mockFetchChargers).toHaveBeenCalledTimes(2));
   });
 
   // --- loading / error states ---
@@ -296,9 +296,8 @@ describe('StationDetailScreen', () => {
     mockFetchStationDetail.mockClear();
     mockFetchChargers.mockClear();
     renderScreen();
-    // RefreshControl is part of ScrollView; we test via store calls
-    // The initial render already calls once
-    expect(mockFetchStationDetail).toHaveBeenCalledTimes(1);
+    // microtask fire-and-forget: wait for initial mount call
+    await waitFor(() => expect(mockFetchStationDetail).toHaveBeenCalledTimes(1));
   });
 
   // --- navigation when "去充电" pressed in Alert ---

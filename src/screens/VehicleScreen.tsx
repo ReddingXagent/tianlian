@@ -55,7 +55,11 @@ const VehicleScreen: React.FC = () => {
 
   useEffect(() => {
     if (isFocused) {
-      loadVehicles();
+      let cancelled = false;
+      Promise.resolve().then(() => {
+        if (!cancelled) loadVehicles();
+      });
+      return () => { cancelled = true; };
     }
   }, [isFocused, loadVehicles]);
 

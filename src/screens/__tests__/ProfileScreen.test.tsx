@@ -88,10 +88,10 @@ describe('ProfileScreen', () => {
     expect(getByText('退出登录')).toBeTruthy();
   });
 
-  it('calls getUserStats on mount', () => {
+  it('calls getUserStats on mount', async () => {
     mockGetUserStats.mockResolvedValue({ data: { totalOrders: 12, totalEnergy: 340.5, couponCount: 3 } });
     renderScreen();
-    expect(mockGetUserStats).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockGetUserStats).toHaveBeenCalledTimes(1));
   });
 
   it('renders stats after load', async () => {
@@ -106,10 +106,10 @@ describe('ProfileScreen', () => {
     expect(getByText('关于我们')).toBeTruthy();
   });
 
-  it('refetches stats when tab regains focus (回焦刷新)', () => {
+  it('refetches stats when tab regains focus (回焦刷新)', async () => {
     mockGetUserStats.mockResolvedValue({ data: {} });
     const utils = renderScreen();
-    expect(mockGetUserStats).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockGetUserStats).toHaveBeenCalledTimes(1));
 
     mockFocused = false;
     utils.rerender(
@@ -125,7 +125,7 @@ describe('ProfileScreen', () => {
         <ProfileScreen />
       </SafeAreaProvider>
     );
-    expect(mockGetUserStats).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(mockGetUserStats).toHaveBeenCalledTimes(2));
   });
 
   it('silently refreshes profile (余额) on focus', async () => {

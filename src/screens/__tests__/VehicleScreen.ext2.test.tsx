@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { Alert } from 'react-native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';

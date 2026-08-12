@@ -143,8 +143,10 @@ describe('StationDetailScreen.ext2 — refresh + remaining branch coverage', () 
   // line 40: loadData(false) vs loadData(true) branch
   // Already covered by mount (isRefresh=false) and refresh test above (isRefresh=true)
   // Additional: loadData called from useEffect on focus
-  it('calls loadData on focus regain', () => {
+  it('calls loadData on focus regain', async () => {
     const utils = renderScreen();
+    // Wait for initial microtask fire-and-forget
+    await waitFor(() => expect(mockFetchStationDetail).toHaveBeenCalledTimes(1));
     mockFetchStationDetail.mockClear();
     mockFetchChargers.mockClear();
 
@@ -159,8 +161,8 @@ describe('StationDetailScreen.ext2 — refresh + remaining branch coverage', () 
       <SafeAreaProvider><StationDetailScreen /></SafeAreaProvider>,
     );
 
-    expect(mockFetchStationDetail).toHaveBeenCalledWith(1);
-    expect(mockFetchChargers).toHaveBeenCalledWith(1);
+    await waitFor(() => expect(mockFetchStationDetail).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(mockFetchChargers).toHaveBeenCalledWith(1));
   });
 
   // line 45: isFocused=false → useEffect does not call loadData

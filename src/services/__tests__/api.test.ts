@@ -12,6 +12,8 @@ import {
   setUnauthorizedHandler,
 } from '../api';
 
+import axios from 'axios';
+
 // Mock axios and SecureStore at module level
 jest.mock('axios', () => {
   const mockInstance = {
@@ -42,8 +44,6 @@ jest.mock('expo-secure-store', () => ({
   setItemAsync: (...args: unknown[]) => mockSetItem(...args as []),
   deleteItemAsync: (...args: unknown[]) => mockDeleteItem(...args as []),
 }));
-
-import axios from 'axios';
 
 // Get the mocked instance
 const mockAxiosInstance = jest.mocked(axios.create).mock.results[0].value;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -50,12 +50,36 @@ const ProfileScreen: React.FC = () => {
   // 统计/余额随订单与充值随时在变 → 回焦时静默重拉。
   const isFocused = useIsFocused();
 
+  const loadStatsCb = useCallback(async () => {
+    try {
+      const response = await statsApi.getUserStats();
+      setStats(response.data);
+    } catch {
+      // 静默处理
+    }
+  }, []);
+
+  const refreshProfileCb = useCallback(async () => {
+    try {
+      const response = await authApi.getProfile();
+      setUser(response.data);
+    } catch {
+      // 静默处理
+    }
+  }, [setUser]);
+
   useEffect(() => {
     if (isFocused) {
-      loadStats();
-      refreshProfile();
+      let cancelled = false;
+      Promise.resolve().then(() => {
+        if (!cancelled) {
+          loadStatsCb();
+          refreshProfileCb();
+        }
+      });
+      return () => { cancelled = true; };
     }
-  }, [isFocused]);
+  }, [isFocused, loadStatsCb, refreshProfileCb]);
 
   const handleLogout = () => {
     Alert.alert(

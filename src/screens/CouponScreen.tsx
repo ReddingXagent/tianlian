@@ -68,7 +68,13 @@ const CouponScreen: React.FC = () => {
 
   useEffect(() => {
     if (isFocused) {
-      loadCoupons();
+      // fire-and-forget: loadCoupons sets loading synchronously,
+      // wrap in microtask to avoid cascading renders
+      let cancelled = false;
+      Promise.resolve().then(() => {
+        if (!cancelled) loadCoupons();
+      });
+      return () => { cancelled = true; };
     }
   }, [isFocused, loadCoupons]);
 

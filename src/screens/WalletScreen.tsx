@@ -87,8 +87,14 @@ const WalletScreen: React.FC = () => {
 
   useEffect(() => {
     if (isFocused) {
-      loadRecords();
-      refreshProfile();
+      let cancelled = false;
+      Promise.resolve().then(() => {
+        if (!cancelled) {
+          loadRecords();
+          refreshProfile();
+        }
+      });
+      return () => { cancelled = true; };
     }
   }, [isFocused, loadRecords, refreshProfile]);
 
