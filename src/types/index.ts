@@ -1113,3 +1113,43 @@ export interface Tenant {
   createdAt: string;
   updatedAt: string;
 }
+
+// =====================
+// AI对话 (Chat — from POST /chat)
+// =====================
+export interface ChatSource {
+  title: string;
+  url: string;
+  type: string;
+}
+
+export interface ChatAction {
+  type: string;
+  label: string;
+  target: string;
+}
+
+export interface ChatUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
+export interface ChatResponse {
+  answer: string;
+  confidence: number;
+  sources: ChatSource[];
+  actions: ChatAction[];
+  needsHuman: boolean;
+  usage: ChatUsage | null;
+}
+
+// =====================
+// 主动通知发送 (from POST /notifications/send)
+// =====================
+export interface NotificationSendResult {
+  success: boolean;
+  messageId: string | null;
+  channel: string | null;
+  sentAt: string | null;
+}

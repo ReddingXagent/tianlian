@@ -58,6 +58,11 @@ import {
   RealtimeOverview,
   Gateway,
   Tenant,
+  ChatSource,
+  ChatAction,
+  ChatResponse,
+  ChatUsage,
+  NotificationSendResult,
 } from '../types';
 
 const TOKEN_KEY = 'auth_token';
@@ -2130,6 +2135,86 @@ export const vppApi = {
             dispatchMode: (c.dispatch_mode as VppDispatchMode) ?? 'peak_shaving',
           })),
           createdAt: (d.created_at as string) ?? '',
+        },
+      };
+    });
+  },
+};
+
+// =====================
+// AI 对话 API (POST /chat)
+// =====================
+export const chatApi = {
+  /** POST /chat — 发送消息给AI助手 */
+  send(message: string, options?: {
+    conversationId?: string;
+    context?: Record<string, unknown>;
+  }): Promise<ApiResponse<ChatResponse>> {
+    const body: Record<string, unknown> = { message };
+    if (options?.conversationId) body.conversation_id = options.conversationId;
+    if (options?.context) body.context = options.context;
+    return api.post('/chat', body).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const sources = (d.sources as Record<string, unknown>[]) ?? [];
+      const actions = (d.actions as Record<string, unknown>[]) ?? [];
+      const usage = d.usage as Record<string, unknown> | null;
+      return {
+        ...raw,
+        data: {
+          answer: (d.answer as string) ?? '',
+          confidence: (d.confidence as number) ?? 0,
+          sources: sources.map((s): ChatSource => ({
+            title: (s.title as string) ?? '',
+            url: (s.url as string) ?? '',
+            type: (s.type as string) ?? '',
+          })),
+          actions: actions.map((a): ChatAction => ({
+            type: (a.type as string) ?? '',
+            label: (a.label as string) ?? '',
+            target: (a.target as string) ?? '',
+          })),
+          needsHuman: (d.needs_human as boolean) ?? false,
+          usage: usage ? {
+            promptTokens: (usage.prompt_tokens as number) ?? 0,
+            completionTokens: (usage.completion_tokens as number) ?? 0,
+            totalTokens: (usage.total_tokens as number) ?? 0,
+          } : null,
+        },
+      };
+    });
+  },
+};
+
+// =====================
+// 通知发送 API (POST /notifications/send)
+// =====================
+export const notificationSendApi = {
+  /** POST /notifications/send — 发送通知给指定用户 */
+  send(params: {
+    userId: number;
+    title: string;
+    content: string;
+    channel?: string;
+    type?: string;
+  }): Promise<ApiResponse<NotificationSendResult>> {
+    const body: Record<string, unknown> = {
+      user_id: params.userId,
+      title: params.title,
+      content: params.content,
+    };
+    if (params.channel) body.channel = params.channel;
+    if (params.type) body.type = params.type;
+    return api.post('/notifications/send', body).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          success: (d.success as boolean) ?? false,
+          messageId: (d.message_id as string) ?? null,
+          channel: (d.channel as string) ?? null,
+          sentAt: (d.sent_at as string) ?? null,
         },
       };
     });
