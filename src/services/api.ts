@@ -103,6 +103,7 @@ import {
   Station,
   StationBranding,
   ChargingOrder,
+  WorkOrderRating,
 } from '../types';
 
 /** health端点返回类型 */
@@ -941,6 +942,17 @@ export const workOrderActionApi = {
       .post(`/work-orders/${id}/reject`, null, { params: { reason } })
       .then((res) => res.data);
   },
+  /** POST /work-orders/{id}/rate — 工单评价 (需 response_rating + quality_rating + attitude_rating) */
+  rate(id: string, rating: WorkOrderRating): Promise<ApiResponse<null>> {
+    return api
+      .post(`/work-orders/${id}/rate`, {
+        response_rating: rating.responseRating,
+        quality_rating: rating.qualityRating,
+        attitude_rating: rating.attitudeRating,
+        ...(rating.comment !== undefined ? { comment: rating.comment } : {}),
+      })
+      .then((res) => res.data);
+  },
 };
 
 // =====================
@@ -1362,6 +1374,16 @@ export const reportApi = {
             stationName: (s.station_name as string) ?? '',
             deviceCount: (s.device_count as number) ?? 0,
           })),
+          healthScore: (() => {
+            const hs = d.health_score as Record<string, unknown> | undefined;
+            if (!hs) return undefined;
+            return {
+              average: (hs.average as number) ?? 0,
+              distribution: (hs.distribution as Record<string, number>) ?? {},
+            };
+          })(),
+          onlineRate: (d.online_rate as number) ?? undefined,
+          faultRate: (d.fault_rate as number) ?? undefined,
         },
       };
     });

@@ -632,6 +632,12 @@ export interface DeviceReport {
     stationName: string;
     deviceCount: number;
   }[];
+  healthScore?: {
+    average: number;
+    distribution: Record<string, number>;
+  };
+  onlineRate?: number;
+  faultRate?: number;
 }
 
 // =====================
@@ -654,6 +660,17 @@ export interface AlarmReport {
     date: string;
     count: number;
   }[];
+}
+
+// =====================
+// 工单评价 (Work Order Rating — from POST /work-orders/{id}/rate)
+// =====================
+/** POST /work-orders/{id}/rate — 请求体 */
+export interface WorkOrderRating {
+  responseRating: number;
+  qualityRating: number;
+  attitudeRating: number;
+  comment?: string;
 }
 
 // =====================
