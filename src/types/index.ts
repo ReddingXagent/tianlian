@@ -1042,6 +1042,19 @@ export interface HealingRuleCreate {
   enabled?: boolean;
 }
 
+// HealingRule 更新请求 (PUT /healing/rules/{id} — 部分更新)
+export interface HealingRuleUpdate {
+  name?: string;
+  description?: string;
+  alarmPattern?: Record<string, unknown>;
+  runbookTemplate?: string | null;
+  autoApprove?: boolean;
+  maxRetries?: number;
+  cooldownMinutes?: number;
+  priority?: number;
+  enabled?: boolean;
+}
+
 // ====================
 // 自愈执行记录 (HealingExecution — from /healing/executions)
 // ====================
@@ -1717,4 +1730,28 @@ export interface FleetDriver {
   status: string;
   createdAt: string | null;
   updatedAt: string | null;
+}
+
+// =====================
+// 工单备件申请 (from POST /work-orders/{id}/spare-parts)
+// =====================
+/** POST /work-orders/{id}/spare-parts 请求体 */
+export interface WorkOrderSparePartCreate {
+  partName: string;
+  reason: string;
+  partModel?: string;
+  quantity?: number;
+}
+
+/** POST /work-orders/{id}/spare-parts 响应体 */
+export interface WorkOrderSparePartCreated {
+  id: number;
+  orderId: string;
+  partName: string;
+  partModel: string | null;
+  quantity: number;
+  reason: string;
+  status: string;
+  inventoryDeducted: boolean;
+  createdAt: string;
 }

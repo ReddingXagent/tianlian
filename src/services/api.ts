@@ -51,6 +51,7 @@ import {
   Webhook,
   HealingRule,
   HealingRuleCreate,
+  HealingRuleUpdate,
   HealingExecution,
   HealingStats,
   ApiKey,
@@ -106,6 +107,8 @@ import {
   StationBranding,
   ChargingOrder,
   WorkOrderRating,
+  WorkOrderSparePartCreate,
+  WorkOrderSparePartCreated,
 } from '../types';
 
 /** health端点返回类型 */
@@ -954,6 +957,38 @@ export const workOrderActionApi = {
         ...(rating.comment !== undefined ? { comment: rating.comment } : {}),
       })
       .then((res) => res.data);
+  },
+  /** POST /work-orders/{id}/spare-parts — 备件申请 (需 part_name + reason) */
+  requestSparePart(
+    id: string,
+    body: WorkOrderSparePartCreate,
+  ): Promise<ApiResponse<WorkOrderSparePartCreated>> {
+    return api
+      .post(`/work-orders/${id}/spare-parts`, {
+        part_name: body.partName,
+        reason: body.reason,
+        ...(body.partModel !== undefined ? { part_model: body.partModel } : {}),
+        ...(body.quantity !== undefined ? { quantity: body.quantity } : {}),
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        if (!raw.data) return { ...raw, data: null } as ApiResponse<WorkOrderSparePartCreated>;
+        const d = raw.data as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (d.id as number) ?? 0,
+            orderId: (d.order_id as string) ?? '',
+            partName: (d.part_name as string) ?? '',
+            partModel: (d.part_model as string | null) ?? null,
+            quantity: (d.quantity as number) ?? 1,
+            reason: (d.reason as string) ?? '',
+            status: (d.status as string) ?? 'requested',
+            inventoryDeducted: (d.inventory_deducted as boolean) ?? false,
+            createdAt: (d.created_at as string) ?? '',
+          } as WorkOrderSparePartCreated,
+        };
+      });
   },
 };
 
@@ -2322,6 +2357,41 @@ export const healingRuleApi = {
           },
         };
       });
+  },
+
+  /** PUT /healing/rules/{id} — 更新自愈规则 */
+  update(id: number, body: HealingRuleUpdate): Promise<ApiResponse<HealingRule>> {
+    const payload: Record<string, unknown> = {};
+    if (body.name !== undefined) payload.name = body.name;
+    if (body.description !== undefined) payload.description = body.description;
+    if (body.alarmPattern !== undefined) payload.alarm_pattern = body.alarmPattern;
+    if (body.runbookTemplate !== undefined) payload.runbook_template = body.runbookTemplate;
+    if (body.autoApprove !== undefined) payload.auto_approve = body.autoApprove;
+    if (body.maxRetries !== undefined) payload.max_retries = body.maxRetries;
+    if (body.cooldownMinutes !== undefined) payload.cooldown_minutes = body.cooldownMinutes;
+    if (body.priority !== undefined) payload.priority = body.priority;
+    if (body.enabled !== undefined) payload.enabled = body.enabled;
+    return api.put(`/healing/rules/${id}`, payload).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (d.id as number) ?? 0,
+          name: (d.name as string) ?? '',
+          description: (d.description as string) ?? '',
+          alarmPattern: (d.alarm_pattern as Record<string, unknown>) ?? {},
+          runbookTemplate: (d.runbook_template as string | null) ?? null,
+          autoApprove: (d.auto_approve as boolean) ?? false,
+          maxRetries: (d.max_retries as number) ?? 0,
+          cooldownMinutes: (d.cooldown_minutes as number) ?? 0,
+          priority: (d.priority as number) ?? 0,
+          enabled: (d.enabled as boolean) ?? false,
+          createdAt: (d.created_at as string) ?? '',
+          updatedAt: (d.updated_at as string) ?? '',
+        },
+      };
+    });
   },
 
   /** DELETE /healing/rules/{id} — 删除自愈规则 */
