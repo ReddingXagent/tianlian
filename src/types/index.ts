@@ -790,6 +790,52 @@ export interface ChargerConfig {
 }
 
 // =====================
+// 充电订单 (ChargingOrder — from /charging-orders)
+// =====================
+export interface ChargingOrder {
+  id: number;
+  orderNo: string;
+  stationId: number;
+  deviceId: number;
+  userId: number;
+  userType: string | null;
+  vehicleId: string | null;
+  plateNumber: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  durationMinutes: number;
+  startSoc: number | null;
+  endSoc: number | null;
+  startMeter: number | null;
+  endMeter: number | null;
+  stopReason: string | null;
+  chargedKwh: number;
+  electricityFee: number;
+  serviceFee: number;
+  parkingFee: number;
+  idlePenalty: number;
+  reservationFee: number;
+  totalAmount: number;
+  discountAmount: number;
+  paidAmount: number;
+  paymentStatus: ChargingPaymentStatus;
+  orderStatus: ChargingOrderStatus;
+  paymentMethod: string | null;
+  remark: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ChargingPaymentStatus = 'unpaid' | 'paid' | 'refunded' | 'refunding';
+
+export type ChargingOrderStatus =
+  | 'pending'
+  | 'charging'
+  | 'completed'
+  | 'cancelled'
+  | 'faulted';
+
+// =====================
 // 定价规则 (PricingRule — from /pricing)
 // =====================
 export interface PricingRule {

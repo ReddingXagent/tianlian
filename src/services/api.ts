@@ -80,6 +80,7 @@ import {
   LivenessProbe,
   Station,
   StationBranding,
+  ChargingOrder,
 } from '../types';
 
 /** health端点返回类型 */
@@ -1353,6 +1354,123 @@ export const notificationTemplateApi = {
           },
         };
       });
+  },
+};
+
+// =====================
+// 充电订单 API (/charging-orders)
+// =====================
+export const chargingOrderApi = {
+  /** GET /charging-orders — 充电订单列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+    stationId?: number;
+    orderStatus?: string;
+    paymentStatus?: string;
+  }): Promise<ApiResponse<PaginatedData<ChargingOrder>>> {
+    return api
+      .get('/charging-orders', {
+        params: {
+          page: params?.page,
+          page_size: params?.pageSize,
+          station_id: params?.stationId,
+          order_status: params?.orderStatus,
+          payment_status: params?.paymentStatus,
+        },
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          orderNo: (it.order_no as string) ?? '',
+          stationId: (it.station_id as number) ?? 0,
+          deviceId: (it.device_id as number) ?? 0,
+          userId: (it.user_id as number) ?? 0,
+          userType: (it.user_type as string | null) ?? null,
+          vehicleId: (it.vehicle_id as string | null) ?? null,
+          plateNumber: (it.plate_number as string | null) ?? null,
+          startTime: (it.start_time as string | null) ?? null,
+          endTime: (it.end_time as string | null) ?? null,
+          durationMinutes: (it.duration_minutes as number) ?? 0,
+          startSoc: it.start_soc as number | null ?? null,
+          endSoc: it.end_soc as number | null ?? null,
+          startMeter: it.start_meter as number | null ?? null,
+          endMeter: it.end_meter as number | null ?? null,
+          stopReason: (it.stop_reason as string | null) ?? null,
+          chargedKwh: (it.charged_kwh as number) ?? 0,
+          electricityFee: (it.electricity_fee as number) ?? 0,
+          serviceFee: (it.service_fee as number) ?? 0,
+          parkingFee: (it.parking_fee as number) ?? 0,
+          idlePenalty: (it.idle_penalty as number) ?? 0,
+          reservationFee: (it.reservation_fee as number) ?? 0,
+          totalAmount: (it.total_amount as number) ?? 0,
+          discountAmount: (it.discount_amount as number) ?? 0,
+          paidAmount: (it.paid_amount as number) ?? 0,
+          paymentStatus: (it.payment_status as ChargingOrder['paymentStatus']) ?? 'unpaid',
+          orderStatus: (it.order_status as ChargingOrder['orderStatus']) ?? 'pending',
+          paymentMethod: (it.payment_method as string | null) ?? null,
+          remark: (it.remark as string | null) ?? null,
+          createdAt: (it.created_at as string) ?? '',
+          updatedAt: (it.updated_at as string) ?? '',
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? 0,
+            page: (d.page as number) ?? params?.page ?? 1,
+            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+
+  /** GET /charging-orders/{id} — 充电订单详情 */
+  getById(id: number): Promise<ApiResponse<ChargingOrder | null>> {
+    return api.get(`/charging-orders/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown> | null>;
+      const it = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: raw.data
+          ? {
+              id: (it.id as number) ?? 0,
+              orderNo: (it.order_no as string) ?? '',
+              stationId: (it.station_id as number) ?? 0,
+              deviceId: (it.device_id as number) ?? 0,
+              userId: (it.user_id as number) ?? 0,
+              userType: (it.user_type as string | null) ?? null,
+              vehicleId: (it.vehicle_id as string | null) ?? null,
+              plateNumber: (it.plate_number as string | null) ?? null,
+              startTime: (it.start_time as string | null) ?? null,
+              endTime: (it.end_time as string | null) ?? null,
+              durationMinutes: (it.duration_minutes as number) ?? 0,
+              startSoc: it.start_soc as number | null ?? null,
+              endSoc: it.end_soc as number | null ?? null,
+              startMeter: it.start_meter as number | null ?? null,
+              endMeter: it.end_meter as number | null ?? null,
+              stopReason: (it.stop_reason as string | null) ?? null,
+              chargedKwh: (it.charged_kwh as number) ?? 0,
+              electricityFee: (it.electricity_fee as number) ?? 0,
+              serviceFee: (it.service_fee as number) ?? 0,
+              parkingFee: (it.parking_fee as number) ?? 0,
+              idlePenalty: (it.idle_penalty as number) ?? 0,
+              reservationFee: (it.reservation_fee as number) ?? 0,
+              totalAmount: (it.total_amount as number) ?? 0,
+              discountAmount: (it.discount_amount as number) ?? 0,
+              paidAmount: (it.paid_amount as number) ?? 0,
+              paymentStatus: (it.payment_status as ChargingOrder['paymentStatus']) ?? 'unpaid',
+              orderStatus: (it.order_status as ChargingOrder['orderStatus']) ?? 'pending',
+              paymentMethod: (it.payment_method as string | null) ?? null,
+              remark: (it.remark as string | null) ?? null,
+              createdAt: (it.created_at as string) ?? '',
+              updatedAt: (it.updated_at as string) ?? '',
+            }
+          : null,
+      };
+    });
   },
 };
 
