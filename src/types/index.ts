@@ -599,6 +599,16 @@ export interface DeviceHealth {
   lastHealthCheck: string | null;
 }
 
+// 设备健康摘要 (Device Health Summary — from /devices/health, 全局设备健康列表)
+export interface DeviceHealthSummary {
+  id: number;
+  code: string;
+  name: string;
+  type: string;
+  healthScore: number;
+  status: string;
+}
+
 // 设备健康历史记录 (Device Health History — from /devices/{id}/health/history)
 export interface DeviceHealthHistory {
   deviceId: number;

@@ -431,6 +431,35 @@ export const deviceApi = {
   getMetrics(id: number): Promise<ApiResponse<DeviceMetrics>> {
     return api.get(`/devices/${id}/metrics`).then((res) => res.data);
   },
+  /** GET /devices/health — 全局设备健康列表 */
+  getHealthList(params?: {
+    status?: string;
+    type?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<PaginatedData<DeviceHealthSummary>>> {
+    return api.get('/devices/health', { params }).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = ((d.items as Record<string, unknown>[]) ?? []).map((item) => ({
+        id: (item.id as number) ?? 0,
+        code: (item.code as string) ?? '',
+        name: (item.name as string) ?? '',
+        type: (item.type as string) ?? '',
+        healthScore: (item.health_score as number) ?? 0,
+        status: (item.status as string) ?? '',
+      }));
+      return {
+        ...raw,
+        data: {
+          items,
+          total: (d.total as number) ?? items.length,
+          page: (d.page as number) ?? 1,
+          pageSize: (d.page_size as number) ?? items.length,
+        },
+      };
+    });
+  },
   /** GET /devices/{id}/health — 设备健康度 */
   getHealth(id: number): Promise<ApiResponse<DeviceHealth>> {
     return api.get(`/devices/${id}/health`).then((res) => {
