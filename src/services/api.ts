@@ -922,6 +922,19 @@ export const workOrderActionApi = {
   verify(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/verify`).then((res) => res.data);
   },
+  /** POST /work-orders/{id}/transfer — 转单 (需 target_engineer_id + reason) */
+  transfer(
+    id: string,
+    targetEngineerId: number,
+    reason: string,
+  ): Promise<ApiResponse<null>> {
+    return api
+      .post(`/work-orders/${id}/transfer`, {
+        target_engineer_id: targetEngineerId,
+        reason,
+      })
+      .then((res) => res.data);
+  },
 };
 
 // =====================
