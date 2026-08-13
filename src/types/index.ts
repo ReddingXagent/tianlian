@@ -1074,6 +1074,15 @@ export interface KnowledgeFaqItem {
   sortOrder?: number;
 }
 
+// 知识库FAQ分类 (FaqCategory — from /knowledge/faq/categories API)
+export interface FaqCategory {
+  id: number;
+  name: string;
+  description?: string;
+  faqCount?: number;
+  sortOrder?: number;
+}
+
 // =====================
 // 知识库分类 (KnowledgeCategoryItem — from /knowledge/categories API)
 // =====================
@@ -1457,6 +1466,27 @@ export interface TeamCreate {
   name: string;
   code?: string;
   description?: string;
+}
+
+// =====================
+// 团队成员 (TeamMember — from POST /teams/{id}/members, GET /teams/{id}/members)
+// =====================
+export interface TeamMember {
+  id: number;
+  userId: number;
+  username: string;
+  realName: string | null;
+  teamId: number;
+  role: string;
+  level: string | null;
+  phone: string | null;
+  status: string;
+  joinDate: string | null;
+}
+
+export interface TeamMemberAdd {
+  userId: number;
+  role?: string;
 }
 
 // =====================

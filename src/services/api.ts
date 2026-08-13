@@ -626,6 +626,24 @@ export const knowledgeApi = {
       });
   },
 
+  /** GET /knowledge/faq/categories — 知识库FAQ分类列表 */
+  getFaqCategories(): Promise<ApiResponse<FaqCategory[]>> {
+    return api
+      .get('/knowledge/faq/categories')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>[] | Record<string, unknown>>;
+        const items = (Array.isArray(raw.data) ? raw.data : (raw.data as Record<string, unknown>)?.items ?? []) as Record<string, unknown>[];
+        const mapped = items.map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          description: (it.description as string) ?? undefined,
+          faqCount: (it.faq_count as number) ?? undefined,
+          sortOrder: (it.sort_order as number) ?? undefined,
+        }));
+        return { ...raw, data: mapped };
+      });
+  },
+
   /** GET /knowledge/categories — 知识库分类列表 */
   getCategories(): Promise<ApiResponse<KnowledgeCategoryItem[]>> {
     return api
