@@ -2232,6 +2232,50 @@ export const apiKeyApi = {
       .put(`/api-keys/${id}`, payload)
       .then((res) => res.data as ApiResponse<null>);
   },
+
+  /** GET /api-keys/{id}/usage — API密钥使用统计 */
+  getUsage(id: number): Promise<ApiResponse<ApiKeyUsage>> {
+    return api
+      .get(`/api-keys/${id}/usage`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            keyId: (d.key_id as number) ?? 0,
+            periodDays: (d.period_days as number) ?? 0,
+            totalRequests: (d.total_requests as number) ?? 0,
+            avgDurationMs: (d.avg_duration_ms as number) ?? 0,
+          },
+        };
+      });
+  },
+
+  /** POST /api-keys/{id}/rotate — 轮换API密钥 */
+  rotate(id: number): Promise<ApiResponse<ApiKeyRotated>> {
+    return api
+      .post(`/api-keys/${id}/rotate`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (d.id as number) ?? 0,
+            apiKey: (d.api_key as string) ?? '',
+            keyPrefix: (d.key_prefix as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** DELETE /api-keys/{id} — 删除API密钥 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api
+      .delete(`/api-keys/${id}`)
+      .then((res) => res.data as ApiResponse<null>);
+  },
 };
 // =====================
 // 安全审计日志 API (/security/logs)

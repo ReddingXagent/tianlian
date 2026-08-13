@@ -1112,6 +1112,21 @@ export interface ApiKey {
   createdAt: string;
 }
 
+/** GET /api-keys/{id}/usage — API密钥使用统计 */
+export interface ApiKeyUsage {
+  keyId: number;
+  periodDays: number;
+  totalRequests: number;
+  avgDurationMs: number;
+}
+
+/** POST /api-keys/{id}/rotate — 轮换后的API密钥 */
+export interface ApiKeyRotated {
+  id: number;
+  apiKey: string;
+  keyPrefix: string;
+}
+
 /** PUT /api-keys/{id} — 更新API密钥 */
 export interface ApiKeyUpdate {
   name?: string;
