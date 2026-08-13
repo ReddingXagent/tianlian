@@ -1058,6 +1058,15 @@ export interface KnowledgeArticleItem {
   updatedAt: string;
 }
 
+// 知识库FAQ条目 (KnowledgeFaqItem — from /knowledge/faq API)
+export interface KnowledgeFaqItem {
+  id: number;
+  question: string;
+  answer: string;
+  categoryId?: number;
+  sortOrder?: number;
+}
+
 // =====================
 // 知识库分类 (KnowledgeCategoryItem — from /knowledge/categories API)
 // =====================

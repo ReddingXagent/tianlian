@@ -58,6 +58,7 @@ import {
   WorkOrderStats,
   RevenueAnalytics,
   KnowledgeArticleItem,
+  KnowledgeFaqItem,
   KnowledgeCategoryItem,
   UnreadCount,
   RealtimeOverview,
@@ -596,6 +597,24 @@ export const knowledgeApi = {
             pageSize: (d.page_size as number) ?? 20,
           },
         };
+      });
+  },
+
+  /** GET /knowledge/faq — 知识库FAQ列表 */
+  getFaq(): Promise<ApiResponse<KnowledgeFaqItem[]>> {
+    return api
+      .get('/knowledge/faq')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>[] | Record<string, unknown>>;
+        const items = (Array.isArray(raw.data) ? raw.data : (raw.data as Record<string, unknown>)?.items ?? []) as Record<string, unknown>[];
+        const mapped = items.map((it) => ({
+          id: (it.id as number) ?? 0,
+          question: (it.question as string) ?? '',
+          answer: (it.answer as string) ?? '',
+          categoryId: (it.category_id as number) ?? undefined,
+          sortOrder: (it.sort_order as number) ?? undefined,
+        }));
+        return { ...raw, data: mapped };
       });
   },
 
