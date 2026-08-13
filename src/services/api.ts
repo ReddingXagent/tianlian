@@ -77,6 +77,7 @@ import {
   VppDispatchPlan,
   VppDispatchHistory,
   FleetDriver,
+  Team,
   RunbookTemplateSummary,
   RunbookTemplateDetail,
   HealthStatus,
@@ -2923,5 +2924,67 @@ export const stationApi = {
       const raw = res.data as ApiResponse<Record<string, unknown>>;
       return { ...raw, data: mapStation((raw.data ?? {}) as Record<string, unknown>) };
     });
+  },
+};
+
+// =====================
+// 团队 API (teams — /teams)
+// =====================
+export const teamApi = {
+  /** GET /teams — 团队列表 */
+  getList(params?: { page?: number; page_size?: number }): Promise<ApiResponse<PaginatedData<Team>>> {
+    const query = params ? `?page=${params.page ?? 1}&page_size=${params.page_size ?? 20}` : '';
+    return api
+      .get(`/teams${query}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          code: (it.code as string | null) ?? null,
+          leaderId: (it.leader_id as number | null) ?? null,
+          leaderName: (it.leader_name as string | null) ?? null,
+          description: (it.description as string | null) ?? null,
+          memberCount: (it.member_count as number) ?? 0,
+          stationCount: (it.station_count as number) ?? 0,
+          status: (it.status as string) ?? 'active',
+          createdAt: (it.created_at as string | null) ?? null,
+        }));
+        return {
+          ...raw,
+          data: {
+            items,
+            total: (d.total as number) ?? items.length,
+            page: (d.page as number) ?? (params?.page ?? 1),
+            pageSize: (d.page_size as number) ?? (params?.page_size ?? 20),
+          },
+        };
+      });
+  },
+
+  /** GET /teams/{id} — 团队详情 */
+  getDetail(id: number): Promise<ApiResponse<Team>> {
+    return api
+      .get(`/teams/${id}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            code: (it.code as string | null) ?? null,
+            leaderId: (it.leader_id as number | null) ?? null,
+            leaderName: (it.leader_name as string | null) ?? null,
+            description: (it.description as string | null) ?? null,
+            memberCount: (it.member_count as number) ?? 0,
+            stationCount: (it.station_count as number) ?? 0,
+            status: (it.status as string) ?? 'active',
+            createdAt: (it.created_at as string | null) ?? null,
+          },
+        };
+      });
   },
 };

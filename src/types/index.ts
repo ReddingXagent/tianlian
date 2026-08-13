@@ -1424,6 +1424,22 @@ export interface CacheStats {
 }
 
 // =====================
+// 运维团队 (from GET /teams)
+// =====================
+export interface Team {
+  id: number;
+  name: string;
+  code: string | null;
+  leaderId: number | null;
+  leaderName: string | null;
+  description: string | null;
+  memberCount: number;
+  stationCount: number;
+  status: string;
+  createdAt: string | null;
+}
+
+// =====================
 // 车队司机 (from GET /fleet/drivers)
 // =====================
 export interface FleetDriver {
