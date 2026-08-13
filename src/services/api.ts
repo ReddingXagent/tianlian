@@ -935,6 +935,12 @@ export const workOrderActionApi = {
       })
       .then((res) => res.data);
   },
+  /** POST /work-orders/{id}/reject?reason=xxx — 驳回工单 */
+  reject(id: string, reason: string): Promise<ApiResponse<null>> {
+    return api
+      .post(`/work-orders/${id}/reject`, null, { params: { reason } })
+      .then((res) => res.data);
+  },
 };
 
 // =====================
