@@ -109,6 +109,12 @@ import {
   WorkOrderRating,
   WorkOrderSparePartCreate,
   WorkOrderSparePartCreated,
+  AlarmRuleCreate,
+  AlarmRuleCreated,
+  NotificationRuleCreate,
+  NotificationRuleCreated,
+  InspectionTemplateCreate,
+  InspectionTemplateCreated,
 } from '../types';
 
 /** health端点返回类型 */
@@ -1612,6 +1618,50 @@ export const alarmRuleApi = {
       };
     });
   },
+
+  create(body: AlarmRuleCreate): Promise<ApiResponse<AlarmRuleCreated>> {
+    return api
+      .post('/alarm-rules', {
+        name: body.name,
+        metric: body.metric,
+        threshold: body.threshold,
+        ...(body.deviceType !== undefined && { device_type: body.deviceType }),
+        ...(body.severity !== undefined && { severity: body.severity }),
+        ...(body.operator !== undefined && { operator: body.operator }),
+        ...(body.duration !== undefined && { duration: body.duration }),
+        ...(body.enabled !== undefined && { enabled: body.enabled }),
+        ...(body.description !== undefined && { description: body.description }),
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        if (!raw.data) return { ...raw, data: null } as ApiResponse<AlarmRuleCreated>;
+        const d = raw.data as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (d.id as number) ?? 0,
+            name: (d.name as string) ?? '',
+            description: (d.description as string) ?? '',
+            deviceType: (d.device_type as string | null) ?? null,
+            deviceIds: (d.device_ids as number[] | null) ?? null,
+            stationIds: (d.station_ids as number[] | null) ?? null,
+            metric: (d.metric as string) ?? '',
+            operator: (d.operator as string) ?? '>',
+            threshold: (d.threshold as number) ?? 0,
+            duration: (d.duration as number) ?? 0,
+            level: (d.level as string) ?? 'warning',
+            alarmTemplate: (d.alarm_template as string) ?? '',
+            notifyUsers: (d.notify_users as string[] | null) ?? null,
+            autoCreateWorkorder: (d.auto_create_workorder as boolean) ?? false,
+            workorderPriority: (d.workorder_priority as string) ?? 'medium',
+            enabled: (d.enabled as boolean) ?? false,
+            silenceMinutes: (d.silence_minutes as number) ?? 0,
+            createdAt: (d.created_at as string) ?? '',
+            updatedAt: (d.updated_at as string | null) ?? null,
+          },
+        };
+      });
+  },
 };
 
 // =====================
@@ -1638,6 +1688,36 @@ export const notificationRuleApi = {
         })),
       };
     });
+  },
+
+  /** POST /notification-rules — 创建通知规则 */
+  create(body: NotificationRuleCreate): Promise<ApiResponse<NotificationRuleCreated>> {
+    return api
+      .post('/notification-rules', {
+        name: body.name,
+        level: body.level,
+        ...(body.channels !== undefined && { channels: body.channels }),
+        ...(body.receivers !== undefined && { receivers: body.receivers }),
+        ...(body.enabled !== undefined && { enabled: body.enabled }),
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        if (!raw.data) return { ...raw, data: null } as ApiResponse<NotificationRuleCreated>;
+        const d = raw.data as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (d.id as number) ?? 0,
+            name: (d.name as string) ?? '',
+            level: (d.level as string) ?? '',
+            channels: (d.channels as string[]) ?? [],
+            receivers: (d.receivers as string[]) ?? [],
+            enabled: (d.enabled as boolean) ?? false,
+            createdAt: (d.created_at as string) ?? '',
+            updatedAt: (d.updated_at as string | null) ?? null,
+          },
+        };
+      });
   },
 };
 
@@ -2035,6 +2115,39 @@ export const inspectionTemplateApi = {
             total: (d.total as number) ?? 0,
             page: (d.page as number) ?? params?.page ?? 1,
             pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,
+          },
+        };
+      });
+  },
+
+  /** POST /inspection/templates — 创建巡检模板 */
+  create(body: InspectionTemplateCreate): Promise<ApiResponse<InspectionTemplateCreated>> {
+    return api
+      .post('/inspection/templates', {
+        name: body.name,
+        ...(body.category !== undefined && { category: body.category }),
+        ...(body.description !== undefined && { description: body.description }),
+        ...(body.items !== undefined && { items: body.items }),
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (d.id as number) ?? 0,
+            name: (d.name as string) ?? '',
+            description: (d.description as string | null) ?? null,
+            items: ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+              name: (it.name as string) ?? '',
+              required: (it.required as boolean) ?? false,
+            })),
+            itemCount: (d.item_count as number) ?? 0,
+            deviceTypes: (d.device_types as string[]) ?? [],
+            target: (d.target as string | null) ?? null,
+            status: (d.status as string) ?? 'active',
+            createdAt: (d.created_at as string) ?? '',
+            updatedAt: (d.updated_at as string) ?? '',
           },
         };
       });

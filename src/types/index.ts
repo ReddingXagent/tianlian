@@ -430,6 +430,26 @@ export interface InspectionTemplate {
   updatedAt: string;
 }
 
+export interface InspectionTemplateCreate {
+  name: string;
+  category?: string;
+  description?: string;
+  items?: Array<{ name: string; required?: boolean }>;
+}
+
+export interface InspectionTemplateCreated {
+  id: number;
+  name: string;
+  description: string | null;
+  items: Array<{ name: string; required: boolean }>;
+  itemCount: number;
+  deviceTypes: string[];
+  target: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // =====================
 // 数据看板 (Dashboard)
 // =====================
@@ -742,6 +762,40 @@ export interface AlarmRule {
   updatedAt: string;
 }
 
+export interface AlarmRuleCreate {
+  name: string;
+  metric: string;
+  threshold: number;
+  deviceType?: string;
+  severity?: string;
+  operator?: string;
+  duration?: number;
+  enabled?: boolean;
+  description?: string;
+}
+
+export interface AlarmRuleCreated {
+  id: number;
+  name: string;
+  description: string;
+  deviceType: string | null;
+  deviceIds: number[] | null;
+  stationIds: number[] | null;
+  metric: string;
+  operator: string;
+  threshold: number;
+  duration: number;
+  level: string;
+  alarmTemplate: string;
+  notifyUsers: string[] | null;
+  autoCreateWorkorder: boolean;
+  workorderPriority: string;
+  enabled: boolean;
+  silenceMinutes: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 // =====================
 // 通知规则 (Notification Rule — from /notification-rules)
 // =====================
@@ -755,6 +809,25 @@ export interface NotificationRule {
   template: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface NotificationRuleCreate {
+  name: string;
+  level: string;
+  channels?: string[];
+  receivers?: string[];
+  enabled?: boolean;
+}
+
+export interface NotificationRuleCreated {
+  id: number;
+  name: string;
+  level: string;
+  channels: string[];
+  receivers: string[];
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string | null;
 }
 
 // =====================
