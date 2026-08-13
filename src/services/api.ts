@@ -118,6 +118,8 @@ import {
   InspectionTemplateCreate,
   InspectionTemplateCreated,
   InspectionTemplateUpdate,
+  UserCreate,
+  StationCreate,
 } from '../types';
 
 /** health端点返回类型 */
@@ -1337,6 +1339,39 @@ export const userApi = {
     return api.get(`/users/${id}`).then((res) => {
       const raw = res.data as ApiResponse<Record<string, unknown>>;
       const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (d.id as number) ?? 0,
+          username: (d.username as string) ?? '',
+          realName: (d.real_name as string) ?? '',
+          phone: (d.phone as string | null) ?? null,
+          role: (d.role as string) ?? '',
+          level: (d.level as string) ?? '',
+          teamId: (d.team_id as number | null) ?? null,
+          teamName: (d.team_name as string | null) ?? null,
+          status: (d.status as string) ?? '',
+          lastLogin: (d.last_login as string) ?? '',
+          createdAt: (d.created_at as string) ?? '',
+          updatedAt: (d.updated_at as string) ?? '',
+        },
+      };
+    });
+  },
+
+  /** POST /users — 创建用户 */
+  create(body: UserCreate): Promise<ApiResponse<UserDetail>> {
+    const payload: Record<string, unknown> = { username: body.username };
+    if (body.password != null) payload.password = body.password;
+    if (body.realName != null) payload.real_name = body.realName;
+    if (body.phone != null) payload.phone = body.phone;
+    if (body.role != null) payload.role = body.role;
+    if (body.level != null) payload.level = body.level;
+    if (body.teamId != null) payload.team_id = body.teamId;
+    return api.post('/users', payload).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      if (raw.data == null) return { ...raw, data: null as unknown as UserDetail };
+      const d = raw.data as Record<string, unknown>;
       return {
         ...raw,
         data: {
@@ -3890,6 +3925,29 @@ export const stationApi = {
   /** GET /stations/{id} — 站点详情 */
   getDetail(id: number): Promise<ApiResponse<Station>> {
     return api.get(`/stations/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      return { ...raw, data: mapStation((raw.data ?? {}) as Record<string, unknown>) };
+    });
+  },
+
+  /** POST /stations — 创建站点 */
+  create(body: StationCreate): Promise<ApiResponse<Station>> {
+    const payload: Record<string, unknown> = { name: body.name };
+    if (body.code != null) payload.code = body.code;
+    if (body.province != null) payload.province = body.province;
+    if (body.city != null) payload.city = body.city;
+    if (body.district != null) payload.district = body.district;
+    if (body.address != null) payload.address = body.address;
+    if (body.lat != null) payload.lat = body.lat;
+    if (body.lon != null) payload.lon = body.lon;
+    if (body.stationType != null) payload.station_type = body.stationType;
+    if (body.operatorId != null) payload.operator_id = body.operatorId;
+    if (body.teamId != null) payload.team_id = body.teamId;
+    if (body.totalPower != null) payload.total_power = body.totalPower;
+    if (body.venueType != null) payload.venue_type = body.venueType;
+    if (body.totalCost != null) payload.total_cost = body.totalCost;
+    if (body.parkingSpots != null) payload.parking_spots = body.parkingSpots;
+    return api.post('/stations', payload).then((res) => {
       const raw = res.data as ApiResponse<Record<string, unknown>>;
       return { ...raw, data: mapStation((raw.data ?? {}) as Record<string, unknown>) };
     });

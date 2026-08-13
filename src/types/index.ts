@@ -242,6 +242,25 @@ export interface Station {
 
 export type StationStatus = 'online' | 'offline' | 'maintenance' | 'normal';
 
+/** POST /stations — 创建站点请求体 */
+export interface StationCreate {
+  name: string;
+  code?: string;
+  province?: string;
+  city?: string;
+  district?: string;
+  address?: string;
+  lat?: number;
+  lon?: number;
+  stationType?: string;
+  operatorId?: number;
+  teamId?: number;
+  totalPower?: number;
+  venueType?: string;
+  totalCost?: number;
+  parkingSpots?: number;
+}
+
 // =====================
 // 通用API响应
 // =====================
@@ -582,6 +601,17 @@ export interface ReportSummary {
 // =====================
 // 用户详情 (User Detail — from /users/{id})
 // =====================
+/** POST /users — 创建用户请求体 */
+export interface UserCreate {
+  username: string;
+  password?: string;
+  realName?: string;
+  phone?: string;
+  role?: string;
+  level?: string;
+  teamId?: number;
+}
+
 export interface UserDetail {
   id: number;
   username: string;
