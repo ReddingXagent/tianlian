@@ -78,6 +78,7 @@ import {
   VppDispatchHistory,
   FleetDriver,
   Team,
+  TeamUpdate,
   RunbookTemplateSummary,
   RunbookTemplateDetail,
   HealthStatus,
@@ -2967,6 +2968,37 @@ export const teamApi = {
   getDetail(id: number): Promise<ApiResponse<Team>> {
     return api
       .get(`/teams/${id}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            code: (it.code as string | null) ?? null,
+            leaderId: (it.leader_id as number | null) ?? null,
+            leaderName: (it.leader_name as string | null) ?? null,
+            description: (it.description as string | null) ?? null,
+            memberCount: (it.member_count as number) ?? 0,
+            stationCount: (it.station_count as number) ?? 0,
+            status: (it.status as string) ?? 'active',
+            createdAt: (it.created_at as string | null) ?? null,
+          },
+        };
+      });
+  },
+
+  /** PUT /teams/{id} — 更新团队 */
+  update(id: number, body: TeamUpdate): Promise<ApiResponse<Team>> {
+    // camel → snake for request body
+    const payload: Record<string, unknown> = {};
+    if (body.name !== undefined) payload.name = body.name;
+    if (body.description !== undefined) payload.description = body.description;
+    if (body.leaderId !== undefined) payload.leader_id = body.leaderId;
+    if (body.status !== undefined) payload.status = body.status;
+    return api
+      .put(`/teams/${id}`, payload)
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
         const it = (raw.data ?? {}) as Record<string, unknown>;

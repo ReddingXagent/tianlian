@@ -1439,6 +1439,13 @@ export interface Team {
   createdAt: string | null;
 }
 
+export interface TeamUpdate {
+  name?: string;
+  description?: string;
+  leaderId?: number | null;
+  status?: string;
+}
+
 // =====================
 // 车队司机 (from GET /fleet/drivers)
 // =====================
