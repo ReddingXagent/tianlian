@@ -960,6 +960,37 @@ export const roleApi = {
       });
   },
 
+  /** POST /roles — 创建角色 */
+  create(body: RoleCreate): Promise<ApiResponse<Role>> {
+    const payload: Record<string, unknown> = { name: body.name };
+    if (body.displayName !== undefined) payload.display_name = body.displayName;
+    if (body.description !== undefined) payload.description = body.description;
+    if (body.permissions !== undefined) payload.permissions = body.permissions;
+    return api.post('/roles', payload).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const it = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          id: (it.id as number) ?? 0,
+          name: (it.name as string) ?? '',
+          displayName: (it.display_name as string) ?? '',
+          description: (it.description as string) ?? '',
+          isSystem: (it.is_system as boolean) ?? false,
+          permissions: (it.permissions as string[]) ?? [],
+        },
+      };
+    });
+  },
+
+  /** DELETE /roles/{id} — 删除角色 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/roles/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<null>;
+      return { ...raw, data: null };
+    });
+  },
+
   /** GET /roles/tree — 权限树 (按 resource 分组的层级结构) */
   getTree(): Promise<ApiResponse<PermissionTreeNode[]>> {
     return api.get('/roles/tree').then((res) => {

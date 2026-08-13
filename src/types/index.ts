@@ -675,6 +675,14 @@ export interface RoleUpdate {
   permissions?: string[];
 }
 
+/** POST /roles — 创建角色 */
+export interface RoleCreate {
+  name: string;
+  displayName?: string;
+  description?: string;
+  permissions?: string[];
+}
+
 // =====================
 // 权限树节点 (Permission Tree Node — from /roles/tree)
 // =====================
