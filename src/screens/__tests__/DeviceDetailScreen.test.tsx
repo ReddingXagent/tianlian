@@ -359,4 +359,40 @@ describe('DeviceDetailScreen', () => {
     // response.data.message缺失 → `${label}指令已发送`回退分支
     expect(await findByText('停止指令已发送')).toBeTruthy();
   });
+
+  it('should fall back to 其他 type label and empty name when device fields are missing', async () => {
+    (deviceApi.getDetail as jest.Mock).mockResolvedValue({
+      data: { ...MOCK_DEVICE, type: undefined, name: undefined },
+    });
+
+    const { findByText } = render(<DeviceDetailScreen />);
+
+    // type undefined → DEVICE_TYPE_LABEL['other'] (device?.type ?? 'other') 分支
+    expect(await findByText('其他')).toBeTruthy();
+
+    // name undefined → 确认弹窗消息中设备名为空 (device?.name ?? '') 分支
+    await findByText('远程控制');
+    fireEvent.press(await findByText('停止'));
+    expect(await findByText('确定要停止设备「」吗？')).toBeTruthy();
+  });
+
+  it('should ignore cancel while a control command is in flight', async () => {
+    // 控制指令永不返回 → controlling 保持 true
+    (deviceApi.controlDevice as jest.Mock).mockImplementation(() => new Promise(() => {}));
+
+    const { findByText } = render(<DeviceDetailScreen />);
+
+    await findByText('远程控制');
+    fireEvent.press(await findByText('停止'));
+    fireEvent.press(await findByText('确认停止'));
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // controlling=true → onCancel 的 if (!controlling) 分支为假, 弹窗不关闭
+    fireEvent.press(await findByText('取消'));
+    expect(await findByText('远程控制确认')).toBeTruthy();
+    expect(deviceApi.controlDevice).toHaveBeenCalledTimes(1);
+  });
 });

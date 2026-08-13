@@ -5,6 +5,19 @@ import RevenueScreen from '../RevenueScreen';
 import { revenueApi } from '../../services/api';
 
 // 捕获 LineChart props, 便于测试中直接调用图表回调(color/labelColor/datasets.color)
+interface CapturedChartProps {
+  data: {
+    labels: string[];
+    datasets: Array<{
+      data: number[];
+      color: () => string;
+    }>;
+  };
+  chartConfig: {
+    color: (opacity?: number) => string;
+    labelColor: () => string;
+  };
+}
 let mockChartProps: Record<string, unknown> | null = null;
 
 jest.mock('react-native-chart-kit', () => {
@@ -174,7 +187,7 @@ describe('RevenueScreen', () => {
     await findByText('2024-01-01');
 
     expect(mockChartProps).toBeTruthy();
-    const props = mockChartProps as any;
+    const props = mockChartProps as unknown as CapturedChartProps;
     // labels: date -> M/D
     expect(props.data.labels).toEqual(['1/1', '1/2']);
     // datasets: 金额序列 + 曲线颜色回调
@@ -182,6 +195,8 @@ describe('RevenueScreen', () => {
     expect(props.data.datasets[0].color()).toBe('#1a73e8');
     // chartConfig 颜色回调
     expect(props.chartConfig.color(0.5)).toBe('rgba(26, 115, 232, 0.5)');
+    // 无参调用 → opacity 默认值 1 分支
+    expect(props.chartConfig.color()).toBe('rgba(26, 115, 232, 1)');
     expect(props.chartConfig.labelColor()).toBe('#999');
   });
 });
