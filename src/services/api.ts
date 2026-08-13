@@ -62,6 +62,7 @@ import {
   RealtimeOverview,
   Gateway,
   GatewayStatus,
+  GatewayFirmware,
   Tenant,
   ChatSource,
   ChatAction,
@@ -2264,6 +2265,33 @@ export const gatewayApi = {
           createdAt: (item.created_at as string) ?? '',
           updatedAt: (item.updated_at as string) ?? '',
           notes: (item.notes as string) ?? null,
+        },
+      };
+    });
+  },
+
+  /** GET /gateways/firmware — 固件包列表 */
+  getFirmware(): Promise<ApiResponse<PaginatedData<GatewayFirmware>>> {
+    return api.get('/gateways/firmware').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = (d.items as Record<string, unknown>[]) ?? [];
+      return {
+        ...raw,
+        data: {
+          items: items.map((item): GatewayFirmware => ({
+            id: item.id as number,
+            version: (item.version as string) ?? '',
+            fileId: (item.file_id as string) ?? null,
+            fileSize: (item.file_size as number) ?? null,
+            releaseNotes: (item.release_notes as string) ?? null,
+            status: (item.status as string) ?? null,
+            createdAt: (item.created_at as string) ?? '',
+            updatedAt: (item.updated_at as string) ?? null,
+          })),
+          total: (d.total as number) ?? 0,
+          page: (d.page as number) ?? 1,
+          pageSize: (d.page_size as number) ?? 20,
         },
       };
     });

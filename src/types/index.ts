@@ -1143,6 +1143,18 @@ export interface Gateway {
   notes: string | null;
 }
 
+// 网关固件包 (from /gateways/firmware)
+export interface GatewayFirmware {
+  id: number;
+  version: string;
+  fileId: string | null;
+  fileSize: number | null;
+  releaseNotes: string | null;
+  status: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 // 网关状态统计 (from /gateways/status)
 export interface GatewayStatus {
   onlineCount: number;
