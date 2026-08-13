@@ -1102,12 +1102,24 @@ export interface ApiKey {
   id: number;
   name: string;
   keyPrefix: string;
-  permissions: string[];
+  description: string | null;
+  scopes: string[];
+  rateLimit: number;
+  isActive: boolean;
+  isRevoked: boolean;
   lastUsedAt: string | null;
   expiresAt: string | null;
-  enabled: boolean;
   createdAt: string;
-  updatedAt: string;
+}
+
+/** PUT /api-keys/{id} — 更新API密钥 */
+export interface ApiKeyUpdate {
+  name?: string;
+  description?: string;
+  scopes?: string[];
+  rateLimit?: number;
+  isActive?: boolean;
+  expiresAt?: string | null;
 }
 
 // =====================

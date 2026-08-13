@@ -251,12 +251,14 @@ describe('apiKeyApi.getList', () => {
         id: 1,
         name: '边缘网关密钥',
         key_prefix: 'tl_live_',
-        permissions: ['device:view', 'telemetry:report'],
+        description: '用于边缘网关',
+        scopes: ['device:view', 'telemetry:report'],
+        rate_limit: 1000,
+        is_active: true,
+        is_revoked: false,
         last_used_at: '2026-08-10T12:00:00+08:00',
         expires_at: '2027-01-01T00:00:00+08:00',
-        enabled: true,
         created_at: '2026-07-01T00:00:00+08:00',
-        updated_at: '2026-08-10T12:00:00+08:00',
       }],
       total: 1,
       page: 1,
@@ -269,10 +271,12 @@ describe('apiKeyApi.getList', () => {
     expect(k.id).toBe(1);
     expect(k.name).toBe('边缘网关密钥');
     expect(k.keyPrefix).toBe('tl_live_');
-    expect(k.permissions).toEqual(['device:view', 'telemetry:report']);
+    expect(k.scopes).toEqual(['device:view', 'telemetry:report']);
+    expect(k.rateLimit).toBe(1000);
+    expect(k.isActive).toBe(true);
+    expect(k.isRevoked).toBe(false);
     expect(k.lastUsedAt).toBe('2026-08-10T12:00:00+08:00');
     expect(k.expiresAt).toBe('2027-01-01T00:00:00+08:00');
-    expect(k.enabled).toBe(true);
   });
 
   it('handles never-used key with null fields', async () => {
@@ -281,12 +285,14 @@ describe('apiKeyApi.getList', () => {
         id: 2,
         name: 'unused',
         key_prefix: 'tl_new_',
-        permissions: [],
+        description: null,
+        scopes: [],
+        rate_limit: 0,
+        is_active: false,
+        is_revoked: false,
         last_used_at: null,
         expires_at: null,
-        enabled: false,
         created_at: '2026-07-01T00:00:00+08:00',
-        updated_at: '2026-07-01T00:00:00+08:00',
       }],
       total: 1,
       page: 1,
@@ -296,7 +302,7 @@ describe('apiKeyApi.getList', () => {
     const k = res.data.items[0];
     expect(k.lastUsedAt).toBeNull();
     expect(k.expiresAt).toBeNull();
-    expect(k.enabled).toBe(false);
+    expect(k.isActive).toBe(false);
   });
 
   it('handles empty list', async () => {

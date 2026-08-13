@@ -2172,12 +2172,14 @@ export const apiKeyApi = {
           id: (it.id as number) ?? 0,
           name: (it.name as string) ?? '',
           keyPrefix: (it.key_prefix as string) ?? '',
-          permissions: ((it.permissions as string[]) ?? []),
+          description: (it.description as string | null) ?? null,
+          scopes: ((it.scopes as string[]) ?? []),
+          rateLimit: (it.rate_limit as number) ?? 0,
+          isActive: (it.is_active as boolean) ?? false,
+          isRevoked: (it.is_revoked as boolean) ?? false,
           lastUsedAt: (it.last_used_at as string | null) ?? null,
           expiresAt: (it.expires_at as string | null) ?? null,
-          enabled: (it.enabled as boolean) ?? false,
           createdAt: (it.created_at as string) ?? '',
-          updatedAt: (it.updated_at as string) ?? '',
         }));
         return {
           ...raw,
@@ -2189,6 +2191,46 @@ export const apiKeyApi = {
           },
         };
       });
+  },
+
+  /** GET /api-keys/{id} — API密钥详情 */
+  getDetail(id: number): Promise<ApiResponse<ApiKey>> {
+    return api
+      .get(`/api-keys/${id}`)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            keyPrefix: (it.key_prefix as string) ?? '',
+            description: (it.description as string | null) ?? null,
+            scopes: ((it.scopes as string[]) ?? []),
+            rateLimit: (it.rate_limit as number) ?? 0,
+            isActive: (it.is_active as boolean) ?? false,
+            isRevoked: (it.is_revoked as boolean) ?? false,
+            lastUsedAt: (it.last_used_at as string | null) ?? null,
+            expiresAt: (it.expires_at as string | null) ?? null,
+            createdAt: (it.created_at as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** PUT /api-keys/{id} — 更新API密钥 */
+  update(id: number, body: ApiKeyUpdate): Promise<ApiResponse<null>> {
+    const payload: Record<string, unknown> = {};
+    if (body.name !== undefined) payload.name = body.name;
+    if (body.description !== undefined) payload.description = body.description;
+    if (body.scopes !== undefined) payload.scopes = body.scopes;
+    if (body.rateLimit !== undefined) payload.rate_limit = body.rateLimit;
+    if (body.isActive !== undefined) payload.is_active = body.isActive;
+    if (body.expiresAt !== undefined) payload.expires_at = body.expiresAt;
+    return api
+      .put(`/api-keys/${id}`, payload)
+      .then((res) => res.data as ApiResponse<null>);
   },
 };
 // =====================
