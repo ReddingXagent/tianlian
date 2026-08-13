@@ -417,6 +417,10 @@ export const alarmApi = {
   handleAlarm(id: number): Promise<ApiResponse<Alarm>> {
     return api.post(`/alarms/${id}/handle`).then((res) => res.data);
   },
+  /** PUT /alarms/{id}/resolve — 解决告警 */
+  resolve(id: number): Promise<ApiResponse<Alarm>> {
+    return api.put(`/alarms/${id}/resolve`).then((res) => res.data);
+  },
 };
 
 // =====================
