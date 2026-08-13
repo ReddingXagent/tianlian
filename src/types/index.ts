@@ -949,6 +949,36 @@ export interface EfficiencyItem {
   utilization?: number;
 }
 
+// ====================
+// 设备利用率报告 (UtilizationReport — from /reports/utilization)
+// ====================
+export interface UtilizationReport {
+  items: UtilizationItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  alerts: {
+    lowUtilization: UtilizationAlertBucket;
+    overload: UtilizationAlertBucket;
+  };
+}
+
+export interface UtilizationItem {
+  deviceId?: number;
+  deviceName?: string;
+  deviceCode?: string;
+  deviceType?: string;
+  stationId?: number;
+  stationName?: string;
+  utilizationRate?: number;
+}
+
+export interface UtilizationAlertBucket {
+  count: number;
+  threshold: string;
+  items: UtilizationItem[];
+}
+
 // =====================
 // 工程师 (Engineer — from /engineers)
 // ====================

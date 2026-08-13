@@ -45,6 +45,8 @@ import {
   ChargerConfig,
   PricingRule,
   EfficiencyReport,
+  UtilizationReport,
+  UtilizationItem,
   Engineer,
   Webhook,
   HealingRule,
@@ -1487,6 +1489,50 @@ export const reportApi = {
                 uptime: (item.uptime as number) ?? undefined,
                 utilization: (item.utilization as number) ?? undefined,
               })),
+            },
+          },
+        },
+      };
+    });
+  },
+
+  /** GET /reports/utilization — 设备利用率报告 */
+  getUtilization(params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<ApiResponse<UtilizationReport>> {
+    return api.get('/reports/utilization', { params: { page: params?.page, page_size: params?.pageSize } }).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const alerts = (d.alerts ?? {}) as Record<string, unknown>;
+      const lowUtil = (alerts.low_utilization ?? {}) as Record<string, unknown>;
+      const overload = (alerts.overload ?? {}) as Record<string, unknown>;
+      const mapItem = (item: Record<string, unknown>): UtilizationItem => ({
+        deviceId: (item.device_id as number) ?? undefined,
+        deviceName: (item.device_name as string) ?? undefined,
+        deviceCode: (item.device_code as string) ?? undefined,
+        deviceType: (item.device_type as string) ?? undefined,
+        stationId: (item.station_id as number) ?? undefined,
+        stationName: (item.station_name as string) ?? undefined,
+        utilizationRate: (item.utilization_rate as number) ?? undefined,
+      });
+      return {
+        ...raw,
+        data: {
+          items: ((d.items as Record<string, unknown>[]) ?? []).map(mapItem),
+          total: (d.total as number) ?? 0,
+          page: (d.page as number) ?? 1,
+          pageSize: (d.page_size as number) ?? 20,
+          alerts: {
+            lowUtilization: {
+              count: (lowUtil.count as number) ?? 0,
+              threshold: (lowUtil.threshold as string) ?? '',
+              items: ((lowUtil.items as Record<string, unknown>[]) ?? []).map(mapItem),
+            },
+            overload: {
+              count: (overload.count as number) ?? 0,
+              threshold: (overload.threshold as string) ?? '',
+              items: ((overload.items as Record<string, unknown>[]) ?? []).map(mapItem),
             },
           },
         },
