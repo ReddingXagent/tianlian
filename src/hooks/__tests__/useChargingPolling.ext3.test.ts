@@ -30,7 +30,7 @@ describe('useChargingPolling.ext3 — L76 non-Error throw in fetchStatus', () =>
 
   // L76: `if (err instanceof Error)` false branch — non-Error throw
   it('sets fallback error message when fetchStatus throws non-Error', async () => {
-    chargingApi.getStatus.mockRejectedValue('network down');
+    (chargingApi.getStatus as jest.Mock).mockRejectedValue('network down');
 
     const { result, unmount } = renderHook(() =>
       useChargingPolling({ orderId: 1 }),

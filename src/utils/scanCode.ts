@@ -24,16 +24,15 @@ export function parseScanPayload(payload: string): string | null {
   if (codeMatch) return codeMatch[0].toUpperCase();
 
   // ② URL: 取最后路径段
+  // scheme正则已保证'//'前至少有"scheme:"非空段, 去尾斜杠后末段必非空, 无需空判
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(data)) {
     const path = data.split(/[?#]/)[0];
     const segments = path.replace(/\/+$/, '').split('/');
     const last = segments[segments.length - 1];
-    if (last) {
-      try {
-        return decodeURIComponent(last);
-      } catch {
-        return last;
-      }
+    try {
+      return decodeURIComponent(last);
+    } catch {
+      return last;
     }
   }
 
