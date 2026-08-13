@@ -79,6 +79,31 @@ describe('ext76 teamApi mapper fallbacks', () => {
     expect(res.data.items).toEqual([]);
   });
 
+  it('teamApi.update: full body → all if-defined true branches', async () => {
+    mockAxios.put.mockResolvedValueOnce(ok({}));
+    const res = await teamApi.update(1, { name: 'n', description: 'd', leaderId: 5, status: 'active' });
+    expect(mockAxios.put).toHaveBeenCalledWith('/teams/1', {
+      name: 'n',
+      description: 'd',
+      leader_id: 5,
+      status: 'active',
+    });
+    expect(res.data).toEqual(TEAM_FALLBACK);
+  });
+
+  it('teamApi.create: full body → code/description true branches', async () => {
+    mockAxios.post.mockResolvedValueOnce(ok({}));
+    const res = await teamApi.create({ name: 't', code: 'c', description: 'd' });
+    expect(mockAxios.post).toHaveBeenCalledWith('/teams', { name: 't', code: 'c', description: 'd' });
+    expect(res.data).toEqual(TEAM_FALLBACK);
+  });
+
+  it('teamApi.addMember: with role → role truthy branch', async () => {
+    mockAxios.post.mockResolvedValueOnce(ok({}));
+    await teamApi.addMember(1, 2, 'leader');
+    expect(mockAxios.post).toHaveBeenCalledWith('/teams/1/members', { user_id: 2, role: 'leader' });
+  });
+
   it('teamApi.getDetail: empty data {} → all ?? fallbacks', async () => {
     mockAxios.get.mockResolvedValueOnce(ok({}));
     const res = await teamApi.getDetail(1);
@@ -89,6 +114,35 @@ describe('ext76 teamApi mapper fallbacks', () => {
     mockAxios.get.mockResolvedValueOnce(ok(null));
     const res = await teamApi.getDetail(1);
     expect(res.data).toEqual(TEAM_FALLBACK);
+  });
+
+  it('teamApi.update: data null → mapper ?? fallbacks', async () => {
+    mockAxios.put.mockResolvedValueOnce(ok(null));
+    const res = await teamApi.update(1, {});
+    expect(res.data).toEqual(TEAM_FALLBACK);
+  });
+
+  it('teamApi.create: data null → mapper ?? fallbacks', async () => {
+    mockAxios.post.mockResolvedValueOnce(ok(null));
+    const res = await teamApi.create({ name: 't' });
+    expect(res.data).toEqual(TEAM_FALLBACK);
+  });
+
+  it('teamApi.addMember: data null → mapper ?? fallbacks', async () => {
+    mockAxios.post.mockResolvedValueOnce(ok(null));
+    const res = await teamApi.addMember(1, 2);
+    expect(res.data).toEqual({
+      id: 0,
+      userId: 0,
+      username: '',
+      realName: null,
+      teamId: 0,
+      role: 'member',
+      level: null,
+      phone: null,
+      status: 'active',
+      joinDate: null,
+    });
   });
 });
 
@@ -196,6 +250,22 @@ describe('ext76 workOrderApi mapWorkOrder fallbacks', () => {
     expect(res.data.total).toBe(0);
     expect(res.data.page).toBe(1);
     expect(res.data.pageSize).toBe(20);
+  });
+
+  it('workOrderApi.getList: known status → mapped to backend status', async () => {
+    mockAxios.get.mockResolvedValueOnce(ok({ items: [] }));
+    await workOrderApi.getList({ status: 'in_progress' });
+    expect(mockAxios.get).toHaveBeenCalledWith('/work-orders', {
+      params: expect.objectContaining({ status: 'processing' }),
+    });
+  });
+
+  it('workOrderApi.getList: unknown status → passed through (?? fallback)', async () => {
+    mockAxios.get.mockResolvedValueOnce(ok({ items: [] }));
+    await workOrderApi.getList({ status: 'whatever' });
+    expect(mockAxios.get).toHaveBeenCalledWith('/work-orders', {
+      params: expect.objectContaining({ status: 'whatever' }),
+    });
   });
 
   it('workOrderApi.getList: data null → null guard path', async () => {
