@@ -1963,6 +1963,27 @@ export const healingExecutionApi = {
         };
       });
   },
+
+  /** POST /healing/executions/{id}/retry — 重试自愈执行 */
+  retry(id: number): Promise<ApiResponse<unknown>> {
+    return api
+      .post(`/healing/executions/${id}/retry`)
+      .then((res) => res.data as ApiResponse<unknown>);
+  },
+
+  /** POST /healing/executions/{id}/approve — 批准自愈执行 */
+  approve(id: number): Promise<ApiResponse<unknown>> {
+    return api
+      .post(`/healing/executions/${id}/approve`)
+      .then((res) => res.data as ApiResponse<unknown>);
+  },
+
+  /** POST /healing/executions/{id}/reject — 拒绝自愈执行 */
+  reject(id: number, reason?: string): Promise<ApiResponse<unknown>> {
+    return api
+      .post(`/healing/executions/${id}/reject`, { reason })
+      .then((res) => res.data as ApiResponse<unknown>);
+  },
 };
 
 // =====================
