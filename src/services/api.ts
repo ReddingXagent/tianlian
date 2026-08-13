@@ -61,6 +61,7 @@ import {
   UnreadCount,
   RealtimeOverview,
   Gateway,
+  GatewayStatus,
   Tenant,
   ChatSource,
   ChatAction,
@@ -2263,6 +2264,24 @@ export const gatewayApi = {
           createdAt: (item.created_at as string) ?? '',
           updatedAt: (item.updated_at as string) ?? '',
           notes: (item.notes as string) ?? null,
+        },
+      };
+    });
+  },
+
+  /** GET /gateways/status — 网关状态统计 */
+  getStatus(): Promise<ApiResponse<GatewayStatus>> {
+    return api.get('/gateways/status').then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      return {
+        ...raw,
+        data: {
+          onlineCount: (d.online_count as number) ?? 0,
+          offlineCount: (d.offline_count as number) ?? 0,
+          maintenanceCount: (d.maintenance_count as number) ?? 0,
+          faultCount: (d.fault_count as number) ?? 0,
+          total: (d.total as number) ?? 0,
         },
       };
     });

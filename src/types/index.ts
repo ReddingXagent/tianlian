@@ -1143,6 +1143,15 @@ export interface Gateway {
   notes: string | null;
 }
 
+// 网关状态统计 (from /gateways/status)
+export interface GatewayStatus {
+  onlineCount: number;
+  offlineCount: number;
+  maintenanceCount: number;
+  faultCount: number;
+  total: number;
+}
+
 // =====================
 // VPP 虚拟电厂资源 (from /vpp/resources)
 // =====================
