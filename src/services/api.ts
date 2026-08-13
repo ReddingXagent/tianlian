@@ -79,6 +79,7 @@ import {
   FleetDriver,
   Team,
   TeamUpdate,
+  TeamCreate,
   RunbookTemplateSummary,
   RunbookTemplateDetail,
   HealthStatus,
@@ -3018,5 +3019,41 @@ export const teamApi = {
           },
         };
       });
+  },
+
+  /** POST /teams — 创建团队 */
+  create(body: TeamCreate): Promise<ApiResponse<Team>> {
+    const payload: Record<string, unknown> = { name: body.name };
+    if (body.code !== undefined) payload.code = body.code;
+    if (body.description !== undefined) payload.description = body.description;
+
+    return api
+      .post('/teams', payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            code: (it.code as string | null) ?? null,
+            leaderId: (it.leader_id as number | null) ?? null,
+            leaderName: (it.leader_name as string | null) ?? null,
+            description: (it.description as string | null) ?? null,
+            memberCount: (it.member_count as number) ?? 0,
+            stationCount: (it.station_count as number) ?? 0,
+            status: (it.status as string) ?? 'active',
+            createdAt: (it.created_at as string | null) ?? null,
+          },
+        };
+      });
+  },
+
+  /** DELETE /teams/{id} — 删除团队 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/teams/${id}`).then((res) => {
+      return res.data as ApiResponse<null>;
+    });
   },
 };

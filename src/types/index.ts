@@ -1446,6 +1446,12 @@ export interface TeamUpdate {
   status?: string;
 }
 
+export interface TeamCreate {
+  name: string;
+  code?: string;
+  description?: string;
+}
+
 // =====================
 // 车队司机 (from GET /fleet/drivers)
 // =====================
