@@ -864,6 +864,11 @@ export const knowledgeApi = {
         };
       });
   },
+
+  /** DELETE /knowledge/categories/{id} — 删除知识分类 */
+  deleteCategory(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/knowledge/categories/${id}`).then((res) => res.data);
+  },
 };
 
 // =====================
@@ -1710,6 +1715,11 @@ export const alarmRuleApi = {
         };
       });
   },
+
+  /** DELETE /alarm-rules/{id} — 删除告警规则 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/alarm-rules/${id}`).then((res) => res.data);
+  },
 };
 
 // =====================
@@ -1796,6 +1806,11 @@ export const notificationRuleApi = {
           },
         };
       });
+  },
+
+  /** DELETE /notification-rules/{id} — 删除通知规则 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/notification-rules/${id}`).then((res) => res.data);
   },
 };
 
@@ -1919,6 +1934,11 @@ export const notificationTemplateApi = {
           },
         };
       });
+  },
+
+  /** DELETE /notifications/templates/{id} — 删除通知模板 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/notifications/templates/${id}`).then((res) => res.data);
   },
 };
 
@@ -2263,6 +2283,11 @@ export const inspectionTemplateApi = {
           },
         };
       });
+  },
+
+  /** DELETE /inspection/templates/{id} — 删除巡检模板 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/inspection/templates/${id}`).then((res) => res.data);
   },
 };
 
