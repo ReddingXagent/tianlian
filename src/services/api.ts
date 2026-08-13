@@ -61,6 +61,7 @@ import {
   KnowledgeFaqItem,
   KnowledgeCategoryItem,
   UnreadCount,
+  ReadAllResult,
   RealtimeOverview,
   Gateway,
   GatewayStatus,
@@ -1743,6 +1744,15 @@ export const inspectionTaskApi = {
 // =====================
 // 工程师 API (/engineers)
 // =====================
+export interface EngineerCreate {
+  username: string;
+  password: string;
+  name: string;
+  phone?: string;
+  level?: 'junior' | 'senior' | 'expert';
+  role?: string;
+}
+
 export const engineerApi = {
   /** GET /engineers — 工程师列表 (分页) */
   getList(params?: {
@@ -1779,11 +1789,60 @@ export const engineerApi = {
         };
       });
   },
+
+  /** POST /engineers — 创建工程师 */
+  create(body: EngineerCreate): Promise<ApiResponse<Engineer>> {
+    return api
+      .post('/engineers', {
+        username: body.username,
+        password: body.password,
+        name: body.name,
+        ...(body.phone !== undefined && { phone: body.phone }),
+        ...(body.level !== undefined && { level: body.level }),
+        ...(body.role !== undefined && { role: body.role }),
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            username: (it.username as string) ?? '',
+            name: (it.name as string) ?? '',
+            phone: (it.phone as string | null) ?? null,
+            level: (it.level as Engineer['level']) ?? 'junior',
+            teamId: (it.team_id as number | null) ?? null,
+            status: (it.status as Engineer['status']) ?? 'active',
+            role: (it.role as string) ?? '',
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** DELETE /engineers/{id} — 删除工程师 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/engineers/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      return { ...raw, data: null };
+    });
+  },
 };
 
 // =====================
 // Webhook API (/webhooks)
 // =====================
+export interface WebhookCreate {
+  name: string;
+  url: string;
+  events?: string[];
+  secret?: string;
+  description?: string;
+  enabled?: boolean;
+}
+
 export const webhookApi = {
   /** GET /webhooks — Webhook列表 (分页) */
   getList(params?: {
@@ -1801,7 +1860,7 @@ export const webhookApi = {
           id: (it.id as number) ?? 0,
           name: (it.name as string) ?? '',
           url: (it.url as string) ?? '',
-          events: ((it.events as string[]) ?? []),
+          events: ((it.event_types as string[]) ?? (it.events as string[]) ?? []),
           secret: (it.secret as string | null) ?? null,
           enabled: (it.enabled as boolean) ?? false,
           lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
@@ -1819,6 +1878,46 @@ export const webhookApi = {
           },
         };
       });
+  },
+
+  /** POST /webhooks — 创建Webhook */
+  create(body: WebhookCreate): Promise<ApiResponse<Webhook>> {
+    return api
+      .post('/webhooks', {
+        name: body.name,
+        url: body.url,
+        events: body.events ?? [],
+        ...(body.secret !== undefined && { secret: body.secret }),
+        ...(body.description !== undefined && { description: body.description }),
+        ...(body.enabled !== undefined && { enabled: body.enabled }),
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            url: (it.url as string) ?? '',
+            events: ((it.event_types as string[]) ?? (it.events as string[]) ?? []),
+            secret: (it.secret as string | null) ?? null,
+            enabled: (it.enabled as boolean) ?? false,
+            lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,
+            lastResponseStatus: (it.last_response_status as number | null) ?? null,
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** DELETE /webhooks/{id} — 删除Webhook */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/webhooks/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      return { ...raw, data: null };
+    });
   },
 };
 
@@ -2289,6 +2388,32 @@ export const notificationUnreadApi = {
   },
 };
 
+// =====================
+// 通知操作 API (POST /notifications/read-all, /notifications/{id}/read)
+// =====================
+export const notificationActionApi = {
+  /** POST /notifications/read-all — 全部标记为已读 */
+  readAll(): Promise<ApiResponse<ReadAllResult>> {
+    return api
+      .post('/notifications/read-all')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            markedCount: (d.marked_count as number) ?? 0,
+          },
+        };
+      });
+  },
+
+  /** POST /notifications/{id}/read — 标记单条为已读 */
+  readById(id: number | string): Promise<ApiResponse<null>> {
+    return api.post(`/notifications/${id}/read`).then((res) => res.data as ApiResponse<null>);
+  },
+};
+
 export const deviceHealthApi = {
   /** GET /health/devices — 设备健康度排名 */
   getRanking(): Promise<ApiResponse<DeviceHealthRanking>> {
@@ -2299,6 +2424,14 @@ export const deviceHealthApi = {
 // =====================
 // 网关管理 API (/gateways)
 // =====================
+export interface GatewayCreate {
+  sn: string;
+  name: string;
+  stationId?: number;
+  model?: string;
+  manufacturer?: string;
+}
+
 export const gatewayApi = {
   /** GET /gateways — 网关列表 */
   getList(): Promise<ApiResponse<PaginatedData<Gateway>>> {
@@ -2408,11 +2541,61 @@ export const gatewayApi = {
       };
     });
   },
+
+  /** POST /gateways — 创建网关 */
+  create(body: GatewayCreate): Promise<ApiResponse<Gateway>> {
+    return api
+      .post('/gateways', {
+        sn: body.sn,
+        name: body.name,
+        ...(body.stationId !== undefined && { station_id: body.stationId }),
+        ...(body.model !== undefined && { model: body.model }),
+        ...(body.manufacturer !== undefined && { manufacturer: body.manufacturer }),
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            sn: (it.sn as string) ?? '',
+            name: (it.name as string) ?? '',
+            model: (it.model as string) ?? null,
+            manufacturer: (it.manufacturer as string) ?? null,
+            stationId: (it.station_id as number) ?? null,
+            status: (it.status as Gateway['status']) ?? 'offline',
+            firmwareVersion: (it.firmware_version as string) ?? null,
+            lastOnline: (it.last_online as string) ?? null,
+            ipAddress: (it.ip_address as string) ?? null,
+            macAddress: (it.mac_address as string) ?? null,
+            location: (it.location as string) ?? null,
+            healthScore: (it.health_score as number) ?? 0,
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
+            notes: (it.notes as string) ?? null,
+          },
+        };
+      });
+  },
+
+  /** DELETE /gateways/{id} — 删除网关 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/gateways/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      return { ...raw, data: null };
+    });
+  },
 };
 
 // =====================
 // 租户管理 API (/tenants)
 // =====================
+export interface TenantCreate {
+  name: string;
+  code: string;
+}
+
 export const tenantListApi = {
   /** GET /tenants — 租户列表 */
   getList(): Promise<ApiResponse<PaginatedData<Tenant>>> {
@@ -2436,6 +2619,38 @@ export const tenantListApi = {
           pageSize: (d.page_size as number) ?? 20,
         },
       };
+    });
+  },
+
+  /** POST /tenants — 创建租户 */
+  create(body: TenantCreate): Promise<ApiResponse<Tenant>> {
+    return api
+      .post('/tenants', {
+        name: body.name,
+        code: body.code,
+      })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            code: (it.code as string) ?? '',
+            status: (it.status as string) ?? 'active',
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** DELETE /tenants/{id} — 删除租户 */
+  delete(id: number): Promise<ApiResponse<null>> {
+    return api.delete(`/tenants/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      return { ...raw, data: null };
     });
   },
 };

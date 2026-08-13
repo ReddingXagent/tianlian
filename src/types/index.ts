@@ -759,6 +759,13 @@ export interface UnreadCount {
 }
 
 // =====================
+// 全部已读结果 (ReadAllResult — from POST /notifications/read-all)
+// =====================
+export interface ReadAllResult {
+  markedCount: number;
+}
+
+// =====================
 // 工单报告 (WorkOrderReport — from /reports/workorders)
 // =====================
 export interface WorkOrderReport {
