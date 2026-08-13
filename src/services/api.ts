@@ -49,6 +49,7 @@ import {
   HealingRule,
   HealingRuleCreate,
   HealingExecution,
+  HealingStats,
   ApiKey,
   SecurityLog,
   SecurityPolicy,
@@ -1983,6 +1984,27 @@ export const healingExecutionApi = {
     return api
       .post(`/healing/executions/${id}/reject`, { reason })
       .then((res) => res.data as ApiResponse<unknown>);
+  },
+
+  /** GET /healing/stats — 自愈统计数据 */
+  getStats(): Promise<ApiResponse<HealingStats>> {
+    return api
+      .get('/healing/stats')
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const d = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            total: (d.total as number) ?? 0,
+            statusBreakdown: (d.status_breakdown as Record<string, number>) ?? {},
+            successRate: (d.success_rate as number) ?? 0,
+            averageDurationMs: (d.average_duration_ms as number) ?? 0,
+            autoApproveRate: (d.auto_approve_rate as number) ?? 0,
+            pendingApprovals: (d.pending_approvals as number) ?? 0,
+          },
+        };
+      });
   },
 };
 

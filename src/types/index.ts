@@ -993,6 +993,18 @@ export interface HealingExecution {
   createdAt: string;
 }
 
+// ====================
+// 自愈统计 (HealingStats — from /healing/stats)
+// ====================
+export interface HealingStats {
+  total: number;
+  statusBreakdown: Record<string, number>;
+  successRate: number;
+  averageDurationMs: number;
+  autoApproveRate: number;
+  pendingApprovals: number;
+}
+
 // =====================
 // 安全审计日志 (SecurityLog — from /security/logs)
 // =====================
