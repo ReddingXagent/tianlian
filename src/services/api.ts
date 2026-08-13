@@ -32,6 +32,7 @@ import {
   DeviceReport,
   AlarmReport,
   Role,
+  RoleUpdate,
   Permission,
   PermissionTreeNode,
   AlarmRule,
@@ -51,6 +52,8 @@ import {
   HealingExecution,
   HealingStats,
   ApiKey,
+  ApiKeyCreate,
+  ApiKeyCreated,
   SecurityLog,
   SecurityPolicy,
   SecurityThreat,
@@ -930,6 +933,31 @@ export const roleApi = {
         },
       };
     });
+  },
+
+  /** PUT /roles/{id} — 更新角色 */
+  update(id: number, body: RoleUpdate): Promise<ApiResponse<Role>> {
+    const payload: Record<string, unknown> = {};
+    if (body.displayName !== undefined) payload.display_name = body.displayName;
+    if (body.description !== undefined) payload.description = body.description;
+    if (body.permissions !== undefined) payload.permissions = body.permissions;
+    return api
+      .put(`/roles/${id}`, payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            displayName: (it.display_name as string) ?? '',
+            description: (it.description as string) ?? '',
+            isSystem: (it.is_system as boolean) ?? false,
+            permissions: (it.permissions as string[]) ?? [],
+          },
+        };
+      });
   },
 
   /** GET /roles/tree — 权限树 (按 resource 分组的层级结构) */
@@ -2156,6 +2184,34 @@ export const healingExecutionApi = {
 // API密钥 API (/api-keys)
 // =====================
 export const apiKeyApi = {
+  /** POST /api-keys — 创建API密钥 (返回含明文api_key, 仅此一次可见) */
+  create(body: ApiKeyCreate): Promise<ApiResponse<ApiKeyCreated>> {
+    const payload: Record<string, unknown> = {
+      name: body.name,
+      scopes: body.scopes,
+    };
+    if (body.description !== undefined) payload.description = body.description;
+    if (body.rateLimit !== undefined) payload.rate_limit = body.rateLimit;
+    if (body.expiresAt !== undefined) payload.expires_at = body.expiresAt;
+    return api
+      .post('/api-keys', payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            apiKey: (it.api_key as string) ?? '',
+            keyPrefix: (it.key_prefix as string) ?? '',
+            scopes: (it.scopes as string[]) ?? [],
+            expiresAt: (it.expires_at as string | null) ?? null,
+          },
+        };
+      });
+  },
+
   /** GET /api-keys — API密钥列表 (分页) */
   getList(params?: {
     page?: number;

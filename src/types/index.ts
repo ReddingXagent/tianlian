@@ -668,6 +668,13 @@ export interface Role {
   permissions: string[];
 }
 
+/** PUT /roles/{id} — 更新角色 */
+export interface RoleUpdate {
+  displayName?: string;
+  description?: string;
+  permissions?: string[];
+}
+
 // =====================
 // 权限树节点 (Permission Tree Node — from /roles/tree)
 // =====================
@@ -1125,6 +1132,25 @@ export interface ApiKeyRotated {
   id: number;
   apiKey: string;
   keyPrefix: string;
+}
+
+/** POST /api-keys — 创建API密钥 */
+export interface ApiKeyCreate {
+  name: string;
+  scopes: string[];
+  description?: string;
+  rateLimit?: number;
+  expiresAt?: string | null;
+}
+
+/** POST /api-keys 返回 — 创建后的API密钥(含明文key) */
+export interface ApiKeyCreated {
+  id: number;
+  name: string;
+  apiKey: string;
+  keyPrefix: string;
+  scopes: string[];
+  expiresAt: string | null;
 }
 
 /** PUT /api-keys/{id} — 更新API密钥 */
