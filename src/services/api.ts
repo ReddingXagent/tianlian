@@ -89,6 +89,10 @@ import {
   KnowledgeArticleCreated,
   KnowledgeCategoryCreate,
   KnowledgeCategoryCreated,
+  KnowledgeCategoryUpdate,
+  KnowledgeCategoryUpdated,
+  KnowledgeArticleUpdate,
+  KnowledgeArticleUpdated,
   KnowledgeFaqCreate,
   KnowledgeFaqCreated,
   RunbookTemplateSummary,
@@ -738,6 +742,35 @@ export const knowledgeApi = {
       });
   },
 
+  /** PUT /knowledge/articles/{id} — 更新知识库文章 */
+  updateArticle(id: number, body: KnowledgeArticleUpdate): Promise<ApiResponse<KnowledgeArticleUpdated>> {
+    const payload: Record<string, unknown> = {};
+    if (body.title !== undefined) payload.title = body.title;
+    if (body.content !== undefined) payload.content = body.content;
+    if (body.categoryId !== undefined) payload.category_id = body.categoryId;
+    if (body.tags !== undefined) payload.tags = body.tags;
+    return api
+      .put(`/knowledge/articles/${id}`, payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            title: (it.title as string) ?? '',
+            content: (it.content as string) ?? '',
+            category: (it.category as string) ?? '',
+            tags: (it.tags as string[] | null) ?? null,
+            viewCount: (it.view_count as number) ?? 0,
+            published: (it.published as boolean) ?? false,
+            updatedAt: (it.updated_at as string) ?? '',
+            authorId: (it.author_id as number) ?? 0,
+          },
+        };
+      });
+  },
+
   /** POST /knowledge/categories — 创建知识库分类 (name via query param) */
   createCategory(body: KnowledgeCategoryCreate): Promise<ApiResponse<KnowledgeCategoryCreated>> {
     const params: Record<string, unknown> = { name: body.name };
@@ -757,6 +790,32 @@ export const knowledgeApi = {
             sortOrder: (it.sort_order as number) ?? 0,
             description: (it.description as string) ?? '',
             createdAt: (it.created_at as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** PUT /knowledge/categories/{id} — 更新知识库分类 */
+  updateCategory(id: number, body: KnowledgeCategoryUpdate): Promise<ApiResponse<KnowledgeCategoryUpdated>> {
+    const payload: Record<string, unknown> = {};
+    if (body.name !== undefined) payload.name = body.name;
+    if (body.sortOrder !== undefined) payload.sort_order = body.sortOrder;
+    if (body.description !== undefined) payload.description = body.description;
+    return api
+      .put(`/knowledge/categories/${id}`, payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            icon: (it.icon as string) ?? '',
+            sortOrder: (it.sort_order as number) ?? 0,
+            description: (it.description as string) ?? '',
+            createdAt: (it.created_at as string) ?? '',
+            updatedAt: (it.updated_at as string | null) ?? null,
           },
         };
       });

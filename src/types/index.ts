@@ -1153,6 +1153,49 @@ export interface KnowledgeCategoryCreated {
 }
 
 // =====================
+// 知识库分类更新 (PUT /knowledge/categories/{id})
+// =====================
+export interface KnowledgeCategoryUpdate {
+  name?: string;
+  sortOrder?: number;
+  description?: string;
+}
+
+/** PUT /knowledge/categories/{id} 返回的分类对象 */
+export interface KnowledgeCategoryUpdated {
+  id: number;
+  name: string;
+  icon: string;
+  sortOrder: number;
+  description: string;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+// =====================
+// 知识库文章更新 (PUT /knowledge/articles/{id})
+// =====================
+export interface KnowledgeArticleUpdate {
+  title?: string;
+  content?: string;
+  categoryId?: number;
+  tags?: string[];
+}
+
+/** PUT /knowledge/articles/{id} 返回的文章对象 */
+export interface KnowledgeArticleUpdated {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[] | null;
+  viewCount: number;
+  published: boolean;
+  updatedAt: string;
+  authorId: number;
+}
+
+// =====================
 // 知识库FAQ创建 (POST /knowledge/faq)
 // =====================
 export interface KnowledgeFaqCreate {
