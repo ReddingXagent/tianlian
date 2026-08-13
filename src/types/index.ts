@@ -1319,9 +1319,10 @@ export interface ChatResponse {
 // 主动通知发送 (from POST /notifications/send)
 // =====================
 export interface NotificationSendResult {
-  success: boolean;
-  messageId: string | null;
+  status: string;
   channel: string | null;
+  userId: string | null;
+  title: string | null;
   sentAt: string | null;
 }
 

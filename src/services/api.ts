@@ -81,6 +81,7 @@ import {
   Team,
   TeamUpdate,
   TeamCreate,
+  TeamMember,
   RunbookTemplateSummary,
   RunbookTemplateDetail,
   HealthStatus,
@@ -2833,9 +2834,10 @@ export const notificationSendApi = {
       return {
         ...raw,
         data: {
-          success: (d.success as boolean) ?? false,
-          messageId: (d.message_id as string) ?? null,
+          status: (d.status as string) ?? '',
           channel: (d.channel as string) ?? null,
+          userId: (d.user_id as string) ?? null,
+          title: (d.title as string) ?? null,
           sentAt: (d.sent_at as string) ?? null,
         },
       };
@@ -3290,6 +3292,40 @@ export const teamApi = {
   /** DELETE /teams/{id} — 删除团队 */
   delete(id: number): Promise<ApiResponse<null>> {
     return api.delete(`/teams/${id}`).then((res) => {
+      return res.data as ApiResponse<null>;
+    });
+  },
+
+  /** POST /teams/{id}/members — 添加团队成员 */
+  addMember(teamId: number, userId: number, role?: string): Promise<ApiResponse<TeamMember>> {
+    const payload: Record<string, unknown> = { user_id: userId };
+    if (role) payload.role = role;
+    return api
+      .post(`/teams/${teamId}/members`, payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            userId: (it.user_id as number) ?? 0,
+            username: (it.username as string) ?? '',
+            realName: (it.real_name as string) ?? null,
+            teamId: (it.team_id as number) ?? 0,
+            role: (it.role as string) ?? 'member',
+            level: (it.level as string) ?? null,
+            phone: (it.phone as string) ?? null,
+            status: (it.status as string) ?? 'active',
+            joinDate: (it.join_date as string) ?? null,
+          },
+        };
+      });
+  },
+
+  /** DELETE /teams/{id}/members/{userId} — 移除团队成员 */
+  removeMember(teamId: number, userId: number): Promise<ApiResponse<null>> {
+    return api.delete(`/teams/${teamId}/members/${userId}`).then((res) => {
       return res.data as ApiResponse<null>;
     });
   },

@@ -185,9 +185,10 @@ describe('notificationSendApi.send (POST /notifications/send)', () => {
         code: 200,
         message: '发送成功',
         data: {
-          success: true,
-          message_id: 'msg-001',
+          status: 'ok',
           channel: 'app',
+          user_id: '1',
+          title: '测试通知',
           sent_at: '2026-08-13T02:15:00Z',
         },
         timestamp: 1786558600,
@@ -205,8 +206,8 @@ describe('notificationSendApi.send (POST /notifications/send)', () => {
       title: '测试通知',
       content: '这是一条测试通知',
     });
-    expect(res.data.success).toBe(true);
-    expect(res.data.messageId).toBe('msg-001');
+    expect(res.data.status).toBe('ok');
+    expect(res.data.userId).toBe('1');
     expect(res.data.channel).toBe('app');
     expect(res.data.sentAt).toBe('2026-08-13T02:15:00Z');
   });
@@ -243,9 +244,9 @@ describe('notificationSendApi.send (POST /notifications/send)', () => {
       title: 't',
       content: 'c',
     });
-    expect(res.data.success).toBe(false);
-    expect(res.data.messageId).toBeNull();
+    expect(res.data.status).toBe('');
     expect(res.data.channel).toBeNull();
+    expect(res.data.userId).toBeNull();
     expect(res.data.sentAt).toBeNull();
   });
 
@@ -259,6 +260,6 @@ describe('notificationSendApi.send (POST /notifications/send)', () => {
       title: 't',
       content: 'c',
     });
-    expect(res.data.success).toBe(false);
+    expect(res.data.status).toBe('');
   });
 });
