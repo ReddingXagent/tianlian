@@ -1111,6 +1111,70 @@ export interface KnowledgeCategoryItem {
 }
 
 // =====================
+// 知识库文章创建 (POST /knowledge/articles)
+// =====================
+export interface KnowledgeArticleCreate {
+  title: string;
+  content: string;
+  categoryId?: number;
+  tags?: string[];
+}
+
+/** POST /knowledge/articles 返回的文章对象 */
+export interface KnowledgeArticleCreated {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[] | null;
+  viewCount: number;
+  published: boolean;
+  createdAt: string;
+  authorId: number;
+}
+
+// =====================
+// 知识库分类创建 (POST /knowledge/categories)
+// =====================
+export interface KnowledgeCategoryCreate {
+  name: string;
+  sortOrder?: number;
+  description?: string;
+}
+
+/** POST /knowledge/categories 返回的分类对象 */
+export interface KnowledgeCategoryCreated {
+  id: number;
+  name: string;
+  icon: string;
+  sortOrder: number;
+  description: string;
+  createdAt: string;
+}
+
+// =====================
+// 知识库FAQ创建 (POST /knowledge/faq)
+// =====================
+export interface KnowledgeFaqCreate {
+  question: string;
+  answer: string;
+  category: string;
+  tags?: string[];
+}
+
+/** POST /knowledge/faq 返回的FAQ对象 */
+export interface KnowledgeFaqCreated {
+  id: number;
+  question: string;
+  answer: string;
+  category: string;
+  tags: string[] | null;
+  views: number;
+  helpfulCount: number;
+  createdAt: string;
+}
+
+// =====================
 // API密钥 (ApiKey — from /api-keys)
 // ====================
 export interface ApiKey {

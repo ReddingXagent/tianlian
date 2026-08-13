@@ -85,6 +85,12 @@ import {
   TeamUpdate,
   TeamCreate,
   TeamMember,
+  KnowledgeArticleCreate,
+  KnowledgeArticleCreated,
+  KnowledgeCategoryCreate,
+  KnowledgeCategoryCreated,
+  KnowledgeFaqCreate,
+  KnowledgeFaqCreated,
   RunbookTemplateSummary,
   RunbookTemplateDetail,
   HealthStatus,
@@ -697,6 +703,89 @@ export const knowledgeApi = {
             total: (d.total as number) ?? 0,
             page: (d.page as number) ?? 1,
             pageSize: (d.page_size as number) ?? 20,
+          },
+        };
+      });
+  },
+
+  /** POST /knowledge/articles — 创建知识库文章 */
+  createArticle(body: KnowledgeArticleCreate): Promise<ApiResponse<KnowledgeArticleCreated>> {
+    const payload: Record<string, unknown> = {
+      title: body.title,
+      content: body.content,
+    };
+    if (body.categoryId !== undefined) payload.category_id = body.categoryId;
+    if (body.tags !== undefined) payload.tags = body.tags;
+    return api
+      .post('/knowledge/articles', payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            title: (it.title as string) ?? '',
+            content: (it.content as string) ?? '',
+            category: (it.category as string) ?? '',
+            tags: (it.tags as string[] | null) ?? null,
+            viewCount: (it.view_count as number) ?? 0,
+            published: (it.published as boolean) ?? false,
+            createdAt: (it.created_at as string) ?? '',
+            authorId: (it.author_id as number) ?? 0,
+          },
+        };
+      });
+  },
+
+  /** POST /knowledge/categories — 创建知识库分类 (name via query param) */
+  createCategory(body: KnowledgeCategoryCreate): Promise<ApiResponse<KnowledgeCategoryCreated>> {
+    const params: Record<string, unknown> = { name: body.name };
+    if (body.sortOrder !== undefined) params.sort_order = body.sortOrder;
+    if (body.description !== undefined) params.description = body.description;
+    return api
+      .post('/knowledge/categories', {}, { params })
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            name: (it.name as string) ?? '',
+            icon: (it.icon as string) ?? '',
+            sortOrder: (it.sort_order as number) ?? 0,
+            description: (it.description as string) ?? '',
+            createdAt: (it.created_at as string) ?? '',
+          },
+        };
+      });
+  },
+
+  /** POST /knowledge/faq — 创建FAQ */
+  createFaq(body: KnowledgeFaqCreate): Promise<ApiResponse<KnowledgeFaqCreated>> {
+    const payload: Record<string, unknown> = {
+      question: body.question,
+      answer: body.answer,
+      category: body.category,
+    };
+    if (body.tags !== undefined) payload.tags = body.tags;
+    return api
+      .post('/knowledge/faq', payload)
+      .then((res) => {
+        const raw = res.data as ApiResponse<Record<string, unknown>>;
+        const it = (raw.data ?? {}) as Record<string, unknown>;
+        return {
+          ...raw,
+          data: {
+            id: (it.id as number) ?? 0,
+            question: (it.question as string) ?? '',
+            answer: (it.answer as string) ?? '',
+            category: (it.category as string) ?? '',
+            tags: (it.tags as string[] | null) ?? null,
+            views: (it.views as number) ?? 0,
+            helpfulCount: (it.helpful_count as number) ?? 0,
+            createdAt: (it.created_at as string) ?? '',
           },
         };
       });
