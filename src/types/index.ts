@@ -437,6 +437,13 @@ export interface InspectionTemplateCreate {
   items?: Array<{ name: string; required?: boolean }>;
 }
 
+export interface InspectionTemplateUpdate {
+  name?: string;
+  category?: string;
+  description?: string;
+  items?: Array<{ name: string; required?: boolean }>;
+}
+
 export interface InspectionTemplateCreated {
   id: number;
   name: string;
@@ -774,6 +781,18 @@ export interface AlarmRuleCreate {
   description?: string;
 }
 
+export interface AlarmRuleUpdate {
+  name?: string;
+  metric?: string;
+  threshold?: number;
+  deviceType?: string;
+  severity?: string;
+  operator?: string;
+  duration?: number;
+  enabled?: boolean;
+  description?: string;
+}
+
 export interface AlarmRuleCreated {
   id: number;
   name: string;
@@ -814,6 +833,14 @@ export interface NotificationRule {
 export interface NotificationRuleCreate {
   name: string;
   level: string;
+  channels?: string[];
+  receivers?: string[];
+  enabled?: boolean;
+}
+
+export interface NotificationRuleUpdate {
+  name?: string;
+  level?: string;
   channels?: string[];
   receivers?: string[];
   enabled?: boolean;
