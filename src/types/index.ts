@@ -205,22 +205,42 @@ export type UserRole =
 // =====================
 // 站点 (Station) — 运维侧只读引用
 // =====================
+export interface StationBranding {
+  operatorName: string;
+  logoUrl: string;
+  servicePhone: string;
+  themeColor: string;
+  source: string;
+}
+
 export interface Station {
   id: number;
   name: string;
   code: string;
+  province: string;
+  city: string;
+  district: string;
   address: string;
+  lat: number;
+  lon: number;
   status: StationStatus;
-  latitude: number;
-  longitude: number;
-  deviceCount: number;
-  onlineDeviceCount: number;
-  alarmCount: number;
+  stationType: string | null;
+  operatorId: number | null;
+  operatorName: string | null;
+  teamId: number | null;
+  totalPower: number;
+  totalDevices: number;
+  gunCount: number;
+  venueType: string | null;
+  totalCost: number | null;
+  parkingSpots: number | null;
+  healthScore: number;
+  branding: StationBranding | null;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
-export type StationStatus = 'online' | 'offline' | 'maintenance';
+export type StationStatus = 'online' | 'offline' | 'maintenance' | 'normal';
 
 // =====================
 // 通用API响应

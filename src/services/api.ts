@@ -78,6 +78,8 @@ import {
   HealthStatus,
   SystemHealth,
   LivenessProbe,
+  Station,
+  StationBranding,
 } from '../types';
 
 /** health端点返回类型 */
@@ -2583,6 +2585,87 @@ export const cacheApi = {
           backend: (d.backend as string) ?? 'unknown',
         },
       };
+    });
+  },
+};
+
+// =====================
+// 站点 API (GET /stations, GET /stations/{id})
+// =====================
+function mapStation(raw: Record<string, unknown>): Station {
+  const brandingRaw = (raw.branding ?? null) as Record<string, unknown> | null;
+  let branding: StationBranding | null = null;
+  if (brandingRaw) {
+    branding = {
+      operatorName: (brandingRaw.operator_name as string) ?? '',
+      logoUrl: (brandingRaw.logo_url as string) ?? '',
+      servicePhone: (brandingRaw.service_phone as string) ?? '',
+      themeColor: (brandingRaw.theme_color as string) ?? '#00A86B',
+      source: (brandingRaw.source as string) ?? 'default',
+    };
+  }
+  return {
+    id: (raw.id as number) ?? 0,
+    name: (raw.name as string) ?? '',
+    code: (raw.code as string) ?? '',
+    province: (raw.province as string) ?? '',
+    city: (raw.city as string) ?? '',
+    district: (raw.district as string) ?? '',
+    address: (raw.address as string) ?? '',
+    lat: (raw.lat as number) ?? 0,
+    lon: (raw.lon as number) ?? 0,
+    status: (raw.status as Station['status']) ?? 'normal',
+    stationType: (raw.station_type as string | null) ?? null,
+    operatorId: (raw.operator_id as number | null) ?? null,
+    operatorName: (raw.operator_name as string | null) ?? null,
+    teamId: (raw.team_id as number | null) ?? null,
+    totalPower: (raw.total_power as number) ?? 0,
+    totalDevices: (raw.total_devices as number) ?? 0,
+    gunCount: (raw.gun_count as number) ?? 0,
+    venueType: (raw.venue_type as string | null) ?? null,
+    totalCost: (raw.total_cost as number | null) ?? null,
+    parkingSpots: (raw.parking_spots as number | null) ?? null,
+    healthScore: (raw.health_score as number) ?? 0,
+    branding,
+    createdAt: (raw.created_at as string) ?? '',
+    updatedAt: (raw.updated_at as string | null) ?? null,
+  };
+}
+
+export const stationApi = {
+  /** GET /stations — 站点列表 (分页) */
+  getList(params?: {
+    page?: number;
+    pageSize?: number;
+    status?: string;
+    keyword?: string;
+  }): Promise<ApiResponse<PaginatedData<Station>>> {
+    const query: Record<string, string> = {};
+    if (params?.page != null) query.page = String(params.page);
+    if (params?.pageSize != null) query.page_size = String(params.pageSize);
+    if (params?.status != null) query.status = params.status;
+    if (params?.keyword != null) query.keyword = params.keyword;
+    return api.get('/stations', { params: query }).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = ((d.items ?? []) as Record<string, unknown>[]).map(mapStation);
+      return {
+        ...raw,
+        data: {
+          items,
+          total: (d.total as number) ?? items.length,
+          page: (d.page as number) ?? (params?.page ?? 1),
+          pageSize: (d.page_size as number) ?? (params?.pageSize ?? 20),
+        },
+      };
+    });
+  },
+
+  /** GET /stations/{id} — 站点详情 */
+  getDetail(id: number): Promise<ApiResponse<Station>> {
+    return api.get(`/stations/${id}`).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      return { ...raw, data: mapStation((raw.data ?? {}) as Record<string, unknown>) };
     });
   },
 };
