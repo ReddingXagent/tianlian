@@ -371,7 +371,6 @@ export type MainTabParamList = {
   Dashboard: undefined;
   Stations: undefined;
   Revenue: undefined;
-  AIChat: undefined;
   Profile: undefined;
 };
 

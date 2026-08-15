@@ -4,7 +4,9 @@ import { MainTabParamList } from '../types';
 import DashboardScreen from './DashboardScreen';
 import StationListScreen from './StationListScreen';
 import RevenueScreen from './RevenueScreen';
-import { AIChatPanel } from '../components/AIChatPanel';
+// AI 助手 Tab 已暂时移除: 云端 /ai/chat 端点下线(2026-08-15 侦察, 404 稳定),
+// 用户点入会报错。组件 AIChatPanel 与 services/ai.ts 保留未删, 端点恢复后
+// 重新 import + 加回 Tab.Screen + types.MainTabParamList 补 AIChat 即可恢复。
 import ProfileScreen from './ProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -34,11 +36,6 @@ export default function MainTabNavigator() {
         name="Revenue"
         component={RevenueScreen}
         options={{ title: '营收', tabBarLabel: '营收' }}
-      />
-      <Tab.Screen
-        name="AIChat"
-        component={AIChatPanel}
-        options={{ title: 'AI 助手', tabBarLabel: 'AI 助手', headerShown: false }}
       />
       <Tab.Screen
         name="Profile"
