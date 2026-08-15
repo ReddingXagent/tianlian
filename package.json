@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --passWithNoTests",
-    "lint": "eslint . --max-warnings=9",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "doctor": "expo-doctor",
     "build:android": "expo export --platform android",
@@ -33,7 +33,7 @@
     "check:eas-env": "bash scripts/check-eas-env.sh",
     "check:app-identity": "bash scripts/check-app-identity.sh",
     "check:apk-direct-distribution": "bash scripts/check-apk-direct-distribution.sh",
-    "lint:ci": "eslint . --max-warnings=9"
+    "lint:ci": "eslint . --max-warnings=0"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.14",

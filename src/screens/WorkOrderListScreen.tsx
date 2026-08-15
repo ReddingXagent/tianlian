@@ -31,20 +31,29 @@ const WorkOrderListScreen: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<WorkOrderStatus | 'all'>('all');
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      await fetchOrders(
+  const loadCore = useCallback(
+    () =>
+      fetchOrders(
         activeFilter === 'all' ? undefined : { status: activeFilter }
-      );
-      if (isRefresh) setRefreshing(false);
-    },
+      ),
     [fetchOrders, activeFilter]
   );
 
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      try {
+        await loadCore();
+      } finally {
+        if (isRefresh) setRefreshing(false);
+      }
+    },
+    [loadCore]
+  );
+
   useEffect(() => {
-    loadData();
-  }, [activeFilter, loadData]);
+    void loadCore();
+  }, [loadCore]);
 
   const handleOrderPress = (order: WorkOrder) => {
     navigation.navigate('WorkOrderDetail', { orderId: order.id });

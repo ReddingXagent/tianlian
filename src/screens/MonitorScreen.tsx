@@ -72,13 +72,40 @@ const MonitorScreen: React.FC = () => {
   }, [devices]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const [summaryRes, devicesRes, faultsRes, alarmsRes] = await Promise.all([
+          monitorApi.getSummary(),
+          deviceMonitorApi.getDeviceStatusList({ pageSize: 50 }),
+          monitorApi.getFaultDevices({ pageSize: 20 }),
+          monitorApi.getCriticalAlarms({ pageSize: 20 }),
+        ]);
+        if (cancelled) return;
+        setSummary(summaryRes.data);
+        setDevices(devicesRes.data.items);
+        setFaultDevices(faultsRes.data.items);
+        setCriticalAlarms(alarmsRes.data.items);
+      } catch {
+        if (cancelled) return;
+        setError('加载监控数据失败，请下拉刷新重试');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'devices' && devices.length > 0) {
-      fetchRealtimeMetrics();
-      refreshTimer.current = setInterval(fetchRealtimeMetrics, 10000);
+      Promise.resolve()
+        .then(() => fetchRealtimeMetrics())
+        .catch(() => undefined);
+      refreshTimer.current = setInterval(() => {
+        void fetchRealtimeMetrics();
+      }, 10000);
     }
     return () => {
       if (refreshTimer.current) {

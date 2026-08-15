@@ -41,18 +41,26 @@ const InspectionDetailScreen: React.FC = () => {
   const [completionNote, setCompletionNote] = useState('');
   const [showCompleteForm, setShowCompleteForm] = useState(false);
 
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      await fetchTaskDetail(taskId);
-      if (isRefresh) setRefreshing(false);
-    },
+  const loadCore = useCallback(
+    () => fetchTaskDetail(taskId),
     [taskId, fetchTaskDetail]
   );
 
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      try {
+        await loadCore();
+      } finally {
+        if (isRefresh) setRefreshing(false);
+      }
+    },
+    [loadCore]
+  );
+
   useEffect(() => {
-    loadData();
-  }, [taskId, loadData]);
+    void loadCore();
+  }, [loadCore]);
 
   const handleStart = () => {
     Alert.alert('开始巡检', '确定要开始执行此巡检任务吗？', [

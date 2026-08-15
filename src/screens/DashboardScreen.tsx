@@ -22,18 +22,26 @@ const DashboardScreen: React.FC = () => {
     useDashboardStore();
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      await fetchDashboard();
-      if (isRefresh) setRefreshing(false);
-    },
+  const loadCore = useCallback(
+    () => fetchDashboard(),
     [fetchDashboard]
   );
 
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      try {
+        await loadCore();
+      } finally {
+        if (isRefresh) setRefreshing(false);
+      }
+    },
+    [loadCore]
+  );
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    void loadCore();
+  }, [loadCore]);
 
   if (loading && !data) {
     return <LoadingSpinner text="加载看板数据..." />;

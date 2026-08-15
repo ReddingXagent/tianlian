@@ -40,20 +40,29 @@ const InspectionListScreen: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<InspectionStatus | 'all'>('all');
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      await fetchTasks(
+  const loadCore = useCallback(
+    () =>
+      fetchTasks(
         activeFilter === 'all' ? undefined : { status: activeFilter }
-      );
-      if (isRefresh) setRefreshing(false);
-    },
+      ),
     [fetchTasks, activeFilter]
   );
 
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      try {
+        await loadCore();
+      } finally {
+        if (isRefresh) setRefreshing(false);
+      }
+    },
+    [loadCore]
+  );
+
   useEffect(() => {
-    loadData();
-  }, [activeFilter, loadData]);
+    void loadCore();
+  }, [loadCore]);
 
   const handleTaskPress = (task: InspectionTask) => {
     navigation.navigate('InspectionDetail', { taskId: task.id });
