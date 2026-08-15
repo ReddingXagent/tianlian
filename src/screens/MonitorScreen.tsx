@@ -72,13 +72,11 @@ const MonitorScreen: React.FC = () => {
   }, [devices]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 
   useEffect(() => {
     if (activeTab === 'devices' && devices.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchRealtimeMetrics();
       refreshTimer.current = setInterval(fetchRealtimeMetrics, 10000);
     }

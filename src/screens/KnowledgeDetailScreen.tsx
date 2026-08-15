@@ -49,7 +49,6 @@ const KnowledgeDetailScreen: React.FC = () => {
   }, [articleId]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDetail();
   }, [fetchDetail]);
 
