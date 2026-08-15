@@ -8,10 +8,10 @@ import { revenueApi } from '../../services/api';
 interface CapturedChartProps {
   data: {
     labels: string[];
-    datasets: Array<{
+    datasets: {
       data: number[];
       color: () => string;
-    }>;
+    }[];
   };
   chartConfig: {
     color: (opacity?: number) => string;
