@@ -127,6 +127,9 @@ it('DashboardScreen: loadData(true) covers isRefresh setRefreshing guards', asyn
   const { UNSAFE_root } = render(<DashboardScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, ScrollView);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -148,6 +151,9 @@ it('InspectionListScreen: loadData(true) covers isRefresh guards', async () => {
   const { UNSAFE_root } = render(<InspectionListScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, FlatList);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -169,6 +175,9 @@ it('WorkOrderListScreen: loadData(true) covers isRefresh guards', async () => {
   const { UNSAFE_root } = render(<WorkOrderListScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, FlatList);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -190,6 +199,9 @@ it('InspectionDetailScreen: loadData(true) covers isRefresh guards', async () =>
   const { UNSAFE_root } = render(<InspectionDetailScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, ScrollView);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -211,6 +223,9 @@ it('WorkOrderDetailScreen: loadData(true) covers isRefresh guards', async () => 
   const { UNSAFE_root } = render(<WorkOrderDetailScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, ScrollView);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();

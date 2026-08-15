@@ -63,21 +63,6 @@ const WORK_ORDERS = [
   },
 ];
 
-// Helper: find RefreshControl in rendered tree
-function findRefreshControl(node: ReturnType<typeof render>['UNSAFE_root']): React.ReactElement | null {
-  if (!node) return null;
-  const element = node as unknown as React.ReactElement;
-  if (element.type === RefreshControl) return element;
-  const props = element.props as Record<string, unknown>;
-  const rc = props.refreshControl as React.ReactElement | undefined;
-  if (rc && rc.type === RefreshControl) return rc;
-  const children = (props.children as React.ReactElement[]) || [];
-  for (const child of Array.isArray(children) ? children : [children]) {
-    const found = findRefreshControl(child as unknown as ReturnType<typeof render>['UNSAFE_root']);
-    if (found) return found;
-  }
-  return null;
-}
 
 describe('refresh callbacks across screens', () => {
   beforeEach(() => {
@@ -95,10 +80,17 @@ describe('refresh callbacks across screens', () => {
     });
 
     const { UNSAFE_root } = render(<DashboardScreen />);
-    const rc = findRefreshControl(UNSAFE_root);
+    // F1206: walk()树遍历在FlatList/ScrollView宿主形态下找不到RefreshControl(假绿),
+    // 改findAllByType直查+fail-fast断言 — 找不到时测试变红而非静默空转
+    const all = (UNSAFE_root as unknown as {
+      findAllByType?: (type: unknown) => { props?: { onRefresh?: () => void } }[];
+    }).findAllByType?.(RefreshControl);
+    const rc = all?.[0];
+    expect(rc).toBeDefined(); // F1206 fail-fast: RefreshControl找不到时变红
+    expect(typeof rc?.props?.onRefresh).toBe('function'); // F1206 fail-fast
     if (rc?.props?.onRefresh) {
       await act(async () => {
-        rc.props.onRefresh();
+        rc?.props?.onRefresh?.(); // F1206: 可选链调用, TS窄化通过
         await new Promise(r => setTimeout(r, 50));
       });
       expect(mockFetchDashboard).toHaveBeenCalled();
@@ -113,10 +105,17 @@ describe('refresh callbacks across screens', () => {
     });
 
     const { UNSAFE_root } = render(<InspectionListScreen />);
-    const rc = findRefreshControl(UNSAFE_root);
+    // F1206: walk()树遍历在FlatList/ScrollView宿主形态下找不到RefreshControl(假绿),
+    // 改findAllByType直查+fail-fast断言 — 找不到时测试变红而非静默空转
+    const all = (UNSAFE_root as unknown as {
+      findAllByType?: (type: unknown) => { props?: { onRefresh?: () => void } }[];
+    }).findAllByType?.(RefreshControl);
+    const rc = all?.[0];
+    expect(rc).toBeDefined(); // F1206 fail-fast: RefreshControl找不到时变红
+    expect(typeof rc?.props?.onRefresh).toBe('function'); // F1206 fail-fast
     if (rc?.props?.onRefresh) {
       await act(async () => {
-        rc.props.onRefresh();
+        rc?.props?.onRefresh?.(); // F1206: 可选链调用, TS窄化通过
         await new Promise(r => setTimeout(r, 50));
       });
       expect(mockFetchTasks).toHaveBeenCalled();
@@ -131,10 +130,17 @@ describe('refresh callbacks across screens', () => {
     });
 
     const { UNSAFE_root } = render(<WorkOrderListScreen />);
-    const rc = findRefreshControl(UNSAFE_root);
+    // F1206: walk()树遍历在FlatList/ScrollView宿主形态下找不到RefreshControl(假绿),
+    // 改findAllByType直查+fail-fast断言 — 找不到时测试变红而非静默空转
+    const all = (UNSAFE_root as unknown as {
+      findAllByType?: (type: unknown) => { props?: { onRefresh?: () => void } }[];
+    }).findAllByType?.(RefreshControl);
+    const rc = all?.[0];
+    expect(rc).toBeDefined(); // F1206 fail-fast: RefreshControl找不到时变红
+    expect(typeof rc?.props?.onRefresh).toBe('function'); // F1206 fail-fast
     if (rc?.props?.onRefresh) {
       await act(async () => {
-        rc.props.onRefresh();
+        rc?.props?.onRefresh?.(); // F1206: 可选链调用, TS窄化通过
         await new Promise(r => setTimeout(r, 50));
       });
       expect(mockFetchOrders).toHaveBeenCalled();
