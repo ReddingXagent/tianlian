@@ -15,7 +15,8 @@
     "export:android": "expo export --platform android",
     "export:ios": "expo export --platform ios",
     "check:node": "bash scripts/check-node-version.sh",
-    "check:engine-strict": "bash scripts/check-engine-strict.sh"
+    "check:engine-strict": "bash scripts/check-engine-strict.sh",
+    "lint:ci": "eslint . --max-warnings=12"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.14",

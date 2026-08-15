@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * 网络状态横幅 — 使用 AppState 监听前后台切换
  * App 回前台时静默 ping API 检测连通性，离线时显示横幅

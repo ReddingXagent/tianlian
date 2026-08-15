@@ -1,4 +1,3 @@
-/* eslint-disable import/no-named-as-default-member */
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import {
