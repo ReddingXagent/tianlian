@@ -119,11 +119,19 @@ describe('pages/order-detail/order-detail', () => {
 
   describe('onPullDownRefresh', () => {
     it('reloads and stops refresh', async () => {
+      // F1208 弱假绿加固: 源码loadOrderDetail的catch吞错后promise仍resolve,
+      // .then里stopPullDownRefresh在成功/失败两条路径都会调用 — 裸toHaveBeenCalled()
+      // 无法区分真重载与catch兜底凑数。加请求计数+order值断言锚定成功路径。
+      mockGetOrderDetail.mockClear();
       mockGetOrderDetail.mockResolvedValue({ data: { status: 'finished', duration: 0, amount: 0, energy: 0, startTime: null, endTime: null } });
       pageConfig.onPullDownRefresh();
       // 页面方法返回 void，内部 .then 需要额外微任务冲刷
       await new Promise((r) => { setTimeout(r, 0); });
-      expect(mockStopPullDown).toHaveBeenCalled();
+      expect(mockGetOrderDetail).toHaveBeenCalledTimes(1); // 真实触发了重载请求(非零调用凑数)
+      const call = pageConfig.setData.mock.calls.find(c => c[0].order);
+      expect(call).toBeTruthy(); // fail-fast: 成功路径必须写order数据(走catch则无)
+      expect(call[0].order.statusText).toBe('已完成');
+      expect(mockStopPullDown).toHaveBeenCalledTimes(1);
     });
   });
 });
