@@ -32,17 +32,17 @@ jest.mock('../services/api', () => ({
 jest.mock('../utils/util', () => ({
   debounce: jest.fn((fn) => {
     let timer;
-    return function() {
+    return function (...args) {
       clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(null, arguments), 0);
+      timer = setTimeout(() => fn(...args), 0);
     };
   }),
-  formatDistance: jest.fn((d) => d < 1000 ? `${d}m` : `${(d/1000).toFixed(1)}km`),
+  formatDistance: jest.fn((d) => d < 1000 ? `${d}m` : `${(d / 1000).toFixed(1)}km`),
   calcDistance: jest.fn(() => 500),
 }));
 jest.mock('../config/index', () => ({ CACHE_TTL: { STATIONS: 60000 } }));
 jest.mock('../utils/cache', () => ({
-  cachedRequest: jest.fn(async (fn, args) => fn(...(args || []))),
+  cachedRequest: jest.fn((fn, args) => Promise.resolve(fn(...(args || [])))),
   cache: { delete: jest.fn() },
 }));
 jest.mock('../utils/perf', () => ({

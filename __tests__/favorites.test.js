@@ -23,7 +23,7 @@ jest.mock('../services/api', () => ({
   removeFavorite: mockRemoveFavorite,
 }));
 jest.mock('../utils/util', () => ({
-  formatDistance: jest.fn((d) => d < 1000 ? `${d}m` : `${(d/1000).toFixed(1)}km`),
+  formatDistance: jest.fn((d) => d < 1000 ? `${d}m` : `${(d / 1000).toFixed(1)}km`),
 }));
 jest.mock('../config/index', () => ({ CACHE_TTL: { FAVORITES: 60000 } }));
 jest.mock('../utils/cache', () => ({

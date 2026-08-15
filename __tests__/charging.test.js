@@ -31,7 +31,7 @@ jest.mock('../utils/polling', () => ({
   })),
 }));
 jest.mock('../utils/perf', () => ({
-  diffSetData: jest.fn((page, newData, last) => {
+  diffSetData: jest.fn((page, newData, _last) => {
     page.setData(newData);
   }),
   guardTap: (fn) => fn,

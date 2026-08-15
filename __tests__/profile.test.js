@@ -30,7 +30,7 @@ jest.mock('../config/index', () => ({
   CACHE_TTL: { ORDERS: 30000 },
 }));
 jest.mock('../utils/cache', () => ({
-  cachedRequest: jest.fn(async (fn, args) => fn(...(args || []))),
+  cachedRequest: jest.fn((fn, args) => Promise.resolve(fn(...(args || [])))),
 }));
 
 require('../pages/profile/profile');
@@ -103,7 +103,7 @@ describe('pages/profile/profile', () => {
       mockApp.getToken.mockReturnValue(null);
       mockApp.login.mockRejectedValue(new Error('fail'));
       pageConfig.onLogin();
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise((r) => { setTimeout(r, 0); });
       expect(mockShowToast).toHaveBeenCalledWith(expect.objectContaining({ title: '登录失败' }));
     });
   });

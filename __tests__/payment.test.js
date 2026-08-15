@@ -26,7 +26,7 @@ jest.mock('../utils/util', () => ({
 }));
 jest.mock('../config/index', () => ({ CACHE_TTL: { ORDERS: 30000 } }));
 jest.mock('../utils/cache', () => ({
-  cachedRequest: jest.fn(async (fn, args) => fn(...(args || []))),
+  cachedRequest: jest.fn((fn, args) => Promise.resolve(fn(...(args || [])))),
 }));
 
 require('../pages/payment/payment');

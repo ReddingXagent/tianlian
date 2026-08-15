@@ -32,7 +32,7 @@ describe('pages/scan/scan', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetStorageSync.mockReturnValue([]);
-    mockSetStorageSync.mockImplementation(() => {});
+    mockSetStorageSync.mockImplementation(() => undefined);
   });
 
   describe('parseChargerId', () => {

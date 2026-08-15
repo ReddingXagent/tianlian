@@ -26,7 +26,7 @@ jest.mock('../config/index', () => ({
   COUPON_TYPE: { AMOUNT: 'amount', DISCOUNT: 'discount', FREIGHT: 'freight' },
 }));
 jest.mock('../utils/cache', () => ({
-  cachedRequest: jest.fn(async (fn, args) => fn(...(args || []))),
+  cachedRequest: jest.fn((fn, args) => Promise.resolve(fn(...(args || [])))),
 }));
 jest.mock('../utils/perf', () => ({ guardTap: (fn) => fn }));
 

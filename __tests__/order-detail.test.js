@@ -17,7 +17,7 @@ jest.mock('../services/api', () => ({
 jest.mock('../utils/util', () => ({
   formatDuration: jest.fn((d) => `${d}分钟`),
   formatMoney: jest.fn((a) => `¥${a}`),
-  formatTime: jest.fn((t) => '08-13 12:00'),
+  formatTime: jest.fn((_t) => '08-13 12:00'),
 }));
 jest.mock('../config/index', () => ({ CACHE_TTL: { ORDERS: 30000 } }));
 jest.mock('../utils/cache', () => ({
@@ -122,7 +122,7 @@ describe('pages/order-detail/order-detail', () => {
       mockGetOrderDetail.mockResolvedValue({ data: { status: 'finished', duration: 0, amount: 0, energy: 0, startTime: null, endTime: null } });
       pageConfig.onPullDownRefresh();
       // 页面方法返回 void，内部 .then 需要额外微任务冲刷
-      await new Promise((r) => setTimeout(r, 0));
+      await new Promise((r) => { setTimeout(r, 0); });
       expect(mockStopPullDown).toHaveBeenCalled();
     });
   });
