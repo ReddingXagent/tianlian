@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -39,6 +39,17 @@ const LoginScreen: React.FC = () => {
       });
     }, 1000);
   };
+
+  // 卸载时清理倒计时 interval，防止句柄泄漏逃逸到组件生命周期外
+  // (2026-08-16 F1198: --detectOpenHandles 定位泄漏源，与 WalletScreen.ext3 同类)
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSendCode = async () => {
     if (!phone.trim() || phone.trim().length < 11) {
