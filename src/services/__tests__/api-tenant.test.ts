@@ -32,6 +32,7 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
+// eslint-disable-next-line import/no-named-as-default-member -- axios mock access via default import (F1204)
 const mockApi = jest.mocked(axios.create).mock.results[0].value;
 
 beforeEach(() => {

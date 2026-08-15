@@ -117,10 +117,12 @@ jest.mock('../../screens/CouponScreen', () => () => null);
 
 jest.mock('../../components/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- factory scope, out-of-scope import blocked by jest (F1204)
     require('react').createElement(require('react').Fragment, null, children),
 }));
 
 // Access mock auth state via the exported __mockAuthState
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- module-level require for mocked store access (F1204)
 const authMod = require('../../store/authStore');
 const mockAuthState = authMod.__mockAuthState as {
   isAuthenticated: boolean;
