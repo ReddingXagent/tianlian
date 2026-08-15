@@ -12,8 +12,7 @@ jest.mock('expo-secure-store', () => ({
 
 // Mock axios
 jest.mock('axios', () => {
-  const mockAxios: Record<string, any> = {
-    create: jest.fn(() => mockAxios),
+  const mockInstance = {
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
@@ -22,19 +21,22 @@ jest.mock('axios', () => {
       request: { use: jest.fn() },
       response: { use: jest.fn() },
     },
-    defaults: { headers: { common: {} } },
   };
-  return mockAxios;
+  return {
+    create: jest.fn(() => mockInstance),
+    __mockInstance: mockInstance,
+  };
 });
 
 import axios from 'axios';
-const mockAxios = axios as jest.Mocked<typeof axios>;
+// F1205: any收窄 — 对齐ext49+ __mockInstance模式, 替代逐调用as any
+const mockAxios = (axios as unknown as { __mockInstance: { get: jest.Mock; post: jest.Mock; put: jest.Mock; delete: jest.Mock } }).__mockInstance;
 
 describe('ext48 — teamApi.getList (GET /teams)', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('maps snake_case fields to camelCase', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -61,7 +63,7 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
       },
     });
     const res = await teamApi.getList();
-    expect((mockAxios as any).get).toHaveBeenCalledWith('/teams');
+    expect(mockAxios.get).toHaveBeenCalledWith('/teams');
     expect(res.data.items).toHaveLength(1);
     expect(res.data.items[0]).toEqual({
       id: 1,
@@ -78,7 +80,7 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
   });
 
   it('handles empty items list', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -92,7 +94,7 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
   });
 
   it('handles null/missing fields with defaults', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -116,7 +118,7 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
   });
 
   it('passes page and page_size params', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -125,11 +127,11 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
       },
     });
     await teamApi.getList({ page: 2, page_size: 5 });
-    expect((mockAxios as any).get).toHaveBeenCalledWith('/teams?page=2&page_size=5');
+    expect(mockAxios.get).toHaveBeenCalledWith('/teams?page=2&page_size=5');
   });
 
   it('calls correct endpoint with no params', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -138,12 +140,12 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
       },
     });
     await teamApi.getList();
-    expect((mockAxios as any).get).toHaveBeenCalledTimes(1);
-    expect((mockAxios as any).get).toHaveBeenCalledWith('/teams');
+    expect(mockAxios.get).toHaveBeenCalledTimes(1);
+    expect(mockAxios.get).toHaveBeenCalledWith('/teams');
   });
 
   it('getDetail maps snake_case fields correctly', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -164,7 +166,7 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
       },
     });
     const res = await teamApi.getDetail(3);
-    expect((mockAxios as any).get).toHaveBeenCalledWith('/teams/3');
+    expect(mockAxios.get).toHaveBeenCalledWith('/teams/3');
     expect(res.data).toEqual({
       id: 3,
       name: '应急组',
@@ -180,7 +182,7 @@ describe('ext48 — teamApi.getList (GET /teams)', () => {
   });
 
   it('getDetail handles null fields with defaults', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',

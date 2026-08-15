@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { User, AuthMe } from '../types';
 import { authApi, tokenStorage } from '../services/api';
 
-interface AuthState {
+// F1205: 导出供测试类型收窄使用 (纯类型导出, 零运行时影响)
+export interface AuthState {
   token: string | null;
   user: User | null;
   isAuthenticated: boolean;
