@@ -117,13 +117,21 @@ describe('WalletScreen ext2 — remaining branch coverage', () => {
     const list = UNSAFE_getByType(FlatList);
     const refreshControl = list.props.refreshControl;
 
+    expect(refreshControl).toBeDefined();
+    expect(typeof refreshControl?.props?.onRefresh).toBe('function');
+    mockGetProfile.mockClear();
+    // F1207 fail-fast: RefreshControl必须真实挂载且onRefresh必须是函数 (F1206假绿教训)
+    expect(refreshControl).toBeDefined();
+    expect(typeof refreshControl.props.onRefresh).toBe('function');
+
+    mockGetProfile.mockClear();
+    mockSetUser.mockClear();
     await act(async () => {
-      if (refreshControl?.props?.onRefresh) {
-        await refreshControl.props.onRefresh();
-      }
+      await refreshControl.props.onRefresh();
     });
 
-    // Should have triggered another load
-    expect(mockGetProfile).toHaveBeenCalled();
+    // 下拉刷新必须触发第二轮getProfile并同步余额 (计数锚定, 防挂载期调用凑数)
+    expect(mockGetProfile).toHaveBeenCalledTimes(1);
+    expect(mockSetUser).toHaveBeenCalledWith({ id: 1, balance: 200 });
   });
 });

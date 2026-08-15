@@ -1,4 +1,5 @@
 import React from 'react';
+import { RefreshControl } from 'react-native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from '../HomeScreen';
@@ -39,6 +40,21 @@ jest.unmock('../../components/EmptyState');
 jest.unmock('../../components/StationCard');
 jest.mock('../../components/MapView', () => 'MapView');
 
+
+// F1207: stations非空→ScrollView分支渲染RefreshControl
+const makeStation = (id: number): Partial<Station> => ({
+  id,
+  name: `站${id}`,
+  latitude: 30,
+  longitude: 120,
+  status: 'online',
+  totalConnectors: 4,
+  availableConnectors: 2,
+  chargingConnectors: 0,
+  pricePerKwh: 1.2,
+  serviceFee: 0.4,
+});
+
 describe('HomeScreen.ext2 — refresh + isSearching branches', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -56,14 +72,19 @@ describe('HomeScreen.ext2 — refresh + isSearching branches', () => {
       </SafeAreaProvider>
     );
 
-  it('triggers refreshStations via pull-to-refresh when no search text', () => {
-    const { getByText } = renderHome();
-    // Access refresh control via the RefreshControl onRefresh
-    // We can't directly trigger RefreshControl in test, but we can verify the handler
-    // by testing that handleRefresh calls refreshStations
-    // The refresh control is embedded, so let's test the function indirectly
-    // by mocking refreshing state
-    expect(getByText('附近暂无站点')).toBeTruthy();
+  it('triggers refreshStations via pull-to-refresh when no search text', async () => {
+    // F1207: 空壳修复 — ScrollView+RefreshControl仅在stations非空时渲染, 必须给数据才能真触发
+    mockState.stations = [makeStation(1), makeStation(2)];
+    const { UNSAFE_root } = renderHome();
+
+    // F1206教训: findByType直查, 找不到即抛错(fail-fast), 禁用if守卫静默跳过
+    const refreshControl = UNSAFE_root.findByType(RefreshControl);
+    expect(typeof refreshControl.props.onRefresh).toBe('function');
+
+    refreshControl.props.onRefresh();
+    // 无搜索词分支: handleRefresh→refreshStations (计数锚定)
+    expect(mockState.refreshStations).toHaveBeenCalledTimes(1);
+    expect(mockState.searchStations).not.toHaveBeenCalled();
   });
 
   it('calls searchStations on refresh when search text is present', async () => {
