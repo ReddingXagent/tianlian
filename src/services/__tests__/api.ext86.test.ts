@@ -2,7 +2,6 @@
  * api ext86 — cond-expr/if falsy side coverage + getFaqCategories items-wrapper + healing rules wrapper
  */
 import MockAdapter from 'axios-mock-adapter';
-import * as SecureStore from 'expo-secure-store';
 import api, { knowledgeApi, roleApi, healingRuleApi } from '../api';
 
 jest.mock('expo-secure-store', () => ({

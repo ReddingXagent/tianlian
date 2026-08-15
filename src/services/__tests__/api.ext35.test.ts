@@ -87,7 +87,7 @@ describe('healingRuleApi.create + delete (ext35)', () => {
         alarmPattern: { type: 'offline' },
       });
 
-      const body = mockedAxios.post.mock.calls[0][1];
+      const body = mockedAxios.post.mock.calls[0][1] as Record<string, unknown>;
       expect(body.description).toBe('');
       expect(body.runbook_template).toBeNull();
       expect(body.auto_approve).toBe(false);

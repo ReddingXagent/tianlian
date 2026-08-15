@@ -3,7 +3,6 @@
  * Strategy: empty/partial payloads exercise ?? fallback sides on dense mapper lines
  */
 import MockAdapter from 'axios-mock-adapter';
-import * as SecureStore from 'expo-secure-store';
 import api, {
   knowledgeApi,
   permissionApi,

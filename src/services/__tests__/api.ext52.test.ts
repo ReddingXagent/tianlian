@@ -132,11 +132,11 @@ describe('ext52 — alarmApi.resolve (PUT /alarms/{id}/resolve)', () => {
     });
 
     const res = await alarmApi.resolve(10);
-    expect((res.data as Record<string, unknown>).id).toBe(10);
-    expect((res.data as Record<string, unknown>).fault_code).toBe('E001');
-    expect((res.data as Record<string, unknown>).diagnosis_result).toBe('散热风扇故障');
-    expect((res.data as Record<string, unknown>).remote_fixable).toBe(true);
-    expect((res.data as Record<string, unknown>).trigger_value).toBe('95.5');
+    expect(((res.data as unknown) as Record<string, unknown>).id).toBe(10);
+    expect(((res.data as unknown) as Record<string, unknown>).fault_code).toBe('E001');
+    expect(((res.data as unknown) as Record<string, unknown>).diagnosis_result).toBe('散热风扇故障');
+    expect(((res.data as unknown) as Record<string, unknown>).remote_fixable).toBe(true);
+    expect(((res.data as unknown) as Record<string, unknown>).trigger_value).toBe('95.5');
   });
 
   it('5. resolve: works with different alarm IDs', async () => {

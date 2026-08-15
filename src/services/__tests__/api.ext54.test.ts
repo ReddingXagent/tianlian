@@ -5,6 +5,7 @@
  *        addMember without role, removeMember endpoint, notificationSend corrected shape,
  *        notificationSend null defaults
  */
+import axios from 'axios';
 import { teamApi, notificationSendApi } from '../api';
 
 // Mock axios
@@ -29,14 +30,14 @@ jest.mock('expo-secure-store', () => ({
   deleteItemSecure: jest.fn().mockResolvedValue(undefined),
 }));
 
-// Get mock instance
-const axios = require('axios');
-const mockedAxios = axios.__mockInstance as jest.Mocked<{
-  get: jest.Mock;
-  post: jest.Mock;
-  put: jest.Mock;
-  delete: jest.Mock;
-}>;
+const mockedAxios = (axios as unknown as {
+  __mockInstance: {
+    get: jest.Mock;
+    post: jest.Mock;
+    put: jest.Mock;
+    delete: jest.Mock;
+  },
+}).__mockInstance;
 
 describe('teamApi.addMember (POST /teams/{id}/members)', () => {
   beforeEach(() => {
