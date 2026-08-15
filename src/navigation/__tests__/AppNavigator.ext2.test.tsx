@@ -31,7 +31,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         // Invoke tabBarIcon to cover TabIcon branches
         if (options?.tabBarIcon) {
           // F1205: any收窄 — tabBarIcon实际类型为React.FC<TabIconProps的focused形态>
-          const renderIcon = options.tabBarIcon as ({ focused: boolean }) => React.ReactNode;
+          const renderIcon = options.tabBarIcon as ({ focused }: { focused: boolean }) => React.ReactNode;
           try {
             renderIcon({ focused: true });
             renderIcon({ focused: false });
