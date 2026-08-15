@@ -58,7 +58,8 @@ const RevenueScreen: React.FC = () => {
   }, [period]);
 
   useEffect(() => {
-    fetchData();
+    // F1203: 微任务解耦 effect 直调 async —— period 切换链同步适用
+    Promise.resolve().then(() => fetchData());
   }, [fetchData]);
 
   // 图表入场动画：每次数据加载完成淡入 + 上移

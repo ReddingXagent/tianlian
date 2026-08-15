@@ -38,8 +38,8 @@ export default function NetworkStatus(): React.ReactElement | null {
       }
     });
 
-    // 初始检查
-    checkConnectivity();
+    // 初始检查（F1203: 微任务解耦 effect 直调 async）
+    Promise.resolve().then(() => checkConnectivity());
 
     return () => {
       mountedRef.current = false;

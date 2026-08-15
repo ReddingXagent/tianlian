@@ -95,7 +95,8 @@ const NotificationCenterScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchData(false, 1);
+    // F1203: 微任务解耦 effect 直调 async
+    Promise.resolve().then(() => fetchData(false, 1));
   }, [fetchData]);
 
   const handleLoadMore = () => {

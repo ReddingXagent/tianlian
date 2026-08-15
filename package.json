@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --passWithNoTests",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "build": "tsc --noEmit",
     "check:alias": "bash scripts/check-alias-config.sh",
     "check:test-liveness": "bash scripts/check-test-suite-liveness.sh",
@@ -16,7 +16,7 @@
     "export:ios": "expo export --platform ios",
     "check:node": "bash scripts/check-node-version.sh",
     "check:engine-strict": "bash scripts/check-engine-strict.sh",
-    "lint:ci": "eslint . --max-warnings=12"
+    "lint:ci": "eslint . --max-warnings=0"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.14",

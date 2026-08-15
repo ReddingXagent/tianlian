@@ -77,7 +77,8 @@ const DeviceDetailScreen: React.FC = () => {
   }, [deviceId]);
 
   useEffect(() => {
-    fetchData();
+    // F1203: 微任务解耦 effect 直调 async
+    Promise.resolve().then(() => fetchData());
   }, [fetchData]);
 
   // 点击控制按钮 → 弹出确认对话框（替代原生 Alert，统一交互）

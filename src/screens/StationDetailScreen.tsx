@@ -28,7 +28,8 @@ export default function StationDetailScreen() {
   }, [stationId, fetchStationDetail, fetchStationDevices, fetchStationAlarms]);
 
   useEffect(() => {
-    loadData();
+    // F1203: 微任务解耦 effect 直调 async
+    Promise.resolve().then(() => loadData());
   }, [loadData]);
 
   if (loading && !selectedStation) {
