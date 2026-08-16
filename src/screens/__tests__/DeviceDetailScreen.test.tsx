@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, act, fireEvent } from '@testing-library/react-native';
+import { Modal } from 'react-native';
 import DeviceDetailScreen from '../DeviceDetailScreen';
 import { useDeviceControlLogStore } from '../../store/deviceControlLogStore';
 import { deviceApi } from '../../services/api';
@@ -380,7 +381,7 @@ describe('DeviceDetailScreen', () => {
     // 控制指令永不返回 → controlling 保持 true
     (deviceApi.controlDevice as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-    const { findByText } = render(<DeviceDetailScreen />);
+    const { findByText, UNSAFE_getByType } = render(<DeviceDetailScreen />);
 
     await findByText('远程控制');
     fireEvent.press(await findByText('停止'));
@@ -391,7 +392,16 @@ describe('DeviceDetailScreen', () => {
     });
 
     // controlling=true → onCancel 的 if (!controlling) 分支为假, 弹窗不关闭
-    fireEvent.press(await findByText('取消'));
+    // F1229 修复断言真机制假: fireEvent.press('取消') 打在 disabled={loading} 的按钮上,
+    // onPress 根本不触发, 原断言从未真正执行 L337 守卫; 改用 Modal onRequestClose
+    // (Android 物理返回键, 不受按钮 disabled 门控) 直调 onCancel 走真实守卫臂
+    const modal = UNSAFE_getByType(Modal);
+    expect(modal.props.visible).toBe(true);
+    await act(async () => {
+      modal.props.onRequestClose();
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    // 守卫生效: 弹窗仍打开(远程控制确认标题仍在)
     expect(await findByText('远程控制确认')).toBeTruthy();
     expect(deviceApi.controlDevice).toHaveBeenCalledTimes(1);
   });
