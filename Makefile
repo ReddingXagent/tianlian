@@ -1,5 +1,5 @@
 # 天链V3 边缘网关 — 开发快捷命令
-.PHONY: venv install run test lint check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check env-file-check compile-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
+.PHONY: venv install run test lint coverage check deploy-names-check deploy-endpoints-check api-port-check env-keys-check log-paths-check data-paths-check entry-file-check health-probes-check python-version-check template-render-check backup-restore-check pid-file-check start-interpreter-check env-file-check compile-check clean deploy deploy-rollback deploy-restore-db systemd-install systemd-start systemd-stop systemd-status systemd-restart systemd-logs docker-build docker-up docker-down docker-logs docker-shell
 
 VENV=.venv
 PYTHON=$(VENV)/bin/python
@@ -15,6 +15,13 @@ run:
 
 test:
 	$(VENV)/bin/pytest -x -q --timeout=30
+
+# F1232: coverage门禁固化 — F1231定版生产代码100%基线(1627 stmts全绿)
+# 限定生产模块(--cov=...), tests/目录不进分母; --cov-fail-under=100防倒退
+coverage:
+	$(VENV)/bin/pytest -q --timeout=120 --cov=main.py --cov=config.py --cov=db_migration.py \
+	--cov=adapters --cov=api --cov=models --cov=storage \
+	--cov-fail-under=100 --cov-report=term-missing
 
 lint:
 	$(VENV)/bin/ruff check .

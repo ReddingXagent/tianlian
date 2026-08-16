@@ -86,10 +86,11 @@ jobs:
       - name: Env file guard (F326)
         run: bash scripts/check-env-file.sh
 
+# F1232: coverage门禁同步CI — 与Makefile make coverage同参数(生产模块范围+fail-under=100)
       - name: Pytest with coverage
         run: |
           pip install pytest-cov
-          pytest -x -q --timeout=30 --cov=. --cov-report=term-missing --cov-report=xml
+          pytest -q --timeout=120 --cov=main.py --cov=config.py --cov=db_migration.py --cov=adapters --cov=api --cov=models --cov=storage --cov-fail-under=100 --cov-report=term-missing --cov-report=xml
 
       - name: Upload coverage
         if: always()
