@@ -31,6 +31,7 @@ jest.mock('@react-navigation/native', () => {
   return {
     NavigationContainer: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
+    useIsFocused: () => true,
     // TabBackHandler 需要: 最小导航对象(无父栈, tab停在 index 0)
     useNavigation: () => ({
       getParent: () => undefined,
@@ -93,6 +94,7 @@ jest.mock('../../screens/PaymentScreen', () => () => null);
 jest.mock('../../screens/VehicleScreen', () => () => null);
 jest.mock('../../screens/WalletScreen', () => () => null);
 jest.mock('../../screens/CouponScreen', () => () => null);
+jest.mock('../../screens/EnergyScreen', () => () => null);
 
 jest.mock('../../components/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) =>

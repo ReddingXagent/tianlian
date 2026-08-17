@@ -17,6 +17,7 @@ import { formatMoney, formatEnergy } from '../utils/format';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const MENU_ITEMS = [
+  { key: 'energy', label: '能源概览', icon: '📊', screen: 'Energy' as const },
   { key: 'vehicle', label: '车辆管理', icon: '🚗', screen: 'Vehicle' as const },
   { key: 'wallet', label: '我的钱包', icon: '💰', screen: 'Wallet' as const },
   { key: 'coupon', label: '我的优惠券', icon: '🎫', screen: 'Coupon' as const },

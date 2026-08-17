@@ -11,6 +11,7 @@ import {
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useStationStore } from '../store/stationStore';
+import { useActiveCharging } from '../hooks/useChargingPolling';
 import { RootStackParamList, Station } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -32,6 +33,14 @@ const HomeScreen: React.FC = () => {
   } = useStationStore();
   const [searchText, setSearchText] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+
+  // 检测进行中的充电会话, 有则顶部显示续充入口
+  const { activeOrderId } = useActiveCharging();
+  useEffect(() => {
+    if (activeOrderId) {
+      navigation.navigate('Charging', { orderId: activeOrderId });
+    }
+  }, [activeOrderId, navigation]);
 
   // 移动端质量基线: Home为主Tab, 切Tab后组件保活不重建,
   // 此前仅mount时拉取一次 → 切走再切回时站点状态(空闲/占用)是陈旧的。

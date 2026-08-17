@@ -16,6 +16,7 @@ export type RootStackParamList = {
   Vehicle: undefined;
   Wallet: undefined;
   Coupon: undefined;
+  Energy: undefined;
   Login: undefined;
 };
 

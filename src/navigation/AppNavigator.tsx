@@ -20,6 +20,7 @@ import PaymentScreen from '../screens/PaymentScreen';
 import VehicleScreen from '../screens/VehicleScreen';
 import WalletScreen from '../screens/WalletScreen';
 import CouponScreen from '../screens/CouponScreen';
+import EnergyScreen from '../screens/EnergyScreen';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -221,6 +222,16 @@ function MainWithDetail() {
         component={CouponScreen}
         options={{
           title: '我的优惠券',
+          headerStyle: { backgroundColor: '#1a73e8' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
+      <RootStack.Screen
+        name="Energy"
+        component={EnergyScreen}
+        options={{
+          title: '能源概览',
           headerStyle: { backgroundColor: '#1a73e8' },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
