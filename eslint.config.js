@@ -170,7 +170,7 @@ module.exports = [
     //   (setStorageSync+globalData双写)与api.login(code)兑换, 半登录态漂移; 摸底全仓仅
     //   app.js:47一处(F220预防式门控: 零违规先行), app.js已在ignores并集内, 零行为变化。
     files: ['**/*.js'],
-    ignores: ['app.js', '**/services/api.js', 'config/**', '**/__tests__/**', '**/*.test.js'],
+    ignores: ['app.js', '**/services/api.js', '**/services/modules/client.js', '**/services/modules/auth.js', 'config/**', '**/__tests__/**', '**/*.test.js'],
     rules: {
       'no-restricted-syntax': ['error',
         {
