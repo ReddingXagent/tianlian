@@ -15,7 +15,6 @@ jest.mock('react-native', () => ({
 import { useNetworkStatus } from '../useNetworkStatus';
 
 // Access the mock for assertions
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const netInfoMock = require('@react-native-community/netinfo');
 
 describe('useNetworkStatus.native — NetInfo success path', () => {

@@ -27,7 +27,6 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 // The mock create() returns the same instance each time.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const axios = require('axios');
 const mockInstance = axios.create();
 

@@ -24,7 +24,6 @@ jest.mock('@react-navigation/native', () => ({
 
 // Mock navigators — use require('react') inside factory
 jest.mock('@react-navigation/native-stack', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const R = require('react');
   return {
     createNativeStackNavigator: () => ({
@@ -36,7 +35,6 @@ jest.mock('@react-navigation/native-stack', () => {
 });
 
 jest.mock('@react-navigation/bottom-tabs', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const R = require('react');
   return {
     createBottomTabNavigator: () => ({
@@ -48,7 +46,6 @@ jest.mock('@react-navigation/bottom-tabs', () => {
 
 // Mock all screens with simple components
 const makeScreen = (name: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const R = require('react');
   return function MockScreen() {
     return R.createElement('Text', { testID: name.toLowerCase() }, name);

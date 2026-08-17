@@ -27,7 +27,6 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const api = require('../api').default as jest.Mocked<{ get: jest.Mock }>;
 
 describe('api ext5 — getList unknown status ?? fallback (L211)', () => {

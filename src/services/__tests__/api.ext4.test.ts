@@ -28,7 +28,6 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 // Access the mocked api instance via require to avoid duplicate import warnings
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const api = require('../api').default as jest.Mocked<{
   get: jest.Mock;
 }>;

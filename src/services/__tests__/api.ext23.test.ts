@@ -26,7 +26,6 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const axios = require('axios');
 const mockGet = axios.create().get as jest.Mock;
 

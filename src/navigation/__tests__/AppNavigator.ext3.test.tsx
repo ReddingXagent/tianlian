@@ -11,7 +11,6 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 jest.mock('@react-navigation/native-stack', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const R = require('react');
   return {
     createNativeStackNavigator: () => ({
@@ -23,7 +22,6 @@ jest.mock('@react-navigation/native-stack', () => {
 
 // Mock bottom-tabs to actually RENDER tabBarIcon output (covers TabIcon branches)
 jest.mock('@react-navigation/bottom-tabs', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const R = require('react');
   return {
     createBottomTabNavigator: () => ({
