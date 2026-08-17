@@ -1,18 +1,8 @@
 /**
  * types/modules/energy.ts — 能源概览类型
  */
-export interface EnergyYoY {
-  pvGenerationYoY: number;
-  chargingAmountYoY: number;
-  dischargeAmountYoY: number;
-  totalRevenueYoY: number;
-}
-
-export interface EnergyPriceInfo {
-  feedInTariff: number;
-  chargingPrice: number;
-  dischargePrice: number;
-}
+import type { EnergyYoY, EnergyPriceInfo } from '@tianlian/shared-types';
+export { type EnergyYoY, type EnergyPriceInfo } from '@tianlian/shared-types';
 
 export interface EnergySummary {
   period: string;

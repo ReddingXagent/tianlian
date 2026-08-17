@@ -1,7 +1,8 @@
 /**
  * types/modules/station.ts — 站点/充电桩类型
  */
-export type StationStatus = 'online' | 'offline' | 'maintenance';
+import type { StationStatus } from '@tianlian/shared-types';
+export { type StationStatus } from '@tianlian/shared-types';
 export type ChargerType = 'dc' | 'ac';
 export type ConnectorStatus = 'idle' | 'charging' | 'offline' | 'fault';
 
