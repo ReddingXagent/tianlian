@@ -366,10 +366,16 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
+      if (mountedRef.current) flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, []);
 
@@ -514,7 +520,7 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
                 setInputText(q);
                 // Auto-send on next render cycle
                 setTimeout(() => {
-                  if (q === '仪表盘概览') {
+                  if (mountedRef.current && q === '仪表盘概览') {
                     setInputText(q);
                     // trigger send via ref
                     inputRef.current?.focus();
