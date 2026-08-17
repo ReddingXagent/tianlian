@@ -21,14 +21,14 @@ export function parseScanPayload(payload: string): string | null {
 
   // ① 编码形态优先(兼容 URL/自定义 scheme 包裹)
   const codeMatch = data.match(CODE_PATTERN);
-  if (codeMatch) return codeMatch[0].toUpperCase();
+  if (codeMatch && codeMatch[0]) return codeMatch[0].toUpperCase();
 
   // ② URL: 取最后路径段
   // scheme正则已保证'//'前至少有"scheme:"非空段, 去尾斜杠后末段必非空, 无需空判
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(data)) {
-    const path = data.split(/[?#]/)[0];
+    const path = data.split(/[?#]/)[0]!;
     const segments = path.replace(/\/+$/, '').split('/');
-    const last = segments[segments.length - 1];
+    const last = segments[segments.length - 1]!;
     try {
       return decodeURIComponent(last);
     } catch {
