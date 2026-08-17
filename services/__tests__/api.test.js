@@ -1,5 +1,5 @@
 // services/__tests__/api.test.js
-// 闭环战役B3: 真后端契约测试 (form-urlencoded登录 + /business经营域 + snake→camel归一化)
+// 闭环战役B3: 真后端契约测试 (form-urlencoded登录 + 经营域 + snake→camel归一化)
 const mockWxRequest = jest.fn();
 const mockGetStorageSync = jest.fn();
 const mockSetStorageSync = jest.fn();
@@ -151,12 +151,12 @@ describe('API Service (B3 真契约)', () => {
   });
 
   describe('充电 (扫码→start-by-sn)', () => {
-    it('startCharging: POST /business/charging-orders/start-by-sn + snake body + mapOrder', async () => {
+    it('startCharging: POST /charging-orders/start-by-sn + snake body + mapOrder', async () => {
       useStore({ userInfo: { id: 7 } });
       okResponse({ id: 42, order_no: 'CO-1', station_id: 5, device_id: 9, user_id: 7, status: 'charging', energy_kwh: 0 });
       const res = await api.startCharging('CHG-001');
       const call = lastCall();
-      expect(call.url).toContain('/business/charging-orders/start-by-sn');
+      expect(call.url).toContain('/charging-orders/start-by-sn');
       expect(call.data).toEqual({ charger_sn: 'CHG-001', user_id: 7 });
       expect(res.data.sessionId).toBe('42'); // 兼容充电页sessionId
       expect(res.data.stationId).toBe(5);
@@ -166,7 +166,7 @@ describe('API Service (B3 真契约)', () => {
     it('getChargingStatus: GET 订单详情 + settled→pending UI态', async () => {
       okResponse({ id: 42, status: 'settled', amount: 8.5, final_amount: 8.5 });
       const res = await api.getChargingStatus(42);
-      expect(lastCall().url).toContain('/business/charging-orders/42');
+      expect(lastCall().url).toContain('/charging-orders/42');
       expect(res.data.status).toBe('pending');
       expect(res.data.rawStatus).toBe('settled');
     });
@@ -175,7 +175,7 @@ describe('API Service (B3 真契约)', () => {
       okResponse({ id: 42, status: 'settled', energy_kwh: 30 });
       const res = await api.stopCharging(42, 30, 60);
       const call = lastCall();
-      expect(call.url).toContain('/business/charging-orders/42/complete');
+      expect(call.url).toContain('/charging-orders/42/complete');
       expect(call.data).toEqual({ energy_kwh: 30, duration_min: 60 });
       expect(res.data.energyKwh).toBe(30);
     });
@@ -193,7 +193,7 @@ describe('API Service (B3 真契约)', () => {
       okResponse({ items: [{ id: 2, status: 'paid' }, { id: 1, status: 'charging' }], total: 2, page: 1, page_size: 10 });
       const res = await api.getOrders({ page: 1, pageSize: 10, status: 'finished' });
       const call = lastCall();
-      expect(call.url).toContain('/business/charging-orders');
+      expect(call.url).toContain('/charging-orders');
       expect(call.data).toEqual({ page: 1, page_size: 10, user_id: 7, status: 'paid' });
       expect(res.data.total).toBe(2);
       expect(res.data.items[0].status).toBe('finished'); // paid→finished UI态
@@ -222,7 +222,7 @@ describe('API Service (B3 真契约)', () => {
       okResponse({ id: 9, status: 'paid', final_amount: 20.5 });
       const res = await api.createPayment(9, 'SAVE5');
       const call = lastCall();
-      expect(call.url).toContain('/business/charging-orders/9/pay');
+      expect(call.url).toContain('/charging-orders/9/pay');
       expect(call.data).toEqual({ coupon_code: 'SAVE5' });
       expect(res.data.status).toBe('finished');
     });
@@ -236,7 +236,7 @@ describe('API Service (B3 真契约)', () => {
     it('queryPaymentStatus 即订单详情', async () => {
       okResponse({ id: 9, status: 'paid' });
       const res = await api.queryPaymentStatus(9);
-      expect(lastCall().url).toContain('/business/charging-orders/9');
+      expect(lastCall().url).toContain('/charging-orders/9');
       expect(res.data.status).toBe('finished');
     });
   });
@@ -251,12 +251,12 @@ describe('API Service (B3 真契约)', () => {
       expect(res.data.items[0].minAmount).toBe(10);
     });
 
-    it('claimCoupon: POST /business/coupons/claim + code/user_id', async () => {
+    it('claimCoupon: POST /coupons/claim + code/user_id', async () => {
       useStore({ userInfo: { id: 7 } });
       okResponse({ id: 1, code: 'C1' }, 200);
       await api.claimCoupon('C1');
       const call = lastCall();
-      expect(call.url).toContain('/business/coupons/claim');
+      expect(call.url).toContain('/coupons/claim');
       expect(call.data).toEqual({ code: 'C1', user_id: 7 });
     });
 
@@ -269,7 +269,7 @@ describe('API Service (B3 真契约)', () => {
   });
 
   describe('积分', () => {
-    it('getPoints: GET /business/points?user_id + mapPoints', async () => {
+    it('getPoints: GET /points?user_id + mapPoints', async () => {
       useStore({ userInfo: { id: 7 } });
       okResponse({ user_id: 7, balance: 120, recent: [{ delta: 20, reason: '充电消费', created_at: 'T1' }] });
       const res = await api.getPoints();

@@ -8,7 +8,7 @@ const { getCurrentUserId } = require('./auth');
  * @param {string} chargerId - 充电桩SN或code (扫码内容)
  */
 function startCharging(chargerId) {
-  return request('/business/charging-orders/start-by-sn', {
+  return request('/charging-orders/start-by-sn', {
     method: 'POST',
     data: { charger_sn: chargerId, user_id: getCurrentUserId() },
     showLoading: true,
@@ -21,7 +21,7 @@ function startCharging(chargerId) {
  * @param {string|number} sessionId - 订单ID
  */
 function getChargingStatus(sessionId) {
-  return request(`/business/charging-orders/${sessionId}`).then((res) => ({
+  return request(`/charging-orders/${sessionId}`).then((res) => ({
     ...res,
     data: mapOrder(res.data)
   }));
@@ -34,7 +34,7 @@ function getChargingStatus(sessionId) {
  * @param {number} durationMin - 充电时长(分钟)
  */
 function stopCharging(sessionId, energyKwh = 0, durationMin = 0) {
-  return request(`/business/charging-orders/${sessionId}/complete`, {
+  return request(`/charging-orders/${sessionId}/complete`, {
     method: 'POST',
     data: { energy_kwh: energyKwh, duration_min: durationMin },
     showLoading: true,

@@ -12,7 +12,7 @@ function getCoupons(status) {
   const uid = getCurrentUserId();
   if (uid !== null && uid !== undefined) query.user_id = uid;
   if (status) query.status = COUPON_STATUS_TO_BACKEND[status] || status;
-  return request('/business/coupons', { data: query }).then((res) => ({
+  return request('/coupons', { data: query }).then((res) => ({
     ...res,
     data: mapPagination(res.data, mapCoupon)
   }));
@@ -23,7 +23,7 @@ function getCoupons(status) {
  * @param {string} couponCode - 优惠券码
  */
 function claimCoupon(couponCode) {
-  return request('/business/coupons/claim', {
+  return request('/coupons/claim', {
     method: 'POST',
     data: { code: couponCode, user_id: getCurrentUserId() },
     showLoading: true,

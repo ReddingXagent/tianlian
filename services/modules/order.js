@@ -14,7 +14,7 @@ function getOrders(params = {}) {
   const query = { page, page_size: pageSize };
   if (uid !== null && uid !== undefined) query.user_id = uid;
   if (backendStatus) query.status = backendStatus;
-  return request('/business/charging-orders', { data: query }).then((res) => ({
+  return request('/charging-orders', { data: query }).then((res) => ({
     ...res,
     data: mapPagination(res.data, mapOrder)
   }));
@@ -24,7 +24,7 @@ function getOrders(params = {}) {
  * 获取订单详情
  */
 function getOrderDetail(orderId) {
-  return request(`/business/charging-orders/${orderId}`).then((res) => ({
+  return request(`/charging-orders/${orderId}`).then((res) => ({
     ...res,
     data: mapOrder(res.data)
   }));
@@ -48,7 +48,7 @@ function reviewOrder() {
  * @param {string} couponCode - 可选优惠券码
  */
 function createPayment(orderId, couponCode) {
-  return request(`/business/charging-orders/${orderId}/pay`, {
+  return request(`/charging-orders/${orderId}/pay`, {
     method: 'POST',
     data: { coupon_code: couponCode || null },
     showLoading: true,

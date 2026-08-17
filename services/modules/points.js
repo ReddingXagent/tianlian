@@ -11,7 +11,7 @@ function getPoints(userId) {
   if (uid === null || uid === undefined) {
     return Promise.reject(new Error('NO_USER'));
   }
-  return request('/business/points', { data: { user_id: uid } }).then((res) => ({
+  return request('/points', { data: { user_id: uid } }).then((res) => ({
     ...res,
     data: mapPoints(res.data)
   }));
