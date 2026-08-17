@@ -18,7 +18,7 @@ import path from 'path';
  * 接入: jest全量跑自动入门禁(本仓无CI/Makefile, 走jest测试接入)。
  */
 
-const TYPES_PATH = path.join(__dirname, '../types/index.ts');
+const TYPES_DIR = path.join(__dirname, '../types');
 const NAV_PATH = path.join(__dirname, '../navigation/AppNavigator.tsx');
 const SRC_DIR = path.join(__dirname, '..');
 
@@ -65,6 +65,13 @@ function extractRegisteredNames(navSource: string): string[] {
   return names;
 }
 
+function collectTypesText(): string {
+  return fs.readdirSync(TYPES_DIR, { withFileTypes: true })
+    .filter((e) => e.isFile() && /\.ts$/.test(e.name))
+    .map((f) => fs.readFileSync(path.join(TYPES_DIR, f.name), 'utf8'))
+    .join('\n');
+}
+
 function walkSourceFiles(dir: string, out: string[] = []): string[] {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -85,7 +92,16 @@ function collectSourceText(): string {
 }
 
 describe('导航路由声明↔注册双源一致性守卫', () => {
-  const typesSource = fs.readFileSync(TYPES_PATH, 'utf8');
+  let typesSource = collectTypesText();
+  // also read modules subdirectory for type declarations
+  const modulesDir = path.join(TYPES_DIR, 'modules');
+  if (fs.existsSync(modulesDir)) {
+    const moduleFiles = fs.readdirSync(modulesDir, { withFileTypes: true })
+      .filter((e) => e.isFile() && /\.ts$/.test(e.name))
+      .map((f) => fs.readFileSync(path.join(modulesDir, f.name), 'utf8'))
+      .join('\n');
+    typesSource += '\n' + moduleFiles;
+  }
   const navSource = fs.readFileSync(NAV_PATH, 'utf8');
   const allSource = collectSourceText();
 
