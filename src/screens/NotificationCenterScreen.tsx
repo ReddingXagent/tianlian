@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,10 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { notificationApi } from '../services/api';
-import { AppNotification, NotificationType } from '../types';
+import { useNotifications } from '../hooks/useNotifications';
+import { NotificationType } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
-
-type ReadFilter = 'all' | 'unread';
-type TypeFilter = NotificationType | 'all';
 
 const NOTIFICATION_ICON: Record<string, string> = {
   alarm: '🔴',
@@ -33,8 +30,7 @@ const NOTIFICATION_TYPE_LABEL: Record<string, string> = {
   revenue: '营收通知',
 };
 
-// 类型筛选 chip 配置
-const TYPE_FILTER_OPTIONS: { value: TypeFilter; label: string }[] = [
+const TYPE_FILTER_OPTIONS: { value: NotificationType | 'all'; label: string }[] = [
   { value: 'all', label: '全部' },
   { value: 'alarm', label: '告警' },
   { value: 'work_order', label: '工单' },
@@ -44,95 +40,30 @@ const TYPE_FILTER_OPTIONS: { value: TypeFilter; label: string }[] = [
 ];
 
 const NotificationCenterScreen: React.FC = () => {
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [readFilter, setReadFilter] = useState<ReadFilter>('all');
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
-
-  // 客户端双重筛选：已读状态 + 通知类型
-  const filteredNotifications = useMemo(() => {
-    return notifications.filter((n) => {
-      if (readFilter === 'unread' && n.isRead) return false;
-      if (typeFilter !== 'all' && n.type !== typeFilter) return false;
-      return true;
-    });
-  }, [notifications, readFilter, typeFilter]);
-
-  const fetchData = useCallback(async (isRefresh = false, p = 1) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else if (p === 1) {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const [notifRes, unreadRes] = await Promise.all([
-        notificationApi.getList({ page: p, pageSize: 20 }),
-        notificationApi.getUnreadCount(),
-      ]);
-      const data = notifRes.data;
-
-      if (p === 1) {
-        setNotifications(data.items);
-      } else {
-        setNotifications((prev) => [...prev, ...data.items]);
-      }
-      setTotal(data.total);
-      setPage(p);
-      setUnreadCount(unreadRes.data.count);
-    } catch {
-      setError('加载通知失败');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // F1203: 微任务解耦 effect 直调 async
-    Promise.resolve().then(() => fetchData(false, 1));
-  }, [fetchData]);
-
-  const handleLoadMore = () => {
-    if (notifications.length < total && !loading) {
-      fetchData(false, page + 1);
-    }
-  };
-
-  const handleMarkAsRead = async (id: number) => {
-    try {
-      await notificationApi.markAsRead(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch {
-      // 静默处理
-    }
-  };
+  const {
+    notifications,
+    filteredNotifications,
+    loading,
+    refreshing,
+    total,
+    unreadCount,
+    error,
+    readFilter,
+    typeFilter,
+    setReadFilter,
+    setTypeFilter,
+    fetchData,
+    handleLoadMore,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
 
   const handleMarkAllAsRead = () => {
     Alert.alert('标记已读', '确定要将所有通知标记为已读？', [
       { text: '取消', style: 'cancel' },
       {
         text: '标记已读',
-        onPress: async () => {
-          try {
-            await notificationApi.markAllAsRead();
-            setNotifications((prev) =>
-              prev.map((n) => ({ ...n, isRead: true }))
-            );
-            setUnreadCount(0);
-          } catch {
-            // 静默处理
-          }
-        },
+        onPress: () => { void markAllAsRead(); },
       },
     ]);
   };
@@ -152,11 +83,11 @@ const NotificationCenterScreen: React.FC = () => {
     return `${d.getMonth() + 1}/${d.getDate()}`;
   };
 
-  const renderNotificationItem = ({ item }: { item: AppNotification }) => (
+  const renderNotificationItem = ({ item }: { item: import('../types').AppNotification }) => (
     <TouchableOpacity
       style={[styles.notifCard, !item.isRead && styles.notifCardUnread]}
       activeOpacity={0.7}
-      onPress={() => !item.isRead && handleMarkAsRead(item.id)}
+      onPress={() => !item.isRead && markAsRead(item.id)}
      accessibilityRole="button">
       <View style={styles.notifRow}>
         <Text style={styles.notifIcon}>
@@ -195,9 +126,9 @@ const NotificationCenterScreen: React.FC = () => {
         </View>
       )}
 
-      {loading && notifications.length === 0 ? (
+      {loading && filteredNotifications.length === 0 ? (
         <LoadingSpinner text="加载通知列表..." />
-      ) : error && notifications.length === 0 ? (
+      ) : error && filteredNotifications.length === 0 ? (
         <EmptyState
           icon="⚠️"
           title="加载失败"
@@ -278,11 +209,11 @@ const NotificationCenterScreen: React.FC = () => {
               )
             }
             ListFooterComponent={
-              notifications.length > 0 && notifications.length < total ? (
+              filteredNotifications.length > 0 && filteredNotifications.length < total ? (
                 <View style={styles.loadingMore}>
                   <LoadingSpinner text="加载更多..." size="small" />
                 </View>
-              ) : notifications.length >= total && total > 0 ? (
+              ) : filteredNotifications.length >= total && total > 0 ? (
                 <Text style={styles.footerText}>已显示全部 {total} 条通知</Text>
               ) : null
             }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { revenueApi } from '../services/api';
+import { useRevenue } from '../hooks/useRevenue';
 import { RevenueRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -30,40 +30,9 @@ const screenWidth = Dimensions.get('window').width;
 
 const RevenueScreen: React.FC = () => {
   const [period, setPeriod] = useState<PeriodType>('week');
-  const [records, setRecords] = useState<RevenueRecord[]>([]);
-  const [summary, setSummary] = useState({ today: 0, week: 0, month: 0, total: 0 });
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { records, summary, loading, refreshing, fetchData } = useRevenue({ period });
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-
-    try {
-      const [recordsRes, summaryRes] = await Promise.all([
-        revenueApi.getRecords({ type: period }),
-        revenueApi.getSummary(),
-      ]);
-      setRecords(recordsRes.data);
-      setSummary(summaryRes.data);
-    } catch {
-      // 静默处理
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [period]);
-
-  useEffect(() => {
-    // F1203: 微任务解耦 effect 直调 async —— period 切换链同步适用
-    Promise.resolve().then(() => fetchData());
-  }, [fetchData]);
-
-  // 图表入场动画：每次数据加载完成淡入 + 上移
-  // useState 惰性初始化替代 useRef().current: 渲染期读 ref 违反 react-hooks/refs
+  // 图表入场动画
   const [fadeAnim] = useState(() => new Animated.Value(0));
   useEffect(() => {
     if (records.length > 0 && !loading) {
@@ -76,7 +45,7 @@ const RevenueScreen: React.FC = () => {
     }
   }, [records, loading, fadeAnim]);
 
-  // 导出 CSV：生成内容后调用系统分享面板
+  // 导出 CSV
   const handleExport = useCallback(async () => {
     if (records.length === 0) return;
     const csv = buildRevenueCsv(records, summary, period);
@@ -92,7 +61,7 @@ const RevenueScreen: React.FC = () => {
 
   const chartData = {
     labels: records.length > 0
-      ? records.map((r) => {
+      ? records.map((r: RevenueRecord) => {
           const d = new Date(r.date);
           return `${d.getMonth() + 1}/${d.getDate()}`;
         })
@@ -100,7 +69,7 @@ const RevenueScreen: React.FC = () => {
     datasets: [
       {
         data: records.length > 0
-          ? records.map((r) => r.amount)
+          ? records.map((r: RevenueRecord) => r.amount)
           : [0],
         color: () => '#1a73e8',
         strokeWidth: 2,
@@ -142,7 +111,7 @@ const RevenueScreen: React.FC = () => {
         <LoadingSpinner text="加载营收数据..." />
       ) : (
         <>
-          {/* 汇总数据 (独立于明细, 无明细也展示) */}
+          {/* 汇总数据 */}
           <View style={styles.summaryGrid}>
             <View style={styles.summaryCard}>
               <Text style={styles.summaryLabel}>今日</Text>

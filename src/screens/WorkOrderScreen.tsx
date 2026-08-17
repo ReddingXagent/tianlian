@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { workOrderApi } from '../services/api';
+import { useWorkOrders } from '../hooks/useWorkOrders';
 import { WorkOrder, RootStackParamList, WorkOrderType, WorkOrderPriority } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
@@ -50,13 +50,9 @@ const WorkOrderScreen: React.FC = () => {
   const route = useRoute<WorkOrderRouteProp>();
   const stationId = route.params?.stationId;
 
-  const [orders, setOrders] = useState<WorkOrder[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [error, setError] = useState<string | null>(null);
+  const { orders, loading, refreshing, total, error, fetchData, handleLoadMore, createWorkOrder, completeWorkOrder } =
+    useWorkOrders({ stationId, statusFilter });
 
   // Create modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -65,48 +61,6 @@ const WorkOrderScreen: React.FC = () => {
   const [createType, setCreateType] = useState<WorkOrderType>('repair');
   const [createPriority, setCreatePriority] = useState<WorkOrderPriority>('normal');
   const [creating, setCreating] = useState(false);
-
-  const fetchData = useCallback(async (isRefresh = false, p = 1) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else if (p === 1) {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const params: { page: number; pageSize: number; stationId?: number; status?: string } = { page: p, pageSize: 20 };
-      if (stationId) params.stationId = stationId;
-      if (statusFilter !== 'all') params.status = statusFilter;
-
-      const response = await workOrderApi.getList(params);
-      const data = response.data;
-
-      if (p === 1) {
-        setOrders(data.items);
-      } else {
-        setOrders((prev) => [...prev, ...data.items]);
-      }
-      setTotal(data.total);
-      setPage(p);
-    } catch {
-      setError('加载工单列表失败');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [stationId, statusFilter]);
-
-  useEffect(() => {
-    // F1203: 微任务解耦 effect 直调 async —— statusFilter 变化链同步适用
-    Promise.resolve().then(() => fetchData(false, 1));
-  }, [fetchData]);
-
-  const handleLoadMore = () => {
-    if (orders.length < total && !loading) {
-      fetchData(false, page + 1);
-    }
-  };
 
   const handleCreateWorkOrder = async () => {
     if (!createTitle.trim()) {
@@ -119,25 +73,23 @@ const WorkOrderScreen: React.FC = () => {
     }
 
     setCreating(true);
-    try {
-      await workOrderApi.createWorkOrder({
-        stationId,
-        title: createTitle.trim(),
-        description: createDesc.trim(),
-        type: createType,
-        priority: createPriority,
-      });
+    const success = await createWorkOrder({
+      title: createTitle.trim(),
+      description: createDesc.trim(),
+      type: createType,
+      priority: createPriority,
+    });
+    setCreating(false);
+
+    if (success) {
       Alert.alert('成功', '工单创建成功');
       setShowCreateModal(false);
       setCreateTitle('');
       setCreateDesc('');
       setCreateType('repair');
       setCreatePriority('normal');
-      fetchData(false, 1);
-    } catch {
+    } else {
       Alert.alert('失败', '创建工单失败，请稍后重试');
-    } finally {
-      setCreating(false);
     }
   };
 
@@ -150,11 +102,10 @@ const WorkOrderScreen: React.FC = () => {
         {
           text: '确定完成',
           onPress: async () => {
-            try {
-              await workOrderApi.completeWorkOrder(order.id);
+            const success = await completeWorkOrder(order.id);
+            if (success) {
               Alert.alert('成功', '工单已标记为完成');
-              fetchData(false, 1);
-            } catch {
+            } else {
               Alert.alert('失败', '操作失败，请稍后重试');
             }
           },

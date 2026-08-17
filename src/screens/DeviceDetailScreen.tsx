@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { deviceApi } from '../services/api';
-import { Device, DeviceTelemetry, DeviceControlLog, RootStackParamList } from '../types';
+import { useDeviceDetail } from '../hooks/useDeviceDetail';
+import { RootStackParamList, DeviceControlLog } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
@@ -32,12 +32,9 @@ const DeviceDetailScreen: React.FC = () => {
   const route = useRoute<DeviceDetailRouteProp>();
   const { deviceId } = route.params;
 
-  const [device, setDevice] = useState<Device | null>(null);
-  const [telemetry, setTelemetry] = useState<DeviceTelemetry | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [controlling, setControlling] = useState(false);
+  const { device, telemetry, loading, refreshing, error, controlling, fetchData, controlDevice } =
+    useDeviceDetail({ deviceId });
+
   // 待确认的远程控制指令
   const [confirmCommand, setConfirmCommand] = useState<{
     command: string;
@@ -51,37 +48,7 @@ const DeviceDetailScreen: React.FC = () => {
   const clearLogs = useDeviceControlLogStore((s) => s.clearLogs);
   const deviceLogs = logs.filter((l) => l.deviceId === deviceId);
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const [deviceRes, telemetryRes] = await Promise.all([
-        deviceApi.getDetail(deviceId),
-        deviceApi.getTelemetry(deviceId).catch(() => null), // telemetry may not be available
-      ]);
-      setDevice(deviceRes.data);
-      if (telemetryRes) {
-        setTelemetry(telemetryRes.data);
-      }
-    } catch {
-      setError('加载设备详情失败');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [deviceId]);
-
-  useEffect(() => {
-    // F1203: 微任务解耦 effect 直调 async
-    Promise.resolve().then(() => fetchData());
-  }, [fetchData]);
-
-  // 点击控制按钮 → 弹出确认对话框（替代原生 Alert，统一交互）
+  // 点击控制按钮 → 弹出确认对话框
   const handleControl = (command: string, label: string, danger = false) => {
     setConfirmCommand({ command, label, danger });
   };
@@ -90,10 +57,10 @@ const DeviceDetailScreen: React.FC = () => {
   const executeControl = async () => {
     if (!confirmCommand || !device) return;
     const { command, label } = confirmCommand;
-    setControlling(true);
-    try {
-      const response = await deviceApi.controlDevice(deviceId, command);
-      const message = response.data.message || `${label}指令已发送`;
+    const result = await controlDevice(command);
+
+    if (result.success) {
+      const message = result.message || `${label}指令已发送`;
       addLog({
         deviceId,
         deviceName: device.name,
@@ -104,7 +71,7 @@ const DeviceDetailScreen: React.FC = () => {
         operator: '当前用户',
       });
       Alert.alert('操作成功', message);
-    } catch {
+    } else {
       const failMsg = `发送${label}指令失败`;
       addLog({
         deviceId,
@@ -116,10 +83,8 @@ const DeviceDetailScreen: React.FC = () => {
         operator: '当前用户',
       });
       Alert.alert('操作失败', `${failMsg}，请稍后重试`);
-    } finally {
-      setControlling(false);
-      setConfirmCommand(null);
     }
+    setConfirmCommand(null);
   };
 
   const formatLogTime = (dateStr: string): string => {
