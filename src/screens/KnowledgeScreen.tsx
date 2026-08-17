@@ -112,6 +112,13 @@ const KnowledgeScreen: React.FC = () => {
     };
   }, [activeCategory, searchQuery]);
 
+  // 卸载时清理 debounce timer, 防止回调在组件销毁后执行 setState
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) clearTimeout(searchTimeout);
+    };
+  }, [searchTimeout]);
+
   const handleSearch = (text: string) => {
     setSearchQuery(text);
     if (searchTimeout) clearTimeout(searchTimeout);
