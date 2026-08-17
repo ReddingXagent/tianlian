@@ -51,7 +51,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </ScrollView>
           )}
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.primaryButton} onPress={this.handleReset}>
+            <TouchableOpacity style={styles.primaryButton} onPress={this.handleReset} accessibilityRole="button">
               <Text style={styles.primaryButtonText}>重试</Text>
             </TouchableOpacity>
           </View>

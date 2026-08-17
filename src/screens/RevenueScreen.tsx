@@ -130,7 +130,7 @@ const RevenueScreen: React.FC = () => {
             key={p}
             style={[styles.periodBtn, period === p && styles.periodBtnActive]}
             onPress={() => setPeriod(p)}
-          >
+           accessibilityRole="button">
             <Text style={[styles.periodBtnText, period === p && styles.periodBtnTextActive]}>
               {PERIOD_LABELS[p]}
             </Text>
@@ -174,7 +174,7 @@ const RevenueScreen: React.FC = () => {
               <Text style={styles.chartTitle}>
                 {PERIOD_LABELS[period]}营收趋势
               </Text>
-              <TouchableOpacity style={styles.exportBtn} onPress={handleExport} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.exportBtn} onPress={handleExport} activeOpacity={0.7} accessibilityRole="button">
                 <Text style={styles.exportBtnText}>📥 导出CSV</Text>
               </TouchableOpacity>
             </View>

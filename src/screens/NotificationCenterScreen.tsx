@@ -157,7 +157,7 @@ const NotificationCenterScreen: React.FC = () => {
       style={[styles.notifCard, !item.isRead && styles.notifCardUnread]}
       activeOpacity={0.7}
       onPress={() => !item.isRead && handleMarkAsRead(item.id)}
-    >
+     accessibilityRole="button">
       <View style={styles.notifRow}>
         <Text style={styles.notifIcon}>
           {NOTIFICATION_ICON[item.type] || '📢'}
@@ -189,7 +189,7 @@ const NotificationCenterScreen: React.FC = () => {
       {unreadCount > 0 && (
         <View style={styles.actionBar}>
           <Text style={styles.unreadText}>{unreadCount} 条未读</Text>
-          <TouchableOpacity onPress={handleMarkAllAsRead}>
+          <TouchableOpacity onPress={handleMarkAllAsRead} accessibilityRole="button">
             <Text style={styles.markAllText}>全部标记已读</Text>
           </TouchableOpacity>
         </View>
@@ -213,7 +213,7 @@ const NotificationCenterScreen: React.FC = () => {
               <TouchableOpacity
                 style={[styles.readSegBtn, readFilter === 'all' && styles.readSegBtnActive]}
                 onPress={() => setReadFilter('all')}
-              >
+               accessibilityRole="button">
                 <Text style={[styles.readSegText, readFilter === 'all' && styles.readSegTextActive]}>
                   全部
                 </Text>
@@ -221,7 +221,7 @@ const NotificationCenterScreen: React.FC = () => {
               <TouchableOpacity
                 style={[styles.readSegBtn, readFilter === 'unread' && styles.readSegBtnActive]}
                 onPress={() => setReadFilter('unread')}
-              >
+               accessibilityRole="button">
                 <Text style={[styles.readSegText, readFilter === 'unread' && styles.readSegTextActive]}>
                   未读{unreadCount > 0 ? ` ${unreadCount}` : ''}
                 </Text>
@@ -242,7 +242,7 @@ const NotificationCenterScreen: React.FC = () => {
                   key={opt.value}
                   style={[styles.typeChip, active && styles.typeChipActive]}
                   onPress={() => setTypeFilter(opt.value)}
-                >
+                 accessibilityRole="button">
                   <Text style={[styles.typeChipText, active && styles.typeChipTextActive]}>
                     {opt.label}
                   </Text>

@@ -247,7 +247,7 @@ const DeviceDetailScreen: React.FC = () => {
             onPress={() => handleControl('start', '启动')}
             disabled={controlling || device?.status === 'online'}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             {controlling ? (
               <ActivityIndicator color="#2e7d32" size="small" />
             ) : (
@@ -263,7 +263,7 @@ const DeviceDetailScreen: React.FC = () => {
             onPress={() => handleControl('stop', '停止', true)}
             disabled={controlling}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             <Text style={styles.controlIcon}>⏹️</Text>
             <Text style={[styles.controlLabel, { color: '#c62828' }]}>停止</Text>
           </TouchableOpacity>
@@ -273,7 +273,7 @@ const DeviceDetailScreen: React.FC = () => {
             onPress={() => handleControl('restart', '重启')}
             disabled={controlling}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             <Text style={styles.controlIcon}>🔄</Text>
             <Text style={[styles.controlLabel, { color: '#f57f17' }]}>重启</Text>
           </TouchableOpacity>
@@ -283,7 +283,7 @@ const DeviceDetailScreen: React.FC = () => {
             onPress={() => handleControl('reset', '复位')}
             disabled={controlling}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             <Text style={styles.controlIcon}>🔧</Text>
             <Text style={[styles.controlLabel, { color: '#1565c0' }]}>复位</Text>
           </TouchableOpacity>
@@ -295,7 +295,7 @@ const DeviceDetailScreen: React.FC = () => {
         <View style={styles.logHeader}>
           <Text style={styles.sectionTitle}>操作日志</Text>
           {deviceLogs.length > 0 && (
-            <TouchableOpacity onPress={clearLogs} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity onPress={clearLogs} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button">
               <Text style={styles.clearLogText}>清空</Text>
             </TouchableOpacity>
           )}

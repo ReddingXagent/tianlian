@@ -153,7 +153,7 @@ const ChargerMonitorScreen: React.FC = () => {
                 onPress={() =>
                   setExpandedChargerId((prev) => (prev === charger.id ? null : charger.id))
                 }
-              >
+               accessibilityRole="button">
                 <View style={styles.chargerNameRow}>
                   <Text style={styles.chargerIcon}>🔌</Text>
                   <Text style={styles.chargerName} numberOfLines={1}>

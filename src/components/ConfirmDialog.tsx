@@ -44,7 +44,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               onPress={onCancel}
               disabled={loading}
               activeOpacity={0.7}
-            >
+             accessibilityRole="button">
               <Text style={styles.cancelText}>{cancelLabel}</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -52,7 +52,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               onPress={onConfirm}
               disabled={loading}
               activeOpacity={0.7}
-            >
+             accessibilityRole="button">
               {loading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (

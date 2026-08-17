@@ -60,7 +60,7 @@ export default function StationDetailScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => navigation.navigate('DeviceList', { stationId, stationName: station?.name || '站点' })}
-        >
+         accessibilityRole="button">
           <Text style={styles.actionIcon}>🔌</Text>
           <Text style={styles.actionLabel}>设备</Text>
           <Text style={styles.actionCount}>{devices.length}</Text>
@@ -68,7 +68,7 @@ export default function StationDetailScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => navigation.navigate('AlarmList', { stationId })}
-        >
+         accessibilityRole="button">
           <Text style={styles.actionIcon}>🔔</Text>
           <Text style={styles.actionLabel}>告警</Text>
           <Text style={styles.actionCount}>{alarms.length}</Text>
@@ -76,7 +76,7 @@ export default function StationDetailScreen() {
         <TouchableOpacity
           style={styles.actionBtn}
           onPress={() => navigation.navigate('WorkOrder', { stationId })}
-        >
+         accessibilityRole="button">
           <Text style={styles.actionIcon}>📋</Text>
           <Text style={styles.actionLabel}>工单</Text>
         </TouchableOpacity>
@@ -96,7 +96,7 @@ export default function StationDetailScreen() {
         ))}
         {devices.length === 0 && <Text style={styles.emptyText}>暂无设备</Text>}
         {devices.length > 5 && (
-          <TouchableOpacity onPress={() => navigation.navigate('DeviceList', { stationId, stationName: station?.name || '站点' })}>
+          <TouchableOpacity onPress={() => navigation.navigate('DeviceList', { stationId, stationName: station?.name || '站点' })} accessibilityRole="button">
             <Text style={styles.seeAll}>查看全部设备 →</Text>
           </TouchableOpacity>
         )}

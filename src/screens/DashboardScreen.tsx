@@ -111,28 +111,28 @@ export default function DashboardScreen() {
           <TouchableOpacity
             style={styles.actionItem}
             onPress={() => navigation.navigate('Stations' as never)}
-          >
+           accessibilityRole="button">
             <Text style={styles.actionIcon}>📍</Text>
             <Text style={styles.actionText}>站点管理</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionItem}
             onPress={() => navigation.navigate('AlarmList' as never)}
-          >
+           accessibilityRole="button">
             <Text style={styles.actionIcon}>🔔</Text>
             <Text style={styles.actionText}>告警查看</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionItem}
             onPress={() => navigation.navigate('WorkOrder' as never)}
-          >
+           accessibilityRole="button">
             <Text style={styles.actionIcon}>📋</Text>
             <Text style={styles.actionText}>工单管理</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionItem}
             onPress={() => navigation.navigate('Revenue' as never)}
-          >
+           accessibilityRole="button">
             <Text style={styles.actionIcon}>💰</Text>
             <Text style={styles.actionText}>营收统计</Text>
           </TouchableOpacity>
@@ -143,7 +143,7 @@ export default function DashboardScreen() {
       <View style={styles.stationPreview}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>我的站点</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Stations' as never)}>
+          <TouchableOpacity onPress={() => navigation.navigate('Stations' as never)} accessibilityRole="button">
             <Text style={styles.seeAll}>查看全部 →</Text>
           </TouchableOpacity>
         </View>
@@ -152,7 +152,7 @@ export default function DashboardScreen() {
             key={station.id}
             style={styles.stationItem}
             onPress={() => navigation.navigate('StationDetail', { stationId: station.id })}
-          >
+           accessibilityRole="button">
             <View style={styles.stationInfo}>
               <Text style={styles.stationName}>{station.name}</Text>
               <Text style={styles.stationAddr}>{station.address}</Text>

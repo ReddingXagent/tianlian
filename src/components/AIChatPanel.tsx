@@ -487,7 +487,7 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
           </View>
         </View>
         {onClose && (
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
             <Text style={styles.closeText}>✕</Text>
           </TouchableOpacity>
         )}
@@ -527,7 +527,7 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
                   }
                 }, 50);
               }}
-            >
+             accessibilityRole="button">
               <Text style={styles.quickChipText}>{q}</Text>
             </TouchableOpacity>
           ))}
@@ -560,7 +560,8 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
             ]}
             onPress={handleSend}
             disabled={!inputText.trim() || loading}
-          >
+           accessibilityRole="button"
+           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             {loading ? (
               <ActivityIndicator size="small" color="#0f0f23" />
             ) : (

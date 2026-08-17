@@ -206,7 +206,7 @@ const WorkOrderScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.completeBtn}
               onPress={() => handleCompleteOrder(item)}
-            >
+             accessibilityRole="button">
               <Text style={styles.completeBtnText}>完成</Text>
             </TouchableOpacity>
           )}
@@ -225,7 +225,7 @@ const WorkOrderScreen: React.FC = () => {
               key={f.key}
               style={[styles.filterChip, statusFilter === f.key && styles.filterChipActive]}
               onPress={() => setStatusFilter(f.key)}
-            >
+             accessibilityRole="button">
               <Text style={[styles.filterChipText, statusFilter === f.key && styles.filterChipTextActive]}>
                 {f.label}
               </Text>
@@ -285,7 +285,7 @@ const WorkOrderScreen: React.FC = () => {
           style={styles.fab}
           onPress={() => setShowCreateModal(true)}
           activeOpacity={0.8}
-        >
+         accessibilityRole="button">
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
       )}
@@ -329,7 +329,7 @@ const WorkOrderScreen: React.FC = () => {
                     key={t}
                     style={[styles.pickerItem, createType === t && styles.pickerItemActive]}
                     onPress={() => setCreateType(t)}
-                  >
+                   accessibilityRole="button">
                     <Text style={[styles.pickerItemText, createType === t && styles.pickerItemTextActive]}>
                       {WORK_ORDER_TYPE_LABEL[t] || t}
                     </Text>
@@ -349,7 +349,7 @@ const WorkOrderScreen: React.FC = () => {
                         createPriority === p && { backgroundColor: pc.color + '20', borderColor: pc.color },
                       ]}
                       onPress={() => setCreatePriority(p)}
-                    >
+                     accessibilityRole="button">
                       <Text style={[
                         styles.pickerItemText,
                         createPriority === p && { color: pc.color, fontWeight: '600' },
@@ -365,14 +365,14 @@ const WorkOrderScreen: React.FC = () => {
                 <TouchableOpacity
                   style={styles.modalCancelBtn}
                   onPress={() => setShowCreateModal(false)}
-                >
+                 accessibilityRole="button">
                   <Text style={styles.modalCancelText}>取消</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalSubmitBtn, creating && styles.modalSubmitBtnDisabled]}
                   onPress={handleCreateWorkOrder}
                   disabled={creating}
-                >
+                 accessibilityRole="button">
                   {creating ? (
                     <ActivityIndicator color="#fff" size="small" />
                   ) : (

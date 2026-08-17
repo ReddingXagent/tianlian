@@ -106,7 +106,7 @@ const ProfileScreen: React.FC = () => {
       </View>
 
       {/* 退出登录 */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7} accessibilityRole="button">
         <Text style={styles.logoutText}>退出登录</Text>
       </TouchableOpacity>
 

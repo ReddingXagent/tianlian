@@ -35,7 +35,7 @@ export default function StationListScreen() {
     <TouchableOpacity
       style={styles.card}
       onPress={() => navigation.navigate('StationDetail', { stationId: item.id })}
-    >
+     accessibilityRole="button">
       <View style={styles.cardHeader}>
         <Text style={styles.stationName}>{item.name}</Text>
         <View style={[styles.badge, item.status === 'online' ? styles.badgeOnline : item.status === 'maintenance' ? styles.badgeMaint : styles.badgeOffline]}>

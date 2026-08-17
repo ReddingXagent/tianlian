@@ -22,7 +22,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
       {actionLabel && onAction && (
-        <TouchableOpacity style={styles.actionButton} onPress={onAction} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.actionButton} onPress={onAction} activeOpacity={0.7} accessibilityRole="button">
           <Text style={styles.actionText}>{actionLabel}</Text>
         </TouchableOpacity>
       )}

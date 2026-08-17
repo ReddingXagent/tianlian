@@ -88,7 +88,7 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>实时趋势</Text>
-        <TouchableOpacity onPress={fetchTrend} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity onPress={fetchTrend} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button">
           <Text style={styles.refresh}>刷新</Text>
         </TouchableOpacity>
       </View>
@@ -104,7 +104,7 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
               style={[styles.metricTab, active && { backgroundColor: cfg.color }]}
               onPress={() => setMetric(m)}
               activeOpacity={0.7}
-            >
+             accessibilityRole="button">
               <Text style={[styles.metricTabText, active && styles.metricTabTextActive]}>
                 {cfg.label}
               </Text>
