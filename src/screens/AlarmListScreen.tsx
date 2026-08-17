@@ -1,41 +1,12 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React from 'react';
 import {
   View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator,
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { alarmApi } from '../services/api';
-import { Alarm, AlarmStatus, AlarmLevel } from '../types';
+import { useAlarms } from '../hooks/useAlarms';
+import { Alarm, AlarmLevel, AlarmStatus } from '../types';
 
 export default function AlarmListScreen() {
-  const route = useRoute();
-  const params = route.params as { stationId?: number } | undefined;
-  const stationId = params?.stationId;
-  const [alarms, setAlarms] = useState<Alarm[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<AlarmStatus | 'all'>('all');
-
-  const loadData = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      const resp = await alarmApi.getList({
-        stationId,
-        status: filter === 'all' ? undefined : filter,
-        page: 1, pageSize: 50,
-      });
-      setAlarms(resp.data.items);
-    } catch {
-      // API not ready
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [stationId, filter]);
-
-  useEffect(() => {
-    // F1203: 微任务解耦 —— 避免 filter 变化触发的 render 期同步 setState 链
-    Promise.resolve().then(() => loadData());
-  }, [loadData]);
+  const { alarms, loading, refreshing, filter, setFilter, refresh } = useAlarms();
 
   const levelColor = (level: AlarmLevel) => {
     if (level === 'critical') return '#e74c3c';
@@ -105,7 +76,7 @@ export default function AlarmListScreen() {
           data={alarms}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadData} tintColor="#4ECDC4" />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#4ECDC4" />}
           contentContainerStyle={styles.list}
           ListEmptyComponent={<View style={styles.center}><Text style={styles.emptyText}>暂无告警 🎉</Text></View>}
         />

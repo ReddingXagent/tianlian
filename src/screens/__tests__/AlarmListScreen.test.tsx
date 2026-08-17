@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, act, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import AlarmListScreen from '../AlarmListScreen';
-import { alarmApi } from '../../services/api';
+import { Alarm, AlarmStatus } from '../../types';
 
 // Mock navigation and route
 const mockNavigate = jest.fn();
@@ -10,13 +10,6 @@ jest.mock('@react-navigation/native', () => ({
     params: {},
   }),
   useNavigation: () => ({ navigate: mockNavigate }),
-}));
-
-// Mock the API module
-jest.mock('../../services/api', () => ({
-  alarmApi: {
-    getList: jest.fn(),
-  },
 }));
 
 // Mock child components
@@ -56,7 +49,21 @@ jest.mock('../../components/EmptyState', () => {
   return MockEmptyState;
 });
 
-const MOCK_ALARMS = [
+// Mock the hook
+const mockUseAlarms = {
+  alarms: [] as Alarm[],
+  loading: true,
+  refreshing: false,
+  filter: 'all' as AlarmStatus | 'all',
+  setFilter: jest.fn(),
+  refresh: jest.fn(),
+};
+
+jest.mock('../../hooks/useAlarms', () => ({
+  useAlarms: () => mockUseAlarms,
+}));
+
+const MOCK_ALARMS: Alarm[] = [
   {
     id: 1,
     stationId: 1,
@@ -70,7 +77,7 @@ const MOCK_ALARMS = [
     status: 'unhandled' as const,
     createdAt: '2024-01-15T10:30:00Z',
     updatedAt: '2024-01-15T10:30:00Z',
-  },
+  } as Alarm,
   {
     id: 2,
     stationId: 1,
@@ -82,7 +89,7 @@ const MOCK_ALARMS = [
     status: 'processing' as const,
     createdAt: '2024-01-15T09:00:00Z',
     updatedAt: '2024-01-15T09:30:00Z',
-  },
+  } as Alarm,
   {
     id: 3,
     stationId: 2,
@@ -94,104 +101,85 @@ const MOCK_ALARMS = [
     status: 'resolved' as const,
     createdAt: '2024-01-14T08:00:00Z',
     updatedAt: '2024-01-14T09:00:00Z',
-  },
+  } as Alarm,
 ];
 
 describe('AlarmListScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (alarmApi.getList as jest.Mock).mockResolvedValue({
-      data: { items: MOCK_ALARMS, total: 3, page: 1, pageSize: 20 },
-    });
+    mockUseAlarms.alarms = [];
+    mockUseAlarms.loading = true;
+    mockUseAlarms.refreshing = false;
+    mockUseAlarms.filter = 'all';
+    mockUseAlarms.setFilter = jest.fn();
+    mockUseAlarms.refresh = jest.fn();
   });
 
   it('should render loading state initially', () => {
-    (alarmApi.getList as jest.Mock).mockImplementation(() => new Promise(() => {}));
-
-    // The component uses ActivityIndicator (no text), but the loading state
-    // should show the filter row while loading. The ActivityIndicator has no
-    // accessible text, so we check that filter chips are visible instead.
+    mockUseAlarms.loading = true;
+    mockUseAlarms.refreshing = false;
     const { getByText } = render(<AlarmListScreen />);
-    // Filter chips should be visible during loading
     expect(getByText('全部')).toBeTruthy();
   });
 
-  it('筛选chip切换: 点按状态chip触发带status参数的重新拉取(setFilter非all分支)', async () => {
+  it('筛选chip切换: 点按状态chip调用setFilter', async () => {
+    mockUseAlarms.loading = false;
+    mockUseAlarms.alarms = MOCK_ALARMS;
     const { getAllByText } = render(<AlarmListScreen />);
-    await waitFor(() => {
-      expect((alarmApi.getList as jest.Mock).mock.calls.length).toBeGreaterThan(0);
-    });
-    // '未处理'在chip与告警卡片状态文本双处出现, 逐个press——仅chip有onPress生效
+    // '未处理' appears as both filter chip and alarm status text
     for (const el of getAllByText('未处理')) {
       fireEvent.press(el);
     }
-    await waitFor(() => {
-      const calls = (alarmApi.getList as jest.Mock).mock.calls;
-      const last = calls[calls.length - 1][0];
-      expect(last.status).toBe('unhandled');
-    });
+    expect(mockUseAlarms.setFilter).toHaveBeenCalledWith('unhandled');
   });
 
   it('should render alarm list after loading', async () => {
-    const { findByText } = render(<AlarmListScreen />);
-
-    expect(await findByText('充电桩A-01温度异常')).toBeTruthy();
-    expect(await findByText('充电站A功率异常')).toBeTruthy();
-    expect(await findByText('充电站B通信恢复')).toBeTruthy();
+    mockUseAlarms.loading = false;
+    mockUseAlarms.alarms = MOCK_ALARMS;
+    const { getByText } = render(<AlarmListScreen />);
+    expect(getByText('充电桩A-01温度异常')).toBeTruthy();
+    expect(getByText('充电站A功率异常')).toBeTruthy();
+    expect(getByText('充电站B通信恢复')).toBeTruthy();
   });
 
   it('should render station names in alarm cards', async () => {
-    const { findByText } = render(<AlarmListScreen />);
-
-    // Station name is only in the alarm title text (e.g. "充电站A功率异常")
-    // not rendered separately, so we verify via the title text
-    expect(await findByText('充电站A功率异常')).toBeTruthy();
-    expect(await findByText('充电站B通信恢复')).toBeTruthy();
+    mockUseAlarms.loading = false;
+    mockUseAlarms.alarms = MOCK_ALARMS;
+    const { getByText } = render(<AlarmListScreen />);
+    expect(getByText('充电站A功率异常')).toBeTruthy();
+    expect(getByText('充电站B通信恢复')).toBeTruthy();
   });
 
   it('should show device name for device-related alarms', async () => {
-    const { findByText, findAllByText } = render(<AlarmListScreen />);
-
-    // The alarm title already contains the device name: "充电桩A-01温度异常"
-    expect(await findByText('充电桩A-01温度异常')).toBeTruthy();
-    // Device name appears in title and description
-    const deviceNameElements = await findAllByText(/充电桩A-01/);
+    mockUseAlarms.loading = false;
+    mockUseAlarms.alarms = MOCK_ALARMS;
+    const { getByText, getAllByText } = render(<AlarmListScreen />);
+    expect(getByText('充电桩A-01温度异常')).toBeTruthy();
+    const deviceNameElements = getAllByText(/充电桩A-01/);
     expect(deviceNameElements.length).toBeGreaterThanOrEqual(2);
   });
 
   it('should render filter chips', async () => {
-    const { findByText, getAllByText } = render(<AlarmListScreen />);
-
-    // The component renders a single filter row with status filters
-    // "未处理" also appears as status text in the first alarm card
-    // "处理中" also appears as status text in the second alarm card
-    expect(await findByText('全部')).toBeTruthy();
+    mockUseAlarms.loading = false;
+    mockUseAlarms.alarms = MOCK_ALARMS;
+    const { getByText, getAllByText } = render(<AlarmListScreen />);
+    expect(getByText('全部')).toBeTruthy();
     expect(getAllByText('未处理').length).toBeGreaterThanOrEqual(1);
     expect(getAllByText('处理中').length).toBeGreaterThanOrEqual(1);
     expect(getAllByText('已解决').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('should handle error state', async () => {
-    (alarmApi.getList as jest.Mock).mockRejectedValue(new Error('API Error'));
-
-    const { findByText } = render(<AlarmListScreen />);
-    // Wait for the async loadData to complete (it catches errors silently)
-    // The component catches errors and just shows empty list with ActivityIndicator
-    // We need to wait for the loading to finish
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 100));
-    });
-    // After error, component shows empty state "暂无告警 🎉" (not error text)
-    expect(await findByText('暂无告警 🎉')).toBeTruthy();
+  it('should handle error state (empty list)', async () => {
+    mockUseAlarms.loading = false;
+    mockUseAlarms.alarms = [];
+    const { getByText } = render(<AlarmListScreen />);
+    expect(getByText('暂无告警 🎉')).toBeTruthy();
   });
 
   it('should render empty state when no alarms', async () => {
-    (alarmApi.getList as jest.Mock).mockResolvedValue({
-      data: { items: [], total: 0, page: 1, pageSize: 20 },
-    });
-
-    // The empty state text includes an emoji
-    const { findByText } = render(<AlarmListScreen />);
-    expect(await findByText('暂无告警 🎉')).toBeTruthy();
+    mockUseAlarms.loading = false;
+    mockUseAlarms.alarms = [];
+    const { getByText } = render(<AlarmListScreen />);
+    expect(getByText('暂无告警 🎉')).toBeTruthy();
   });
 });

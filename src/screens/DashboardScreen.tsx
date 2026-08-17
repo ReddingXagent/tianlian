@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, RefreshControl,
   ScrollView, ActivityIndicator,
@@ -6,45 +6,15 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
-import { useStationStore } from '../store/stationStore';
-import { useWorkOrderStore } from '../store/workOrderStore';
-import { dashboardApi } from '../services/api';
-import { RootStackParamList, DashboardStats } from '../types';
+import { useDashboard } from '../hooks/useDashboard';
+import { RootStackParamList } from '../types';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
 export default function DashboardScreen() {
   const navigation = useNavigation<NavProp>();
   const { user } = useAuthStore();
-  const { stations, fetchStations } = useStationStore();
-  const { fetchOrders } = useWorkOrderStore();
-  const [refreshing, setRefreshing] = React.useState(false);
-  const [stats, setStats] = React.useState<DashboardStats | null>(null);
-  const [loading, setLoading] = React.useState(true);
-
-  const loadDashboard = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        fetchStations({ page: 1, pageSize: 100 }),
-        fetchOrders({ page: 1, pageSize: 5 }),
-      ]);
-      try {
-        const resp = await dashboardApi.getStats();
-        setStats(resp.data);
-      } catch {
-        // Stats API may not be ready
-      }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [fetchStations, fetchOrders]);
-
-  useEffect(() => {
-    // F1203: 微任务解耦 effect 直调 async —— 避免 render 期同步 setState 链
-    Promise.resolve().then(() => loadDashboard());
-  }, [loadDashboard]);
+  const { stats, refreshing, loading, refresh, stations } = useDashboard();
 
   if (loading && !refreshing) {
     return (
@@ -59,7 +29,7 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadDashboard} tintColor="#4ECDC4" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#4ECDC4" />}
     >
       {/* 欢迎区 */}
       <View style={styles.welcome}>
