@@ -1,0 +1,103 @@
+/**
+ * types/modules/device.ts — 设备相关类型
+ */
+export type DeviceType = 'charger' | 'battery' | 'inverter' | 'sensor' | 'other';
+
+export type DeviceStatus = 'online' | 'offline' | 'fault' | 'maintenance';
+
+export interface Device {
+  id: number;
+  stationId: number;
+  stationName?: string;
+  name: string;
+  code: string;
+  type: DeviceType;
+  status: DeviceStatus;
+  model: string;
+  manufacturer: string;
+  lastHeartbeat: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DeviceMetrics {
+  deviceId: number;
+  deviceName: string;
+  temperature?: number;
+  humidity?: number;
+  voltage?: number;
+  current?: number;
+  power?: number;
+  status: DeviceStatus;
+  lastUpdated: string;
+}
+
+// 充电桩配置 (ChargerConfig — from /devices/{id}/config)
+export interface ChargerConfig {
+  deviceId: number;
+  voltageLimit: number;
+  currentLimit: number;
+  maxPower: number;
+  chargeMode: string;
+  overloadProtection: boolean;
+  timePeriods: {
+    startTime: string;
+    endTime: string;
+    powerLimit: number;
+  }[];
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+// 设备健康度 (Device Health — from /devices/{id}/health)
+export interface DeviceHealth {
+  deviceId: number;
+  deviceCode: string;
+  deviceName: string;
+  deviceType: string;
+  healthScore: number;
+  healthStatus: string;
+  healthStatusDisplay: string;
+  dimensionScores: Record<string, number>;
+  checkedAt: string;
+  lastHealthCheck: string | null;
+}
+
+// 设备健康摘要 (Device Health Summary — from /devices/health, 全局设备健康列表)
+export interface DeviceHealthSummary {
+  id: number;
+  code: string;
+  name: string;
+  type: string;
+  healthScore: number;
+  status: string;
+}
+
+// 设备健康历史记录 (Device Health History — from /devices/{id}/health/history)
+export interface DeviceHealthHistory {
+  deviceId: number;
+  healthScore: number;
+  healthStatus: string;
+  healthStatusDisplay: string;
+  dimensionScores: Record<string, number>;
+  checkedAt: string;
+}
+
+// 设备报告 (Device Report — from /reports/devices)
+export interface DeviceReport {
+  periodDays: number;
+  totalDevices: number;
+  typeDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
+  stationDistribution: {
+    stationId: number;
+    stationName: string;
+    deviceCount: number;
+  }[];
+  healthScore?: {
+    average: number;
+    distribution: Record<string, number>;
+  };
+  onlineRate?: number;
+  faultRate?: number;
+}
