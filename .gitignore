@@ -5,3 +5,4 @@ dist/
 *.keystore
 .env
 coverage/
+report/jscpd-report.json
