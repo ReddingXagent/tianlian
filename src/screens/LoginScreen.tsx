@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,45 +9,18 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import { useAuthStore } from '../store/authStore';
+import { useLogin } from '../hooks/useLogin';
 
 const LoginScreen: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const login = useAuthStore((s) => s.login);
-
-  const handleLogin = async () => {
-    if (!username.trim()) {
-      setError('请输入用户名');
-      return;
-    }
-    if (!password.trim()) {
-      setError('请输入密码');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      await login(username.trim(), password);
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as {
-          response?: { data?: { message?: string } };
-        };
-        const msg =
-          axiosErr.response?.data?.message || '登录失败，请检查用户名和密码';
-        setError(msg);
-      } else {
-        setError('网络错误，请检查网络连接');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    username,
+    setUsername,
+    password,
+    setPassword,
+    loading,
+    error,
+    handleLogin,
+  } = useLogin();
 
   return (
     <KeyboardAvoidingView
@@ -74,10 +47,7 @@ const LoginScreen: React.FC = () => {
               placeholder="请输入用户名"
               placeholderTextColor="#999"
               value={username}
-              onChangeText={(text) => {
-                setUsername(text);
-                setError(null);
-              }}
+              onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
               editable={!loading}
@@ -91,10 +61,7 @@ const LoginScreen: React.FC = () => {
               placeholder="请输入密码"
               placeholderTextColor="#999"
               value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setError(null);
-              }}
+              onChangeText={setPassword}
               secureTextEntry
               editable={!loading}
             />

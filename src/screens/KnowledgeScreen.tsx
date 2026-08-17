@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { knowledgeApi } from '../services/api';
-import { KnowledgeArticle, KnowledgeArticleItem, RootStackParamList } from '../types';
+import { useKnowledge } from '../hooks/useKnowledge';
+import { KnowledgeArticle, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
@@ -28,105 +28,17 @@ const CATEGORIES: { key: string; label: string; icon: string }[] = [
 
 const KnowledgeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [articles, setArticles] = useState<KnowledgeArticle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
-
-  const fetchArticles = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      let response: { data: { items: KnowledgeArticleItem[] } };
-      const mapItem = (it: KnowledgeArticleItem): KnowledgeArticle => ({
-        id: it.id,
-        title: it.title,
-        summary: it.summary,
-        content: it.content,
-        category: 'other',
-        tags: it.tags,
-        authorId: 0,
-        authorName: it.author,
-        viewCount: it.viewCount,
-        createdAt: it.createdAt,
-        updatedAt: it.updatedAt,
-      });
-      if (searchQuery.trim()) {
-        response = await knowledgeApi.search(searchQuery.trim());
-        setArticles(response.data.items.map(mapItem));
-      } else {
-        response = await knowledgeApi.getArticles({ page: 1, page_size: 50 });
-        setArticles(response.data.items.map(mapItem));
-      }
-    } catch {
-      setError('加载知识库失败，请下拉刷新重试');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [searchQuery]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        let response: { data: { items: KnowledgeArticleItem[] } };
-        const mapItem = (it: KnowledgeArticleItem): KnowledgeArticle => ({
-          id: it.id,
-          title: it.title,
-          summary: it.summary,
-          content: it.content,
-          category: 'other',
-          tags: it.tags,
-          authorId: 0,
-          authorName: it.author,
-          viewCount: it.viewCount,
-          createdAt: it.createdAt,
-          updatedAt: it.updatedAt,
-        });
-        if (searchQuery.trim()) {
-          response = await knowledgeApi.search(searchQuery.trim());
-          if (cancelled) return;
-          setArticles(response.data.items.map(mapItem));
-        } else {
-          response = await knowledgeApi.getArticles({ page: 1, page_size: 50 });
-          if (cancelled) return;
-          setArticles(response.data.items.map(mapItem));
-        }
-      } catch {
-        if (!cancelled) setError('加载知识库失败，请下拉刷新重试');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [activeCategory, searchQuery]);
-
-  // 卸载时清理 debounce timer, 防止回调在组件销毁后执行 setState
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) clearTimeout(searchTimeout);
-    };
-  }, [searchTimeout]);
-
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-    if (searchTimeout) clearTimeout(searchTimeout);
-    const timeout = setTimeout(() => {
-      fetchArticles();
-    }, 500);
-    setSearchTimeout(timeout);
-  };
+  const {
+    articles,
+    loading,
+    refreshing,
+    error,
+    searchQuery,
+    activeCategory,
+    setSearchQuery,
+    setActiveCategory,
+    fetchArticles,
+  } = useKnowledge();
 
   const handleArticlePress = (article: KnowledgeArticle) => {
     navigation.navigate('KnowledgeDetail', { articleId: article.id });
@@ -175,7 +87,7 @@ const KnowledgeScreen: React.FC = () => {
           placeholder="搜索知识库..."
           placeholderTextColor="#999"
           value={searchQuery}
-          onChangeText={handleSearch}
+          onChangeText={setSearchQuery}
           clearButtonMode="while-editing"
         />
       </View>
@@ -189,10 +101,7 @@ const KnowledgeScreen: React.FC = () => {
               styles.categoryBtn,
               activeCategory === cat.key && styles.categoryBtnActive,
             ]}
-            onPress={() => {
-              setSearchQuery('');
-              setActiveCategory(cat.key);
-            }}
+            onPress={() => setActiveCategory(cat.key)}
            accessibilityRole="button">
             <Text style={styles.categoryIcon}>{cat.icon}</Text>
             <Text
