@@ -35,6 +35,10 @@ module.exports = defineConfig([
     rules: {
       // jest.mock 工厂函数内 require() 是 RN 测试标准模式
       '@typescript-eslint/no-require-imports': 'off',
+      // axios mock通过默认导入访问.create是测试惯用法
+      'import/no-named-as-default-member': 'off',
+      // 测试中 mock 工厂参数可能不全部使用
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 ]);

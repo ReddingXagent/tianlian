@@ -476,7 +476,6 @@ describe('streamChatMessage', () => {
     ];
 
     await expect(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for await (const _ of streamChatMessage(messages)) {
         // should throw before yielding
       }
@@ -495,7 +494,6 @@ describe('streamChatMessage', () => {
     ];
 
     await expect(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of streamChatMessage(messages)) {
         // should throw before yielding
       }
@@ -559,7 +557,6 @@ describe('streamChatMessage', () => {
       { id: '1', role: 'user', content: 'test', timestamp: Date.now() },
     ];
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for await (const _ of streamChatMessage(messages)) {
       // nothing
     }
@@ -777,7 +774,6 @@ describe('streamChatMessage edge branches (F187)', () => {
     ];
 
     await expect(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for await (const _ of streamChatMessage(messages)) {
         // should throw before yielding
       }
