@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -10,89 +10,56 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { useInspectionStore } from '../store/inspectionStore';
-import { RootStackParamList, InspectionTask, InspectionItem } from '../types';
+import { useInspectionDetail } from '../hooks/useInspectionDetail';
+import { InspectionTask, InspectionItem } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
-
-type DetailRouteProp = RouteProp<RootStackParamList, 'InspectionDetail'>;
 
 const TYPE_LABELS: Record<string, string> = {
   daily: '日检', weekly: '周检', monthly: '月检', quarterly: '季检', annual: '年检', special: '特检',
 };
 
+const getResultIcon = (result?: string) => {
+  switch (result) {
+    case 'pass': return '✅';
+    case 'fail': return '❌';
+    case 'na': return '➖';
+    default: return '⬜';
+  }
+};
+
 const InspectionDetailScreen: React.FC = () => {
-  const route = useRoute<DetailRouteProp>();
-  const { taskId } = route.params;
   const {
     selectedTask,
     loading,
     error,
     submitting,
-    fetchTaskDetail,
-    startTask,
-    updateItem,
-    completeTask,
-  } = useInspectionStore();
+    refreshing,
+    loadData,
+    handleStart,
+    handleItemResult,
+    handleComplete,
+  } = useInspectionDetail();
 
-  const [refreshing, setRefreshing] = useState(false);
   const [completionNote, setCompletionNote] = useState('');
   const [showCompleteForm, setShowCompleteForm] = useState(false);
 
-  const loadCore = useCallback(
-    () => fetchTaskDetail(taskId),
-    [taskId, fetchTaskDetail]
-  );
-
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      try {
-        await loadCore();
-      } finally {
-        if (isRefresh) setRefreshing(false);
-      }
-    },
-    [loadCore]
-  );
-
-  useEffect(() => {
-    void loadCore();
-  }, [loadCore]);
-
-  const handleStart = () => {
+  const onStart = () => {
     Alert.alert('开始巡检', '确定要开始执行此巡检任务吗？', [
       { text: '取消', style: 'cancel' },
-      { text: '确定', onPress: () => startTask(taskId) },
+      { text: '确定', onPress: () => handleStart() },
     ]);
   };
 
-  const handleItemResult = (item: InspectionItem, result: 'pass' | 'fail' | 'na') => {
-    updateItem(taskId, item.id, result);
-  };
-
-  const handleComplete = async () => {
+  const onComplete = async () => {
     if (!completionNote.trim()) {
       Alert.alert('提示', '请填写巡检总结');
       return;
     }
-    const passedCount = selectedTask?.items.filter((i) => i.result === 'pass').length || 0;
-    const totalCount = selectedTask?.items.length || 1;
-    const overall = passedCount === totalCount ? 'pass' : passedCount > 0 ? 'partial' : 'fail';
-    await completeTask(taskId, completionNote.trim(), overall);
+    await handleComplete(completionNote.trim());
     setShowCompleteForm(false);
     setCompletionNote('');
-  };
-
-  const getResultIcon = (result?: string) => {
-    switch (result) {
-      case 'pass': return '✅';
-      case 'fail': return '❌';
-      case 'na': return '➖';
-      default: return '⬜';
-    }
   };
 
   if (loading && !selectedTask) {
@@ -153,7 +120,7 @@ const InspectionDetailScreen: React.FC = () => {
       {/* Inspection Items */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>检查项目 ({task?.items?.length || 0})</Text>
-        {task?.items?.map((item) => (
+        {task?.items?.map((item: InspectionItem) => (
           <View key={item.id} style={styles.itemCard}>
             <View style={styles.itemHeader}>
               <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
@@ -203,7 +170,7 @@ const InspectionDetailScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>操作</Text>
         <View style={styles.actionCard}>
           {task?.status === 'pending' && (
-            <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary]} onPress={handleStart} disabled={submitting} activeOpacity={0.7} accessibilityRole="button">
+            <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary]} onPress={onStart} disabled={submitting} activeOpacity={0.7} accessibilityRole="button">
               {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.actionBtnText}>开始巡检</Text>}
             </TouchableOpacity>
           )}
@@ -231,7 +198,7 @@ const InspectionDetailScreen: React.FC = () => {
                     <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowCompleteForm(false); setCompletionNote(''); }} accessibilityRole="button">
                       <Text style={styles.cancelBtnText}>取消</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.submitCompleteBtn, submitting && { opacity: 0.6 }]} onPress={handleComplete} disabled={submitting} accessibilityRole="button">
+                    <TouchableOpacity style={[styles.submitCompleteBtn, submitting && { opacity: 0.6 }]} onPress={onComplete} disabled={submitting} accessibilityRole="button">
                       {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.submitCompleteBtnText}>提交结果</Text>}
                     </TouchableOpacity>
                   </View>
