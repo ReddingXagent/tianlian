@@ -429,14 +429,14 @@ describe('alarmApi', () => {
     expect(result).toEqual(apiResponse);
   });
 
-  it('handleAlarm should POST /alarms/:id/handle', async () => {
+  it('handleAlarm should POST /alarms/:id/ack', async () => {
     const alarm = {
       id: 1, stationId: 1, stationName: '站A', type: 'device_fault' as const,
       level: 'warning' as const, title: '温度异常', description: '温度过高',
       status: 'resolved' as const, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z',
     };
     const apiResponse = { code: 0, message: 'success', data: alarm };
-    mockAxios.onPost('/alarms/1/handle').reply(200, apiResponse);
+    mockAxios.onPost('/alarms/1/ack').reply(200, apiResponse);
 
     const result = await alarmApi.handleAlarm(1);
     expect(result).toEqual(apiResponse);

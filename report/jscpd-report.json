@@ -1,0 +1,5205 @@
+{
+  "duplicates": [
+    {
+      "firstFile": {
+        "end": 44,
+        "endLoc": {
+          "column": 17,
+          "line": 44,
+          "position": 1117
+        },
+        "name": "screens/DashboardScreen.tsx",
+        "start": 27,
+        "startLoc": {
+          "column": 19,
+          "line": 27,
+          "position": 805
+        }
+      },
+      "format": "tsx",
+      "fragment": "    [fetchDashboard]\n  );\n\n  const loadData = useCallback(\n    async (isRefresh = false) => {\n      if (isRefresh) setRefreshing(true);\n      try {\n        await loadCore();\n      } finally {\n        if (isRefresh) setRefreshing(false);\n      }\n    },\n    [loadCore]\n  );\n\n  useEffect(() => {\n    void loadCore();\n  }, [loadCore]);",
+      "lines": 18,
+      "secondFile": {
+        "end": 63,
+        "endLoc": {
+          "column": 17,
+          "line": 63,
+          "position": 1710
+        },
+        "name": "screens/InspectionDetailScreen.tsx",
+        "start": 46,
+        "startLoc": {
+          "column": 28,
+          "line": 46,
+          "position": 1398
+        }
+      },
+      "tokens": 70
+    },
+    {
+      "firstFile": {
+        "end": 46,
+        "endLoc": {
+          "column": 4,
+          "line": 46,
+          "position": 1123
+        },
+        "name": "screens/DashboardScreen.tsx",
+        "start": 27,
+        "startLoc": {
+          "column": 19,
+          "line": 27,
+          "position": 805
+        }
+      },
+      "format": "tsx",
+      "fragment": "    [fetchDashboard]\n  );\n\n  const loadData = useCallback(\n    async (isRefresh = false) => {\n      if (isRefresh) setRefreshing(true);\n      try {\n        await loadCore();\n      } finally {\n        if (isRefresh) setRefreshing(false);\n      }\n    },\n    [loadCore]\n  );\n\n  useEffect(() => {\n    void loadCore();\n  }, [loadCore]);\n\n  if (loading && !data) {",
+      "lines": 20,
+      "secondFile": {
+        "end": 67,
+        "endLoc": {
+          "column": 7,
+          "line": 67,
+          "position": 1954
+        },
+        "name": "screens/InspectionListScreen.tsx",
+        "start": 48,
+        "startLoc": {
+          "column": 29,
+          "line": 48,
+          "position": 1633
+        }
+      },
+      "tokens": 71
+    },
+    {
+      "firstFile": {
+        "end": 46,
+        "endLoc": {
+          "column": 4,
+          "line": 46,
+          "position": 1123
+        },
+        "name": "screens/DashboardScreen.tsx",
+        "start": 27,
+        "startLoc": {
+          "column": 19,
+          "line": 27,
+          "position": 805
+        }
+      },
+      "format": "tsx",
+      "fragment": "    [fetchDashboard]\n  );\n\n  const loadData = useCallback(\n    async (isRefresh = false) => {\n      if (isRefresh) setRefreshing(true);\n      try {\n        await loadCore();\n      } finally {\n        if (isRefresh) setRefreshing(false);\n      }\n    },\n    [loadCore]\n  );\n\n  useEffect(() => {\n    void loadCore();\n  }, [loadCore]);\n\n  if (loading && !data) {",
+      "lines": 20,
+      "secondFile": {
+        "end": 96,
+        "endLoc": {
+          "column": 7,
+          "line": 96,
+          "position": 2988
+        },
+        "name": "screens/WorkOrderDetailScreen.tsx",
+        "start": 77,
+        "startLoc": {
+          "column": 30,
+          "line": 77,
+          "position": 2667
+        }
+      },
+      "tokens": 71
+    },
+    {
+      "firstFile": {
+        "end": 76,
+        "endLoc": {
+          "column": 26,
+          "line": 76,
+          "position": 1801
+        },
+        "name": "screens/DashboardScreen.tsx",
+        "start": 62,
+        "startLoc": {
+          "column": 2,
+          "line": 62,
+          "position": 1434
+        }
+      },
+      "format": "tsx",
+      "fragment": "  return (\n    <ScrollView\n      style={styles.container}\n      contentContainerStyle={styles.content}\n      refreshControl={\n        <RefreshControl\n          refreshing={refreshing}\n          onRefresh={() => loadData(true)}\n          colors={['#1a73e8']}\n          tintColor=\"#1a73e8\"\n        />\n      }\n    >\n      {/* Period selector */}\n      <View style={styles.periodContainer}>",
+      "lines": 15,
+      "secondFile": {
+        "end": 117,
+        "endLoc": {
+          "column": 26,
+          "line": 117,
+          "position": 3430
+        },
+        "name": "screens/InspectionDetailScreen.tsx",
+        "start": 108,
+        "startLoc": {
+          "column": 2,
+          "line": 108,
+          "position": 3120
+        }
+      },
+      "tokens": 64
+    },
+    {
+      "firstFile": {
+        "end": 174,
+        "endLoc": {
+          "column": 42,
+          "line": 174,
+          "position": 6725
+        },
+        "name": "screens/DashboardScreen.tsx",
+        "start": 166,
+        "startLoc": {
+          "column": 121,
+          "line": 166,
+          "position": 6477
+        }
+      },
+      "format": "tsx",
+      "fragment": "                    <View style={[styles.stackSegment, { height: Math.max(2, trend.info * 5), backgroundColor: '#1565c0' }]} />\n                  </View>\n                  <Text style={styles.chartLabel}>{trend.date.slice(5)}</Text>\n                </View>\n              ))}\n            </View>\n          </View>\n        ) : (\n          <Text style={styles.noDataText}>暂无告警趋势数据</Text>",
+      "lines": 9,
+      "secondFile": {
+        "end": 206,
+        "endLoc": {
+          "column": 42,
+          "line": 206,
+          "position": 8210
+        },
+        "name": "screens/DashboardScreen.tsx",
+        "start": 198,
+        "startLoc": {
+          "column": 126,
+          "line": 198,
+          "position": 7962
+        }
+      },
+      "tokens": 66
+    },
+    {
+      "firstFile": {
+        "end": 133,
+        "endLoc": {
+          "column": 7,
+          "line": 133,
+          "position": 3946
+        },
+        "name": "screens/DiagnosisScreen.tsx",
+        "start": 121,
+        "startLoc": {
+          "column": 13,
+          "line": 121,
+          "position": 3708
+        }
+      },
+      "format": "tsx",
+      "fragment": "          ))}\n        </View>\n      </View>\n\n      {/* 错误提示 */}\n      {error && (\n        <View style={styles.errorContainer}>\n          <Text style={styles.errorText}>{error}</Text>\n        </View>\n      )}\n\n      {/* 诊断结果 */}\n      {result && (",
+      "lines": 13,
+      "secondFile": {
+        "end": 212,
+        "endLoc": {
+          "column": 7,
+          "line": 212,
+          "position": 6169
+        },
+        "name": "screens/ScanScreen.tsx",
+        "start": 200,
+        "startLoc": {
+          "column": 29,
+          "line": 200,
+          "position": 5931
+        }
+      },
+      "tokens": 58
+    },
+    {
+      "firstFile": {
+        "end": 247,
+        "endLoc": {
+          "column": 4,
+          "line": 247,
+          "position": 8040
+        },
+        "name": "screens/DiagnosisScreen.tsx",
+        "start": 232,
+        "startLoc": {
+          "column": 16,
+          "line": 232,
+          "position": 7829
+        }
+      },
+      "format": "tsx",
+      "fragment": "          </Text>\n        </View>\n      )}\n    </ScrollView>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: '#f5f6fa',\n  },\n  content: {\n    padding: 16,\n    paddingBottom: 40,\n  },",
+      "lines": 16,
+      "secondFile": {
+        "end": 273,
+        "endLoc": {
+          "column": 4,
+          "line": 273,
+          "position": 8194
+        },
+        "name": "screens/ScanScreen.tsx",
+        "start": 258,
+        "startLoc": {
+          "column": 16,
+          "line": 258,
+          "position": 7983
+        }
+      },
+      "tokens": 51
+    },
+    {
+      "firstFile": {
+        "end": 119,
+        "endLoc": {
+          "column": 30,
+          "line": 119,
+          "position": 3513
+        },
+        "name": "screens/InspectionDetailScreen.tsx",
+        "start": 106,
+        "startLoc": {
+          "column": 46,
+          "line": 106,
+          "position": 3109
+        }
+      },
+      "format": "tsx",
+      "fragment": "  const task = selectedTask as InspectionTask | null;\n\n  return (\n    <ScrollView\n      style={styles.container}\n      contentContainerStyle={styles.content}\n      refreshControl={\n        <RefreshControl refreshing={refreshing} onRefresh={() => loadData(true)} colors={['#1a73e8']} tintColor=\"#1a73e8\" />\n      }\n    >\n      {/* Header */}\n      <View style={styles.headerCard}>\n        <View style={styles.headerRow}>\n          <Text style={styles.taskTitle} numberOfLines={2}>{task?.description}</Text>",
+      "lines": 14,
+      "secondFile": {
+        "end": 170,
+        "endLoc": {
+          "column": 30,
+          "line": 170,
+          "position": 5129
+        },
+        "name": "screens/WorkOrderDetailScreen.tsx",
+        "start": 152,
+        "startLoc": {
+          "column": 43,
+          "line": 152,
+          "position": 4671
+        }
+      },
+      "tokens": 89
+    },
+    {
+      "firstFile": {
+        "end": 135,
+        "endLoc": {
+          "column": 43,
+          "line": 135,
+          "position": 4189
+        },
+        "name": "screens/InspectionDetailScreen.tsx",
+        "start": 126,
+        "startLoc": {
+          "column": 64,
+          "line": 126,
+          "position": 3911
+        }
+      },
+      "format": "tsx",
+      "fragment": "          <Text style={styles.headerStation}>{task?.stationName}</Text>\n        </View>\n      </View>\n\n      {/* Info */}\n      <View style={styles.section}>\n        <Text style={styles.sectionTitle}>基本信息</Text>\n        <View style={styles.infoCard}>\n          <View style={styles.infoRow}>\n            <Text style={styles.infoLabel}>设备名称</Text>",
+      "lines": 10,
+      "secondFile": {
+        "end": 186,
+        "endLoc": {
+          "column": 43,
+          "line": 186,
+          "position": 5758
+        },
+        "name": "screens/WorkOrderDetailScreen.tsx",
+        "start": 177,
+        "startLoc": {
+          "column": 10,
+          "line": 177,
+          "position": 5472
+        }
+      },
+      "tokens": 77
+    },
+    {
+      "firstFile": {
+        "end": 67,
+        "endLoc": {
+          "column": 7,
+          "line": 67,
+          "position": 1954
+        },
+        "name": "screens/InspectionListScreen.tsx",
+        "start": 48,
+        "startLoc": {
+          "column": 15,
+          "line": 48,
+          "position": 1619
+        }
+      },
+      "format": "tsx",
+      "fragment": "    [fetchTasks, activeFilter]\n  );\n\n  const loadData = useCallback(\n    async (isRefresh = false) => {\n      if (isRefresh) setRefreshing(true);\n      try {\n        await loadCore();\n      } finally {\n        if (isRefresh) setRefreshing(false);\n      }\n    },\n    [loadCore]\n  );\n\n  useEffect(() => {\n    void loadCore();\n  }, [loadCore]);\n\n  const handleTaskPress = (task: InspectionTask) => {",
+      "lines": 20,
+      "secondFile": {
+        "end": 58,
+        "endLoc": {
+          "column": 7,
+          "line": 58,
+          "position": 1778
+        },
+        "name": "screens/WorkOrderListScreen.tsx",
+        "start": 39,
+        "startLoc": {
+          "column": 16,
+          "line": 39,
+          "position": 1443
+        }
+      },
+      "tokens": 73
+    },
+    {
+      "firstFile": {
+        "end": 194,
+        "endLoc": {
+          "column": 4,
+          "line": 194,
+          "position": 5590
+        },
+        "name": "screens/InspectionListScreen.tsx",
+        "start": 163,
+        "startLoc": {
+          "column": 30,
+          "line": 163,
+          "position": 4996
+        }
+      },
+      "format": "tsx",
+      "fragment": "    backgroundColor: '#f5f6fa',\n  },\n  filterContainer: {\n    flexDirection: 'row',\n    backgroundColor: '#fff',\n    paddingVertical: 10,\n    paddingHorizontal: 12,\n    borderBottomWidth: 1,\n    borderBottomColor: '#eee',\n  },\n  filterBtn: {\n    paddingHorizontal: 12,\n    paddingVertical: 6,\n    borderRadius: 16,\n    marginRight: 8,\n    backgroundColor: '#f0f0f0',\n  },\n  filterBtnActive: {\n    backgroundColor: '#1a73e8',\n  },\n  filterBtnText: {\n    fontSize: 13,\n    color: '#666',\n    fontWeight: '500',\n  },\n  filterBtnTextActive: {\n    color: '#fff',\n  },\n  listContent: {\n    padding: 16,\n    paddingBottom: 32,\n  },",
+      "lines": 32,
+      "secondFile": {
+        "end": 240,
+        "endLoc": {
+          "column": 4,
+          "line": 240,
+          "position": 6236
+        },
+        "name": "screens/WorkOrderListScreen.tsx",
+        "start": 209,
+        "startLoc": {
+          "column": 21,
+          "line": 209,
+          "position": 5642
+        }
+      },
+      "tokens": 105
+    },
+    {
+      "firstFile": {
+        "end": 31,
+        "endLoc": {
+          "column": 16,
+          "line": 31,
+          "position": 1207
+        },
+        "name": "screens/KnowledgeDetailScreen.tsx",
+        "start": 26,
+        "startLoc": {
+          "column": 4,
+          "line": 26,
+          "position": 902
+        }
+      },
+      "format": "tsx",
+      "fragment": "    try {\n      // No dedicated detail endpoint; fetch from list and find by id\n      const response = await knowledgeApi.getArticles({ page: 1, page_size: 100 });\n      const item = response.data.items.find((it) => it.id === articleId);\n      if (!item) throw new Error('Article not found');\n      setArticle({",
+      "lines": 6,
+      "secondFile": {
+        "end": 59,
+        "endLoc": {
+          "column": 10,
+          "line": 59,
+          "position": 2057
+        },
+        "name": "screens/KnowledgeDetailScreen.tsx",
+        "start": 54,
+        "startLoc": {
+          "column": 6,
+          "line": 54,
+          "position": 1750
+        }
+      },
+      "tokens": 55
+    },
+    {
+      "firstFile": {
+        "end": 44,
+        "endLoc": {
+          "column": 13,
+          "line": 44,
+          "position": 1554
+        },
+        "name": "screens/KnowledgeDetailScreen.tsx",
+        "start": 30,
+        "startLoc": {
+          "column": 53,
+          "line": 30,
+          "position": 1189
+        }
+      },
+      "format": "tsx",
+      "fragment": "      if (!item) throw new Error('Article not found');\n      setArticle({\n        id: item.id,\n        title: item.title,\n        summary: item.summary,\n        content: item.content,\n        category: 'other',\n        tags: item.tags,\n        authorId: 0,\n        authorName: item.author,\n        viewCount: item.viewCount,\n        createdAt: item.createdAt,\n        updatedAt: item.updatedAt,\n      });\n    } catch {",
+      "lines": 15,
+      "secondFile": {
+        "end": 73,
+        "endLoc": {
+          "column": 15,
+          "line": 73,
+          "position": 2469
+        },
+        "name": "screens/KnowledgeDetailScreen.tsx",
+        "start": 59,
+        "startLoc": {
+          "column": 29,
+          "line": 59,
+          "position": 2076
+        }
+      },
+      "tokens": 72
+    },
+    {
+      "firstFile": {
+        "end": 162,
+        "endLoc": {
+          "column": 17,
+          "line": 162,
+          "position": 4778
+        },
+        "name": "screens/KnowledgeDetailScreen.tsx",
+        "start": 143,
+        "startLoc": {
+          "column": 14,
+          "line": 143,
+          "position": 4476
+        }
+      },
+      "format": "tsx",
+      "fragment": "        </Text>\n      </View>\n    </ScrollView>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: '#f5f6fa',\n  },\n  content: {\n    padding: 16,\n    paddingBottom: 40,\n  },\n  headerCard: {\n    backgroundColor: '#fff',\n    borderRadius: 12,\n    padding: 16,\n    marginBottom: 12,",
+      "lines": 20,
+      "secondFile": {
+        "end": 371,
+        "endLoc": {
+          "column": 17,
+          "line": 371,
+          "position": 12422
+        },
+        "name": "screens/WorkOrderDetailScreen.tsx",
+        "start": 352,
+        "startLoc": {
+          "column": 14,
+          "line": 352,
+          "position": 12120
+        }
+      },
+      "tokens": 66
+    },
+    {
+      "firstFile": {
+        "end": 63,
+        "endLoc": {
+          "column": 65,
+          "line": 63,
+          "position": 2321
+        },
+        "name": "screens/KnowledgeScreen.tsx",
+        "start": 47,
+        "startLoc": {
+          "column": 4,
+          "line": 47,
+          "position": 1767
+        }
+      },
+      "format": "tsx",
+      "fragment": "    try {\n      let response: { data: { items: KnowledgeArticleItem[] } };\n      const mapItem = (it: KnowledgeArticleItem): KnowledgeArticle => ({\n        id: it.id,\n        title: it.title,\n        summary: it.summary,\n        content: it.content,\n        category: 'other',\n        tags: it.tags,\n        authorId: 0,\n        authorName: it.author,\n        viewCount: it.viewCount,\n        createdAt: it.createdAt,\n        updatedAt: it.updatedAt,\n      });\n      if (searchQuery.trim()) {\n        response = await knowledgeApi.search(searchQuery.trim());",
+      "lines": 17,
+      "secondFile": {
+        "end": 96,
+        "endLoc": {
+          "column": 67,
+          "line": 96,
+          "position": 3368
+        },
+        "name": "screens/KnowledgeScreen.tsx",
+        "start": 80,
+        "startLoc": {
+          "column": 6,
+          "line": 80,
+          "position": 2782
+        }
+      },
+      "tokens": 118
+    },
+    {
+      "firstFile": {
+        "end": 51,
+        "endLoc": {
+          "column": 9,
+          "line": 51,
+          "position": 1992
+        },
+        "name": "screens/MonitorScreen.tsx",
+        "start": 45,
+        "startLoc": {
+          "column": 4,
+          "line": 45,
+          "position": 1689
+        }
+      },
+      "format": "tsx",
+      "fragment": "    try {\n      const [summaryRes, devicesRes, faultsRes, alarmsRes] = await Promise.all([\n        monitorApi.getSummary(),\n        deviceMonitorApi.getDeviceStatusList({ pageSize: 50 }),\n        monitorApi.getFaultDevices({ pageSize: 20 }),\n        monitorApi.getCriticalAlarms({ pageSize: 20 }),\n      ]);",
+      "lines": 7,
+      "secondFile": {
+        "end": 83,
+        "endLoc": {
+          "column": 11,
+          "line": 83,
+          "position": 3009
+        },
+        "name": "screens/MonitorScreen.tsx",
+        "start": 77,
+        "startLoc": {
+          "column": 6,
+          "line": 77,
+          "position": 2694
+        }
+      },
+      "tokens": 61
+    },
+    {
+      "firstFile": {
+        "end": 92,
+        "endLoc": {
+          "column": 42,
+          "line": 92,
+          "position": 3076
+        },
+        "name": "screens/ProfileScreen.tsx",
+        "start": 87,
+        "startLoc": {
+          "column": 55,
+          "line": 87,
+          "position": 2823
+        }
+      },
+      "format": "tsx",
+      "fragment": "            <Text style={styles.menuLabel}>消息通知</Text>\n            <Text style={styles.menuArrow}>›</Text>\n          </TouchableOpacity>\n          <View style={styles.menuDivider} />\n          <TouchableOpacity style={styles.menuItem} activeOpacity={0.6}>\n            <Text style={styles.menuIcon}>🔒</Text>",
+      "lines": 6,
+      "secondFile": {
+        "end": 98,
+        "endLoc": {
+          "column": 42,
+          "line": 98,
+          "position": 3396
+        },
+        "name": "screens/ProfileScreen.tsx",
+        "start": 93,
+        "startLoc": {
+          "column": 55,
+          "line": 93,
+          "position": 3143
+        }
+      },
+      "tokens": 64
+    },
+    {
+      "firstFile": {
+        "end": 92,
+        "endLoc": {
+          "column": 42,
+          "line": 92,
+          "position": 3076
+        },
+        "name": "screens/ProfileScreen.tsx",
+        "start": 87,
+        "startLoc": {
+          "column": 55,
+          "line": 87,
+          "position": 2823
+        }
+      },
+      "format": "tsx",
+      "fragment": "            <Text style={styles.menuLabel}>消息通知</Text>\n            <Text style={styles.menuArrow}>›</Text>\n          </TouchableOpacity>\n          <View style={styles.menuDivider} />\n          <TouchableOpacity style={styles.menuItem} activeOpacity={0.6}>\n            <Text style={styles.menuIcon}>🔒</Text>",
+      "lines": 6,
+      "secondFile": {
+        "end": 104,
+        "endLoc": {
+          "column": 42,
+          "line": 104,
+          "position": 3716
+        },
+        "name": "screens/ProfileScreen.tsx",
+        "start": 99,
+        "startLoc": {
+          "column": 55,
+          "line": 99,
+          "position": 3463
+        }
+      },
+      "tokens": 64
+    },
+    {
+      "firstFile": {
+        "end": 201,
+        "endLoc": {
+          "column": 20,
+          "line": 201,
+          "position": 5750
+        },
+        "name": "screens/ProfileScreen.tsx",
+        "start": 175,
+        "startLoc": {
+          "column": 21,
+          "line": 175,
+          "position": 5231
+        }
+      },
+      "format": "tsx",
+      "fragment": "    fontWeight: '500',\n  },\n  section: {\n    marginBottom: 16,\n  },\n  sectionTitle: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: '#333',\n    marginBottom: 10,\n  },\n  infoCard: {\n    backgroundColor: '#fff',\n    borderRadius: 12,\n    padding: 4,\n    shadowColor: '#000',\n    shadowOffset: { width: 0, height: 1 },\n    shadowOpacity: 0.05,\n    shadowRadius: 4,\n    elevation: 2,\n  },\n  infoRow: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    paddingHorizontal: 16,\n    paddingVertical: 14,",
+      "lines": 27,
+      "secondFile": {
+        "end": 424,
+        "endLoc": {
+          "column": 20,
+          "line": 424,
+          "position": 13462
+        },
+        "name": "screens/WorkOrderDetailScreen.tsx",
+        "start": 398,
+        "startLoc": {
+          "column": 17,
+          "line": 398,
+          "position": 12943
+        }
+      },
+      "tokens": 99
+    },
+    {
+      "firstFile": {
+        "end": 240,
+        "endLoc": {
+          "column": 4,
+          "line": 240,
+          "position": 7220
+        },
+        "name": "screens/WorkOrderCreateScreen.tsx",
+        "start": 218,
+        "startLoc": {
+          "column": 11,
+          "line": 218,
+          "position": 6849
+        }
+      },
+      "format": "tsx",
+      "fragment": "    flex: 1,\n  },\n  content: {\n    padding: 16,\n    paddingBottom: 40,\n  },\n  sectionTitle: {\n    fontSize: 20,\n    fontWeight: '700',\n    color: '#333',\n    marginBottom: 20,\n  },\n  errorContainer: {\n    backgroundColor: '#fce4ec',\n    borderRadius: 8,\n    padding: 12,\n    marginBottom: 16,\n  },\n  errorText: {\n    color: '#c62828',\n    fontSize: 14,\n    textAlign: 'center',\n  },",
+      "lines": 23,
+      "secondFile": {
+        "end": 171,
+        "endLoc": {
+          "column": 4,
+          "line": 171,
+          "position": 5005
+        },
+        "name": "screens/WorkOrderTransferScreen.tsx",
+        "start": 149,
+        "startLoc": {
+          "column": 30,
+          "line": 149,
+          "position": 4634
+        }
+      },
+      "tokens": 75
+    },
+    {
+      "firstFile": {
+        "end": 366,
+        "endLoc": {
+          "column": 4,
+          "line": 366,
+          "position": 12320
+        },
+        "name": "screens/WorkOrderDetailScreen.tsx",
+        "start": 351,
+        "startLoc": {
+          "column": 12,
+          "line": 351,
+          "position": 12105
+        }
+      },
+      "format": "tsx",
+      "fragment": "          )}\n        </View>\n      </View>\n    </ScrollView>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: '#f5f6fa',\n  },\n  content: {\n    padding: 16,\n    paddingBottom: 40,\n  },",
+      "lines": 16,
+      "secondFile": {
+        "end": 154,
+        "endLoc": {
+          "column": 4,
+          "line": 154,
+          "position": 4698
+        },
+        "name": "screens/WorkOrderTransferScreen.tsx",
+        "start": 139,
+        "startLoc": {
+          "column": 29,
+          "line": 139,
+          "position": 4483
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 235,
+        "endLoc": {
+          "column": 15,
+          "line": 235,
+          "position": 5399
+        },
+        "name": "services/api.ts",
+        "start": 230,
+        "startLoc": {
+          "column": 29,
+          "line": 230,
+          "position": 5206
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 518,
+        "endLoc": {
+          "column": 15,
+          "line": 518,
+          "position": 14714
+        },
+        "name": "services/api.ts",
+        "start": 513,
+        "startLoc": {
+          "column": 42,
+          "line": 513,
+          "position": 14521
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 221,
+        "endLoc": {
+          "column": 56,
+          "line": 221,
+          "position": 4919
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',",
+      "lines": 7,
+      "secondFile": {
+        "end": 556,
+        "endLoc": {
+          "column": 49,
+          "line": 556,
+          "position": 16590
+        },
+        "name": "services/api.ts",
+        "start": 550,
+        "startLoc": {
+          "column": 42,
+          "line": 550,
+          "position": 16347
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 1029,
+        "endLoc": {
+          "column": 15,
+          "line": 1029,
+          "position": 35611
+        },
+        "name": "services/api.ts",
+        "start": 1024,
+        "startLoc": {
+          "column": 38,
+          "line": 1024,
+          "position": 35418
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 223,
+        "endLoc": {
+          "column": 51,
+          "line": 223,
+          "position": 5030
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',\n          tokenType: (d.token_type as string) ?? 'bearer',\n          expiresIn: (d.expires_in as number) ?? 0,",
+      "lines": 9,
+      "secondFile": {
+        "end": 1354,
+        "endLoc": {
+          "column": 50,
+          "line": 1354,
+          "position": 48042
+        },
+        "name": "services/api.ts",
+        "start": 1346,
+        "startLoc": {
+          "column": 33,
+          "line": 1346,
+          "position": 47711
+        }
+      },
+      "tokens": 89
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 1460,
+        "endLoc": {
+          "column": 15,
+          "line": 1460,
+          "position": 52664
+        },
+        "name": "services/api.ts",
+        "start": 1455,
+        "startLoc": {
+          "column": 37,
+          "line": 1455,
+          "position": 52471
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 221,
+        "endLoc": {
+          "column": 56,
+          "line": 221,
+          "position": 4919
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',",
+      "lines": 7,
+      "secondFile": {
+        "end": 1493,
+        "endLoc": {
+          "column": 54,
+          "line": 1493,
+          "position": 54120
+        },
+        "name": "services/api.ts",
+        "start": 1487,
+        "startLoc": {
+          "column": 36,
+          "line": 1487,
+          "position": 53872
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 232,
+        "endLoc": {
+          "column": 21,
+          "line": 232,
+          "position": 5313
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',\n          tokenType: (d.token_type as string) ?? 'bearer',\n          expiresIn: (d.expires_in as number) ?? 0,\n        },\n      };\n    });\n  },\n  /** GET /auth/me — 当前登录用户信息 + 权限列表 */\n  getProfile(): Promise<ApiResponse<AuthMe>> {\n    return api.get('/auth/me').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;",
+      "lines": 18,
+      "secondFile": {
+        "end": 1934,
+        "endLoc": {
+          "column": 4,
+          "line": 1934,
+          "position": 73455
+        },
+        "name": "services/api.ts",
+        "start": 1918,
+        "startLoc": {
+          "column": 40,
+          "line": 1918,
+          "position": 72846
+        }
+      },
+      "tokens": 148
+    },
+    {
+      "firstFile": {
+        "end": 221,
+        "endLoc": {
+          "column": 56,
+          "line": 221,
+          "position": 4919
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',",
+      "lines": 7,
+      "secondFile": {
+        "end": 2278,
+        "endLoc": {
+          "column": 38,
+          "line": 2278,
+          "position": 87727
+        },
+        "name": "services/api.ts",
+        "start": 2271,
+        "startLoc": {
+          "column": 7,
+          "line": 2271,
+          "position": 87478
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 223,
+        "endLoc": {
+          "column": 44,
+          "line": 223,
+          "position": 5023
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',\n          tokenType: (d.token_type as string) ?? 'bearer',\n          expiresIn: (d.expires_in as number) ?? 0,",
+      "lines": 9,
+      "secondFile": {
+        "end": 2674,
+        "endLoc": {
+          "column": 47,
+          "line": 2674,
+          "position": 103410
+        },
+        "name": "services/api.ts",
+        "start": 2666,
+        "startLoc": {
+          "column": 50,
+          "line": 2666,
+          "position": 103090
+        }
+      },
+      "tokens": 85
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 2798,
+        "endLoc": {
+          "column": 17,
+          "line": 2798,
+          "position": 108266
+        },
+        "name": "services/api.ts",
+        "start": 2792,
+        "startLoc": {
+          "column": 27,
+          "line": 2792,
+          "position": 108056
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 2929,
+        "endLoc": {
+          "column": 17,
+          "line": 2929,
+          "position": 113444
+        },
+        "name": "services/api.ts",
+        "start": 2923,
+        "startLoc": {
+          "column": 34,
+          "line": 2923,
+          "position": 113234
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 221,
+        "endLoc": {
+          "column": 56,
+          "line": 221,
+          "position": 4919
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',",
+      "lines": 7,
+      "secondFile": {
+        "end": 2949,
+        "endLoc": {
+          "column": 38,
+          "line": 2949,
+          "position": 114128
+        },
+        "name": "services/api.ts",
+        "start": 2942,
+        "startLoc": {
+          "column": 36,
+          "line": 2942,
+          "position": 113879
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 3151,
+        "endLoc": {
+          "column": 17,
+          "line": 3151,
+          "position": 121412
+        },
+        "name": "services/api.ts",
+        "start": 3145,
+        "startLoc": {
+          "column": 33,
+          "line": 3145,
+          "position": 121202
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 3176,
+        "endLoc": {
+          "column": 17,
+          "line": 3176,
+          "position": 122315
+        },
+        "name": "services/api.ts",
+        "start": 3170,
+        "startLoc": {
+          "column": 40,
+          "line": 3170,
+          "position": 122105
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 3197,
+        "endLoc": {
+          "column": 17,
+          "line": 3197,
+          "position": 122960
+        },
+        "name": "services/api.ts",
+        "start": 3191,
+        "startLoc": {
+          "column": 37,
+          "line": 3191,
+          "position": 122750
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 3327,
+        "endLoc": {
+          "column": 15,
+          "line": 3327,
+          "position": 128004
+        },
+        "name": "services/api.ts",
+        "start": 3322,
+        "startLoc": {
+          "column": 37,
+          "line": 3322,
+          "position": 127811
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 3814,
+        "endLoc": {
+          "column": 15,
+          "line": 3814,
+          "position": 147443
+        },
+        "name": "services/api.ts",
+        "start": 3809,
+        "startLoc": {
+          "column": 26,
+          "line": 3809,
+          "position": 147250
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 221,
+        "endLoc": {
+          "column": 49,
+          "line": 221,
+          "position": 4912
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          accessToken: (d.access_token as string) ?? '',",
+      "lines": 7,
+      "secondFile": {
+        "end": 3829,
+        "endLoc": {
+          "column": 38,
+          "line": 3829,
+          "position": 147880
+        },
+        "name": "services/api.ts",
+        "start": 3823,
+        "startLoc": {
+          "column": 28,
+          "line": 3823,
+          "position": 147648
+        }
+      },
+      "tokens": 62
+    },
+    {
+      "firstFile": {
+        "end": 220,
+        "endLoc": {
+          "column": 15,
+          "line": 220,
+          "position": 4862
+        },
+        "name": "services/api.ts",
+        "start": 215,
+        "startLoc": {
+          "column": 35,
+          "line": 215,
+          "position": 4669
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/auth/refresh').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 3849,
+        "endLoc": {
+          "column": 15,
+          "line": 3849,
+          "position": 148528
+        },
+        "name": "services/api.ts",
+        "start": 3844,
+        "startLoc": {
+          "column": 33,
+          "line": 3844,
+          "position": 148335
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 257,
+        "endLoc": {
+          "column": 19,
+          "line": 257,
+          "position": 6087
+        },
+        "name": "services/api.ts",
+        "start": 232,
+        "startLoc": {
+          "column": 33,
+          "line": 232,
+          "position": 5325
+        }
+      },
+      "format": "typescript",
+      "fragment": "      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (d.id as number) ?? 0,\n          username: (d.username as string) ?? '',\n          realName: (d.real_name as string) ?? '',\n          role: (d.role as string) ?? '',\n          permissions: (d.permissions as string[]) ?? [],\n          teamType: (d.team_type as string) ?? null,\n          teamId: (d.team_id as number) ?? null,\n        },\n      };\n    });\n  },\n};\n\n// =====================\n// 工作台 API\n// =====================\nexport const workbenchApi = {\n  getStats(): Promise<ApiResponse<WorkbenchStats>> {\n    return api.get('/workbench/stats').then((res) => res.data);\n  },\n  getPendingOrders(limit?: number): Promise<ApiResponse<WorkOrder[]>> {\n    return api.get('/workbench/pending-orders', { params: { limit } }).then((res) => res.data);",
+      "lines": 26,
+      "secondFile": {
+        "end": 1400,
+        "endLoc": {
+          "column": 4,
+          "line": 1400,
+          "position": 50005
+        },
+        "name": "services/api.ts",
+        "start": 1381,
+        "startLoc": {
+          "column": 25,
+          "line": 1381,
+          "position": 49300
+        }
+      },
+      "tokens": 175
+    },
+    {
+      "firstFile": {
+        "end": 494,
+        "endLoc": {
+          "column": 42,
+          "line": 494,
+          "position": 13908
+        },
+        "name": "services/api.ts",
+        "start": 489,
+        "startLoc": {
+          "column": 48,
+          "line": 489,
+          "position": 13597
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get('/devices/health', { params }).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      const items = ((d.items as Record<string, unknown>[]) ?? []).map((item) => ({\n        id: (item.id as number) ?? 0,\n        code: (item.code as string) ?? '',",
+      "lines": 6,
+      "secondFile": {
+        "end": 3669,
+        "endLoc": {
+          "column": 42,
+          "line": 3669,
+          "position": 141309
+        },
+        "name": "services/api.ts",
+        "start": 3663,
+        "startLoc": {
+          "column": 32,
+          "line": 3663,
+          "position": 140987
+        }
+      },
+      "tokens": 100
+    },
+    {
+      "firstFile": {
+        "end": 510,
+        "endLoc": {
+          "column": 4,
+          "line": 510,
+          "position": 14362
+        },
+        "name": "services/api.ts",
+        "start": 498,
+        "startLoc": {
+          "column": 29,
+          "line": 498,
+          "position": 14081
+        }
+      },
+      "format": "typescript",
+      "fragment": "        status: (item.status as string) ?? '',\n      }));\n      return {\n        ...raw,\n        data: {\n          items,\n          total: (d.total as number) ?? items.length,\n          page: (d.page as number) ?? 1,\n          pageSize: (d.page_size as number) ?? items.length,\n        },\n      };\n    });\n  },",
+      "lines": 13,
+      "secondFile": {
+        "end": 3691,
+        "endLoc": {
+          "column": 4,
+          "line": 3691,
+          "position": 142129
+        },
+        "name": "services/api.ts",
+        "start": 3679,
+        "startLoc": {
+          "column": 36,
+          "line": 3679,
+          "position": 141826
+        }
+      },
+      "tokens": 69
+    },
+    {
+      "firstFile": {
+        "end": 520,
+        "endLoc": {
+          "column": 20,
+          "line": 520,
+          "position": 14785
+        },
+        "name": "services/api.ts",
+        "start": 513,
+        "startLoc": {
+          "column": 49,
+          "line": 513,
+          "position": 14528
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/devices/${id}/health`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          deviceId: (d.device_id as number) ?? 0,\n          deviceCode: (d.device_code as string) ?? '',",
+      "lines": 8,
+      "secondFile": {
+        "end": 557,
+        "endLoc": {
+          "column": 22,
+          "line": 557,
+          "position": 16613
+        },
+        "name": "services/api.ts",
+        "start": 550,
+        "startLoc": {
+          "column": 49,
+          "line": 550,
+          "position": 16354
+        }
+      },
+      "tokens": 61
+    },
+    {
+      "firstFile": {
+        "end": 527,
+        "endLoc": {
+          "column": 48,
+          "line": 527,
+          "position": 15248
+        },
+        "name": "services/api.ts",
+        "start": 522,
+        "startLoc": {
+          "column": 53,
+          "line": 522,
+          "position": 14928
+        }
+      },
+      "format": "typescript",
+      "fragment": "          deviceType: (d.device_type as string) ?? '',\n          healthScore: (d.health_score as number) ?? 0,\n          healthStatus: (d.health_status as string) ?? '',\n          healthStatusDisplay: (d.health_status_display as string) ?? '',\n          dimensionScores: (d.dimension_scores as Record<string, number>) ?? {},\n          checkedAt: (d.checked_at as string) ?? '',",
+      "lines": 6,
+      "secondFile": {
+        "end": 543,
+        "endLoc": {
+          "column": 46,
+          "line": 543,
+          "position": 16087
+        },
+        "name": "services/api.ts",
+        "start": 538,
+        "startLoc": {
+          "column": 47,
+          "line": 538,
+          "position": 15777
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 647,
+        "endLoc": {
+          "column": 4,
+          "line": 647,
+          "position": 20190
+        },
+        "name": "services/api.ts",
+        "start": 619,
+        "startLoc": {
+          "column": 38,
+          "line": 619,
+          "position": 19044
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get(`/knowledge/articles${query}`)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          title: (it.title as string) ?? '',\n          content: (it.content as string) ?? '',\n          summary: (it.summary as string) ?? '',\n          categoryId: (it.category_id as number) ?? 0,\n          categoryName: (it.category_name as string) ?? undefined,\n          tags: ((it.tags as string[]) ?? []),\n          author: (it.author as string) ?? '',\n          viewCount: (it.view_count as number) ?? 0,\n          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? 1,\n            pageSize: (d.page_size as number) ?? 20,\n          },\n        };\n      });\n  },",
+      "lines": 29,
+      "secondFile": {
+        "end": 737,
+        "endLoc": {
+          "column": 4,
+          "line": 737,
+          "position": 24200
+        },
+        "name": "services/api.ts",
+        "start": 709,
+        "startLoc": {
+          "column": 96,
+          "line": 709,
+          "position": 23054
+        }
+      },
+      "tokens": 289
+    },
+    {
+      "firstFile": {
+        "end": 625,
+        "endLoc": {
+          "column": 44,
+          "line": 625,
+          "position": 19370
+        },
+        "name": "services/api.ts",
+        "start": 619,
+        "startLoc": {
+          "column": 33,
+          "line": 619,
+          "position": 19039
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get(`/knowledge/articles${query}`)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          title: (it.title as string) ?? '',",
+      "lines": 7,
+      "secondFile": {
+        "end": 3978,
+        "endLoc": {
+          "column": 42,
+          "line": 3978,
+          "position": 154044
+        },
+        "name": "services/api.ts",
+        "start": 3972,
+        "startLoc": {
+          "column": 20,
+          "line": 3972,
+          "position": 153715
+        }
+      },
+      "tokens": 102
+    },
+    {
+      "firstFile": {
+        "end": 642,
+        "endLoc": {
+          "column": 39,
+          "line": 642,
+          "position": 20095
+        },
+        "name": "services/api.ts",
+        "start": 633,
+        "startLoc": {
+          "column": 78,
+          "line": 633,
+          "position": 19816
+        }
+      },
+      "format": "typescript",
+      "fragment": "          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? 1,",
+      "lines": 10,
+      "secondFile": {
+        "end": 1665,
+        "endLoc": {
+          "column": 37,
+          "line": 1665,
+          "position": 62036
+        },
+        "name": "services/api.ts",
+        "start": 1656,
+        "startLoc": {
+          "column": 53,
+          "line": 1656,
+          "position": 61775
+        }
+      },
+      "tokens": 61
+    },
+    {
+      "firstFile": {
+        "end": 650,
+        "endLoc": {
+          "column": 32,
+          "line": 650,
+          "position": 20275
+        },
+        "name": "services/api.ts",
+        "start": 633,
+        "startLoc": {
+          "column": 78,
+          "line": 633,
+          "position": 19816
+        }
+      },
+      "format": "typescript",
+      "fragment": "          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? 1,\n            pageSize: (d.page_size as number) ?? 20,\n          },\n        };\n      });\n  },\n\n  /** GET /knowledge/faq — 知识库FAQ列表 */\n  getFaq(): Promise<ApiResponse<KnowledgeFaqItem[]>> {",
+      "lines": 18,
+      "secondFile": {
+        "end": 1979,
+        "endLoc": {
+          "column": 4,
+          "line": 1979,
+          "position": 75090
+        },
+        "name": "services/api.ts",
+        "start": 1965,
+        "startLoc": {
+          "column": 51,
+          "line": 1965,
+          "position": 74680
+        }
+      },
+      "tokens": 92
+    },
+    {
+      "firstFile": {
+        "end": 652,
+        "endLoc": {
+          "column": 11,
+          "line": 652,
+          "position": 20324
+        },
+        "name": "services/api.ts",
+        "start": 633,
+        "startLoc": {
+          "column": 78,
+          "line": 633,
+          "position": 19816
+        }
+      },
+      "format": "typescript",
+      "fragment": "          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? 1,\n            pageSize: (d.page_size as number) ?? 20,\n          },\n        };\n      });\n  },\n\n  /** GET /knowledge/faq — 知识库FAQ列表 */\n  getFaq(): Promise<ApiResponse<KnowledgeFaqItem[]>> {\n    return api\n      .get('/knowledge/faq')",
+      "lines": 20,
+      "secondFile": {
+        "end": 2058,
+        "endLoc": {
+          "column": 43,
+          "line": 2058,
+          "position": 78475
+        },
+        "name": "services/api.ts",
+        "start": 2041,
+        "startLoc": {
+          "column": 54,
+          "line": 2041,
+          "position": 77962
+        }
+      },
+      "tokens": 103
+    },
+    {
+      "firstFile": {
+        "end": 650,
+        "endLoc": {
+          "column": 32,
+          "line": 650,
+          "position": 20275
+        },
+        "name": "services/api.ts",
+        "start": 633,
+        "startLoc": {
+          "column": 78,
+          "line": 633,
+          "position": 19816
+        }
+      },
+      "format": "typescript",
+      "fragment": "          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? 1,\n            pageSize: (d.page_size as number) ?? 20,\n          },\n        };\n      });\n  },\n\n  /** GET /knowledge/faq — 知识库FAQ列表 */\n  getFaq(): Promise<ApiResponse<KnowledgeFaqItem[]>> {",
+      "lines": 18,
+      "secondFile": {
+        "end": 2216,
+        "endLoc": {
+          "column": 4,
+          "line": 2216,
+          "position": 85284
+        },
+        "name": "services/api.ts",
+        "start": 2202,
+        "startLoc": {
+          "column": 59,
+          "line": 2202,
+          "position": 84874
+        }
+      },
+      "tokens": 92
+    },
+    {
+      "firstFile": {
+        "end": 650,
+        "endLoc": {
+          "column": 51,
+          "line": 650,
+          "position": 20294
+        },
+        "name": "services/api.ts",
+        "start": 633,
+        "startLoc": {
+          "column": 78,
+          "line": 633,
+          "position": 19816
+        }
+      },
+      "format": "typescript",
+      "fragment": "          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? 1,\n            pageSize: (d.page_size as number) ?? 20,\n          },\n        };\n      });\n  },\n\n  /** GET /knowledge/faq — 知识库FAQ列表 */\n  getFaq(): Promise<ApiResponse<KnowledgeFaqItem[]>> {",
+      "lines": 18,
+      "secondFile": {
+        "end": 2264,
+        "endLoc": {
+          "column": 14,
+          "line": 2264,
+          "position": 87095
+        },
+        "name": "services/api.ts",
+        "start": 2247,
+        "startLoc": {
+          "column": 50,
+          "line": 2247,
+          "position": 86610
+        }
+      },
+      "tokens": 96
+    },
+    {
+      "firstFile": {
+        "end": 642,
+        "endLoc": {
+          "column": 17,
+          "line": 642,
+          "position": 20073
+        },
+        "name": "services/api.ts",
+        "start": 633,
+        "startLoc": {
+          "column": 78,
+          "line": 633,
+          "position": 19816
+        }
+      },
+      "format": "typescript",
+      "fragment": "          status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? 1,",
+      "lines": 10,
+      "secondFile": {
+        "end": 3036,
+        "endLoc": {
+          "column": 17,
+          "line": 3036,
+          "position": 117435
+        },
+        "name": "services/api.ts",
+        "start": 3027,
+        "startLoc": {
+          "column": 66,
+          "line": 3027,
+          "position": 117178
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 657,
+        "endLoc": {
+          "column": 37,
+          "line": 657,
+          "position": 20686
+        },
+        "name": "services/api.ts",
+        "start": 652,
+        "startLoc": {
+          "column": 27,
+          "line": 652,
+          "position": 20340
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/knowledge/faq')\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>[] | Record<string, unknown>>;\n        const items = (Array.isArray(raw.data) ? raw.data : (raw.data as Record<string, unknown>)?.items ?? []) as Record<string, unknown>[];\n        const mapped = items.map((it) => ({\n          id: (it.id as number) ?? 0,",
+      "lines": 6,
+      "secondFile": {
+        "end": 675,
+        "endLoc": {
+          "column": 37,
+          "line": 675,
+          "position": 21506
+        },
+        "name": "services/api.ts",
+        "start": 670,
+        "startLoc": {
+          "column": 38,
+          "line": 670,
+          "position": 21160
+        }
+      },
+      "tokens": 105
+    },
+    {
+      "firstFile": {
+        "end": 659,
+        "endLoc": {
+          "column": 42,
+          "line": 659,
+          "position": 20780
+        },
+        "name": "services/api.ts",
+        "start": 652,
+        "startLoc": {
+          "column": 27,
+          "line": 652,
+          "position": 20340
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/knowledge/faq')\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>[] | Record<string, unknown>>;\n        const items = (Array.isArray(raw.data) ? raw.data : (raw.data as Record<string, unknown>)?.items ?? []) as Record<string, unknown>[];\n        const mapped = items.map((it) => ({\n          id: (it.id as number) ?? 0,\n          question: (it.question as string) ?? '',\n          answer: (it.answer as string) ?? '',",
+      "lines": 8,
+      "secondFile": {
+        "end": 695,
+        "endLoc": {
+          "column": 52,
+          "line": 695,
+          "position": 22423
+        },
+        "name": "services/api.ts",
+        "start": 688,
+        "startLoc": {
+          "column": 34,
+          "line": 688,
+          "position": 21981
+        }
+      },
+      "tokens": 127
+    },
+    {
+      "firstFile": {
+        "end": 761,
+        "endLoc": {
+          "column": 58,
+          "line": 761,
+          "position": 25231
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 33,
+          "line": 748,
+          "position": 24650
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',\n            content: (it.content as string) ?? '',\n            category: (it.category as string) ?? '',\n            tags: (it.tags as string[] | null) ?? null,\n            viewCount: (it.view_count as number) ?? 0,\n            published: (it.published as boolean) ?? false,",
+      "lines": 14,
+      "secondFile": {
+        "end": 790,
+        "endLoc": {
+          "column": 58,
+          "line": 790,
+          "position": 26502
+        },
+        "name": "services/api.ts",
+        "start": 777,
+        "startLoc": {
+          "column": 38,
+          "line": 777,
+          "position": 25921
+        }
+      },
+      "tokens": 143
+    },
+    {
+      "firstFile": {
+        "end": 755,
+        "endLoc": {
+          "column": 39,
+          "line": 755,
+          "position": 24910
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 42,
+          "line": 748,
+          "position": 24659
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 811,
+        "endLoc": {
+          "column": 39,
+          "line": 811,
+          "position": 27370
+        },
+        "name": "services/api.ts",
+        "start": 804,
+        "startLoc": {
+          "column": 51,
+          "line": 804,
+          "position": 27119
+        }
+      },
+      "tokens": 65
+    },
+    {
+      "firstFile": {
+        "end": 755,
+        "endLoc": {
+          "column": 39,
+          "line": 755,
+          "position": 24910
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 33,
+          "line": 748,
+          "position": 24650
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 864,
+        "endLoc": {
+          "column": 39,
+          "line": 864,
+          "position": 29422
+        },
+        "name": "services/api.ts",
+        "start": 857,
+        "startLoc": {
+          "column": 28,
+          "line": 857,
+          "position": 29162
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 756,
+        "endLoc": {
+          "column": 46,
+          "line": 756,
+          "position": 24957
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 42,
+          "line": 748,
+          "position": 24659
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 1167,
+        "endLoc": {
+          "column": 42,
+          "line": 1167,
+          "position": 40700
+        },
+        "name": "services/api.ts",
+        "start": 1160,
+        "startLoc": {
+          "column": 33,
+          "line": 1160,
+          "position": 40425
+        }
+      },
+      "tokens": 77
+    },
+    {
+      "firstFile": {
+        "end": 761,
+        "endLoc": {
+          "column": 47,
+          "line": 761,
+          "position": 25220
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 33,
+          "line": 748,
+          "position": 24650
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',\n            content: (it.content as string) ?? '',\n            category: (it.category as string) ?? '',\n            tags: (it.tags as string[] | null) ?? null,\n            viewCount: (it.view_count as number) ?? 0,\n            published: (it.published as boolean) ?? false,",
+      "lines": 14,
+      "secondFile": {
+        "end": 1223,
+        "endLoc": {
+          "column": 4,
+          "line": 1223,
+          "position": 42967
+        },
+        "name": "services/api.ts",
+        "start": 1208,
+        "startLoc": {
+          "column": 28,
+          "line": 1208,
+          "position": 42420
+        }
+      },
+      "tokens": 139
+    },
+    {
+      "firstFile": {
+        "end": 756,
+        "endLoc": {
+          "column": 46,
+          "line": 756,
+          "position": 24957
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 33,
+          "line": 748,
+          "position": 24650
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 2833,
+        "endLoc": {
+          "column": 44,
+          "line": 2833,
+          "position": 109642
+        },
+        "name": "services/api.ts",
+        "start": 2825,
+        "startLoc": {
+          "column": 23,
+          "line": 2825,
+          "position": 109337
+        }
+      },
+      "tokens": 79
+    },
+    {
+      "firstFile": {
+        "end": 770,
+        "endLoc": {
+          "column": 104,
+          "line": 770,
+          "position": 25549
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 33,
+          "line": 748,
+          "position": 24650
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',\n            content: (it.content as string) ?? '',\n            category: (it.category as string) ?? '',\n            tags: (it.tags as string[] | null) ?? null,\n            viewCount: (it.view_count as number) ?? 0,\n            published: (it.published as boolean) ?? false,\n            createdAt: (it.created_at as string) ?? '',\n            authorId: (it.author_id as number) ?? 0,\n          },\n        };\n      });\n  },\n\n  /** PUT /knowledge/articles/{id} — 更新知识库文章 */\n  updateArticle(id: number, body: KnowledgeArticleUpdate): Promise<ApiResponse<KnowledgeArticleUpdated>> {",
+      "lines": 23,
+      "secondFile": {
+        "end": 4083,
+        "endLoc": {
+          "column": 4,
+          "line": 4083,
+          "position": 158330
+        },
+        "name": "services/api.ts",
+        "start": 4063,
+        "startLoc": {
+          "column": 20,
+          "line": 4063,
+          "position": 157494
+        }
+      },
+      "tokens": 194
+    },
+    {
+      "firstFile": {
+        "end": 755,
+        "endLoc": {
+          "column": 39,
+          "line": 755,
+          "position": 24910
+        },
+        "name": "services/api.ts",
+        "start": 748,
+        "startLoc": {
+          "column": 33,
+          "line": 748,
+          "position": 24650
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/articles', payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 4104,
+        "endLoc": {
+          "column": 39,
+          "line": 4104,
+          "position": 159106
+        },
+        "name": "services/api.ts",
+        "start": 4097,
+        "startLoc": {
+          "column": 38,
+          "line": 4097,
+          "position": 158846
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 789,
+        "endLoc": {
+          "column": 47,
+          "line": 789,
+          "position": 26436
+        },
+        "name": "services/api.ts",
+        "start": 777,
+        "startLoc": {
+          "column": 34,
+          "line": 777,
+          "position": 25917
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .put(`/knowledge/articles/${id}`, payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',\n            content: (it.content as string) ?? '',\n            category: (it.category as string) ?? '',\n            tags: (it.tags as string[] | null) ?? null,\n            viewCount: (it.view_count as number) ?? 0,",
+      "lines": 13,
+      "secondFile": {
+        "end": 841,
+        "endLoc": {
+          "column": 55,
+          "line": 841,
+          "position": 28685
+        },
+        "name": "services/api.ts",
+        "start": 829,
+        "startLoc": {
+          "column": 36,
+          "line": 829,
+          "position": 28161
+        }
+      },
+      "tokens": 129
+    },
+    {
+      "firstFile": {
+        "end": 790,
+        "endLoc": {
+          "column": 47,
+          "line": 790,
+          "position": 26491
+        },
+        "name": "services/api.ts",
+        "start": 777,
+        "startLoc": {
+          "column": 34,
+          "line": 777,
+          "position": 25917
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .put(`/knowledge/articles/${id}`, payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',\n            content: (it.content as string) ?? '',\n            category: (it.category as string) ?? '',\n            tags: (it.tags as string[] | null) ?? null,\n            viewCount: (it.view_count as number) ?? 0,\n            published: (it.published as boolean) ?? false,",
+      "lines": 14,
+      "secondFile": {
+        "end": 1200,
+        "endLoc": {
+          "column": 4,
+          "line": 1200,
+          "position": 41988
+        },
+        "name": "services/api.ts",
+        "start": 1184,
+        "startLoc": {
+          "column": 21,
+          "line": 1184,
+          "position": 41402
+        }
+      },
+      "tokens": 141
+    },
+    {
+      "firstFile": {
+        "end": 800,
+        "endLoc": {
+          "column": 17,
+          "line": 800,
+          "position": 26852
+        },
+        "name": "services/api.ts",
+        "start": 777,
+        "startLoc": {
+          "column": 34,
+          "line": 777,
+          "position": 25917
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .put(`/knowledge/articles/${id}`, payload)\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            title: (it.title as string) ?? '',\n            content: (it.content as string) ?? '',\n            category: (it.category as string) ?? '',\n            tags: (it.tags as string[] | null) ?? null,\n            viewCount: (it.view_count as number) ?? 0,\n            published: (it.published as boolean) ?? false,\n            updatedAt: (it.updated_at as string) ?? '',\n            authorId: (it.author_id as number) ?? 0,\n          },\n        };\n      });\n  },\n\n  /** POST /knowledge/categories — 创建知识库分类 (name via query param) */\n  createCategory(body: KnowledgeCategoryCreate): Promise<ApiResponse<KnowledgeCategoryCreated>> {\n    const params: Record<string, unknown> = { name: body.name };",
+      "lines": 24,
+      "secondFile": {
+        "end": 4054,
+        "endLoc": {
+          "column": 4,
+          "line": 4054,
+          "position": 157156
+        },
+        "name": "services/api.ts",
+        "start": 4034,
+        "startLoc": {
+          "column": 21,
+          "line": 4034,
+          "position": 156316
+        }
+      },
+      "tokens": 196
+    },
+    {
+      "firstFile": {
+        "end": 811,
+        "endLoc": {
+          "column": 39,
+          "line": 811,
+          "position": 27370
+        },
+        "name": "services/api.ts",
+        "start": 804,
+        "startLoc": {
+          "column": 50,
+          "line": 804,
+          "position": 27118
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .post('/knowledge/categories', {}, { params })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 2454,
+        "endLoc": {
+          "column": 39,
+          "line": 2454,
+          "position": 94677
+        },
+        "name": "services/api.ts",
+        "start": 2447,
+        "startLoc": {
+          "column": 6,
+          "line": 2447,
+          "position": 94425
+        }
+      },
+      "tokens": 66
+    },
+    {
+      "firstFile": {
+        "end": 817,
+        "endLoc": {
+          "column": 11,
+          "line": 817,
+          "position": 27642
+        },
+        "name": "services/api.ts",
+        "start": 806,
+        "startLoc": {
+          "column": 32,
+          "line": 806,
+          "position": 27176
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            name: (it.name as string) ?? '',\n            icon: (it.icon as string) ?? '',\n            sortOrder: (it.sort_order as number) ?? 0,\n            description: (it.description as string) ?? '',\n            createdAt: (it.created_at as string) ?? '',\n          },",
+      "lines": 12,
+      "secondFile": {
+        "end": 842,
+        "endLoc": {
+          "column": 21,
+          "line": 842,
+          "position": 28707
+        },
+        "name": "services/api.ts",
+        "start": 831,
+        "startLoc": {
+          "column": 32,
+          "line": 831,
+          "position": 28231
+        }
+      },
+      "tokens": 109
+    },
+    {
+      "firstFile": {
+        "end": 1146,
+        "endLoc": {
+          "column": 34,
+          "line": 1146,
+          "position": 39926
+        },
+        "name": "services/api.ts",
+        "start": 1141,
+        "startLoc": {
+          "column": 27,
+          "line": 1141,
+          "position": 39687
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get('/roles').then((res) => {\n      const raw = res.data as ApiResponse<{ items?: Record<string, unknown>[] }>;\n      const items = (raw.data?.items ?? []) as Record<string, unknown>[];\n      return {\n        ...raw,\n        data: items.map((it) => ({",
+      "lines": 6,
+      "secondFile": {
+        "end": 1266,
+        "endLoc": {
+          "column": 34,
+          "line": 1266,
+          "position": 44656
+        },
+        "name": "services/api.ts",
+        "start": 1261,
+        "startLoc": {
+          "column": 33,
+          "line": 1261,
+          "position": 44417
+        }
+      },
+      "tokens": 73
+    },
+    {
+      "firstFile": {
+        "end": 1148,
+        "endLoc": {
+          "column": 42,
+          "line": 1148,
+          "position": 40007
+        },
+        "name": "services/api.ts",
+        "start": 1143,
+        "startLoc": {
+          "column": 40,
+          "line": 1143,
+          "position": 39827
+        }
+      },
+      "format": "typescript",
+      "fragment": "      const items = (raw.data?.items ?? []) as Record<string, unknown>[];\n      return {\n        ...raw,\n        data: items.map((it) => ({\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',",
+      "lines": 6,
+      "secondFile": {
+        "end": 1780,
+        "endLoc": {
+          "column": 42,
+          "line": 1780,
+          "position": 67420
+        },
+        "name": "services/api.ts",
+        "start": 1775,
+        "startLoc": {
+          "column": 58,
+          "line": 1775,
+          "position": 67240
+        }
+      },
+      "tokens": 54
+    },
+    {
+      "firstFile": {
+        "end": 1153,
+        "endLoc": {
+          "column": 9,
+          "line": 1153,
+          "position": 40247
+        },
+        "name": "services/api.ts",
+        "start": 1146,
+        "startLoc": {
+          "column": 33,
+          "line": 1146,
+          "position": 39925
+        }
+      },
+      "format": "typescript",
+      "fragment": "        data: items.map((it) => ({\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',\n          displayName: (it.display_name as string) ?? '',\n          description: (it.description as string) ?? '',\n          isSystem: (it.is_system as boolean) ?? false,\n          permissions: (it.permissions as string[]) ?? [],\n        })),",
+      "lines": 8,
+      "secondFile": {
+        "end": 1172,
+        "endLoc": {
+          "column": 9,
+          "line": 1172,
+          "position": 40940
+        },
+        "name": "services/api.ts",
+        "start": 1165,
+        "startLoc": {
+          "column": 14,
+          "line": 1165,
+          "position": 40618
+        }
+      },
+      "tokens": 77
+    },
+    {
+      "firstFile": {
+        "end": 1167,
+        "endLoc": {
+          "column": 42,
+          "line": 1167,
+          "position": 40700
+        },
+        "name": "services/api.ts",
+        "start": 1160,
+        "startLoc": {
+          "column": 29,
+          "line": 1160,
+          "position": 40421
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/roles/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const it = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',",
+      "lines": 8,
+      "secondFile": {
+        "end": 2610,
+        "endLoc": {
+          "column": 44,
+          "line": 2610,
+          "position": 100496
+        },
+        "name": "services/api.ts",
+        "start": 2602,
+        "startLoc": {
+          "column": 29,
+          "line": 2602,
+          "position": 100196
+        }
+      },
+      "tokens": 79
+    },
+    {
+      "firstFile": {
+        "end": 1166,
+        "endLoc": {
+          "column": 37,
+          "line": 1166,
+          "position": 40657
+        },
+        "name": "services/api.ts",
+        "start": 1160,
+        "startLoc": {
+          "column": 29,
+          "line": 1160,
+          "position": 40421
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/roles/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const it = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (it.id as number) ?? 0,",
+      "lines": 7,
+      "secondFile": {
+        "end": 2749,
+        "endLoc": {
+          "column": 39,
+          "line": 2749,
+          "position": 106363
+        },
+        "name": "services/api.ts",
+        "start": 2742,
+        "startLoc": {
+          "column": 34,
+          "line": 2742,
+          "position": 106108
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 1167,
+        "endLoc": {
+          "column": 42,
+          "line": 1167,
+          "position": 40700
+        },
+        "name": "services/api.ts",
+        "start": 1160,
+        "startLoc": {
+          "column": 29,
+          "line": 1160,
+          "position": 40421
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/roles/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const it = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',",
+      "lines": 8,
+      "secondFile": {
+        "end": 2891,
+        "endLoc": {
+          "column": 44,
+          "line": 2891,
+          "position": 111778
+        },
+        "name": "services/api.ts",
+        "start": 2883,
+        "startLoc": {
+          "column": 24,
+          "line": 2883,
+          "position": 111478
+        }
+      },
+      "tokens": 79
+    },
+    {
+      "firstFile": {
+        "end": 1166,
+        "endLoc": {
+          "column": 37,
+          "line": 1166,
+          "position": 40657
+        },
+        "name": "services/api.ts",
+        "start": 1160,
+        "startLoc": {
+          "column": 31,
+          "line": 1160,
+          "position": 40423
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/roles/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const it = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (it.id as number) ?? 0,",
+      "lines": 7,
+      "secondFile": {
+        "end": 3053,
+        "endLoc": {
+          "column": 39,
+          "line": 3053,
+          "position": 117950
+        },
+        "name": "services/api.ts",
+        "start": 3046,
+        "startLoc": {
+          "column": 36,
+          "line": 3046,
+          "position": 117697
+        }
+      },
+      "tokens": 66
+    },
+    {
+      "firstFile": {
+        "end": 1168,
+        "endLoc": {
+          "column": 49,
+          "line": 1168,
+          "position": 40750
+        },
+        "name": "services/api.ts",
+        "start": 1160,
+        "startLoc": {
+          "column": 29,
+          "line": 1160,
+          "position": 40421
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/roles/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const it = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',\n          displayName: (it.display_name as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 4012,
+        "endLoc": {
+          "column": 36,
+          "line": 4012,
+          "position": 155308
+        },
+        "name": "services/api.ts",
+        "start": 4003,
+        "startLoc": {
+          "column": 21,
+          "line": 4003,
+          "position": 154971
+        }
+      },
+      "tokens": 87
+    },
+    {
+      "firstFile": {
+        "end": 1178,
+        "endLoc": {
+          "column": 8,
+          "line": 1178,
+          "position": 41015
+        },
+        "name": "services/api.ts",
+        "start": 1168,
+        "startLoc": {
+          "column": 24,
+          "line": 1168,
+          "position": 40725
+        }
+      },
+      "format": "typescript",
+      "fragment": "          displayName: (it.display_name as string) ?? '',\n          description: (it.description as string) ?? '',\n          isSystem: (it.is_system as boolean) ?? false,\n          permissions: (it.permissions as string[]) ?? [],\n        },\n      };\n    });\n  },\n\n  /** PUT /roles/{id} — 更新角色 */\n  update(id: number, body: RoleUpdate): Promise<ApiResponse<Role>> {",
+      "lines": 11,
+      "secondFile": {
+        "end": 1203,
+        "endLoc": {
+          "column": 8,
+          "line": 1203,
+          "position": 42036
+        },
+        "name": "services/api.ts",
+        "start": 1193,
+        "startLoc": {
+          "column": 26,
+          "line": 1193,
+          "position": 41738
+        }
+      },
+      "tokens": 57
+    },
+    {
+      "firstFile": {
+        "end": 1184,
+        "endLoc": {
+          "column": 7,
+          "line": 1184,
+          "position": 41388
+        },
+        "name": "services/api.ts",
+        "start": 1179,
+        "startLoc": {
+          "column": 46,
+          "line": 1179,
+          "position": 41122
+        }
+      },
+      "format": "typescript",
+      "fragment": "    const payload: Record<string, unknown> = {};\n    if (body.displayName !== undefined) payload.display_name = body.displayName;\n    if (body.description !== undefined) payload.description = body.description;\n    if (body.permissions !== undefined) payload.permissions = body.permissions;\n    return api\n      .put(`/roles/${id}`, payload)",
+      "lines": 6,
+      "secondFile": {
+        "end": 1208,
+        "endLoc": {
+          "column": 15,
+          "line": 1208,
+          "position": 42407
+        },
+        "name": "services/api.ts",
+        "start": 1204,
+        "startLoc": {
+          "column": 63,
+          "line": 1204,
+          "position": 42148
+        }
+      },
+      "tokens": 53
+    },
+    {
+      "firstFile": {
+        "end": 1301,
+        "endLoc": {
+          "column": 57,
+          "line": 1301,
+          "position": 46006
+        },
+        "name": "services/api.ts",
+        "start": 1294,
+        "startLoc": {
+          "column": 39,
+          "line": 1294,
+          "position": 45581
+        }
+      },
+      "format": "typescript",
+      "fragment": "          days: (d.days as number) ?? 0,\n          pvGeneration: (d.pv_generation as number) ?? 0,\n          chargingAmount: (d.charging_amount as number) ?? 0,\n          dischargeAmount: (d.discharge_amount as number) ?? 0,\n          pvRevenue: (d.pv_revenue as number) ?? 0,\n          chargingRevenue: (d.charging_revenue as number) ?? 0,\n          dischargeRevenue: (d.discharge_revenue as number) ?? 0,\n          totalRevenue: (d.total_revenue as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 1333,
+        "endLoc": {
+          "column": 57,
+          "line": 1333,
+          "position": 47441
+        },
+        "name": "services/api.ts",
+        "start": 1326,
+        "startLoc": {
+          "column": 40,
+          "line": 1326,
+          "position": 47016
+        }
+      },
+      "tokens": 85
+    },
+    {
+      "firstFile": {
+        "end": 1352,
+        "endLoc": {
+          "column": 36,
+          "line": 1352,
+          "position": 47941
+        },
+        "name": "services/api.ts",
+        "start": 1346,
+        "startLoc": {
+          "column": 29,
+          "line": 1346,
+          "position": 47707
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/users/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (d.id as number) ?? 0,",
+      "lines": 7,
+      "secondFile": {
+        "end": 1904,
+        "endLoc": {
+          "column": 36,
+          "line": 1904,
+          "position": 72299
+        },
+        "name": "services/api.ts",
+        "start": 1898,
+        "startLoc": {
+          "column": 35,
+          "line": 1898,
+          "position": 72065
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 1370,
+        "endLoc": {
+          "column": 8,
+          "line": 1370,
+          "position": 48583
+        },
+        "name": "services/api.ts",
+        "start": 1348,
+        "startLoc": {
+          "column": 43,
+          "line": 1348,
+          "position": 47840
+        }
+      },
+      "format": "typescript",
+      "fragment": "      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (d.id as number) ?? 0,\n          username: (d.username as string) ?? '',\n          realName: (d.real_name as string) ?? '',\n          phone: (d.phone as string | null) ?? null,\n          role: (d.role as string) ?? '',\n          level: (d.level as string) ?? '',\n          teamId: (d.team_id as number | null) ?? null,\n          teamName: (d.team_name as string | null) ?? null,\n          status: (d.status as string) ?? '',\n          lastLogin: (d.last_login as string) ?? '',\n          createdAt: (d.created_at as string) ?? '',\n          updatedAt: (d.updated_at as string) ?? '',\n        },\n      };\n    });\n  },\n\n  /** POST /users — 创建用户 */\n  create(body: UserCreate): Promise<ApiResponse<UserDetail>> {",
+      "lines": 23,
+      "secondFile": {
+        "end": 1401,
+        "endLoc": {
+          "column": 1,
+          "line": 1401,
+          "position": 50007
+        },
+        "name": "services/api.ts",
+        "start": 1381,
+        "startLoc": {
+          "column": 35,
+          "line": 1381,
+          "position": 49310
+        }
+      },
+      "tokens": 172
+    },
+    {
+      "firstFile": {
+        "end": 1462,
+        "endLoc": {
+          "column": 22,
+          "line": 1462,
+          "position": 52742
+        },
+        "name": "services/api.ts",
+        "start": 1455,
+        "startLoc": {
+          "column": 44,
+          "line": 1455,
+          "position": 52478
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get('/reports/devices').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          periodDays: (d.period_days as number) ?? 30,\n          totalDevices: (d.total_devices as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 1494,
+        "endLoc": {
+          "column": 21,
+          "line": 1494,
+          "position": 54142
+        },
+        "name": "services/api.ts",
+        "start": 1487,
+        "startLoc": {
+          "column": 43,
+          "line": 1487,
+          "position": 53879
+        }
+      },
+      "tokens": 61
+    },
+    {
+      "firstFile": {
+        "end": 1566,
+        "endLoc": {
+          "column": 14,
+          "line": 1566,
+          "position": 57721
+        },
+        "name": "services/api.ts",
+        "start": 1558,
+        "startLoc": {
+          "column": 20,
+          "line": 1558,
+          "position": 57190
+        }
+      },
+      "format": "typescript",
+      "fragment": "          items: ((d.items as Record<string, unknown>[]) ?? []).map((item) => ({\n            stationId: (item.station_id as number) ?? undefined,\n            stationName: (item.station_name as string) ?? undefined,\n            deviceId: (item.device_id as number) ?? undefined,\n            deviceName: (item.device_name as string) ?? undefined,\n            efficiency: (item.efficiency as number) ?? undefined,\n            uptime: (item.uptime as number) ?? undefined,\n            utilization: (item.utilization as number) ?? undefined,\n          })),",
+      "lines": 9,
+      "secondFile": {
+        "end": 1582,
+        "endLoc": {
+          "column": 18,
+          "line": 1582,
+          "position": 58625
+        },
+        "name": "services/api.ts",
+        "start": 1574,
+        "startLoc": {
+          "column": 31,
+          "line": 1574,
+          "position": 58062
+        }
+      },
+      "tokens": 113
+    },
+    {
+      "firstFile": {
+        "end": 1672,
+        "endLoc": {
+          "column": 14,
+          "line": 1672,
+          "position": 62175
+        },
+        "name": "services/api.ts",
+        "start": 1656,
+        "startLoc": {
+          "column": 37,
+          "line": 1656,
+          "position": 61759
+        }
+      },
+      "format": "typescript",
+      "fragment": "        description: (it.description as string) ?? '',\n        createdAt: (it.created_at as string) ?? '',\n        updatedAt: (it.updated_at as string) ?? '',\n      }));\n      return {\n        ...raw,\n        data: {\n          items,\n          total: (d.total as number) ?? 0,\n          page: (d.page as number) ?? params?.page ?? 1,\n          pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n        },\n      };\n    });\n  },\n\n  create(body: AlarmRuleCreate): Promise<ApiResponse<AlarmRuleCreated>> {",
+      "lines": 17,
+      "secondFile": {
+        "end": 2438,
+        "endLoc": {
+          "column": 14,
+          "line": 2438,
+          "position": 94045
+        },
+        "name": "services/api.ts",
+        "start": 2421,
+        "startLoc": {
+          "column": 25,
+          "line": 2421,
+          "position": 93558
+        }
+      },
+      "tokens": 101
+    },
+    {
+      "firstFile": {
+        "end": 1670,
+        "endLoc": {
+          "column": 4,
+          "line": 1670,
+          "position": 62159
+        },
+        "name": "services/api.ts",
+        "start": 1658,
+        "startLoc": {
+          "column": 34,
+          "line": 1658,
+          "position": 61863
+        }
+      },
+      "format": "typescript",
+      "fragment": "        updatedAt: (it.updated_at as string) ?? '',\n      }));\n      return {\n        ...raw,\n        data: {\n          items,\n          total: (d.total as number) ?? 0,\n          page: (d.page as number) ?? params?.page ?? 1,\n          pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n        },\n      };\n    });\n  },",
+      "lines": 13,
+      "secondFile": {
+        "end": 1894,
+        "endLoc": {
+          "column": 4,
+          "line": 1894,
+          "position": 71923
+        },
+        "name": "services/api.ts",
+        "start": 1882,
+        "startLoc": {
+          "column": 36,
+          "line": 1882,
+          "position": 71605
+        }
+      },
+      "tokens": 73
+    },
+    {
+      "firstFile": {
+        "end": 1672,
+        "endLoc": {
+          "column": 14,
+          "line": 1672,
+          "position": 62175
+        },
+        "name": "services/api.ts",
+        "start": 1658,
+        "startLoc": {
+          "column": 50,
+          "line": 1658,
+          "position": 61879
+        }
+      },
+      "format": "typescript",
+      "fragment": "        updatedAt: (it.updated_at as string) ?? '',\n      }));\n      return {\n        ...raw,\n        data: {\n          items,\n          total: (d.total as number) ?? 0,\n          page: (d.page as number) ?? params?.page ?? 1,\n          pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n        },\n      };\n    });\n  },\n\n  create(body: AlarmRuleCreate): Promise<ApiResponse<AlarmRuleCreated>> {",
+      "lines": 15,
+      "secondFile": {
+        "end": 3014,
+        "endLoc": {
+          "column": 12,
+          "line": 3014,
+          "position": 116453
+        },
+        "name": "services/api.ts",
+        "start": 2996,
+        "startLoc": {
+          "column": 59,
+          "line": 2996,
+          "position": 116043
+        }
+      },
+      "tokens": 72
+    },
+    {
+      "firstFile": {
+        "end": 1672,
+        "endLoc": {
+          "column": 13,
+          "line": 1672,
+          "position": 62174
+        },
+        "name": "services/api.ts",
+        "start": 1659,
+        "startLoc": {
+          "column": 9,
+          "line": 1659,
+          "position": 61890
+        }
+      },
+      "format": "typescript",
+      "fragment": "      }));\n      return {\n        ...raw,\n        data: {\n          items,\n          total: (d.total as number) ?? 0,\n          page: (d.page as number) ?? params?.page ?? 1,\n          pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n        },\n      };\n    });\n  },\n\n  create(body: AlarmRuleCreate): Promise<ApiResponse<AlarmRuleCreated>> {",
+      "lines": 14,
+      "secondFile": {
+        "end": 2391,
+        "endLoc": {
+          "column": 6,
+          "line": 2391,
+          "position": 92440
+        },
+        "name": "services/api.ts",
+        "start": 2374,
+        "startLoc": {
+          "column": 31,
+          "line": 2374,
+          "position": 92060
+        }
+      },
+      "tokens": 67
+    },
+    {
+      "firstFile": {
+        "end": 1714,
+        "endLoc": {
+          "column": 4,
+          "line": 1714,
+          "position": 64292
+        },
+        "name": "services/api.ts",
+        "start": 1677,
+        "startLoc": {
+          "column": 33,
+          "line": 1677,
+          "position": 62367
+        }
+      },
+      "format": "typescript",
+      "fragment": "        threshold: body.threshold,\n        ...(body.deviceType !== undefined && { device_type: body.deviceType }),\n        ...(body.severity !== undefined && { severity: body.severity }),\n        ...(body.operator !== undefined && { operator: body.operator }),\n        ...(body.duration !== undefined && { duration: body.duration }),\n        ...(body.enabled !== undefined && { enabled: body.enabled }),\n        ...(body.description !== undefined && { description: body.description }),\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<AlarmRuleCreated>;\n        const d = raw.data as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (d.id as number) ?? 0,\n            name: (d.name as string) ?? '',\n            description: (d.description as string) ?? '',\n            deviceType: (d.device_type as string | null) ?? null,\n            deviceIds: (d.device_ids as number[] | null) ?? null,\n            stationIds: (d.station_ids as number[] | null) ?? null,\n            metric: (d.metric as string) ?? '',\n            operator: (d.operator as string) ?? '>',\n            threshold: (d.threshold as number) ?? 0,\n            duration: (d.duration as number) ?? 0,\n            level: (d.level as string) ?? 'warning',\n            alarmTemplate: (d.alarm_template as string) ?? '',\n            notifyUsers: (d.notify_users as string[] | null) ?? null,\n            autoCreateWorkorder: (d.auto_create_workorder as boolean) ?? false,\n            workorderPriority: (d.workorder_priority as string) ?? 'medium',\n            enabled: (d.enabled as boolean) ?? false,\n            silenceMinutes: (d.silence_minutes as number) ?? 0,\n            createdAt: (d.created_at as string) ?? '',\n            updatedAt: (d.updated_at as string | null) ?? null,\n          },\n        };\n      });\n  },",
+      "lines": 38,
+      "secondFile": {
+        "end": 1759,
+        "endLoc": {
+          "column": 4,
+          "line": 1759,
+          "position": 66611
+        },
+        "name": "services/api.ts",
+        "start": 1722,
+        "startLoc": {
+          "column": 74,
+          "line": 1722,
+          "position": 64686
+        }
+      },
+      "tokens": 429
+    },
+    {
+      "firstFile": {
+        "end": 1694,
+        "endLoc": {
+          "column": 49,
+          "line": 1694,
+          "position": 63260
+        },
+        "name": "services/api.ts",
+        "start": 1687,
+        "startLoc": {
+          "column": 95,
+          "line": 1687,
+          "position": 63017
+        }
+      },
+      "format": "typescript",
+      "fragment": "        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<AlarmRuleCreated>;\n        const d = raw.data as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (d.id as number) ?? 0,\n            name: (d.name as string) ?? '',\n            description: (d.description as string) ?? '',",
+      "lines": 8,
+      "secondFile": {
+        "end": 2314,
+        "endLoc": {
+          "column": 49,
+          "line": 2314,
+          "position": 89374
+        },
+        "name": "services/api.ts",
+        "start": 2307,
+        "startLoc": {
+          "column": 104,
+          "line": 2307,
+          "position": 89131
+        }
+      },
+      "tokens": 56
+    },
+    {
+      "firstFile": {
+        "end": 1694,
+        "endLoc": {
+          "column": 57,
+          "line": 1694,
+          "position": 63268
+        },
+        "name": "services/api.ts",
+        "start": 1688,
+        "startLoc": {
+          "column": 27,
+          "line": 1688,
+          "position": 63047
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const d = raw.data as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (d.id as number) ?? 0,\n            name: (d.name as string) ?? '',\n            description: (d.description as string) ?? '',",
+      "lines": 7,
+      "secondFile": {
+        "end": 2674,
+        "endLoc": {
+          "column": 55,
+          "line": 2674,
+          "position": 103418
+        },
+        "name": "services/api.ts",
+        "start": 2668,
+        "startLoc": {
+          "column": 33,
+          "line": 2668,
+          "position": 103209
+        }
+      },
+      "tokens": 52
+    },
+    {
+      "firstFile": {
+        "end": 1763,
+        "endLoc": {
+          "column": 22,
+          "line": 1763,
+          "position": 66743
+        },
+        "name": "services/api.ts",
+        "start": 1753,
+        "startLoc": {
+          "column": 62,
+          "line": 1753,
+          "position": 66452
+        }
+      },
+      "format": "typescript",
+      "fragment": "            silenceMinutes: (d.silence_minutes as number) ?? 0,\n            createdAt: (d.created_at as string) ?? '',\n            updatedAt: (d.updated_at as string | null) ?? null,\n          },\n        };\n      });\n  },\n\n  /** DELETE /alarm-rules/{id} — 删除告警规则 */\n  delete(id: number): Promise<ApiResponse<null>> {\n    return api.delete(`/alarm-rules/${id}`).then((res) => res.data);",
+      "lines": 11,
+      "secondFile": {
+        "end": 1855,
+        "endLoc": {
+          "column": 22,
+          "line": 1855,
+          "position": 70525
+        },
+        "name": "services/api.ts",
+        "start": 1845,
+        "startLoc": {
+          "column": 52,
+          "line": 1845,
+          "position": 70227
+        }
+      },
+      "tokens": 56
+    },
+    {
+      "firstFile": {
+        "end": 1821,
+        "endLoc": {
+          "column": 4,
+          "line": 1821,
+          "position": 69057
+        },
+        "name": "services/api.ts",
+        "start": 1798,
+        "startLoc": {
+          "column": 25,
+          "line": 1798,
+          "position": 68071
+        }
+      },
+      "format": "typescript",
+      "fragment": "        level: body.level,\n        ...(body.channels !== undefined && { channels: body.channels }),\n        ...(body.receivers !== undefined && { receivers: body.receivers }),\n        ...(body.enabled !== undefined && { enabled: body.enabled }),\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<NotificationRuleCreated>;\n        const d = raw.data as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (d.id as number) ?? 0,\n            name: (d.name as string) ?? '',\n            level: (d.level as string) ?? '',\n            channels: (d.channels as string[]) ?? [],\n            receivers: (d.receivers as string[]) ?? [],\n            enabled: (d.enabled as boolean) ?? false,\n            createdAt: (d.created_at as string) ?? '',\n            updatedAt: (d.updated_at as string | null) ?? null,\n          },\n        };\n      });\n  },",
+      "lines": 24,
+      "secondFile": {
+        "end": 1851,
+        "endLoc": {
+          "column": 4,
+          "line": 1851,
+          "position": 70386
+        },
+        "name": "services/api.ts",
+        "start": 1828,
+        "startLoc": {
+          "column": 62,
+          "line": 1828,
+          "position": 69400
+        }
+      },
+      "tokens": 238
+    },
+    {
+      "firstFile": {
+        "end": 1877,
+        "endLoc": {
+          "column": 51,
+          "line": 1877,
+          "position": 71322
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          partName: (it.part_name as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 1960,
+        "endLoc": {
+          "column": 42,
+          "line": 1960,
+          "position": 74432
+        },
+        "name": "services/api.ts",
+        "start": 1952,
+        "startLoc": {
+          "column": 37,
+          "line": 1952,
+          "position": 74030
+        }
+      },
+      "tokens": 119
+    },
+    {
+      "firstFile": {
+        "end": 1877,
+        "endLoc": {
+          "column": 51,
+          "line": 1877,
+          "position": 71322
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          partName: (it.part_name as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 2122,
+        "endLoc": {
+          "column": 42,
+          "line": 2122,
+          "position": 81524
+        },
+        "name": "services/api.ts",
+        "start": 2114,
+        "startLoc": {
+          "column": 21,
+          "line": 2114,
+          "position": 81122
+        }
+      },
+      "tokens": 119
+    },
+    {
+      "firstFile": {
+        "end": 1877,
+        "endLoc": {
+          "column": 51,
+          "line": 1877,
+          "position": 71322
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          partName: (it.part_name as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 2190,
+        "endLoc": {
+          "column": 42,
+          "line": 2190,
+          "position": 84156
+        },
+        "name": "services/api.ts",
+        "start": 2182,
+        "startLoc": {
+          "column": 30,
+          "line": 2182,
+          "position": 83754
+        }
+      },
+      "tokens": 119
+    },
+    {
+      "firstFile": {
+        "end": 1877,
+        "endLoc": {
+          "column": 51,
+          "line": 1877,
+          "position": 71322
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          partName: (it.part_name as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 2237,
+        "endLoc": {
+          "column": 42,
+          "line": 2237,
+          "position": 86067
+        },
+        "name": "services/api.ts",
+        "start": 2229,
+        "startLoc": {
+          "column": 34,
+          "line": 2229,
+          "position": 85665
+        }
+      },
+      "tokens": 119
+    },
+    {
+      "firstFile": {
+        "end": 1876,
+        "endLoc": {
+          "column": 37,
+          "line": 1876,
+          "position": 71270
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 2353,
+        "endLoc": {
+          "column": 37,
+          "line": 2353,
+          "position": 90894
+        },
+        "name": "services/api.ts",
+        "start": 2346,
+        "startLoc": {
+          "column": 30,
+          "line": 2346,
+          "position": 90535
+        }
+      },
+      "tokens": 107
+    },
+    {
+      "firstFile": {
+        "end": 1876,
+        "endLoc": {
+          "column": 37,
+          "line": 1876,
+          "position": 71270
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 2414,
+        "endLoc": {
+          "column": 37,
+          "line": 2414,
+          "position": 93200
+        },
+        "name": "services/api.ts",
+        "start": 2407,
+        "startLoc": {
+          "column": 23,
+          "line": 2407,
+          "position": 92841
+        }
+      },
+      "tokens": 107
+    },
+    {
+      "firstFile": {
+        "end": 1877,
+        "endLoc": {
+          "column": 51,
+          "line": 1877,
+          "position": 71322
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          partName: (it.part_name as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 2505,
+        "endLoc": {
+          "column": 42,
+          "line": 2505,
+          "position": 96364
+        },
+        "name": "services/api.ts",
+        "start": 2497,
+        "startLoc": {
+          "column": 22,
+          "line": 2497,
+          "position": 95962
+        }
+      },
+      "tokens": 119
+    },
+    {
+      "firstFile": {
+        "end": 1876,
+        "endLoc": {
+          "column": 37,
+          "line": 1876,
+          "position": 71270
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 2712,
+        "endLoc": {
+          "column": 37,
+          "line": 2712,
+          "position": 104916
+        },
+        "name": "services/api.ts",
+        "start": 2705,
+        "startLoc": {
+          "column": 32,
+          "line": 2705,
+          "position": 104557
+        }
+      },
+      "tokens": 107
+    },
+    {
+      "firstFile": {
+        "end": 1877,
+        "endLoc": {
+          "column": 51,
+          "line": 1877,
+          "position": 71322
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          partName: (it.part_name as string) ?? '',",
+      "lines": 9,
+      "secondFile": {
+        "end": 2857,
+        "endLoc": {
+          "column": 42,
+          "line": 2857,
+          "position": 110511
+        },
+        "name": "services/api.ts",
+        "start": 2849,
+        "startLoc": {
+          "column": 22,
+          "line": 2849,
+          "position": 110109
+        }
+      },
+      "tokens": 119
+    },
+    {
+      "firstFile": {
+        "end": 1876,
+        "endLoc": {
+          "column": 37,
+          "line": 1876,
+          "position": 71270
+        },
+        "name": "services/api.ts",
+        "start": 1869,
+        "startLoc": {
+          "column": 25,
+          "line": 1869,
+          "position": 70911
+        }
+      },
+      "format": "typescript",
+      "fragment": "      .get('/spare-parts', {\n        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 2981,
+        "endLoc": {
+          "column": 37,
+          "line": 2981,
+          "position": 115196
+        },
+        "name": "services/api.ts",
+        "start": 2974,
+        "startLoc": {
+          "column": 27,
+          "line": 2974,
+          "position": 114837
+        }
+      },
+      "tokens": 107
+    },
+    {
+      "firstFile": {
+        "end": 1876,
+        "endLoc": {
+          "column": 37,
+          "line": 1876,
+          "position": 71270
+        },
+        "name": "services/api.ts",
+        "start": 1870,
+        "startLoc": {
+          "column": 66,
+          "line": 1870,
+          "position": 70981
+        }
+      },
+      "format": "typescript",
+      "fragment": "        params: { page: params?.page, page_size: params?.pageSize },\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,",
+      "lines": 7,
+      "secondFile": {
+        "end": 2013,
+        "endLoc": {
+          "column": 37,
+          "line": 2013,
+          "position": 76254
+        },
+        "name": "services/api.ts",
+        "start": 2007,
+        "startLoc": {
+          "column": 8,
+          "line": 2007,
+          "position": 75965
+        }
+      },
+      "tokens": 91
+    },
+    {
+      "firstFile": {
+        "end": 1897,
+        "endLoc": {
+          "column": 43,
+          "line": 1897,
+          "position": 72016
+        },
+        "name": "services/api.ts",
+        "start": 1881,
+        "startLoc": {
+          "column": 51,
+          "line": 1881,
+          "position": 71567
+        }
+      },
+      "format": "typescript",
+      "fragment": "          warehouse: (it.warehouse as string) ?? '',\n          createdAt: (it.created_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? params?.page ?? 1,\n            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n          },\n        };\n      });\n  },\n\n  /** GET /spare-parts/{id} — 备件详情 */\n  getById(id: number): Promise<ApiResponse<SparePart>> {",
+      "lines": 17,
+      "secondFile": {
+        "end": 2740,
+        "endLoc": {
+          "column": 43,
+          "line": 2740,
+          "position": 106038
+        },
+        "name": "services/api.ts",
+        "start": 2724,
+        "startLoc": {
+          "column": 67,
+          "line": 2724,
+          "position": 105570
+        }
+      },
+      "tokens": 91
+    },
+    {
+      "firstFile": {
+        "end": 1917,
+        "endLoc": {
+          "column": 8,
+          "line": 1917,
+          "position": 72747
+        },
+        "name": "services/api.ts",
+        "start": 1899,
+        "startLoc": {
+          "column": 30,
+          "line": 1899,
+          "position": 72117
+        }
+      },
+      "format": "typescript",
+      "fragment": "      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {\n          id: (d.id as number) ?? 0,\n          partName: (d.part_name as string) ?? '',\n          partModel: (d.part_model as string | null) ?? null,\n          totalQuantity: (d.total_quantity as number) ?? 0,\n          availableQuantity: (d.available_quantity as number) ?? 0,\n          warehouse: (d.warehouse as string) ?? '',\n          createdAt: (d.created_at as string) ?? '',\n        },\n      };\n    });\n  },\n\n  /** POST /spare-parts — 创建备件 (登记入库) */\n  create(body: SparePartCreate): Promise<ApiResponse<SparePart>> {",
+      "lines": 19,
+      "secondFile": {
+        "end": 1937,
+        "endLoc": {
+          "column": 8,
+          "line": 1937,
+          "position": 73516
+        },
+        "name": "services/api.ts",
+        "start": 1919,
+        "startLoc": {
+          "column": 30,
+          "line": 1919,
+          "position": 72894
+        }
+      },
+      "tokens": 132
+    },
+    {
+      "firstFile": {
+        "end": 1923,
+        "endLoc": {
+          "column": 15,
+          "line": 1923,
+          "position": 73039
+        },
+        "name": "services/api.ts",
+        "start": 1918,
+        "startLoc": {
+          "column": 34,
+          "line": 1918,
+          "position": 72840
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.post('/spare-parts', body).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: {",
+      "lines": 6,
+      "secondFile": {
+        "end": 3606,
+        "endLoc": {
+          "column": 15,
+          "line": 3606,
+          "position": 138943
+        },
+        "name": "services/api.ts",
+        "start": 3601,
+        "startLoc": {
+          "column": 41,
+          "line": 3601,
+          "position": 138744
+        }
+      },
+      "tokens": 55
+    },
+    {
+      "firstFile": {
+        "end": 1982,
+        "endLoc": {
+          "column": 42,
+          "line": 1982,
+          "position": 75203
+        },
+        "name": "services/api.ts",
+        "start": 1964,
+        "startLoc": {
+          "column": 53,
+          "line": 1964,
+          "position": 74627
+        }
+      },
+      "format": "typescript",
+      "fragment": "          variables: (it.variables as string[]) ?? [],\n          enabled: (it.enabled as boolean) ?? false,\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? params?.page ?? 1,\n            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n          },\n        };\n      });\n  },\n\n  /** DELETE /notifications/templates/{id} — 删除通知模板 */\n  delete(id: number): Promise<ApiResponse<null>> {",
+      "lines": 19,
+      "secondFile": {
+        "end": 2146,
+        "endLoc": {
+          "column": 43,
+          "line": 2146,
+          "position": 82427
+        },
+        "name": "services/api.ts",
+        "start": 2128,
+        "startLoc": {
+          "column": 58,
+          "line": 2128,
+          "position": 81869
+        }
+      },
+      "tokens": 115
+    },
+    {
+      "firstFile": {
+        "end": 2044,
+        "endLoc": {
+          "column": 9,
+          "line": 2044,
+          "position": 78081
+        },
+        "name": "services/api.ts",
+        "start": 2012,
+        "startLoc": {
+          "column": 82,
+          "line": 2012,
+          "position": 76215
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          orderNo: (it.order_no as string) ?? '',\n          stationId: (it.station_id as number) ?? 0,\n          deviceId: (it.device_id as number) ?? 0,\n          userId: (it.user_id as number) ?? 0,\n          userType: (it.user_type as string | null) ?? null,\n          vehicleId: (it.vehicle_id as string | null) ?? null,\n          plateNumber: (it.plate_number as string | null) ?? null,\n          startTime: (it.start_time as string | null) ?? null,\n          endTime: (it.end_time as string | null) ?? null,\n          durationMinutes: (it.duration_minutes as number) ?? 0,\n          startSoc: it.start_soc as number | null ?? null,\n          endSoc: it.end_soc as number | null ?? null,\n          startMeter: it.start_meter as number | null ?? null,\n          endMeter: it.end_meter as number | null ?? null,\n          stopReason: (it.stop_reason as string | null) ?? null,\n          chargedKwh: (it.charged_kwh as number) ?? 0,\n          electricityFee: (it.electricity_fee as number) ?? 0,\n          serviceFee: (it.service_fee as number) ?? 0,\n          parkingFee: (it.parking_fee as number) ?? 0,\n          idlePenalty: (it.idle_penalty as number) ?? 0,\n          reservationFee: (it.reservation_fee as number) ?? 0,\n          totalAmount: (it.total_amount as number) ?? 0,\n          discountAmount: (it.discount_amount as number) ?? 0,\n          paidAmount: (it.paid_amount as number) ?? 0,\n          paymentStatus: (it.payment_status as ChargingOrder['paymentStatus']) ?? 'unpaid',\n          orderStatus: (it.order_status as ChargingOrder['orderStatus']) ?? 'pending',\n          paymentMethod: (it.payment_method as string | null) ?? null,\n          remark: (it.remark as string | null) ?? null,\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));",
+      "lines": 33,
+      "secondFile": {
+        "end": 2097,
+        "endLoc": {
+          "column": 13,
+          "line": 2097,
+          "position": 80758
+        },
+        "name": "services/api.ts",
+        "start": 2065,
+        "startLoc": {
+          "column": 12,
+          "line": 2065,
+          "position": 78764
+        }
+      },
+      "tokens": 396
+    },
+    {
+      "firstFile": {
+        "end": 2058,
+        "endLoc": {
+          "column": 13,
+          "line": 2058,
+          "position": 78445
+        },
+        "name": "services/api.ts",
+        "start": 2041,
+        "startLoc": {
+          "column": 39,
+          "line": 2041,
+          "position": 77947
+        }
+      },
+      "format": "typescript",
+      "fragment": "          remark: (it.remark as string | null) ?? null,\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? params?.page ?? 1,\n            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n          },\n        };\n      });\n  },\n\n  /** GET /charging-orders/{id} — 充电订单详情 */\n  getById(id: number): Promise<ApiResponse<ChargingOrder | null>> {",
+      "lines": 18,
+      "secondFile": {
+        "end": 2528,
+        "endLoc": {
+          "column": 14,
+          "line": 2528,
+          "position": 97222
+        },
+        "name": "services/api.ts",
+        "start": 2511,
+        "startLoc": {
+          "column": 65,
+          "line": 2511,
+          "position": 96739
+        }
+      },
+      "tokens": 101
+    },
+    {
+      "firstFile": {
+        "end": 2066,
+        "endLoc": {
+          "column": 41,
+          "line": 2066,
+          "position": 78807
+        },
+        "name": "services/api.ts",
+        "start": 2059,
+        "startLoc": {
+          "column": 39,
+          "line": 2059,
+          "position": 78539
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/charging-orders/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown> | null>;\n      const it = (raw.data ?? {}) as Record<string, unknown>;\n      return {\n        ...raw,\n        data: raw.data\n          ? {\n              id: (it.id as number) ?? 0,",
+      "lines": 8,
+      "secondFile": {
+        "end": 2154,
+        "endLoc": {
+          "column": 41,
+          "line": 2154,
+          "position": 82749
+        },
+        "name": "services/api.ts",
+        "start": 2147,
+        "startLoc": {
+          "column": 31,
+          "line": 2147,
+          "position": 82481
+        }
+      },
+      "tokens": 73
+    },
+    {
+      "firstFile": {
+        "end": 2132,
+        "endLoc": {
+          "column": 9,
+          "line": 2132,
+          "position": 82041
+        },
+        "name": "services/api.ts",
+        "start": 2120,
+        "startLoc": {
+          "column": 82,
+          "line": 2120,
+          "position": 81442
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',\n          periodType: (it.period_type as string) ?? '',\n          startTime: (it.start_time as string) ?? '',\n          endTime: (it.end_time as string) ?? '',\n          energyPrice: it.energy_price as number | undefined,\n          servicePrice: it.service_price as number | undefined,\n          powerLimit: it.power_limit as number | undefined,\n          enabled: (it.enabled as boolean) ?? false,\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));",
+      "lines": 13,
+      "secondFile": {
+        "end": 2165,
+        "endLoc": {
+          "column": 13,
+          "line": 2165,
+          "position": 83353
+        },
+        "name": "services/api.ts",
+        "start": 2153,
+        "startLoc": {
+          "column": 12,
+          "line": 2153,
+          "position": 82706
+        }
+      },
+      "tokens": 128
+    },
+    {
+      "firstFile": {
+        "end": 2245,
+        "endLoc": {
+          "column": 14,
+          "line": 2245,
+          "position": 86498
+        },
+        "name": "services/api.ts",
+        "start": 2238,
+        "startLoc": {
+          "column": 66,
+          "line": 2238,
+          "position": 86134
+        }
+      },
+      "format": "typescript",
+      "fragment": "          type: (it.type as InspectionTemplate['type']) ?? 'daily',\n          items: ((it.items as Record<string, unknown>[]) ?? []).map((item) => ({\n            id: (item.id as number) ?? 0,\n            name: (item.name as string) ?? '',\n            expected: (item.expected as string) ?? '',\n            result: item.result as 'pass' | 'fail' | 'na' | undefined,\n            note: item.note as string | undefined,\n          })),",
+      "lines": 8,
+      "secondFile": {
+        "end": 2371,
+        "endLoc": {
+          "column": 14,
+          "line": 2371,
+          "position": 91920
+        },
+        "name": "services/api.ts",
+        "start": 2364,
+        "startLoc": {
+          "column": 55,
+          "line": 2364,
+          "position": 91556
+        }
+      },
+      "tokens": 95
+    },
+    {
+      "firstFile": {
+        "end": 2273,
+        "endLoc": {
+          "column": 69,
+          "line": 2273,
+          "position": 87572
+        },
+        "name": "services/api.ts",
+        "start": 2267,
+        "startLoc": {
+          "column": 23,
+          "line": 2267,
+          "position": 87250
+        }
+      },
+      "format": "typescript",
+      "fragment": "        name: body.name,\n        ...(body.category !== undefined && { category: body.category }),\n        ...(body.description !== undefined && { description: body.description }),\n        ...(body.items !== undefined && { items: body.items }),\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;",
+      "lines": 7,
+      "secondFile": {
+        "end": 2306,
+        "endLoc": {
+          "column": 69,
+          "line": 2306,
+          "position": 89026
+        },
+        "name": "services/api.ts",
+        "start": 2300,
+        "startLoc": {
+          "column": 59,
+          "line": 2300,
+          "position": 88704
+        }
+      },
+      "tokens": 79
+    },
+    {
+      "firstFile": {
+        "end": 2279,
+        "endLoc": {
+          "column": 43,
+          "line": 2279,
+          "position": 87771
+        },
+        "name": "services/api.ts",
+        "start": 2270,
+        "startLoc": {
+          "column": 62,
+          "line": 2270,
+          "position": 87469
+        }
+      },
+      "format": "typescript",
+      "fragment": "        ...(body.items !== undefined && { items: body.items }),\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const d = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (d.id as number) ?? 0,\n            name: (d.name as string) ?? '',",
+      "lines": 10,
+      "secondFile": {
+        "end": 2647,
+        "endLoc": {
+          "column": 43,
+          "line": 2647,
+          "position": 102054
+        },
+        "name": "services/api.ts",
+        "start": 2638,
+        "startLoc": {
+          "column": 37,
+          "line": 2638,
+          "position": 101752
+        }
+      },
+      "tokens": 79
+    },
+    {
+      "firstFile": {
+        "end": 2294,
+        "endLoc": {
+          "column": 4,
+          "line": 2294,
+          "position": 88417
+        },
+        "name": "services/api.ts",
+        "start": 2274,
+        "startLoc": {
+          "column": 35,
+          "line": 2274,
+          "position": 87608
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const d = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (d.id as number) ?? 0,\n            name: (d.name as string) ?? '',\n            description: (d.description as string | null) ?? null,\n            items: ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n              name: (it.name as string) ?? '',\n              required: (it.required as boolean) ?? false,\n            })),\n            itemCount: (d.item_count as number) ?? 0,\n            deviceTypes: (d.device_types as string[]) ?? [],\n            target: (d.target as string | null) ?? null,\n            status: (d.status as string) ?? 'active',\n            createdAt: (d.created_at as string) ?? '',\n            updatedAt: (d.updated_at as string) ?? '',\n          },\n        };\n      });\n  },",
+      "lines": 21,
+      "secondFile": {
+        "end": 2328,
+        "endLoc": {
+          "column": 4,
+          "line": 2328,
+          "position": 89970
+        },
+        "name": "services/api.ts",
+        "start": 2308,
+        "startLoc": {
+          "column": 27,
+          "line": 2308,
+          "position": 89161
+        }
+      },
+      "tokens": 198
+    },
+    {
+      "firstFile": {
+        "end": 2332,
+        "endLoc": {
+          "column": 22,
+          "line": 2332,
+          "position": 90111
+        },
+        "name": "services/api.ts",
+        "start": 2322,
+        "startLoc": {
+          "column": 52,
+          "line": 2322,
+          "position": 89820
+        }
+      },
+      "format": "typescript",
+      "fragment": "            status: (d.status as string) ?? 'active',\n            createdAt: (d.created_at as string) ?? '',\n            updatedAt: (d.updated_at as string) ?? '',\n          },\n        };\n      });\n  },\n\n  /** DELETE /inspection/templates/{id} — 删除巡检模板 */\n  delete(id: number): Promise<ApiResponse<null>> {\n    return api.delete(`/inspection/templates/${id}`).then((res) => res.data);",
+      "lines": 11,
+      "secondFile": {
+        "end": 2691,
+        "endLoc": {
+          "column": 22,
+          "line": 2691,
+          "position": 104121
+        },
+        "name": "services/api.ts",
+        "start": 2681,
+        "startLoc": {
+          "column": 50,
+          "line": 2681,
+          "position": 103847
+        }
+      },
+      "tokens": 54
+    },
+    {
+      "firstFile": {
+        "end": 2424,
+        "endLoc": {
+          "column": 9,
+          "line": 2424,
+          "position": 93693
+        },
+        "name": "services/api.ts",
+        "start": 2413,
+        "startLoc": {
+          "column": 82,
+          "line": 2413,
+          "position": 93161
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          username: (it.username as string) ?? '',\n          name: (it.name as string) ?? '',\n          phone: (it.phone as string | null) ?? null,\n          level: (it.level as Engineer['level']) ?? 'junior',\n          teamId: (it.team_id as number | null) ?? null,\n          status: (it.status as Engineer['status']) ?? 'active',\n          role: (it.role as string) ?? '',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));",
+      "lines": 12,
+      "secondFile": {
+        "end": 2464,
+        "endLoc": {
+          "column": 11,
+          "line": 2464,
+          "position": 95190
+        },
+        "name": "services/api.ts",
+        "start": 2453,
+        "startLoc": {
+          "column": 16,
+          "line": 2453,
+          "position": 94636
+        }
+      },
+      "tokens": 132
+    },
+    {
+      "firstFile": {
+        "end": 2455,
+        "endLoc": {
+          "column": 52,
+          "line": 2455,
+          "position": 94730
+        },
+        "name": "services/api.ts",
+        "start": 2446,
+        "startLoc": {
+          "column": 57,
+          "line": 2446,
+          "position": 94415
+        }
+      },
+      "format": "typescript",
+      "fragment": "        ...(body.role !== undefined && { role: body.role }),\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            username: (it.username as string) ?? '',",
+      "lines": 10,
+      "secondFile": {
+        "end": 2545,
+        "endLoc": {
+          "column": 44,
+          "line": 2545,
+          "position": 97918
+        },
+        "name": "services/api.ts",
+        "start": 2536,
+        "startLoc": {
+          "column": 66,
+          "line": 2536,
+          "position": 97611
+        }
+      },
+      "tokens": 81
+    },
+    {
+      "firstFile": {
+        "end": 2454,
+        "endLoc": {
+          "column": 39,
+          "line": 2454,
+          "position": 94677
+        },
+        "name": "services/api.ts",
+        "start": 2446,
+        "startLoc": {
+          "column": 57,
+          "line": 2446,
+          "position": 94415
+        }
+      },
+      "format": "typescript",
+      "fragment": "        ...(body.role !== undefined && { role: body.role }),\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,",
+      "lines": 9,
+      "secondFile": {
+        "end": 3354,
+        "endLoc": {
+          "column": 39,
+          "line": 3354,
+          "position": 128992
+        },
+        "name": "services/api.ts",
+        "start": 3346,
+        "startLoc": {
+          "column": 81,
+          "line": 3346,
+          "position": 128730
+        }
+      },
+      "tokens": 69
+    },
+    {
+      "firstFile": {
+        "end": 2455,
+        "endLoc": {
+          "column": 52,
+          "line": 2455,
+          "position": 94730
+        },
+        "name": "services/api.ts",
+        "start": 2446,
+        "startLoc": {
+          "column": 59,
+          "line": 2446,
+          "position": 94417
+        }
+      },
+      "format": "typescript",
+      "fragment": "        ...(body.role !== undefined && { role: body.role }),\n      })\n      .then((res) => {\n        const raw = res.data as ApiResponse<Record<string, unknown>>;\n        const it = (raw.data ?? {}) as Record<string, unknown>;\n        return {\n          ...raw,\n          data: {\n            id: (it.id as number) ?? 0,\n            username: (it.username as string) ?? '',",
+      "lines": 10,
+      "secondFile": {
+        "end": 3432,
+        "endLoc": {
+          "column": 44,
+          "line": 3432,
+          "position": 131752
+        },
+        "name": "services/api.ts",
+        "start": 3423,
+        "startLoc": {
+          "column": 23,
+          "line": 3423,
+          "position": 131447
+        }
+      },
+      "tokens": 79
+    },
+    {
+      "firstFile": {
+        "end": 2471,
+        "endLoc": {
+          "column": 22,
+          "line": 2471,
+          "position": 95344
+        },
+        "name": "services/api.ts",
+        "start": 2461,
+        "startLoc": {
+          "column": 43,
+          "line": 2461,
+          "position": 95065
+        }
+      },
+      "format": "typescript",
+      "fragment": "            role: (it.role as string) ?? '',\n            createdAt: (it.created_at as string) ?? '',\n            updatedAt: (it.updated_at as string) ?? '',\n          },\n        };\n      });\n  },\n\n  /** DELETE /engineers/{id} — 删除工程师 */\n  delete(id: number): Promise<ApiResponse<null>> {\n    return api.delete(`/engineers/${id}`).then((res) => {",
+      "lines": 11,
+      "secondFile": {
+        "end": 2561,
+        "endLoc": {
+          "column": 22,
+          "line": 2561,
+          "position": 98596
+        },
+        "name": "services/api.ts",
+        "start": 2551,
+        "startLoc": {
+          "column": 82,
+          "line": 2551,
+          "position": 98320
+        }
+      },
+      "tokens": 54
+    },
+    {
+      "firstFile": {
+        "end": 2471,
+        "endLoc": {
+          "column": 22,
+          "line": 2471,
+          "position": 95344
+        },
+        "name": "services/api.ts",
+        "start": 2461,
+        "startLoc": {
+          "column": 43,
+          "line": 2461,
+          "position": 95065
+        }
+      },
+      "format": "typescript",
+      "fragment": "            role: (it.role as string) ?? '',\n            createdAt: (it.created_at as string) ?? '',\n            updatedAt: (it.updated_at as string) ?? '',\n          },\n        };\n      });\n  },\n\n  /** DELETE /engineers/{id} — 删除工程师 */\n  delete(id: number): Promise<ApiResponse<null>> {\n    return api.delete(`/engineers/${id}`).then((res) => {",
+      "lines": 11,
+      "secondFile": {
+        "end": 3444,
+        "endLoc": {
+          "column": 22,
+          "line": 3444,
+          "position": 132125
+        },
+        "name": "services/api.ts",
+        "start": 3434,
+        "startLoc": {
+          "column": 53,
+          "line": 3434,
+          "position": 131851
+        }
+      },
+      "tokens": 54
+    },
+    {
+      "firstFile": {
+        "end": 2514,
+        "endLoc": {
+          "column": 9,
+          "line": 2514,
+          "position": 96873
+        },
+        "name": "services/api.ts",
+        "start": 2503,
+        "startLoc": {
+          "column": 82,
+          "line": 2503,
+          "position": 96282
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',\n          url: (it.url as string) ?? '',\n          events: ((it.event_types as string[]) ?? (it.events as string[]) ?? []),\n          secret: (it.secret as string | null) ?? null,\n          enabled: (it.enabled as boolean) ?? false,\n          lastTriggeredAt: (it.last_triggered_at as string | null) ?? null,\n          lastResponseStatus: (it.last_response_status as number | null) ?? null,\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));",
+      "lines": 12,
+      "secondFile": {
+        "end": 2554,
+        "endLoc": {
+          "column": 11,
+          "line": 2554,
+          "position": 98445
+        },
+        "name": "services/api.ts",
+        "start": 2543,
+        "startLoc": {
+          "column": 16,
+          "line": 2543,
+          "position": 97832
+        }
+      },
+      "tokens": 143
+    },
+    {
+      "firstFile": {
+        "end": 2594,
+        "endLoc": {
+          "column": 11,
+          "line": 2594,
+          "position": 100006
+        },
+        "name": "services/api.ts",
+        "start": 2581,
+        "startLoc": {
+          "column": 33,
+          "line": 2581,
+          "position": 99286
+        }
+      },
+      "format": "typescript",
+      "fragment": "          data: arr.map((it) => ({\n            id: (it.id as number) ?? 0,\n            name: (it.name as string) ?? '',\n            description: (it.description as string) ?? '',\n            alarmPattern: (it.alarm_pattern as Record<string, unknown>) ?? {},\n            runbookTemplate: (it.runbook_template as string | null) ?? null,\n            autoApprove: (it.auto_approve as boolean) ?? false,\n            maxRetries: (it.max_retries as number) ?? 0,\n            cooldownMinutes: (it.cooldown_minutes as number) ?? 0,\n            priority: (it.priority as number) ?? 0,\n            enabled: (it.enabled as boolean) ?? false,\n            createdAt: (it.created_at as string) ?? '',\n            updatedAt: (it.updated_at as string) ?? '',\n          })),",
+      "lines": 14,
+      "secondFile": {
+        "end": 2621,
+        "endLoc": {
+          "column": 11,
+          "line": 2621,
+          "position": 101130
+        },
+        "name": "services/api.ts",
+        "start": 2608,
+        "startLoc": {
+          "column": 16,
+          "line": 2608,
+          "position": 100410
+        }
+      },
+      "tokens": 154
+    },
+    {
+      "firstFile": {
+        "end": 2726,
+        "endLoc": {
+          "column": 9,
+          "line": 2726,
+          "position": 105635
+        },
+        "name": "services/api.ts",
+        "start": 2711,
+        "startLoc": {
+          "column": 82,
+          "line": 2711,
+          "position": 104877
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          ruleId: (it.rule_id as number) ?? 0,\n          ruleName: (it.rule_name as string) ?? '',\n          deviceId: (it.device_id as number) ?? 0,\n          deviceName: (it.device_name as string) ?? '',\n          stationId: (it.station_id as number) ?? 0,\n          stationName: (it.station_name as string) ?? '',\n          triggeredAt: (it.triggered_at as string) ?? '',\n          status: (it.status as string) ?? '',\n          actionTaken: (it.action_taken as string) ?? '',\n          result: (it.result as string | null) ?? null,\n          duration: (it.duration as number) ?? 0,\n          errorMessage: (it.error_message as string | null) ?? null,\n          createdAt: (it.created_at as string) ?? '',\n        }));",
+      "lines": 16,
+      "secondFile": {
+        "end": 2763,
+        "endLoc": {
+          "column": 11,
+          "line": 2763,
+          "position": 107110
+        },
+        "name": "services/api.ts",
+        "start": 2748,
+        "startLoc": {
+          "column": 16,
+          "line": 2748,
+          "position": 106322
+        }
+      },
+      "tokens": 174
+    },
+    {
+      "firstFile": {
+        "end": 2737,
+        "endLoc": {
+          "column": 4,
+          "line": 2737,
+          "position": 105926
+        },
+        "name": "services/api.ts",
+        "start": 2724,
+        "startLoc": {
+          "column": 42,
+          "line": 2724,
+          "position": 105545
+        }
+      },
+      "format": "typescript",
+      "fragment": "          errorMessage: (it.error_message as string | null) ?? null,\n          createdAt: (it.created_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: (d.page as number) ?? params?.page ?? 1,\n            pageSize: (d.page_size as number) ?? params?.pageSize ?? 20,\n          },\n        };\n      });\n  },",
+      "lines": 14,
+      "secondFile": {
+        "end": 2878,
+        "endLoc": {
+          "column": 4,
+          "line": 2878,
+          "position": 111333
+        },
+        "name": "services/api.ts",
+        "start": 2865,
+        "startLoc": {
+          "column": 36,
+          "line": 2865,
+          "position": 110952
+        }
+      },
+      "tokens": 87
+    },
+    {
+      "firstFile": {
+        "end": 2867,
+        "endLoc": {
+          "column": 9,
+          "line": 2867,
+          "position": 111042
+        },
+        "name": "services/api.ts",
+        "start": 2855,
+        "startLoc": {
+          "column": 82,
+          "line": 2855,
+          "position": 110429
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',\n          keyPrefix: (it.key_prefix as string) ?? '',\n          description: (it.description as string | null) ?? null,\n          scopes: ((it.scopes as string[]) ?? []),\n          rateLimit: (it.rate_limit as number) ?? 0,\n          isActive: (it.is_active as boolean) ?? false,\n          isRevoked: (it.is_revoked as boolean) ?? false,\n          lastUsedAt: (it.last_used_at as string | null) ?? null,\n          expiresAt: (it.expires_at as string | null) ?? null,\n          createdAt: (it.created_at as string) ?? '',\n        }));",
+      "lines": 13,
+      "secondFile": {
+        "end": 2901,
+        "endLoc": {
+          "column": 11,
+          "line": 2901,
+          "position": 112329
+        },
+        "name": "services/api.ts",
+        "start": 2889,
+        "startLoc": {
+          "column": 16,
+          "line": 2889,
+          "position": 111692
+        }
+      },
+      "tokens": 145
+    },
+    {
+      "firstFile": {
+        "end": 3030,
+        "endLoc": {
+          "column": 9,
+          "line": 3030,
+          "position": 117297
+        },
+        "name": "services/api.ts",
+        "start": 3022,
+        "startLoc": {
+          "column": 82,
+          "line": 3022,
+          "position": 116884
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          policyKey: (it.policy_key as string) ?? '',\n          policyConfig: (it.policy_config as Record<string, unknown>) ?? {},\n          description: (it.description as string) ?? '',\n          status: (it.status as 'active' | 'inactive') ?? 'active',\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',\n        }));",
+      "lines": 9,
+      "secondFile": {
+        "end": 3060,
+        "endLoc": {
+          "column": 11,
+          "line": 3060,
+          "position": 118338
+        },
+        "name": "services/api.ts",
+        "start": 3052,
+        "startLoc": {
+          "column": 16,
+          "line": 3052,
+          "position": 117909
+        }
+      },
+      "tokens": 94
+    },
+    {
+      "firstFile": {
+        "end": 3041,
+        "endLoc": {
+          "column": 4,
+          "line": 3041,
+          "position": 117513
+        },
+        "name": "services/api.ts",
+        "start": 3029,
+        "startLoc": {
+          "column": 36,
+          "line": 3029,
+          "position": 117270
+        }
+      },
+      "format": "typescript",
+      "fragment": "          updatedAt: (it.updated_at as string) ?? '',\n        }));\n        return {\n          ...raw,\n          data: {\n            items,\n            total: (d.total as number) ?? 0,\n            page: 1,\n            pageSize: items.length,\n          },\n        };\n      });\n  },",
+      "lines": 13,
+      "secondFile": {
+        "end": 3135,
+        "endLoc": {
+          "column": 4,
+          "line": 3135,
+          "position": 120911
+        },
+        "name": "services/api.ts",
+        "start": 3123,
+        "startLoc": {
+          "column": 35,
+          "line": 3123,
+          "position": 120668
+        }
+      },
+      "tokens": 51
+    },
+    {
+      "firstFile": {
+        "end": 3238,
+        "endLoc": {
+          "column": 34,
+          "line": 3238,
+          "position": 124211
+        },
+        "name": "services/api.ts",
+        "start": 3231,
+        "startLoc": {
+          "column": 30,
+          "line": 3231,
+          "position": 123917
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get('/gateways').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      const items = (d.items as Record<string, unknown>[]) ?? [];\n      return {\n        ...raw,\n        data: {\n          items: items.map((item): Gateway => ({",
+      "lines": 8,
+      "secondFile": {
+        "end": 3302,
+        "endLoc": {
+          "column": 34,
+          "line": 3302,
+          "position": 127024
+        },
+        "name": "services/api.ts",
+        "start": 3295,
+        "startLoc": {
+          "column": 39,
+          "line": 3295,
+          "position": 126730
+        }
+      },
+      "tokens": 84
+    },
+    {
+      "firstFile": {
+        "end": 3238,
+        "endLoc": {
+          "column": 34,
+          "line": 3238,
+          "position": 124211
+        },
+        "name": "services/api.ts",
+        "start": 3231,
+        "startLoc": {
+          "column": 30,
+          "line": 3231,
+          "position": 123917
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get('/gateways').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const d = (raw.data ?? {}) as Record<string, unknown>;\n      const items = (d.items as Record<string, unknown>[]) ?? [];\n      return {\n        ...raw,\n        data: {\n          items: items.map((item): Gateway => ({",
+      "lines": 8,
+      "secondFile": {
+        "end": 3402,
+        "endLoc": {
+          "column": 34,
+          "line": 3402,
+          "position": 130757
+        },
+        "name": "services/api.ts",
+        "start": 3395,
+        "startLoc": {
+          "column": 29,
+          "line": 3395,
+          "position": 130463
+        }
+      },
+      "tokens": 84
+    },
+    {
+      "firstFile": {
+        "end": 3255,
+        "endLoc": {
+          "column": 11,
+          "line": 3255,
+          "position": 125148
+        },
+        "name": "services/api.ts",
+        "start": 3238,
+        "startLoc": {
+          "column": 47,
+          "line": 3238,
+          "position": 124224
+        }
+      },
+      "format": "typescript",
+      "fragment": "          items: items.map((item): Gateway => ({\n            id: item.id as number,\n            sn: (item.sn as string) ?? '',\n            name: (item.name as string) ?? '',\n            model: (item.model as string) ?? null,\n            manufacturer: (item.manufacturer as string) ?? null,\n            stationId: (item.station_id as number) ?? null,\n            status: (item.status as Gateway['status']) ?? 'offline',\n            firmwareVersion: (item.firmware_version as string) ?? null,\n            lastOnline: (item.last_online as string) ?? null,\n            ipAddress: (item.ip_address as string) ?? null,\n            macAddress: (item.mac_address as string) ?? null,\n            location: (item.location as string) ?? null,\n            healthScore: (item.health_score as number) ?? 0,\n            createdAt: (item.created_at as string) ?? '',\n            updatedAt: (item.updated_at as string) ?? '',\n            notes: (item.notes as string) ?? null,\n          })),",
+      "lines": 18,
+      "secondFile": {
+        "end": 3288,
+        "endLoc": {
+          "column": 9,
+          "line": 3288,
+          "position": 126542
+        },
+        "name": "services/api.ts",
+        "start": 3271,
+        "startLoc": {
+          "column": 14,
+          "line": 3271,
+          "position": 125652
+        }
+      },
+      "tokens": 193
+    },
+    {
+      "firstFile": {
+        "end": 3262,
+        "endLoc": {
+          "column": 4,
+          "line": 3262,
+          "position": 125319
+        },
+        "name": "services/api.ts",
+        "start": 3254,
+        "startLoc": {
+          "column": 31,
+          "line": 3254,
+          "position": 125117
+        }
+      },
+      "format": "typescript",
+      "fragment": "            notes: (item.notes as string) ?? null,\n          })),\n          total: (d.total as number) ?? 0,\n          page: (d.page as number) ?? 1,\n          pageSize: (d.page_size as number) ?? 20,\n        },\n      };\n    });\n  },",
+      "lines": 9,
+      "secondFile": {
+        "end": 3318,
+        "endLoc": {
+          "column": 4,
+          "line": 3318,
+          "position": 127666
+        },
+        "name": "services/api.ts",
+        "start": 3310,
+        "startLoc": {
+          "column": 40,
+          "line": 3310,
+          "position": 127464
+        }
+      },
+      "tokens": 55
+    },
+    {
+      "firstFile": {
+        "end": 3262,
+        "endLoc": {
+          "column": 4,
+          "line": 3262,
+          "position": 125319
+        },
+        "name": "services/api.ts",
+        "start": 3254,
+        "startLoc": {
+          "column": 49,
+          "line": 3254,
+          "position": 125135
+        }
+      },
+      "format": "typescript",
+      "fragment": "            notes: (item.notes as string) ?? null,\n          })),\n          total: (d.total as number) ?? 0,\n          page: (d.page as number) ?? 1,\n          pageSize: (d.page_size as number) ?? 20,\n        },\n      };\n    });\n  },",
+      "lines": 9,
+      "secondFile": {
+        "end": 3416,
+        "endLoc": {
+          "column": 4,
+          "line": 3416,
+          "position": 131255
+        },
+        "name": "services/api.ts",
+        "start": 3408,
+        "startLoc": {
+          "column": 56,
+          "line": 3408,
+          "position": 131071
+        }
+      },
+      "tokens": 50
+    },
+    {
+      "firstFile": {
+        "end": 3318,
+        "endLoc": {
+          "column": 4,
+          "line": 3318,
+          "position": 127666
+        },
+        "name": "services/api.ts",
+        "start": 3309,
+        "startLoc": {
+          "column": 56,
+          "line": 3309,
+          "position": 127422
+        }
+      },
+      "format": "typescript",
+      "fragment": "            createdAt: (item.created_at as string) ?? '',\n            updatedAt: (item.updated_at as string) ?? null,\n          })),\n          total: (d.total as number) ?? 0,\n          page: (d.page as number) ?? 1,\n          pageSize: (d.page_size as number) ?? 20,\n        },\n      };\n    });\n  },",
+      "lines": 10,
+      "secondFile": {
+        "end": 3653,
+        "endLoc": {
+          "column": 4,
+          "line": 3653,
+          "position": 140668
+        },
+        "name": "services/api.ts",
+        "start": 3644,
+        "startLoc": {
+          "column": 58,
+          "line": 3644,
+          "position": 140424
+        }
+      },
+      "tokens": 62
+    },
+    {
+      "firstFile": {
+        "end": 3462,
+        "endLoc": {
+          "column": 31,
+          "line": 3462,
+          "position": 132806
+        },
+        "name": "services/api.ts",
+        "start": 3457,
+        "startLoc": {
+          "column": 35,
+          "line": 3457,
+          "position": 132580
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get('/vpp/resources').then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      const items = (raw.data as unknown as Record<string, unknown>[]) ?? [];\n      return {\n        ...raw,\n        data: items.map((item): VppResource => ({",
+      "lines": 6,
+      "secondFile": {
+        "end": 3519,
+        "endLoc": {
+          "column": 31,
+          "line": 3519,
+          "position": 135588
+        },
+        "name": "services/api.ts",
+        "start": 3514,
+        "startLoc": {
+          "column": 42,
+          "line": 3514,
+          "position": 135362
+        }
+      },
+      "tokens": 64
+    },
+    {
+      "firstFile": {
+        "end": 3679,
+        "endLoc": {
+          "column": 53,
+          "line": 3679,
+          "position": 141843
+        },
+        "name": "services/api.ts",
+        "start": 3667,
+        "startLoc": {
+          "column": 82,
+          "line": 3667,
+          "position": 141227
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',\n          category: (it.category as string) ?? '',\n          alarmType: (it.alarm_type as string) ?? '',\n          description: (it.description as string) ?? '',\n          stepCount: (it.step_count as number) ?? 0,\n          autoSteps: (it.auto_steps as number) ?? 0,\n          manualSteps: (it.manual_steps as number) ?? 0,\n          status: (it.status as string) ?? 'active',\n          version: (it.version as number) ?? 1,\n          createdAt: (it.created_at as string) ?? '',\n          updatedAt: (it.updated_at as string) ?? '',",
+      "lines": 13,
+      "secondFile": {
+        "end": 3715,
+        "endLoc": {
+          "column": 55,
+          "line": 3715,
+          "position": 143250
+        },
+        "name": "services/api.ts",
+        "start": 3703,
+        "startLoc": {
+          "column": 16,
+          "line": 3703,
+          "position": 142610
+        }
+      },
+      "tokens": 145
+    },
+    {
+      "firstFile": {
+        "end": 3926,
+        "endLoc": {
+          "column": 56,
+          "line": 3926,
+          "position": 151664
+        },
+        "name": "services/api.ts",
+        "start": 3919,
+        "startLoc": {
+          "column": 81,
+          "line": 3919,
+          "position": 151428
+        }
+      },
+      "format": "typescript",
+      "fragment": "      const items = ((d.items ?? []) as Record<string, unknown>[]).map(mapStation);\n      return {\n        ...raw,\n        data: {\n          items,\n          total: (d.total as number) ?? items.length,\n          page: (d.page as number) ?? (params?.page ?? 1),\n          pageSize: (d.page_size as number) ?? (params?.pageSize ?? 20),",
+      "lines": 8,
+      "secondFile": {
+        "end": 3994,
+        "endLoc": {
+          "column": 58,
+          "line": 3994,
+          "position": 154781
+        },
+        "name": "services/api.ts",
+        "start": 3987,
+        "startLoc": {
+          "column": 10,
+          "line": 3987,
+          "position": 154531
+        }
+      },
+      "tokens": 57
+    },
+    {
+      "firstFile": {
+        "end": 3941,
+        "endLoc": {
+          "column": 8,
+          "line": 3941,
+          "position": 152090
+        },
+        "name": "services/api.ts",
+        "start": 3934,
+        "startLoc": {
+          "column": 36,
+          "line": 3934,
+          "position": 151853
+        }
+      },
+      "format": "typescript",
+      "fragment": "    return api.get(`/stations/${id}`).then((res) => {\n      const raw = res.data as ApiResponse<Record<string, unknown>>;\n      return { ...raw, data: mapStation((raw.data ?? {}) as Record<string, unknown>) };\n    });\n  },\n\n  /** POST /stations — 创建站点 */\n  create(body: StationCreate): Promise<ApiResponse<Station>> {",
+      "lines": 8,
+      "secondFile": {
+        "end": 3962,
+        "endLoc": {
+          "column": 1,
+          "line": 3962,
+          "position": 153332
+        },
+        "name": "services/api.ts",
+        "start": 3957,
+        "startLoc": {
+          "column": 40,
+          "line": 3957,
+          "position": 153144
+        }
+      },
+      "tokens": 58
+    },
+    {
+      "firstFile": {
+        "end": 3987,
+        "endLoc": {
+          "column": 9,
+          "line": 3987,
+          "position": 154530
+        },
+        "name": "services/api.ts",
+        "start": 3976,
+        "startLoc": {
+          "column": 82,
+          "line": 3976,
+          "position": 153962
+        }
+      },
+      "format": "typescript",
+      "fragment": "        const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({\n          id: (it.id as number) ?? 0,\n          name: (it.name as string) ?? '',\n          code: (it.code as string | null) ?? null,\n          leaderId: (it.leader_id as number | null) ?? null,\n          leaderName: (it.leader_name as string | null) ?? null,\n          description: (it.description as string | null) ?? null,\n          memberCount: (it.member_count as number) ?? 0,\n          stationCount: (it.station_count as number) ?? 0,\n          status: (it.status as string) ?? 'active',\n          createdAt: (it.created_at as string | null) ?? null,\n        }));",
+      "lines": 12,
+      "secondFile": {
+        "end": 4020,
+        "endLoc": {
+          "column": 11,
+          "line": 4020,
+          "position": 155775
+        },
+        "name": "services/api.ts",
+        "start": 4009,
+        "startLoc": {
+          "column": 16,
+          "line": 4009,
+          "position": 155185
+        }
+      },
+      "tokens": 132
+    },
+    {
+      "firstFile": {
+        "end": 4026,
+        "endLoc": {
+          "column": 8,
+          "line": 4026,
+          "position": 155854
+        },
+        "name": "services/api.ts",
+        "start": 4016,
+        "startLoc": {
+          "column": 25,
+          "line": 4016,
+          "position": 155549
+        }
+      },
+      "format": "typescript",
+      "fragment": "            memberCount: (it.member_count as number) ?? 0,\n            stationCount: (it.station_count as number) ?? 0,\n            status: (it.status as string) ?? 'active',\n            createdAt: (it.created_at as string | null) ?? null,\n          },\n        };\n      });\n  },\n\n  /** PUT /teams/{id} — 更新团队 */\n  update(id: number, body: TeamUpdate): Promise<ApiResponse<Team>> {",
+      "lines": 11,
+      "secondFile": {
+        "end": 4057,
+        "endLoc": {
+          "column": 8,
+          "line": 4057,
+          "position": 157204
+        },
+        "name": "services/api.ts",
+        "start": 4047,
+        "startLoc": {
+          "column": 25,
+          "line": 4047,
+          "position": 156903
+        }
+      },
+      "tokens": 57
+    },
+    {
+      "firstFile": {
+        "end": 81,
+        "endLoc": {
+          "column": 58,
+          "line": 81,
+          "position": 2456
+        },
+        "name": "store/inspectionStore.ts",
+        "start": 74,
+        "startLoc": {
+          "column": 51,
+          "line": 74,
+          "position": 2182
+        }
+      },
+      "format": "typescript",
+      "fragment": "      const response = await inspectionApi.start(id);\n      set({ selectedTask: response.data, submitting: false });\n      const { tasks } = get();\n      set({\n        tasks: tasks.map((t) => (t.id === id ? response.data : t)),\n      });\n    } catch (err: unknown) {\n      const message = err instanceof Error ? err.message : '启动巡检失败';",
+      "lines": 8,
+      "secondFile": {
+        "end": 107,
+        "endLoc": {
+          "column": 58,
+          "line": 107,
+          "position": 3456
+        },
+        "name": "store/inspectionStore.ts",
+        "start": 100,
+        "startLoc": {
+          "column": 76,
+          "line": 100,
+          "position": 3182
+        }
+      },
+      "tokens": 76
+    }
+  ],
+  "statistics": {
+    "detectionDate": "2026-08-17T15:45:59.676Z",
+    "formats": {
+      "javascript": {
+        "clones": 0,
+        "duplicatedLines": 0,
+        "duplicatedTokens": 0,
+        "lines": 21,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 0.0,
+        "percentageTokens": 0.0,
+        "sources": 1,
+        "tokens": 78
+      },
+      "tsx": {
+        "clones": 21,
+        "duplicatedLines": 309,
+        "duplicatedTokens": 1522,
+        "lines": 5906,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 5.2319674906874365,
+        "percentageTokens": 4.446781780465714,
+        "sources": 22,
+        "tokens": 34227
+      },
+      "typescript": {
+        "clones": 122,
+        "duplicatedLines": 1231,
+        "duplicatedTokens": 11939,
+        "lines": 6811,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 18.07370430186463,
+        "percentageTokens": 26.413716814159294,
+        "sources": 11,
+        "tokens": 45200
+      }
+    },
+    "total": {
+      "clones": 143,
+      "duplicatedLines": 1540,
+      "duplicatedTokens": 13461,
+      "lines": 12738,
+      "newClones": 0,
+      "newDuplicatedLines": 0,
+      "percentage": 12.089810017271157,
+      "percentageTokens": 16.931010628262374,
+      "sources": 34,
+      "tokens": 79505
+    }
+  }
+}
