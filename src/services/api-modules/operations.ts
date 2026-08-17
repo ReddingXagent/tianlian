@@ -33,7 +33,6 @@ interface RawRecord {
 }
 
 export const workOrderRecordApi = {
-  /** @cloud-down 2026-08-18 GET /work-orders/{id}/logs → 404 (was 200) */
   getRecords(orderId: string): Promise<ApiResponse<WorkOrderRecord[]>> {
     return api.get(`/work-orders/${orderId}/logs`).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
@@ -52,7 +51,7 @@ export const workOrderRecordApi = {
       };
     });
   },
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/notes → 404 (was 200) */
+  /** @cloud-down 2026-08-18 POST /work-orders/{id}/notes → 404 (still down in F1384) */
   addRecord(orderId: string, data: { action: string; note: string }): Promise<ApiResponse<WorkOrderRecord>> {
     return api.post(`/work-orders/${orderId}/notes`, data).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
@@ -74,21 +73,17 @@ export const workOrderRecordApi = {
 };
 
 export const workOrderActionApi = {
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/accept → 404 */
   accept(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/accept`).then((res) => res.data);
   },
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/start → 404 */
   start(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/start`).then((res) => res.data);
   },
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/complete → 404 */
   complete(id: string, solution?: string): Promise<ApiResponse<unknown>> {
     return api
       .post(`/work-orders/${id}/complete`, null, { params: solution ? { solution } : {} })
       .then((res) => res.data);
   },
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/verify → 404 */
   verify(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/verify`).then((res) => res.data);
   },
@@ -247,7 +242,6 @@ export const workOrderTransferApi = {
       })
       .then((res) => res.data);
   },
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/urge → 404 */
   urge(id: string, message = '请尽快处理'): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/urge`, { message }).then((res) => res.data);
   },
