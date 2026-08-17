@@ -30,7 +30,7 @@
       "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/your-project-id"
+      "enabled": false
     },
     "plugins": [
       "expo-secure-store",
