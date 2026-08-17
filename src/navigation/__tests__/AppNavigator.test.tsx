@@ -27,7 +27,6 @@ jest.mock('../../store/authStore', () => ({
 
 // ── Mock navigation: use React.Nested to avoid scope issues ──
 jest.mock('@react-navigation/native', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     NavigationContainer: ({ children }: { children: React.ReactNode }) =>
@@ -42,7 +41,6 @@ jest.mock('@react-navigation/native', () => {
 });
 
 jest.mock('@react-navigation/native-stack', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     createNativeStackNavigator: () => ({
@@ -58,9 +56,7 @@ jest.mock('@react-navigation/native-stack', () => {
 });
 
 jest.mock('@react-navigation/bottom-tabs', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text, View } = require('react-native');
   return {
     createBottomTabNavigator: () => ({
@@ -74,18 +70,14 @@ jest.mock('@react-navigation/bottom-tabs', () => {
 
 // ── Mock screens to lightweight stubs ────────────────────────
 jest.mock('../../screens/LoginScreen', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text } = require('react-native');
   const LoginScreenStub = () => React.createElement(Text, null, 'LoginScreen');
   LoginScreenStub.displayName = 'LoginScreen';
   return LoginScreenStub;
 });
 jest.mock('../../screens/HomeScreen', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text } = require('react-native');
   const HomeScreenStub = () => React.createElement(Text, null, 'HomeScreen');
   HomeScreenStub.displayName = 'HomeScreen';
@@ -104,7 +96,6 @@ jest.mock('../../screens/CouponScreen', () => () => null);
 
 jest.mock('../../components/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) =>
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('react').createElement(require('react').Fragment, null, children),
 }));
 

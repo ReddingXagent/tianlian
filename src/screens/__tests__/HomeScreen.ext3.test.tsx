@@ -11,7 +11,6 @@ jest.mock('../../store/stationStore', () => ({
   useStationStore: jest.fn(() => mockState),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { useStationStore } = require('../../store/stationStore');
 
 let mockFocused = true;

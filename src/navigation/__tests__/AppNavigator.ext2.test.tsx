@@ -30,7 +30,6 @@ jest.mock('../../store/authStore', () => {
 });
 
 jest.mock('@react-navigation/native', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     NavigationContainer: ({ children }: { children: React.ReactNode }) =>
@@ -44,7 +43,6 @@ jest.mock('@react-navigation/native', () => {
 });
 
 jest.mock('@react-navigation/native-stack', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     createNativeStackNavigator: () => ({
@@ -64,9 +62,7 @@ jest.mock('@react-navigation/native-stack', () => {
 });
 
 jest.mock('@react-navigation/bottom-tabs', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports -- factory scope, import hoisting unavailable (F1204)
   const React = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports -- factory scope, import hoisting unavailable (F1204)
   const { View, Text } = require('react-native');
   return {
     createBottomTabNavigator: () => ({
@@ -110,11 +106,9 @@ jest.mock('../../screens/CouponScreen', () => () => null);
 
 jest.mock('../../components/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) =>
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- factory scope, out-of-scope import blocked by jest (F1204)
     require('react').createElement(require('react').Fragment, null, children),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- module-level require for mocked store access (F1204)
 const authMod = require('../../store/authStore');
 const mockState = authMod.__mockAuthState as {
   isAuthenticated: boolean;

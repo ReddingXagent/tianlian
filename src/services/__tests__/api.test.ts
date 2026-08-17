@@ -46,7 +46,6 @@ jest.mock('expo-secure-store', () => ({
 }));
 
 // Get the mocked instance
-// eslint-disable-next-line import/no-named-as-default-member -- axios mock access via default import (F1204)
 const mockAxiosInstance = jest.mocked(axios.create).mock.results[0].value;
 
 // Helper to create AxiosResponse-like mock

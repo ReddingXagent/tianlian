@@ -22,7 +22,6 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
-// eslint-disable-next-line import/first
 import PaymentScreen from '../PaymentScreen';
 
 const renderScreen = () =>

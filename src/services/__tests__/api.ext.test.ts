@@ -42,7 +42,6 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: (...args: unknown[]) => mockDeleteItem(...args as []),
 }));
 
-// eslint-disable-next-line import/no-named-as-default-member -- axios mock access via default import (F1204)
 const mockAxiosInstance = jest.mocked(axios.create).mock.results[0].value;
 
 // Capture interceptor callbacks at module level (before clearAllMocks runs)

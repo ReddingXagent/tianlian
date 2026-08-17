@@ -56,7 +56,6 @@ describe('ScanScreen.ext5 — 非idle充电桩启动拦截分支', () => {
     );
 
   it('alerts 该充电桩当前不可用 and blocks start when charger status is not idle', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { chargingApi } = require('../../services/api');
     chargingApi.scan.mockResolvedValue({
       data: {

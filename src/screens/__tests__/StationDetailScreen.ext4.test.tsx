@@ -10,7 +10,6 @@ jest.mock('../../store/stationStore', () => ({
   useStationStore: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { useStationStore } = require('../../store/stationStore');
 
 jest.mock('@react-navigation/native', () => ({

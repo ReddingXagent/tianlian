@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 import React from 'react';
 import { FlatList, RefreshControl } from 'react-native';
 import { render, waitFor, act } from '@testing-library/react-native';

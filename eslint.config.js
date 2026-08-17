@@ -66,7 +66,7 @@ module.exports = defineConfig([
     },
   },
   {
-    // 测试文件放开 jest 全局
+    // 测试文件放开 jest 全局 + jest惯用法豁免
     files: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
     languageOptions: {
       globals: {
@@ -80,6 +80,16 @@ module.exports = defineConfig([
         beforeAll: 'readonly',
         afterAll: 'readonly',
       },
+    },
+    rules: {
+      // mock组件(箭头函数)无需displayName
+      'react/display-name': 'off',
+      // jest.mock会被babel提升到imports之前, import写在mock之后是jest惯用法
+      'import/first': 'off',
+      // jest.mock工厂函数内 require() 是 RN 测试标准模式
+      '@typescript-eslint/no-require-imports': 'off',
+      // axios mock通过默认导入访问.create是测试惯用法
+      'import/no-named-as-default-member': 'off',
     },
   },
 ]);

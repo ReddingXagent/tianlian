@@ -21,9 +21,7 @@ jest.mock('../../services/api', () => ({
 }));
 
 // jest.mock calls are hoisted above imports by babel — safe to import below
-// eslint-disable-next-line import/first
 import LoginScreen from '../LoginScreen';
-// eslint-disable-next-line import/first
 import * as ApiModule from '../../services/api';
 
 const mockSendCode = (ApiModule as unknown as { authApi: { sendCode: jest.Mock } }).authApi.sendCode;

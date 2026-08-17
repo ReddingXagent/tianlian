@@ -31,7 +31,6 @@ jest.mock('../../store/authStore', () => {
 });
 
 jest.mock('@react-navigation/native', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     NavigationContainer: ({ children }: { children: React.ReactNode }) =>
@@ -45,7 +44,6 @@ jest.mock('@react-navigation/native', () => {
 });
 
 jest.mock('@react-navigation/native-stack', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
   return {
     createNativeStackNavigator: () => ({
@@ -65,9 +63,7 @@ jest.mock('@react-navigation/native-stack', () => {
 });
 
 jest.mock('@react-navigation/bottom-tabs', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text, View } = require('react-native');
   return {
     createBottomTabNavigator: () => ({
@@ -95,9 +91,7 @@ jest.mock('@react-navigation/bottom-tabs', () => {
 
 // ── Mock screens ─────────────────────────────────────────────
 jest.mock('../../screens/LoginScreen', () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { Text } = require('react-native');
   const LoginScreenStub = () => React.createElement(Text, null, 'LoginScreen');
   LoginScreenStub.displayName = 'LoginScreen';
@@ -117,12 +111,10 @@ jest.mock('../../screens/CouponScreen', () => () => null);
 
 jest.mock('../../components/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) =>
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- factory scope, out-of-scope import blocked by jest (F1204)
     require('react').createElement(require('react').Fragment, null, children),
 }));
 
 // Access mock auth state via the exported __mockAuthState
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- module-level require for mocked store access (F1204)
 const authMod = require('../../store/authStore');
 const mockAuthState = authMod.__mockAuthState as {
   isAuthenticated: boolean;
