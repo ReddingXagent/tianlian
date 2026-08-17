@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { paymentApi } from '../services/api';
+import { usePayment } from '../hooks/usePayment';
 import { RootStackParamList, PaymentMethod } from '../types';
 import { formatMoney } from '../utils/format';
 
@@ -27,37 +27,21 @@ const PaymentScreen: React.FC = () => {
   const route = useRoute<PaymentRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { orderId, amount } = route.params;
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('wechat');
-  const [paying, setPaying] = useState(false);
+  const { selectedMethod, setSelectedMethod, paying, pay } = usePayment();
 
   const handlePay = async () => {
-    setPaying(true);
-    try {
-      const response = await paymentApi.pay({
-        orderId,
-        method: selectedMethod,
-      });
-      if (response.data.success) {
-        Alert.alert('支付成功', `已支付 ¥${formatMoney(response.data.paidAmount)}`, [
-          {
-            text: '完成',
-            onPress: () => {
-              navigation.popToTop();
-            },
+    const result = await pay(orderId, amount);
+    if (result.success) {
+      Alert.alert('支付成功', `已支付 ¥${formatMoney(result.paidAmount || 0)}`, [
+        {
+          text: '完成',
+          onPress: () => {
+            navigation.popToTop();
           },
-        ]);
-      } else {
-        Alert.alert('支付失败', response.data.message || '请重试');
-      }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        Alert.alert('支付失败', axiosErr.response?.data?.message || '支付请求失败');
-      } else {
-        Alert.alert('支付失败', '网络错误，请检查网络连接');
-      }
-    } finally {
-      setPaying(false);
+        },
+      ]);
+    } else {
+      Alert.alert('支付失败', result.message || '请重试');
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,8 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
-import { authApi, walletApi } from '../services/api';
+import { useWallet } from '../hooks/useWallet';
 import { WalletRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -24,90 +23,23 @@ const RECORD_TYPE_LABELS: Record<string, string> = {
   withdraw: '提现',
 };
 
-const PAGE_SIZE = 20;
-
 const WalletScreen: React.FC = () => {
-  const { user, setUser } = useAuthStore();
-  const [records, setRecords] = useState<WalletRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  // 首屏拉取失败不再静默(F221): 此前失败伪装成"暂无记录", 资金页误导更甚
-  const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [recharging, setRecharging] = useState(false);
-  // 无限滚动分页状态(API本就分页, 此前UI只拉第一页——流水超出即不可见)
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const { user } = useAuthStore();
+  const {
+    records,
+    loading,
+    error,
+    refreshing,
+    recharging,
+    loadingMore,
+    hasMore,
+    loadRecords,
+    loadMoreRecords,
+    handleRefresh,
+    recharge,
+  } = useWallet();
 
-  const loadRecords = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await walletApi.getRecords({ page: 1, pageSize: PAGE_SIZE });
-      setRecords(response.data.items);
-      setPage(response.data.page);
-      setHasMore(response.data.items.length < response.data.total);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '获取交易记录失败';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadMoreRecords = useCallback(async () => {
-    if (!hasMore || loadingMore || loading) return;
-    setLoadingMore(true);
-    try {
-      const response = await walletApi.getRecords({ page: page + 1, pageSize: PAGE_SIZE });
-      const data = response.data;
-      const seen = new Set(records.map((r) => r.id));
-      const merged = [...records, ...data.items.filter((r) => !seen.has(r.id))];
-      setRecords(merged);
-      setPage(data.page);
-      setHasMore(merged.length < data.total);
-    } catch {
-      // 静默处理, 下次触边可重试
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [hasMore, loadingMore, loading, page, records]);
-
-  // 余额显示取自authStore.user.balance: 充电扣费/他处充值后回钱包页会陈旧
-  // (F170/F176同型收尾) → 回焦静默重拉流水 + 拉最新profile同步余额。
-  const isFocused = useIsFocused();
-  const refreshProfile = useCallback(async () => {
-    try {
-      const response = await authApi.getProfile();
-      setUser(response.data);
-    } catch {
-      // 静默处理
-    }
-  }, [setUser]);
-
-  useEffect(() => {
-    if (isFocused) {
-      let cancelled = false;
-      Promise.resolve().then(() => {
-        if (!cancelled) {
-          loadRecords();
-          refreshProfile();
-        }
-      });
-      return () => { cancelled = true; };
-    }
-  }, [isFocused, loadRecords, refreshProfile]);
-
-  // 下拉刷新: 与订单/优惠券/首页/站点详情对齐(F209)。
-  // 钱包是资金敏感页——余额/流水陈旧时用户需有手动刷新手段,
-  // 不能只靠回焦静默重拉; 同时重拉profile同步最新余额。
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([loadRecords(), refreshProfile()]);
-    setRefreshing(false);
-  }, [loadRecords, refreshProfile]);
-
-  const handleRecharge = () => {
+  const handleRecharge = useCallback(() => {
     const amounts = [10, 50, 100, 200];
     Alert.alert(
       '充值',
@@ -115,24 +47,17 @@ const WalletScreen: React.FC = () => {
       amounts.map((amount) => ({
         text: `¥${amount}`,
         onPress: async () => {
-          setRecharging(true);
-          try {
-            await walletApi.recharge(amount);
-            // 刷新用户信息获取新余额
-            const response = await authApi.getProfile();
-            setUser(response.data);
-            loadRecords();
+          const success = await recharge(amount);
+          if (success) {
             Alert.alert('充值成功', `已充值 ¥${amount}`);
-          } catch {
+          } else {
             Alert.alert('充值失败', '请重试');
-          } finally {
-            setRecharging(false);
           }
         },
       })),
       { cancelable: true }
     );
-  };
+  }, [recharge]);
 
   const renderRecordItem = ({ item }: { item: WalletRecord }) => (
     <View style={styles.recordCard}>
@@ -185,7 +110,6 @@ const WalletScreen: React.FC = () => {
       {loading && records.length === 0 ? (
         <LoadingSpinner text="加载记录..." />
       ) : error && records.length === 0 ? (
-        // 仅无数据时切错误页; 回焦/下拉重拉失败保留已有流水不闪屏(F209模式)
         <EmptyState
           icon="⚠️"
           title="加载失败"

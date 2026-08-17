@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,84 +7,26 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
-import { couponApi } from '../services/api';
-import { Coupon } from '../types';
+import { useCoupons } from '../hooks/useCoupons';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import StatusBadge from '../components/StatusBadge';
 import { formatDate, formatMoney } from '../utils/format';
 
-const PAGE_SIZE = 20;
-
 const CouponScreen: React.FC = () => {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  // 无限滚动分页状态(API本就分页, 此前UI只拉第一页)
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const {
+    coupons,
+    loading,
+    refreshing,
+    error,
+    hasMore,
+    loadingMore,
+    loadCoupons,
+    loadMoreCoupons,
+    handleRefresh,
+  } = useCoupons();
 
-  const loadCoupons = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await couponApi.getList({ page: 1, pageSize: PAGE_SIZE });
-      setCoupons(response.data.items);
-      setPage(response.data.page);
-      setHasMore(response.data.items.length < response.data.total);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '获取优惠券失败';
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadMoreCoupons = useCallback(async () => {
-    if (!hasMore || loadingMore || loading) return;
-    setLoadingMore(true);
-    try {
-      const response = await couponApi.getList({ page: page + 1, pageSize: PAGE_SIZE });
-      const data = response.data;
-      const seen = new Set(coupons.map((c) => c.id));
-      const merged = [...coupons, ...data.items.filter((c) => !seen.has(c.id))];
-      setCoupons(merged);
-      setPage(data.page);
-      setHasMore(merged.length < data.total);
-    } catch {
-      // 静默处理, 下次触边可重试
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [hasMore, loadingMore, loading, page, coupons]);
-
-  // 回焦静默刷新: 支付/下单页用券后返回, 券状态(已用/过期)会陈旧。
-  // 与订单/首页/钱包/站点详情等屏对齐(F170/F209交互一致性模式);
-  // 重拉固定回第1页, 分页态随之重置。
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    if (isFocused) {
-      // fire-and-forget: loadCoupons sets loading synchronously,
-      // wrap in microtask to avoid cascading renders
-      let cancelled = false;
-      Promise.resolve().then(() => {
-        if (!cancelled) loadCoupons();
-      });
-      return () => { cancelled = true; };
-    }
-  }, [isFocused, loadCoupons]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadCoupons();
-    setRefreshing(false);
-  };
-
-  const renderCouponItem = ({ item }: { item: Coupon }) => (
+  const renderCouponItem = ({ item }: { item: import('../types').Coupon }) => (
     <View style={styles.couponCard}>
       <View style={styles.couponHeader}>
         <Text style={styles.couponTitle}>{item.title}</Text>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,9 +11,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { chargingApi } from '../services/api';
-import { useOrderStore } from '../store/orderStore';
-import { ScanResult, RootStackParamList } from '../types';
+import { useScan } from '../hooks/useScan';
+import { RootStackParamList } from '../types';
 import StatusBadge from '../components/StatusBadge';
 import CameraScanner from '../components/CameraScanner';
 import { formatMoney } from '../utils/format';
@@ -22,65 +21,30 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ScanScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [codeInput, setCodeInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [lastResult, setLastResult] = useState<ScanResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const startCharging = useOrderStore((s) => s.startCharging);
-  const [starting, setStarting] = useState(false);
-  const [cameraOpen, setCameraOpen] = useState(false);
+  const {
+    codeInput,
+    setCodeInput,
+    loading,
+    lastResult,
+    error,
+    starting,
+    cameraOpen,
+    setCameraOpen,
+    handleScan,
+    handleCameraScan,
+    handleStartCharging,
+  } = useScan();
 
-  const lookupCode = useCallback(async (code: string) => {
-    setLoading(true);
-    setError(null);
-    setLastResult(null);
-
-    try {
-      const response = await chargingApi.scan(code);
-      setLastResult(response.data);
-      setCodeInput('');
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || '未找到匹配的充电桩');
-      } else {
-        setError('网络错误，请检查网络连接');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const handleScan = useCallback(async () => {
-    const code = codeInput.trim();
-    if (!code) {
-      setError('请输入充电桩编码');
-      return;
-    }
-    await lookupCode(code);
-  }, [codeInput, lookupCode]);
-
-  const handleCameraScan = useCallback(
-    (code: string) => {
-      setCameraOpen(false);
-      setCodeInput(code);
-      void lookupCode(code);
-    },
-    [lookupCode]
-  );
-
-  const handleStartCharging = useCallback(async () => {
-    if (!lastResult) return;
-
-    if (lastResult.status !== 'idle') {
+  const handleStartChargingPress = async () => {
+    if (!lastResult || lastResult.status !== 'idle') {
       Alert.alert('提示', '该充电桩当前不可用');
       return;
     }
-
-    setStarting(true);
     try {
-      const status = await startCharging(lastResult.id);
-      navigation.replace('Charging', { orderId: status.orderId });
+      const status = await handleStartCharging();
+      if (status) {
+        navigation.replace('Charging', { orderId: status.orderId });
+      }
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -88,14 +52,11 @@ const ScanScreen: React.FC = () => {
       } else {
         Alert.alert('启动失败', '网络错误，请检查网络连接');
       }
-    } finally {
-      setStarting(false);
     }
-  }, [lastResult, startCharging, navigation]);
+  };
 
   const handleQuickInput = (code: string) => {
     setCodeInput(code);
-    setError(null);
   };
 
   return (
@@ -138,7 +99,6 @@ const ScanScreen: React.FC = () => {
           value={codeInput}
           onChangeText={(text) => {
             setCodeInput(text);
-            setError(null);
           }}
           autoCapitalize="characters"
           autoCorrect={false}
@@ -225,7 +185,7 @@ const ScanScreen: React.FC = () => {
               styles.startBtn,
               (lastResult.status !== 'idle' || starting) && styles.startBtnDisabled,
             ]}
-            onPress={handleStartCharging}
+            onPress={handleStartChargingPress}
             disabled={lastResult.status !== 'idle' || starting}
             activeOpacity={0.7}
           >

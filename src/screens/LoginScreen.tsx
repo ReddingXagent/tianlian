@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,106 +11,25 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '../store/authStore';
-import { authApi } from '../services/api';
+import { useLogin } from '../hooks/useLogin';
 
 const LoginScreen: React.FC = () => {
-  const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
-  const [loginMode, setLoginMode] = useState<'code' | 'password'>('code');
-  const [loading, setLoading] = useState(false);
-  const [sendingCode, setSendingCode] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(0);
-  const loginByCode = useAuthStore((s) => s.loginByCode);
-  const loginByPassword = useAuthStore((s) => s.loginByPassword);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startCountdown = () => {
-    setCountdown(60);
-    timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  // 卸载时清理倒计时 interval，防止句柄泄漏逃逸到组件生命周期外
-  // (2026-08-16 F1198: --detectOpenHandles 定位泄漏源，与 WalletScreen.ext3 同类)
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, []);
-
-  const handleSendCode = async () => {
-    if (!phone.trim() || phone.trim().length < 11) {
-      setError('请输入正确的手机号');
-      return;
-    }
-    setSendingCode(true);
-    setError(null);
-    try {
-      await authApi.sendCode({ phone: phone.trim() });
-      startCountdown();
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || '发送验证码失败');
-      } else {
-        setError('网络错误，请检查网络连接');
-      }
-    } finally {
-      setSendingCode(false);
-    }
-  };
-
-  const handleLogin = async () => {
-    if (!phone.trim() || phone.trim().length < 11) {
-      setError('请输入正确的手机号');
-      return;
-    }
-
-    if (loginMode === 'code') {
-      if (!code.trim()) {
-        setError('请输入验证码');
-        return;
-      }
-    } else {
-      if (!password.trim()) {
-        setError('请输入密码');
-        return;
-      }
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (loginMode === 'code') {
-        await loginByCode(phone.trim(), code.trim());
-      } else {
-        await loginByPassword(phone.trim(), password);
-      }
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || '登录失败');
-      } else {
-        setError('网络错误，请检查网络连接');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    phone,
+    setPhone,
+    code,
+    setCode,
+    password,
+    setPassword,
+    loginMode,
+    setLoginMode,
+    loading,
+    sendingCode,
+    error,
+    countdown,
+    handleSendCode,
+    handleLogin,
+  } = useLogin();
 
   return (
     // F299: AuthStack为headerShown:false导航器, 无原生header兜顶,
@@ -143,7 +62,6 @@ const LoginScreen: React.FC = () => {
                 value={phone}
                 onChangeText={(text) => {
                   setPhone(text);
-                  setError(null);
                 }}
                 keyboardType="phone-pad"
                 maxLength={11}
@@ -162,7 +80,6 @@ const LoginScreen: React.FC = () => {
                     value={code}
                     onChangeText={(text) => {
                       setCode(text);
-                      setError(null);
                     }}
                     keyboardType="number-pad"
                     maxLength={6}
@@ -199,7 +116,6 @@ const LoginScreen: React.FC = () => {
                   value={password}
                   onChangeText={(text) => {
                     setPassword(text);
-                    setError(null);
                   }}
                   secureTextEntry
                   autoComplete="password"
@@ -226,7 +142,6 @@ const LoginScreen: React.FC = () => {
               style={styles.modeSwitch}
               onPress={() => {
                 setLoginMode(loginMode === 'code' ? 'password' : 'code');
-                setError(null);
               }}
             >
               <Text style={styles.modeSwitchText}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,19 +13,17 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useIsFocused } from '@react-navigation/native';
-import { vehicleApi } from '../services/api';
+import { useVehicles } from '../hooks/useVehicles';
 import { Vehicle } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
 const VehicleScreen: React.FC = () => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { vehicles, loading, error, refreshing, loadVehicles, handleRefresh, addVehicle, removeVehicle, setDefaultVehicle } =
+    useVehicles();
+
   const [modalVisible, setModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
 
   // 表单
   const [plate, setPlate] = useState('');
@@ -35,68 +33,27 @@ const VehicleScreen: React.FC = () => {
   const [vin, setVin] = useState('');
   const [isDefault, setIsDefault] = useState(false);
 
-  const loadVehicles = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await vehicleApi.getList();
-      setVehicles(response.data);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : '获取车辆列表失败';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // 回焦静默刷新: 与订单/首页/钱包等屏对齐(F170/F209交互一致性模式);
-  // 默认车辆/车辆状态可能在支付/充电流程后变化。
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    if (isFocused) {
-      let cancelled = false;
-      Promise.resolve().then(() => {
-        if (!cancelled) loadVehicles();
-      });
-      return () => { cancelled = true; };
-    }
-  }, [isFocused, loadVehicles]);
-
-  // 下拉刷新: 与订单/优惠券/钱包等列表屏对齐(F209模式)。
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadVehicles();
-    setRefreshing(false);
-  };
-
   const handleAdd = async () => {
     if (!plate.trim()) {
       Alert.alert('提示', '请输入车牌号');
       return;
     }
     setSaving(true);
-    try {
-      await vehicleApi.add({
-        plate: plate.trim(),
-        brand: brand.trim(),
-        model: model.trim(),
-        color: color.trim(),
-        vin: vin.trim(),
-        isDefault,
-      });
+    const result = await addVehicle({
+      plate: plate.trim(),
+      brand: brand.trim(),
+      model: model.trim(),
+      color: color.trim(),
+      vin: vin.trim(),
+      isDefault,
+    });
+    setSaving(false);
+
+    if (result.success) {
       setModalVisible(false);
       resetForm();
-      loadVehicles();
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as { response?: { data?: { message?: string } } };
-        Alert.alert('添加失败', axiosErr.response?.data?.message || '请重试');
-      } else {
-        Alert.alert('添加失败', '网络错误');
-      }
-    } finally {
-      setSaving(false);
+    } else {
+      Alert.alert('添加失败', result.errorMessage || (result.isNetworkError ? '网络错误' : '请重试'));
     }
   };
 
@@ -107,24 +64,16 @@ const VehicleScreen: React.FC = () => {
         text: '删除',
         style: 'destructive',
         onPress: async () => {
-          try {
-            await vehicleApi.remove(vehicle.id);
-            loadVehicles();
-          } catch {
-            Alert.alert('删除失败', '请重试');
-          }
+          const success = await removeVehicle(vehicle.id);
+          if (!success) Alert.alert('删除失败', '请重试');
         },
       },
     ]);
   };
 
   const handleSetDefault = async (vehicle: Vehicle) => {
-    try {
-      await vehicleApi.setDefault(vehicle.id);
-      loadVehicles();
-    } catch {
-      Alert.alert('设置失败', '请重试');
-    }
+    const success = await setDefaultVehicle(vehicle.id);
+    if (!success) Alert.alert('设置失败', '请重试');
   };
 
   const resetForm = () => {
@@ -172,7 +121,6 @@ const VehicleScreen: React.FC = () => {
     </View>
   );
 
-  // 仅首屏(无数据)才切整屏spinner/错误页; 回焦重拉/刷新失败时保留已有列表不闪屏(F209模式)
   if (loading && vehicles.length === 0) {
     return <LoadingSpinner text="加载车辆列表..." />;
   }
@@ -229,9 +177,6 @@ const VehicleScreen: React.FC = () => {
         transparent
         onRequestClose={() => setModalVisible(false)}
       >
-        {/* F271: 底部弹出表单(justifyContent:flex-end)键盘遮挡修复——
-            Modal内TextInput聚焦时软键盘直接覆盖下半部输入项与保存按钮,
-            KAV behavior分平台(iOS padding/Android height), 与LoginScreen同惯例 */}
         <KeyboardAvoidingView
           style={styles.modalOverlay}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

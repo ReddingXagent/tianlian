@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
-import { authApi, statsApi } from '../services/api';
-import { RootStackParamList, UserStats } from '../types';
+import { useProfile } from '../hooks/useProfile';
+import { RootStackParamList } from '../types';
 import { formatMoney, formatEnergy } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -24,45 +24,10 @@ const MENU_ITEMS = [
 
 const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { user, logout, setUser } = useAuthStore();
-  const [stats, setStats] = useState<UserStats | null>(null);
+  const { user, logout } = useAuthStore();
+  const { stats } = useProfile();
 
-  // 移动端质量基线: Profile为底部Tab, 切走保活不重建,
-  // 统计/余额随订单与充值随时在变 → 回焦时静默重拉。
-  const isFocused = useIsFocused();
-
-  const loadStatsCb = useCallback(async () => {
-    try {
-      const response = await statsApi.getUserStats();
-      setStats(response.data);
-    } catch {
-      // 静默处理
-    }
-  }, []);
-
-  const refreshProfileCb = useCallback(async () => {
-    try {
-      const response = await authApi.getProfile();
-      setUser(response.data);
-    } catch {
-      // 静默处理
-    }
-  }, [setUser]);
-
-  useEffect(() => {
-    if (isFocused) {
-      let cancelled = false;
-      Promise.resolve().then(() => {
-        if (!cancelled) {
-          loadStatsCb();
-          refreshProfileCb();
-        }
-      });
-      return () => { cancelled = true; };
-    }
-  }, [isFocused, loadStatsCb, refreshProfileCb]);
-
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     Alert.alert(
       '退出登录',
       '确定要退出当前账号吗？',
@@ -81,7 +46,7 @@ const ProfileScreen: React.FC = () => {
         },
       ]
     );
-  };
+  }, [logout]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -120,7 +85,7 @@ const ProfileScreen: React.FC = () => {
 
       {/* 功能菜单 */}
       <View style={styles.menuCard}>
-        {MENU_ITEMS.map((item, index) => (
+        {MENU_ITEMS.map((item) => (
           <TouchableOpacity accessibilityRole="button"
             key={item.key}
             style={styles.menuItem}
