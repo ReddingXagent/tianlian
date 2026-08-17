@@ -83,4 +83,16 @@ describe('PaymentScreen', () => {
       expect(paymentApi.pay).toHaveBeenCalled();
     });
   });
+
+  it('handles success with undefined paidAmount (falsy branch)', async () => {
+    const { paymentApi } = require('../../services/api');
+    paymentApi.pay.mockResolvedValue({
+      data: { success: true, message: 'ok', amount: 25.5 },
+    });
+    const { getByText } = renderScreen();
+    fireEvent.press(getByText('确认支付 ¥25.50'));
+    await waitFor(() => {
+      expect(paymentApi.pay).toHaveBeenCalled();
+    });
+  });
 });
