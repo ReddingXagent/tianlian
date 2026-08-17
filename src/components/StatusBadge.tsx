@@ -4,7 +4,8 @@ import { View, Text, StyleSheet } from 'react-native';
 export type StatusType = 'online' | 'offline' | 'fault' | 'maintenance' | 'warning' | 'critical' | 'info' | 'unhandled' | 'processing' | 'resolved' | 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'high' | 'normal' | 'low' | 'urgent' | 'idle' | 'connected' | 'charging' | 'suspended';
 
 interface StatusBadgeProps {
-  status: StatusType;
+  /** 已知状态有预设样式/文案；未知字符串原样展示（灰色底） */
+  status: StatusType | (string & {});
   label?: string;
 }
 
