@@ -1,7 +1,8 @@
 /**
  * types/modules/station.ts — 站点相关类型
  */
-export type StationStatus = 'online' | 'offline' | 'maintenance' | 'normal';
+// 共享基础状态 + ops 扩展 'normal'
+export type StationStatus = import('@tianlian/shared-types').StationStatus | 'normal';
 
 export interface StationBranding {
   operatorName: string;

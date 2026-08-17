@@ -1,20 +1,8 @@
 /**
  * types/modules/work-order.ts — 工单相关类型
  */
-export type WorkOrderType =
-  | 'repair'
-  | 'inspection'
-  | 'installation'
-  | 'maintenance'
-  | 'other';
-
-export type WorkOrderPriority = 'low' | 'normal' | 'high' | 'urgent';
-
-export type WorkOrderStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'completed'
-  | 'cancelled';
+import type { WorkOrderType, WorkOrderPriority, WorkOrderStatus } from '@tianlian/shared-types';
+export { type WorkOrderType, type WorkOrderPriority, type WorkOrderStatus } from '@tianlian/shared-types';
 
 export type WorkOrderAction =
   | 'created'

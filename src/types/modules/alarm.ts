@@ -1,16 +1,8 @@
 /**
  * types/modules/alarm.ts — 告警相关类型
  */
-export type AlarmType =
-  | 'device_fault'
-  | 'power_anomaly'
-  | 'communication_loss'
-  | 'temperature_warning'
-  | 'other';
-
-export type AlarmLevel = 'info' | 'warning' | 'critical';
-
-export type AlarmStatus = 'unhandled' | 'processing' | 'resolved';
+import type { AlarmType, AlarmLevel, AlarmStatus } from '@tianlian/shared-types';
+export { type AlarmType, type AlarmLevel, type AlarmStatus } from '@tianlian/shared-types';
 
 export interface Alarm {
   id: number;

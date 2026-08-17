@@ -1,9 +1,8 @@
 /**
  * types/modules/device.ts — 设备相关类型
  */
-export type DeviceType = 'charger' | 'battery' | 'inverter' | 'sensor' | 'other';
-
-export type DeviceStatus = 'online' | 'offline' | 'fault' | 'maintenance';
+import type { DeviceType, DeviceStatus } from '@tianlian/shared-types';
+export { type DeviceType, type DeviceStatus } from '@tianlian/shared-types';
 
 export interface Device {
   id: number;
