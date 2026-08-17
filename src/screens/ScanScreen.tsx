@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,53 +9,24 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { scanApi } from '../services/api';
-import { ScanResult } from '../types';
 import StatusBadge from '../components/StatusBadge';
+import { useScan } from '../hooks/useScan';
 
 const ScanScreen: React.FC = () => {
-  const [codeInput, setCodeInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [lastResult, setLastResult] = useState<ScanResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    codeInput,
+    loading,
+    lastResult,
+    error,
+    inputRef,
+    setCodeInput,
+    setError,
+    handleScan,
+    handleQuickInput,
+    performCheckIn,
+  } = useScan();
+
   const [signInMode, setSignInMode] = useState(false);
-  const inputRef = useRef<TextInput>(null);
-
-  const handleScan = useCallback(async () => {
-    const code = codeInput.trim();
-    if (!code) {
-      setError('请输入设备/站点编码');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setLastResult(null);
-
-    try {
-      const response = await scanApi.scan(code);
-      setLastResult(response.data);
-      setCodeInput('');
-    } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosErr = err as {
-          response?: { data?: { message?: string } };
-        };
-        setError(
-          axiosErr.response?.data?.message || '未找到匹配的设备或站点'
-        );
-      } else {
-        setError('网络错误，请检查网络连接');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [codeInput]);
-
-  const handleQuickInput = (code: string) => {
-    setCodeInput(code);
-    setError(null);
-  };
 
   const handleSignIn = useCallback(async () => {
     if (!lastResult) {
@@ -71,21 +42,18 @@ const ScanScreen: React.FC = () => {
         {
           text: '签到',
           onPress: async () => {
-            setLoading(true);
-            try {
-              await scanApi.checkIn(lastResult.id);
+            const ok = await performCheckIn();
+            if (ok) {
               Alert.alert('签到成功', `已在 ${lastResult.name || lastResult.code} 签到`);
-            } catch {
+            } else {
               Alert.alert('签到失败', '请重试或联系管理员');
-            } finally {
-              setLoading(false);
-              setSignInMode(false);
             }
+            setSignInMode(false);
           },
         },
       ]
     );
-  }, [lastResult]);
+  }, [lastResult, performCheckIn]);
 
   const handleReportFault = () => {
     if (!lastResult) {
@@ -167,7 +135,7 @@ const ScanScreen: React.FC = () => {
           onPress={handleScan}
           disabled={loading}
           activeOpacity={0.7}
-         accessibilityRole="button">
+          accessibilityRole="button">
           {loading ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
@@ -183,19 +151,19 @@ const ScanScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.quickBtn}
             onPress={() => handleQuickInput('DEV-001')}
-           accessibilityRole="button">
+            accessibilityRole="button">
             <Text style={styles.quickBtnText}>DEV-001</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickBtn}
             onPress={() => handleQuickInput('STATION-A01')}
-           accessibilityRole="button">
+            accessibilityRole="button">
             <Text style={styles.quickBtnText}>STATION-A01</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickBtn}
             onPress={() => handleQuickInput('CHARGER-005')}
-           accessibilityRole="button">
+            accessibilityRole="button">
             <Text style={styles.quickBtnText}>CHARGER-005</Text>
           </TouchableOpacity>
         </View>
@@ -243,7 +211,7 @@ const ScanScreen: React.FC = () => {
               style={styles.resultActionBtn}
               onPress={handleSignIn}
               activeOpacity={0.7}
-             accessibilityRole="button">
+              accessibilityRole="button">
               <Text style={styles.resultActionIcon}>📌</Text>
               <Text style={styles.resultActionLabel}>扫码签到</Text>
             </TouchableOpacity>
@@ -251,7 +219,7 @@ const ScanScreen: React.FC = () => {
               style={styles.resultActionBtn}
               onPress={handleReportFault}
               activeOpacity={0.7}
-             accessibilityRole="button">
+              accessibilityRole="button">
               <Text style={styles.resultActionIcon}>🔧</Text>
               <Text style={styles.resultActionLabel}>报修</Text>
             </TouchableOpacity>

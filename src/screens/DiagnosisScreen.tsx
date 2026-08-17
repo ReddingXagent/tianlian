@@ -1,15 +1,5 @@
-import { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native';
-import { diagnosisApi } from '../services/api';
-import { DiagnosisResult } from '../types';
+import { ScrollView, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useDiagnosis } from '../hooks/useDiagnosis';
 
 const FAULT_CODE_EXAMPLES = [
   { code: 'E001', label: 'E001-过压' },
@@ -27,37 +17,16 @@ const SEVERITY_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 const DiagnosisScreen: React.FC = () => {
-  const [codeInput, setCodeInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<DiagnosisResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSearch = useCallback(async () => {
-    const code = codeInput.trim();
-    if (!code) {
-      setError('请输入故障码');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      const response = await diagnosisApi.getDiagnosis(code);
-      setResult(response.data);
-      setCodeInput('');
-    } catch {
-      setError('未找到该故障码，请确认故障码是否正确');
-    } finally {
-      setLoading(false);
-    }
-  }, [codeInput]);
-
-  const handleQuickInput = (code: string) => {
-    setCodeInput(code);
-    setError(null);
-  };
+  const {
+    codeInput,
+    loading,
+    result,
+    error,
+    setCodeInput,
+    clearError,
+    handleSearch,
+    handleQuickInput,
+  } = useDiagnosis();
 
   const severityConfig = result
     ? SEVERITY_CONFIG[result.severity] || { label: result.severity, color: '#999' }
@@ -83,7 +52,7 @@ const DiagnosisScreen: React.FC = () => {
             value={codeInput}
             onChangeText={(text) => {
               setCodeInput(text);
-              setError(null);
+              clearError();
             }}
             autoCapitalize="characters"
             autoCorrect={false}
@@ -96,7 +65,7 @@ const DiagnosisScreen: React.FC = () => {
             onPress={handleSearch}
             disabled={loading}
             activeOpacity={0.7}
-           accessibilityRole="button">
+            accessibilityRole="button">
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
@@ -115,7 +84,7 @@ const DiagnosisScreen: React.FC = () => {
               key={item.code}
               style={styles.exampleBtn}
               onPress={() => handleQuickInput(item.code)}
-             accessibilityRole="button">
+              accessibilityRole="button">
               <Text style={styles.exampleBtnText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
