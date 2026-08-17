@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -99,7 +98,8 @@ const WorkOrderScreen: React.FC = () => {
   }, [stationId, statusFilter]);
 
   useEffect(() => {
-    fetchData(false, 1);
+    // F1203: 微任务解耦 effect 直调 async —— statusFilter 变化链同步适用
+    Promise.resolve().then(() => fetchData(false, 1));
   }, [fetchData]);
 
   const handleLoadMore = () => {

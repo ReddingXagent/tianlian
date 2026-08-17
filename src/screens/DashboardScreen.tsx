@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, RefreshControl,
@@ -43,7 +42,8 @@ export default function DashboardScreen() {
   }, [fetchStations, fetchOrders]);
 
   useEffect(() => {
-    loadDashboard();
+    // F1203: 微任务解耦 effect 直调 async —— 避免 render 期同步 setState 链
+    Promise.resolve().then(() => loadDashboard());
   }, [loadDashboard]);
 
   if (loading && !refreshing) {

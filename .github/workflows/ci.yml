@@ -18,7 +18,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
-      - run: npx eslint . --max-warnings 0
+      - run: npx eslint . --max-warnings=0
       - run: npm run check:alias
       - run: npm run check:test-liveness
       - run: npm run check:node

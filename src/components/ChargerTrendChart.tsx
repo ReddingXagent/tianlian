@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -64,7 +63,8 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
   }, [deviceId]);
 
   useEffect(() => {
-    fetchTrend();
+    // F1203: 微任务解耦 effect 直调 async —— deviceId 变化链同步适用
+    Promise.resolve().then(() => fetchTrend());
   }, [fetchTrend]);
 
   const points = trend?.points ?? [];

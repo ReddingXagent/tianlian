@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useCallback, useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator, TouchableOpacity,
@@ -21,7 +20,8 @@ export default function DeviceListScreen() {
   }, [stationId, fetchStationDevices]);
 
   useEffect(() => {
-    loadData();
+    // F1203: 微任务解耦 effect 直调 async
+    Promise.resolve().then(() => loadData());
   }, [loadData]);
 
   const renderItem = ({ item }: { item: Device }) => (

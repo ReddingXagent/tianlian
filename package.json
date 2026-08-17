@@ -8,14 +8,15 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --passWithNoTests",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "build": "tsc --noEmit",
     "check:alias": "bash scripts/check-alias-config.sh",
     "check:test-liveness": "bash scripts/check-test-suite-liveness.sh",
     "export:android": "expo export --platform android",
     "export:ios": "expo export --platform ios",
     "check:node": "bash scripts/check-node-version.sh",
-    "check:engine-strict": "bash scripts/check-engine-strict.sh"
+    "check:engine-strict": "bash scripts/check-engine-strict.sh",
+    "lint:ci": "eslint . --max-warnings=0"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.14",
@@ -67,8 +68,8 @@
     "coverageThreshold": {
       "global": {
         "statements": 99,
-        "branches": 96,
-        "functions": 98,
+        "branches": 98,
+        "functions": 99,
         "lines": 99
       }
     }

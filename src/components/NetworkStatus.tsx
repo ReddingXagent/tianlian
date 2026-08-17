@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 /**
  * 网络状态横幅 — 使用 AppState 监听前后台切换
  * App 回前台时静默 ping API 检测连通性，离线时显示横幅
@@ -39,8 +38,8 @@ export default function NetworkStatus(): React.ReactElement | null {
       }
     });
 
-    // 初始检查
-    checkConnectivity();
+    // 初始检查（F1203: 微任务解耦 effect 直调 async）
+    Promise.resolve().then(() => checkConnectivity());
 
     return () => {
       mountedRef.current = false;

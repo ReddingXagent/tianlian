@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useCallback, useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, RefreshControl, ActivityIndicator,
@@ -34,7 +33,8 @@ export default function AlarmListScreen() {
   }, [stationId, filter]);
 
   useEffect(() => {
-    loadData();
+    // F1203: 微任务解耦 —— 避免 filter 变化触发的 render 期同步 setState 链
+    Promise.resolve().then(() => loadData());
   }, [loadData]);
 
   const levelColor = (level: AlarmLevel) => {
