@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   View,
   Text,
@@ -9,55 +8,49 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { useWorkOrderEnhancedStore } from '../store/workOrderEnhancedStore';
-import { RootStackParamList } from '../types';
-
-type TransferRouteProp = RouteProp<RootStackParamList, 'WorkOrderDetail'>;
+import { useWorkOrderTransfer } from '../hooks/useWorkOrderTransfer';
 
 const WorkOrderTransferScreen: React.FC = () => {
-  const route = useRoute<TransferRouteProp>();
-  const { orderId } = route.params;
-  const { transferring, transferError, transferOrder, urgeOrder } =
-    useWorkOrderEnhancedStore();
+  const {
+    assigneeId,
+    reason,
+    localError,
+    transferError,
+    transferring,
+    setAssigneeId,
+    setReason,
+    clearError,
+    handleTransfer,
+    handleUrge,
+  } = useWorkOrderTransfer();
 
-  const [assigneeId, setAssigneeId] = useState('');
-  const [reason, setReason] = useState('');
-  const [localError, setLocalError] = useState<string | null>(null);
-
-  const handleTransfer = async () => {
-    setLocalError(null);
-
-    if (!assigneeId.trim() || isNaN(Number(assigneeId))) {
-      setLocalError('请输入有效的运维人员ID');
-      return;
-    }
-    if (!reason.trim()) {
-      setLocalError('请输入转派原因');
-      return;
-    }
-
-    const result = await transferOrder(orderId, Number(assigneeId), reason.trim());
-    if (result) {
+  const onTransfer = async () => {
+    const success = await handleTransfer();
+    if (success) {
       Alert.alert('转派成功', `工单已转派给 #${assigneeId}`, [
         { text: '确定' },
       ]);
     }
   };
 
-  const handleUrge = () => {
+  const onUrge = () => {
     Alert.alert('催单', '确定要催促工程师处理此工单吗？', [
       { text: '取消', style: 'cancel' },
       {
         text: '确定催单',
         onPress: async () => {
-          const result = await urgeOrder(orderId, '请尽快处理');
-          if (result) {
+          const success = await handleUrge();
+          if (success) {
             Alert.alert('催单成功', '已通知工程师尽快处理');
           }
         },
       },
     ]);
+  };
+
+  const onFieldChange = (setter: (t: string) => void) => (t: string) => {
+    setter(t);
+    clearError();
   };
 
   return (
@@ -84,7 +77,7 @@ const WorkOrderTransferScreen: React.FC = () => {
             placeholder="请输入运维人员ID"
             placeholderTextColor="#999"
             value={assigneeId}
-            onChangeText={(t) => { setAssigneeId(t); setLocalError(null); }}
+            onChangeText={onFieldChange(setAssigneeId)}
             keyboardType="numeric"
             editable={!transferring}
           />
@@ -95,7 +88,7 @@ const WorkOrderTransferScreen: React.FC = () => {
             placeholder="请输入转派原因"
             placeholderTextColor="#999"
             value={reason}
-            onChangeText={(t) => { setReason(t); setLocalError(null); }}
+            onChangeText={onFieldChange(setReason)}
             multiline
             numberOfLines={3}
             textAlignVertical="top"
@@ -105,7 +98,7 @@ const WorkOrderTransferScreen: React.FC = () => {
 
           <TouchableOpacity
             style={[styles.transferBtn, transferring && styles.btnDisabled]}
-            onPress={handleTransfer}
+            onPress={onTransfer}
             disabled={transferring}
             activeOpacity={0.7}
            accessibilityRole="button">
@@ -127,7 +120,7 @@ const WorkOrderTransferScreen: React.FC = () => {
           </Text>
           <TouchableOpacity
             style={[styles.escalateBtn, transferring && styles.btnDisabled]}
-            onPress={handleUrge}
+            onPress={onUrge}
             disabled={transferring}
             activeOpacity={0.7}
            accessibilityRole="button">
