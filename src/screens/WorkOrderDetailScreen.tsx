@@ -1,23 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { useWorkOrderStore } from '../store/workOrderStore';
-import { workOrderRecordApi, workOrderActionApi } from '../services/api';
-import { RootStackParamList, WorkOrder, WorkOrderRecord } from '../types';
+import { Alert, ScrollView, View, Text, StyleSheet, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import { WorkOrder, WorkOrderRecord } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
-
-type DetailRouteProp = RouteProp<RootStackParamList, 'WorkOrderDetail'>;
+import { useWorkOrderDetail } from '../hooks/useWorkOrderDetail';
 
 const WORK_ORDER_TYPE_LABEL: Record<string, string> = {
   repair: '维修',
@@ -42,56 +28,17 @@ const WORK_ORDER_ACTION_LABEL: Record<string, { label: string; color: string }> 
 };
 
 const WorkOrderDetailScreen: React.FC = () => {
-  const route = useRoute<DetailRouteProp>();
-  const { orderId } = route.params;
-  const { selectedOrder, loading, error, fetchOrderDetail } =
-    useWorkOrderStore();
-  const [refreshing, setRefreshing] = useState(false);
-  const [statusUpdating, setStatusUpdating] = useState(false);
-  const [records, setRecords] = useState<WorkOrderRecord[]>([]);
-  const [recordsLoading, setRecordsLoading] = useState(false);
-
-  const loadRecords = useCallback(async () => {
-    setRecordsLoading(true);
-    try {
-      const res = await workOrderRecordApi.getRecords(orderId);
-      setRecords(res.data);
-    } catch {
-      // 记录加载失败不阻塞主流程
-    } finally {
-      setRecordsLoading(false);
-    }
-  }, [orderId]);
-
-  const loadCore = useCallback(
-    () =>
-      Promise.all([
-        fetchOrderDetail(orderId),
-        workOrderRecordApi
-          .getRecords(orderId)
-          .then((res) => setRecords(res.data))
-          .catch(() => {
-            // 记录加载失败不阻塞主流程
-          }),
-      ]),
-    [orderId, fetchOrderDetail]
-  );
-
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      try {
-        await loadCore();
-      } finally {
-        if (isRefresh) setRefreshing(false);
-      }
-    },
-    [loadCore]
-  );
-
-  useEffect(() => {
-    void loadCore();
-  }, [loadCore]);
+  const {
+    selectedOrder,
+    loading,
+    error,
+    records,
+    recordsLoading,
+    refreshing,
+    statusUpdating,
+    loadData,
+    performAction,
+  } = useWorkOrderDetail();
 
   const handleAction = (action: 'accept' | 'execute' | 'complete') => {
     const confirmMessages: Record<string, string> = {
@@ -111,22 +58,11 @@ const WorkOrderDetailScreen: React.FC = () => {
       {
         text: '确定',
         onPress: async () => {
-          setStatusUpdating(true);
-          try {
-            if (action === 'accept') {
-              await workOrderActionApi.accept(orderId);
-            } else if (action === 'execute') {
-              await workOrderActionApi.start(orderId);
-            } else if (action === 'complete') {
-              await workOrderActionApi.complete(orderId);
-            }
-            await fetchOrderDetail(orderId);
-            await loadRecords();
+          const ok = await performAction(action);
+          if (ok) {
             Alert.alert('操作成功', `工单已${actionLabels[action]}`);
-          } catch {
+          } else {
             Alert.alert('操作失败', '请重试');
-          } finally {
-            setStatusUpdating(false);
           }
         },
       },
@@ -313,7 +249,7 @@ const WorkOrderDetailScreen: React.FC = () => {
           ) : records.length === 0 ? (
             <Text style={styles.noRecords}>暂无执行记录</Text>
           ) : (
-            records.map((record, index) => {
+            records.map((record: WorkOrderRecord, index: number) => {
               const actionConfig = WORK_ORDER_ACTION_LABEL[record.action] || {
                 label: record.action,
                 color: '#999',

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,12 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { monitorApi, deviceMonitorApi } from '../services/api';
-import { MonitorSummary, Device, Alarm, RealtimeOverview, RealtimeDeviceStatus } from '../types';
+import { Device, Alarm, RealtimeOverview, RealtimeDeviceStatus } from '../types';
 import { type StatusType } from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
-
-type MonitorTab = 'devices' | 'faults' | 'alarms';
+import { useMonitorData, type MonitorTab } from '../hooks/useMonitorData';
 
 const TABS: { key: MonitorTab; label: string }[] = [
   { key: 'devices', label: '实时监控' },
@@ -23,97 +21,26 @@ const TABS: { key: MonitorTab; label: string }[] = [
 ];
 
 const MonitorScreen: React.FC = () => {
-  const [summary, setSummary] = useState<MonitorSummary | null>(null);
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [realtimeOverview, setRealtimeOverview] = useState<RealtimeOverview | null>(null);
-  const [faultDevices, setFaultDevices] = useState<Device[]>([]);
-  const [criticalAlarms, setCriticalAlarms] = useState<Alarm[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    summary,
+    devices,
+    faultDevices,
+    criticalAlarms,
+    realtimeOverview,
+    loading,
+    refreshing,
+    error,
+    fetchAll,
+    startPolling,
+  } = useMonitorData();
+
   const [activeTab, setActiveTab] = useState<MonitorTab>('devices');
-  const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const [summaryRes, devicesRes, faultsRes, alarmsRes] = await Promise.all([
-        monitorApi.getSummary(),
-        deviceMonitorApi.getDeviceStatusList({ pageSize: 50 }),
-        monitorApi.getFaultDevices({ pageSize: 20 }),
-        monitorApi.getCriticalAlarms({ pageSize: 20 }),
-      ]);
-      setSummary(summaryRes.data);
-      setDevices(devicesRes.data.items);
-      setFaultDevices(faultsRes.data.items);
-      setCriticalAlarms(alarmsRes.data.items);
-    } catch {
-      setError('加载监控数据失败，请下拉刷新重试');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  const fetchRealtimeMetrics = useCallback(async () => {
-    if (devices.length === 0) return;
-    try {
-      const res = await deviceMonitorApi.getRealtimeOverview();
-      setRealtimeOverview(res.data);
-    } catch {
-      // 实时数据获取失败，静默处理
-    }
-  }, [devices]);
-
+  // 轮询生命周期随 activeTab + devices 变化
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [summaryRes, devicesRes, faultsRes, alarmsRes] = await Promise.all([
-          monitorApi.getSummary(),
-          deviceMonitorApi.getDeviceStatusList({ pageSize: 50 }),
-          monitorApi.getFaultDevices({ pageSize: 20 }),
-          monitorApi.getCriticalAlarms({ pageSize: 20 }),
-        ]);
-        if (cancelled) return;
-        setSummary(summaryRes.data);
-        setDevices(devicesRes.data.items);
-        setFaultDevices(faultsRes.data.items);
-        setCriticalAlarms(alarmsRes.data.items);
-      } catch {
-        if (cancelled) return;
-        setError('加载监控数据失败，请下拉刷新重试');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (activeTab === 'devices' && devices.length > 0) {
-      Promise.resolve()
-        .then(() => fetchRealtimeMetrics())
-        .catch(() => undefined);
-      refreshTimer.current = setInterval(() => {
-        void fetchRealtimeMetrics();
-      }, 10000);
-    }
-    return () => {
-      if (refreshTimer.current) {
-        clearInterval(refreshTimer.current);
-        refreshTimer.current = null;
-      }
-    };
-  }, [activeTab, devices.length, fetchRealtimeMetrics]);
+    const cleanup = startPolling(activeTab === 'devices');
+    return cleanup;
+  }, [activeTab, devices.length, startPolling]);
 
   if (loading && !refreshing) {
     return <LoadingSpinner text="加载监控数据..." />;
@@ -126,13 +53,19 @@ const MonitorScreen: React.FC = () => {
         title="加载失败"
         message={error}
         actionLabel="重新加载"
-        onAction={() => fetchData()}
+        onAction={() => fetchAll()}
       />
     );
   }
 
-  const getRealtimeDevice = (deviceId: number): RealtimeDeviceStatus | undefined => {
-    return realtimeOverview?.devices.find((d) => d.id === deviceId);
+  const getRealtimeDevice = (
+    deviceId: number,
+  overview: RealtimeOverview | null,
+  deviceList: Device[],
+  ): RealtimeDeviceStatus | undefined => {
+    if (!overview) return undefined;
+    // 优先从 overview 匹配，兜底从 deviceList 本地状态推断
+    return overview.devices.find((d) => d.id === deviceId);
   };
 
   const renderMetricsBar = (rt?: RealtimeDeviceStatus) => {
@@ -158,7 +91,7 @@ const MonitorScreen: React.FC = () => {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => fetchData(true)}
+            onRefresh={() => fetchAll(true)}
             colors={['#1a73e8']}
             tintColor="#1a73e8"
           />
@@ -200,7 +133,7 @@ const MonitorScreen: React.FC = () => {
               key={tab.key}
               style={[styles.tab, activeTab === tab.key && styles.tabActive]}
               onPress={() => setActiveTab(tab.key)}
-             accessibilityRole="button">
+              accessibilityRole="button">
               <Text
                 style={[
                   styles.tabText,
@@ -245,7 +178,7 @@ const MonitorScreen: React.FC = () => {
             />
           ) : (
             devices.map((device) => {
-              const rt = getRealtimeDevice(device.id);
+              const rt = getRealtimeDevice(device.id, realtimeOverview, devices);
               return (
                 <View key={device.id} style={styles.deviceCard}>
                   <View style={styles.deviceHeader}>
@@ -282,7 +215,7 @@ const MonitorScreen: React.FC = () => {
               message="当前所有设备运行正常"
             />
           ) : (
-            faultDevices.map((device) => (
+            faultDevices.map((device: Device) => (
               <View key={device.id} style={styles.itemCard}>
                 <View style={styles.itemHeader}>
                   <Text style={styles.itemName} numberOfLines={1}>
@@ -313,7 +246,7 @@ const MonitorScreen: React.FC = () => {
               message="当前没有严重级别告警"
             />
           ) : (
-            criticalAlarms.map((alarm) => (
+            criticalAlarms.map((alarm: Alarm) => (
               <View key={alarm.id} style={styles.itemCard}>
                 <View style={styles.itemHeader}>
                   <Text style={styles.itemName} numberOfLines={1}>
