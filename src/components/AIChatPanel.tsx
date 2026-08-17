@@ -42,7 +42,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
   let codeBlockLines: string[] = [];
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const line = lines[i]!;
 
     // 代码块开始/结束
     if (line.trim().startsWith('```')) {
@@ -113,7 +113,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
 
     // 有序列表
     const olMatch = line.match(/^(\d+)\.\s/);
-    if (olMatch) {
+    if (olMatch && olMatch[1]) {
       elements.push(
         <View key={`ol-${i}`} style={mdStyles.listItem}>
           <Text style={mdStyles.bullet}>{olMatch[1]}.</Text>

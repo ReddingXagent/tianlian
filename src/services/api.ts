@@ -508,7 +508,7 @@ export const revenueApi = {
     const daily: { date: string; net_revenue: number }[] = dailyRes.data?.data ?? [];
     const month = daily.reduce((s, d) => s + (d.net_revenue || 0), 0);
     const week = daily.slice(-7).reduce((s, d) => s + (d.net_revenue || 0), 0);
-    const today = daily.length > 0 ? daily[daily.length - 1].net_revenue || 0 : 0;
+    const today = daily.length > 0 ? daily[daily.length - 1]!.net_revenue || 0 : 0;
     return {
       code: 200,
       message: 'success',

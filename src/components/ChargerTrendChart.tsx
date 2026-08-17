@@ -81,8 +81,8 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
     ],
   };
 
-  // 最新值摘要
-  const latest = points.length > 0 ? points[points.length - 1][metric] : null;
+  // 最新值摘要 (bounds-checked: length>0 guarantees last element)
+  const latest = points.length > 0 ? points[points.length - 1]![metric] : null;
 
   return (
     <View style={styles.container}>

@@ -379,7 +379,7 @@ export async function sendChatMessage(
     functions: AI_FUNCTIONS,
   });
 
-  const choice = resp.data.choices[0];
+  const choice = resp.data.choices[0]!;
   const msg = choice.message;
 
   return {

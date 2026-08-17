@@ -340,7 +340,7 @@ const WorkOrderScreen: React.FC = () => {
               <Text style={styles.modalLabel}>优先级</Text>
               <View style={styles.pickerRow}>
                 {PRIORITIES.map((p) => {
-                  const pc = PRIORITY_CONFIG[p];
+                  const pc = PRIORITY_CONFIG[p] ?? { label: p, color: '#666' };
                   return (
                     <TouchableOpacity
                       key={p}
