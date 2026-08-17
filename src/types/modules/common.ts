@@ -1,18 +1,8 @@
 /**
  * types/modules/common.ts — 通用API响应 + 导航参数
  */
-export interface ApiResponse<T = unknown> {
-  code: number;
-  message: string;
-  data: T;
-}
-
-export interface PaginatedData<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
+// 共享类型从 @tianlian/shared-types 重导出，保持仓内 import 路径不变
+export { type ApiResponse, type PaginatedData } from '@tianlian/shared-types';
 
 export type RootStackParamList = {
   Auth: undefined;

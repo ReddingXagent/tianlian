@@ -1,7 +1,8 @@
 /**
  * types/modules/user.ts — 用户/认证类型
  */
-export type UserRole = 'admin' | 'station_master' | 'operator' | 'viewer';
+import type { UserRole } from '@tianlian/shared-types';
+export { type UserRole } from '@tianlian/shared-types';
 
 export interface User {
   id: number;
