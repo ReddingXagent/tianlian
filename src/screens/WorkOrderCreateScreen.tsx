@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   View,
   Text,
@@ -13,7 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useWorkOrderEnhancedStore } from '../store/workOrderEnhancedStore';
+import { useWorkOrderCreate } from '../hooks/useWorkOrderCreate';
 import { RootStackParamList, WorkOrderType, WorkOrderPriority } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -35,51 +34,26 @@ const PRIORITIES: { key: WorkOrderPriority; label: string; color: string }[] = [
 
 const WorkOrderCreateScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { creating, createError, createOrder } = useWorkOrderEnhancedStore();
+  const {
+    title, description, stationId, type, priority,
+    localError, createError, creating,
+    setTitle, setDescription, setStationId, setType, setPriority,
+    clearError, handleSubmit,
+  } = useWorkOrderCreate();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [stationId, setStationId] = useState('');
-  const [type, setType] = useState<WorkOrderType>('repair');
-  const [priority, setPriority] = useState<WorkOrderPriority>('normal');
-  const [localError, setLocalError] = useState<string | null>(null);
-
-  const handleSubmit = async () => {
-    setLocalError(null);
-
-    if (!title.trim()) {
-      setLocalError('请输入工单标题');
-      return;
-    }
-    if (!description.trim()) {
-      setLocalError('请输入工单描述');
-      return;
-    }
-    if (!stationId.trim() || isNaN(Number(stationId))) {
-      setLocalError('请输入有效的站点ID');
-      return;
-    }
-
-    const order = await createOrder({
-      title: title.trim(),
-      description: description.trim(),
-      stationId: Number(stationId),
-      type,
-      priority,
-    });
-
+  const onSubmit = async () => {
+    const order = await handleSubmit();
     if (order) {
       Alert.alert('创建成功', `工单 #${order.id} 已创建`, [
         { text: '查看详情', onPress: () => navigation.replace('WorkOrderDetail', { orderId: order.id }) },
-        { text: '继续创建', onPress: () => {
-          setTitle('');
-          setDescription('');
-          setStationId('');
-          setType('repair');
-          setPriority('normal');
-        }},
+        { text: '继续创建', onPress: () => { /* form already reset by hook */ } },
       ]);
     }
+  };
+
+  const onFieldChange = (setter: (t: string) => void) => (t: string) => {
+    setter(t);
+    clearError();
   };
 
   return (
@@ -108,7 +82,7 @@ const WorkOrderCreateScreen: React.FC = () => {
             placeholder="请输入工单标题"
             placeholderTextColor="#999"
             value={title}
-            onChangeText={(t) => { setTitle(t); setLocalError(null); }}
+            onChangeText={onFieldChange(setTitle)}
             editable={!creating}
             maxLength={100}
           />
@@ -122,7 +96,7 @@ const WorkOrderCreateScreen: React.FC = () => {
             placeholder="请详细描述工单内容"
             placeholderTextColor="#999"
             value={description}
-            onChangeText={(t) => { setDescription(t); setLocalError(null); }}
+            onChangeText={onFieldChange(setDescription)}
             multiline
             numberOfLines={4}
             textAlignVertical="top"
@@ -139,7 +113,7 @@ const WorkOrderCreateScreen: React.FC = () => {
             placeholder="请输入站点ID"
             placeholderTextColor="#999"
             value={stationId}
-            onChangeText={(t) => { setStationId(t); setLocalError(null); }}
+            onChangeText={onFieldChange(setStationId)}
             keyboardType="numeric"
             editable={!creating}
           />
@@ -194,7 +168,7 @@ const WorkOrderCreateScreen: React.FC = () => {
         {/* 提交按钮 */}
         <TouchableOpacity
           style={[styles.submitBtn, creating && styles.submitBtnDisabled]}
-          onPress={handleSubmit}
+          onPress={onSubmit}
           disabled={creating}
           activeOpacity={0.7}
          accessibilityRole="button">

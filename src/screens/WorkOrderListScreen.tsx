@@ -1,4 +1,3 @@
-import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +8,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useWorkOrderStore } from '../store/workOrderStore';
+import { useWorkOrderList } from '../hooks/useWorkOrderList';
 import { WorkOrder, WorkOrderStatus, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -27,33 +26,8 @@ const STATUS_FILTERS: { key: WorkOrderStatus | 'all'; label: string }[] = [
 
 const WorkOrderListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { orders, loading, error, total, fetchOrders } = useWorkOrderStore();
-  const [activeFilter, setActiveFilter] = useState<WorkOrderStatus | 'all'>('all');
-  const [refreshing, setRefreshing] = useState(false);
-
-  const loadCore = useCallback(
-    () =>
-      fetchOrders(
-        activeFilter === 'all' ? undefined : { status: activeFilter }
-      ),
-    [fetchOrders, activeFilter]
-  );
-
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      try {
-        await loadCore();
-      } finally {
-        if (isRefresh) setRefreshing(false);
-      }
-    },
-    [loadCore]
-  );
-
-  useEffect(() => {
-    void loadCore();
-  }, [loadCore]);
+  const { orders, loading, error, total, activeFilter, refreshing, setActiveFilter, loadData } =
+    useWorkOrderList();
 
   const handleOrderPress = (order: WorkOrder) => {
     navigation.navigate('WorkOrderDetail', { orderId: order.id });
