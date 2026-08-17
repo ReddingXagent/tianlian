@@ -1,29 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from 'react-native';
-import { useAuthStore } from '../store/authStore';
+import { useLogin } from '../hooks/useLogin';
 
 export default function LoginScreen() {
-  const { login } = useAuthStore();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { username, password, loading, error, setUsername, setPassword, login } = useLogin();
 
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
-      Alert.alert('提示', '请输入用户名和密码');
-      return;
-    }
-    setLoading(true);
-    try {
-      await login(username.trim(), password);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '登录失败，请检查网络';
-      Alert.alert('登录失败', msg);
-    } finally {
-      setLoading(false);
+    const success = await login();
+    if (!success && error) {
+      Alert.alert('登录失败', error);
     }
   };
 

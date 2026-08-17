@@ -1,34 +1,18 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   FlatList, RefreshControl, ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useStationStore } from '../store/stationStore';
+import { useStationList } from '../hooks/useStationList';
 import { RootStackParamList, Station } from '../types';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
 export default function StationListScreen() {
   const navigation = useNavigation<NavProp>();
-  const { stations, loading, fetchStations } = useStationStore();
-  const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
-
-  const loadData = useCallback(async (searchKey?: string) => {
-    setRefreshing(true);
-    await fetchStations({ page: 1, pageSize: 100, search: searchKey });
-    setRefreshing(false);
-  }, [fetchStations]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleSearch = () => {
-    loadData(search);
-  };
+  const { loading, refreshing, search, setSearch, filteredStations, refresh } = useStationList();
 
   const renderItem = ({ item }: { item: Station }) => (
     <TouchableOpacity
@@ -62,7 +46,7 @@ export default function StationListScreen() {
           placeholderTextColor="#666"
           value={search}
           onChangeText={setSearch}
-          onSubmitEditing={handleSearch}
+          onSubmitEditing={refresh}
           returnKeyType="search"
         />
       </View>
@@ -73,10 +57,10 @@ export default function StationListScreen() {
         </View>
       ) : (
         <FlatList
-          data={stations}
+          data={filteredStations}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadData()} tintColor="#4ECDC4" />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#4ECDC4" />}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.center}>
