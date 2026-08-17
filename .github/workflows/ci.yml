@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [master]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -17,7 +24,15 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npx eslint . --max-warnings=0
+      # 调用点单一源(F206): typecheck/lint 委托 package.json scripts, 防 CI 与本地参数漂移
+      - run: npm run typecheck
+      - run: npm run lint:ci
       - run: npm run check:engine-strict
       - run: npm run test:ci
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

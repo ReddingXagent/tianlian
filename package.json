@@ -12,6 +12,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:ci": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
     "deploy:check": "node scripts/deploy-check.js",
     "check:engine-strict": "bash scripts/check-engine-strict.sh"
   },
