@@ -52,8 +52,3 @@ export const buildRevenueCsv = (
   return lines.join('\n');
 };
 
-// 生成导出文件名
-export const revenueCsvFilename = (period: RevenuePeriod): string => {
-  const prefix = period === 'day' ? 'daily' : period === 'week' ? 'weekly' : 'monthly';
-  return `tianlian-revenue-${prefix}.csv`;
-};

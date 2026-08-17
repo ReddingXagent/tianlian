@@ -1,8 +1,6 @@
 import {
   buildRevenueCsv,
-  revenueCsvFilename,
   escapeCsv,
-  RevenuePeriod,
 } from '../csvExport';
 import { RevenueRecord, RevenueSummary } from '../../types';
 
@@ -77,15 +75,3 @@ describe('buildRevenueCsv', () => {
   });
 });
 
-describe('revenueCsvFilename', () => {
-  it('should map each period to the correct filename', () => {
-    const cases: { period: RevenuePeriod; expected: string }[] = [
-      { period: 'day', expected: 'tianlian-revenue-daily.csv' },
-      { period: 'week', expected: 'tianlian-revenue-weekly.csv' },
-      { period: 'month', expected: 'tianlian-revenue-monthly.csv' },
-    ];
-    cases.forEach(({ period, expected }) => {
-      expect(revenueCsvFilename(period)).toBe(expected);
-    });
-  });
-});
