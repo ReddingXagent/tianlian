@@ -63,19 +63,35 @@ const WorkOrderDetailScreen: React.FC = () => {
     }
   }, [orderId]);
 
+  const loadCore = useCallback(
+    () =>
+      Promise.all([
+        fetchOrderDetail(orderId),
+        workOrderRecordApi
+          .getRecords(orderId)
+          .then((res) => setRecords(res.data))
+          .catch(() => {
+            // 记录加载失败不阻塞主流程
+          }),
+      ]),
+    [orderId, fetchOrderDetail]
+  );
+
   const loadData = useCallback(
     async (isRefresh = false) => {
       if (isRefresh) setRefreshing(true);
-      await Promise.all([fetchOrderDetail(orderId), loadRecords()]);
-      if (isRefresh) setRefreshing(false);
+      try {
+        await loadCore();
+      } finally {
+        if (isRefresh) setRefreshing(false);
+      }
     },
-    [orderId, fetchOrderDetail, loadRecords]
+    [loadCore]
   );
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadData();
-  }, [orderId, loadData]);
+    void loadCore();
+  }, [loadCore]);
 
   const handleAction = (action: 'accept' | 'execute' | 'complete') => {
     const confirmMessages: Record<string, string> = {

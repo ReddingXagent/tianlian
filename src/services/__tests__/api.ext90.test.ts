@@ -4,7 +4,6 @@
  * F1040 analysis: 88 branch gaps total; these clusters = ~44 of them, batch-coverable.
  */
 import MockAdapter from 'axios-mock-adapter';
-import * as SecureStore from 'expo-secure-store';
 import api, {
   alarmRuleApi,
   inspectionTemplateApi,

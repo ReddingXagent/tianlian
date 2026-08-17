@@ -120,6 +120,13 @@ import {
   InspectionTemplateUpdate,
   UserCreate,
   StationCreate,
+  RoleCreate,
+  ApiKeyUpdate,
+  ApiKeyUsage,
+  ApiKeyRotated,
+  CacheStats,
+  DeviceHealthSummary,
+  FaqCategory,
 } from '../types';
 
 /** health端点返回类型 */
@@ -988,7 +995,7 @@ export const workOrderActionApi = {
       })
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
-        if (!raw.data) return { ...raw, data: null } as ApiResponse<WorkOrderSparePartCreated>;
+        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<WorkOrderSparePartCreated>;
         const d = raw.data as Record<string, unknown>;
         return {
           ...raw,
@@ -1677,7 +1684,7 @@ export const alarmRuleApi = {
       })
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
-        if (!raw.data) return { ...raw, data: null } as ApiResponse<AlarmRuleCreated>;
+        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<AlarmRuleCreated>;
         const d = raw.data as Record<string, unknown>;
         return {
           ...raw,
@@ -1722,7 +1729,7 @@ export const alarmRuleApi = {
       })
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
-        if (!raw.data) return { ...raw, data: null } as ApiResponse<AlarmRuleCreated>;
+        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<AlarmRuleCreated>;
         const d = raw.data as Record<string, unknown>;
         return {
           ...raw,
@@ -1795,7 +1802,7 @@ export const notificationRuleApi = {
       })
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
-        if (!raw.data) return { ...raw, data: null } as ApiResponse<NotificationRuleCreated>;
+        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<NotificationRuleCreated>;
         const d = raw.data as Record<string, unknown>;
         return {
           ...raw,
@@ -1825,7 +1832,7 @@ export const notificationRuleApi = {
       })
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
-        if (!raw.data) return { ...raw, data: null } as ApiResponse<NotificationRuleCreated>;
+        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<NotificationRuleCreated>;
         const d = raw.data as Record<string, unknown>;
         return {
           ...raw,
@@ -2297,7 +2304,7 @@ export const inspectionTemplateApi = {
       })
       .then((res) => {
         const raw = res.data as ApiResponse<Record<string, unknown>>;
-        if (!raw.data) return { ...raw, data: null } as ApiResponse<InspectionTemplateCreated>;
+        if (!raw.data) return { ...raw, data: null } as unknown as ApiResponse<InspectionTemplateCreated>;
         const d = raw.data as Record<string, unknown>;
         return {
           ...raw,

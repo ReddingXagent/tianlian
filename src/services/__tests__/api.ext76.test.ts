@@ -31,7 +31,8 @@ jest.mock('axios', () => {
   };
 });
 
-const mockAxios = (axios as unknown as { __mockInstance: any }).__mockInstance;
+// F1205: any收窄 — mock工厂返回结构已知, 用具体Mock接口替代any
+const mockAxios = (axios as unknown as { __mockInstance: { get: jest.Mock; post: jest.Mock; put: jest.Mock; delete: jest.Mock; patch: jest.Mock } }).__mockInstance;
 
 const ok = (data: unknown) => ({ data: { code: 200, message: 'ok', data, timestamp: 1 } });
 
@@ -197,7 +198,8 @@ describe('ext76 alarmApi (pass-through)', () => {
     const res = await alarmApi.getList();
     expect(res.code).toBe(200);
     expect(res.data).toBeDefined();
-    expect((res.data as any).items).toEqual([{}]);
+    // F1205: any收窄 — pass-through data局部断言形态
+    expect((res.data as { items: unknown[] }).items).toEqual([{}]);
   });
 
   it('alarmApi.getList: data null', async () => {
@@ -210,7 +212,8 @@ describe('ext76 alarmApi (pass-through)', () => {
     mockAxios.get.mockResolvedValueOnce(ok({ id: 7 }));
     const res = await alarmApi.getDetail(7);
     expect(res.data).toBeDefined();
-    expect((res.data as any).id).toBe(7);
+    // F1205: any收窄 — pass-through data局部断言形态
+    expect((res.data as { id: number }).id).toBe(7);
   });
 
   it('alarmApi.getDetail: data null', async () => {

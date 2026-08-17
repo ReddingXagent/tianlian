@@ -76,7 +76,7 @@ describe('api ext89 — branch falsy-side push 2', () => {
 
   it('reportApi.getUtilization — data {} (dense ?? sweep)', async () => {
     mockAxios.onGet(/\/reports\/utilization/).reply(200, { ...OK, data: {} });
-    const r = await reportApi.getUtilization({ period: 'month' });
+    const r = await reportApi.getUtilization({ page: 1 });
     expect(r).toBeDefined();
   });
 
@@ -103,7 +103,7 @@ describe('api ext89 — branch falsy-side push 2', () => {
   // ---- apiKeyApi 6 sides ----
   it('apiKeyApi.create — sparse data {} (sparse sweep)', async () => {
     mockAxios.onPost(/\/api-keys/).reply(200, { ...OK, data: {} });
-    const r = await apiKeyApi.create({ name: 'k', expiresAt: '2030-01-01' });
+    const r = await apiKeyApi.create({ name: 'k', scopes: ['read'], expiresAt: '2030-01-01' });
     expect(r).toBeDefined();
   });
 
@@ -146,7 +146,7 @@ describe('api ext89 — branch falsy-side push 2', () => {
 
   it('webhookApi.create — sparse data {}', async () => {
     mockAxios.onPost(/\/webhooks/).reply(200, { ...OK, data: {} });
-    const r = await webhookApi.create({ url: 'http://x', events: ['a'] });
+    const r = await webhookApi.create({ name: 'w', url: 'http://x', events: ['a'] });
     expect(r).toBeDefined();
   });
 
@@ -174,7 +174,7 @@ describe('api ext89 — branch falsy-side push 2', () => {
   // ---- engineerApi.create sparse ----
   it('engineerApi.create — sparse data {} (skills ?? sweep)', async () => {
     mockAxios.onPost(/\/engineers/).reply(200, { ...OK, data: {} });
-    const r = await engineerApi.create({ name: 'e', phone: '1' });
+    const r = await engineerApi.create({ username: 'e', password: 'p', name: 'e', phone: '1' });
     expect(r).toBeDefined();
   });
 

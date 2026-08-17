@@ -1,6 +1,8 @@
 /**
- * KnowledgeScreen ext3 — refresh/retry callbacks (lines 166, 177) + search debounce
- * Target: onAction retry (line 166), onRefresh pull-to-refresh (line 177)
+ * KnowledgeScreen ext3 — refresh/retry callbacks + search debounce
+ * F1206: 替换树遍历为 findAllByType — 旧 walk 找不到 RefreshControl(宿主组件包装 FlatList
+ * 的 refreshControl prop 之外形态), `if (rc?.props?.onRefresh)` 守卫使断言静默空转,
+ * onRefresh 分支(line 220)覆盖为假。findAllByType 实测能找到(F1206 探针 FINDALL_COUNT=1)。
  */
 import { render, fireEvent, act } from '@testing-library/react-native';
 import React from 'react';
@@ -68,28 +70,19 @@ describe('KnowledgeScreen.ext3 — refresh & retry callbacks', () => {
     // Wait for initial load
     await findByText('操作手册');
 
-    // Walk the test tree to find RefreshControl and invoke its onRefresh
-    const findRefreshControl = (node: React.ReactElement | null): React.ReactElement | null => {
-      if (!node) return null;
-      if (node.type === RefreshControl) return node;
-      if (node.props?.refreshControl?.type === RefreshControl) return node.props.refreshControl;
-      if ((node.props as any)?.children) {
-        for (const child of (node.props as any).children) {
-          const found = findRefreshControl(child);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    const rc = findRefreshControl(UNSAFE_root);
-    if (rc?.props?.onRefresh) {
-      await act(async () => {
-        rc.props.onRefresh();
-        await new Promise(r => setTimeout(r, 100));
-      });
-      // getList called again (initial + refresh)
-      expect(knowledgeApi.getArticles).toHaveBeenCalledTimes(2);
-    }
+    // F1206: findAllByType 直接定位 RefreshControl 实例(旧树遍历在此组件形态下找不到)
+    const all = (UNSAFE_root as unknown as {
+      findAllByType?: (type: unknown) => { props?: { onRefresh?: () => void } }[];
+    }).findAllByType?.(RefreshControl);
+    const rc = all?.[0];
+    // 不再用 if 守卫包裹断言 — 找不到时 fail fast, 防止假绿
+    expect(rc).toBeDefined();
+    expect(typeof rc?.props?.onRefresh).toBe('function');
+    await act(async () => {
+      rc?.props?.onRefresh?.();
+      await new Promise(r => setTimeout(r, 100));
+    });
+    // getList called again (initial + refresh)
+    expect(knowledgeApi.getArticles).toHaveBeenCalledTimes(2);
   });
 });

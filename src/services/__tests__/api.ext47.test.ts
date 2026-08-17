@@ -12,8 +12,7 @@ jest.mock('expo-secure-store', () => ({
 
 // Mock axios
 jest.mock('axios', () => {
-  const mockAxios: Record<string, any> = {
-    create: jest.fn(() => mockAxios),
+  const mockInstance = {
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
@@ -22,19 +21,22 @@ jest.mock('axios', () => {
       request: { use: jest.fn() },
       response: { use: jest.fn() },
     },
-    defaults: { headers: { common: {} } },
   };
-  return mockAxios;
+  return {
+    create: jest.fn(() => mockInstance),
+    __mockInstance: mockInstance,
+  };
 });
 
 import axios from 'axios';
-const mockAxios = axios as jest.Mocked<typeof axios>;
+// F1205: any收窄 — 对齐ext49+ __mockInstance模式, 替代逐调用as any
+const mockAxios = (axios as unknown as { __mockInstance: { get: jest.Mock; post: jest.Mock; put: jest.Mock; delete: jest.Mock } }).__mockInstance;
 
 describe('ext47 — knowledgeApi.getFaq (GET /knowledge/faq)', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('maps snake_case fields to camelCase', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -59,7 +61,7 @@ describe('ext47 — knowledgeApi.getFaq (GET /knowledge/faq)', () => {
     });
     const res = await knowledgeApi.getFaq();
 
-    expect((mockAxios as any).get).toHaveBeenCalledWith('/knowledge/faq');
+    expect(mockAxios.get).toHaveBeenCalledWith('/knowledge/faq');
     expect(res.data).toHaveLength(2);
     expect(res.data[0]).toEqual({
       id: 1,
@@ -78,7 +80,7 @@ describe('ext47 — knowledgeApi.getFaq (GET /knowledge/faq)', () => {
   });
 
   it('handles empty list', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: { code: 200, message: 'success', data: [], timestamp: 1700000000 },
     });
     const res = await knowledgeApi.getFaq();
@@ -86,7 +88,7 @@ describe('ext47 — knowledgeApi.getFaq (GET /knowledge/faq)', () => {
   });
 
   it('handles null/missing fields with defaults', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -106,7 +108,7 @@ describe('ext47 — knowledgeApi.getFaq (GET /knowledge/faq)', () => {
   });
 
   it('handles data as object with items property', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: {
         code: 200,
         message: 'success',
@@ -120,11 +122,11 @@ describe('ext47 — knowledgeApi.getFaq (GET /knowledge/faq)', () => {
   });
 
   it('calls correct endpoint', async () => {
-    (mockAxios as any).get.mockResolvedValueOnce({
+    mockAxios.get.mockResolvedValueOnce({
       data: { code: 200, message: 'success', data: [], timestamp: 1700000000 },
     });
     await knowledgeApi.getFaq();
-    expect((mockAxios as any).get).toHaveBeenCalledTimes(1);
-    expect((mockAxios as any).get).toHaveBeenCalledWith('/knowledge/faq');
+    expect(mockAxios.get).toHaveBeenCalledTimes(1);
+    expect(mockAxios.get).toHaveBeenCalledWith('/knowledge/faq');
   });
 });

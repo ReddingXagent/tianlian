@@ -33,7 +33,8 @@ jest.mock('axios', () => {
   return { create: jest.fn(() => mockInstance), __mockInstance: mockInstance };
 });
 
-const mockAxios = (axios as unknown as { __mockInstance: any }).__mockInstance;
+// F1205: any收窄 — mock工厂返回结构已知, 用具体Mock接口替代any
+const mockAxios = (axios as unknown as { __mockInstance: { get: jest.Mock; post: jest.Mock; put: jest.Mock; delete: jest.Mock; patch: jest.Mock } }).__mockInstance;
 
 function ok(data: unknown) {
   return { data: { code: 200, message: 'ok', data } };

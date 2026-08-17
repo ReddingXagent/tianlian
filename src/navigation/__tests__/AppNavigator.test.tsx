@@ -54,8 +54,10 @@ jest.mock('../../screens/KnowledgeDetailScreen', () => () => <MockScreen name="K
 
 import { AppNavigator } from '../AppNavigator';
 import { useAuthStore } from '../../store/authStore';
+import type { AuthState } from '../../store/authStore';
 
 const mockedUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
+// F1205: any收窄 — mock态用AuthState本体签名(逆变安全), 实参补齐缺省字段
 
 describe('AppNavigator', () => {
   const mockCheckAuth = jest.fn();
@@ -65,11 +67,10 @@ describe('AppNavigator', () => {
   });
 
   it('renders loading indicator when isLoading is true', () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
+    mockedUseAuthStore.mockImplementation((selector: (state: AuthState) => unknown) => {
       return selector({
-        isAuthenticated: false,
-        isLoading: true,
-        checkAuth: mockCheckAuth,
+        token: null, user: null, isAuthenticated: false, isLoading: true,
+        login: jest.fn(), logout: jest.fn(), checkAuth: mockCheckAuth, setUser: jest.fn(),
       });
     });
 
@@ -78,11 +79,10 @@ describe('AppNavigator', () => {
   });
 
   it('renders Auth navigator (Login) when not authenticated', async () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
+    mockedUseAuthStore.mockImplementation((selector: (state: AuthState) => unknown) => {
       return selector({
-        isAuthenticated: false,
-        isLoading: false,
-        checkAuth: mockCheckAuth,
+        token: null, user: null, isAuthenticated: false, isLoading: false,
+        login: jest.fn(), logout: jest.fn(), checkAuth: mockCheckAuth, setUser: jest.fn(),
       });
     });
 
@@ -93,11 +93,10 @@ describe('AppNavigator', () => {
   });
 
   it('renders Main navigator (Workbench) when authenticated', async () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
+    mockedUseAuthStore.mockImplementation((selector: (state: AuthState) => unknown) => {
       return selector({
-        isAuthenticated: true,
-        isLoading: false,
-        checkAuth: mockCheckAuth,
+        token: null, user: null, isAuthenticated: true, isLoading: false,
+        login: jest.fn(), logout: jest.fn(), checkAuth: mockCheckAuth, setUser: jest.fn(),
       });
     });
 
@@ -108,11 +107,10 @@ describe('AppNavigator', () => {
   });
 
   it('calls checkAuth on mount', () => {
-    mockedUseAuthStore.mockImplementation((selector: any) => {
+    mockedUseAuthStore.mockImplementation((selector: (state: AuthState) => unknown) => {
       return selector({
-        isAuthenticated: false,
-        isLoading: true,
-        checkAuth: mockCheckAuth,
+        token: null, user: null, isAuthenticated: false, isLoading: true,
+        login: jest.fn(), logout: jest.fn(), checkAuth: mockCheckAuth, setUser: jest.fn(),
       });
     });
 

@@ -3,7 +3,6 @@
  * Sparse item objects {} exercise ?? fallbacks on remaining dense mapper lines
  */
 import MockAdapter from 'axios-mock-adapter';
-import * as SecureStore from 'expo-secure-store';
 import api, {
   knowledgeApi,
   reportApi,

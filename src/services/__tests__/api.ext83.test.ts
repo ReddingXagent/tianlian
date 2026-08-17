@@ -3,7 +3,6 @@
  * White-box: directly invoke the registered request interceptor rejected handler
  */
 import MockAdapter from 'axios-mock-adapter';
-import * as SecureStore from 'expo-secure-store';
 import api from '../api';
 
 jest.mock('expo-secure-store', () => ({
@@ -18,7 +17,7 @@ afterAll(() => mockAxios.restore());
 // api module has been imported, the interceptor registration happened; but interceptor
 // registration happened against the real axios instance inside module — access it:
 const reqInterceptors = (api.interceptors.request as unknown as {
-  handlers: Array<{ rejected: (e: unknown) => Promise<never> }>;
+  handlers: { rejected: (e: unknown) => Promise<never> }[];
 }).handlers;
 const requestRejected = reqInterceptors[reqInterceptors.length - 1].rejected;
 

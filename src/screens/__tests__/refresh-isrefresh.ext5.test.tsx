@@ -84,14 +84,18 @@ const ORDER_DETAIL = {
 };
 
 /** Traverse rendered tree to find RefreshControl via refreshControl prop */
-function getOnRefresh(root: React.ReactElement | null, containerType: any): (() => void) | null {
-  const all = (root && (root as any).findAllByType) ? (root as any).findAllByType(containerType) : [];
-  for (const node of all) {
+// F1205: any收窄 — ReactTestInstance鸭子分支仅判能力, 容器类型用ComponentType具体化
+function getOnRefresh(
+  root: ({ findAllByType?: (type: unknown) => unknown[] } & { props?: { refreshControl?: { props?: { onRefresh?: () => void } }; children?: unknown } }) | null,
+  containerType: React.ComponentType<Record<string, never>> | (typeof ScrollView | typeof FlatList),
+): (() => void) | null {
+  const all = root && typeof root.findAllByType === 'function' ? root.findAllByType(containerType) : [];
+  for (const node of all as { props?: { refreshControl?: { props?: { onRefresh?: () => void } } } }[]) {
     const rc = node.props?.refreshControl;
     if (rc?.props?.onRefresh) return rc.props.onRefresh;
   }
   // Also try UNSAFE_allChildren traversal
-  function walk(node: React.ReactElement | null): (() => void) | null {
+  function walk(node: { props?: { refreshControl?: { props?: { onRefresh?: () => void } }; children?: unknown } } | null): (() => void) | null {
     if (!node) return null;
     const rc = node.props?.refreshControl;
     if (rc?.props?.onRefresh) return rc.props.onRefresh;
@@ -123,6 +127,9 @@ it('DashboardScreen: loadData(true) covers isRefresh setRefreshing guards', asyn
   const { UNSAFE_root } = render(<DashboardScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, ScrollView);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -144,6 +151,9 @@ it('InspectionListScreen: loadData(true) covers isRefresh guards', async () => {
   const { UNSAFE_root } = render(<InspectionListScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, FlatList);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -165,6 +175,9 @@ it('WorkOrderListScreen: loadData(true) covers isRefresh guards', async () => {
   const { UNSAFE_root } = render(<WorkOrderListScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, FlatList);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -186,6 +199,9 @@ it('InspectionDetailScreen: loadData(true) covers isRefresh guards', async () =>
   const { UNSAFE_root } = render(<InspectionDetailScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, ScrollView);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();
@@ -207,6 +223,9 @@ it('WorkOrderDetailScreen: loadData(true) covers isRefresh guards', async () => 
   const { UNSAFE_root } = render(<WorkOrderDetailScreen />);
 
   const onRefresh = getOnRefresh(UNSAFE_root, ScrollView);
+  // F1206 fail-fast: 找不到onRefresh时测试变红, 防止断言空转(focus+initial可凑≥2次=弱假绿)
+  expect(onRefresh).toBeDefined();
+  expect(typeof onRefresh).toBe('function');
   if (onRefresh) {
     await act(async () => {
       onRefresh();

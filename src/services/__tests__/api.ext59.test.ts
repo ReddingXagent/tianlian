@@ -27,12 +27,14 @@ jest.mock('expo-secure-store', () => ({
   deleteItemSecure: jest.fn().mockResolvedValue(undefined),
 }));
 
-const mockedAxios = axios.__mockInstance as jest.Mocked<{
-  get: jest.ReturnMock;
-  post: jest.ReturnMock;
-  put: jest.ReturnMock;
-  delete: jest.ReturnMock;
-}>;
+const mockedAxios = (axios as unknown as {
+  __mockInstance: {
+    get: jest.Mock;
+    post: jest.Mock;
+    put: jest.Mock;
+    delete: jest.Mock;
+  },
+}).__mockInstance;
 
 // =====================
 // knowledgeApi.createArticle

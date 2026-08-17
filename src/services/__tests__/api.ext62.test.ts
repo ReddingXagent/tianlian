@@ -19,12 +19,6 @@ jest.mock('axios', () => {
   };
 });
 
-jest.mock('expo-secureStore', () => ({
-  getItemSecure: jest.fn().mockResolvedValue('mock-token'),
-  setItemSecure: jest.fn().mockResolvedValue(undefined),
-  deleteItemSecure: jest.fn().mockResolvedValue(undefined),
-}), { virtual: true });
-
 jest.mock('expo-secure-store', () => ({
   getItemSecure: jest.fn().mockResolvedValue('mock-token'),
   setItemSecure: jest.fn().mockResolvedValue(undefined),
@@ -33,7 +27,7 @@ jest.mock('expo-secure-store', () => ({
 
 describe('api.ext62 — workOrderActionApi.reject', () => {
   it('calls POST /work-orders/{id}/reject with reason as query param', async () => {
-    const mockAxios = axios.__mockInstance as any;
+    const mockAxios = (axios as unknown as { __mockInstance: { post: jest.Mock } }).__mockInstance;
     mockAxios.post.mockResolvedValue({
       data: { code: 200, message: 'success', data: null, timestamp: 1700000000 },
     });
@@ -48,7 +42,7 @@ describe('api.ext62 — workOrderActionApi.reject', () => {
   });
 
   it('returns ApiResponse<null> shape', async () => {
-    const mockAxios = axios.__mockInstance as any;
+    const mockAxios = (axios as unknown as { __mockInstance: { post: jest.Mock } }).__mockInstance;
     mockAxios.post.mockResolvedValue({
       data: { code: 200, message: 'success', data: null, timestamp: 1700000000 },
     });
@@ -63,7 +57,7 @@ describe('api.ext62 — workOrderActionApi.reject', () => {
   });
 
   it('passes business 404 through (工单不存在)', async () => {
-    const mockAxios = axios.__mockInstance as any;
+    const mockAxios = (axios as unknown as { __mockInstance: { post: jest.Mock } }).__mockInstance;
     mockAxios.post.mockResolvedValue({
       data: { code: 404, message: '工单不存在', data: null, timestamp: 1700000000 },
     });
@@ -75,7 +69,7 @@ describe('api.ext62 — workOrderActionApi.reject', () => {
   });
 
   it('sends reason as query param, not body', async () => {
-    const mockAxios = axios.__mockInstance as any;
+    const mockAxios = (axios as unknown as { __mockInstance: { post: jest.Mock } }).__mockInstance;
     mockAxios.post.mockClear();
     mockAxios.post.mockResolvedValue({
       data: { code: 200, message: 'ok', data: null, timestamp: 1 },
@@ -90,7 +84,7 @@ describe('api.ext62 — workOrderActionApi.reject', () => {
   });
 
   it('handles empty reason string', async () => {
-    const mockAxios = axios.__mockInstance as any;
+    const mockAxios = (axios as unknown as { __mockInstance: { post: jest.Mock } }).__mockInstance;
     mockAxios.post.mockClear();
     mockAxios.post.mockResolvedValue({
       data: { code: 200, message: 'ok', data: null, timestamp: 1 },

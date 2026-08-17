@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --passWithNoTests",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "doctor": "expo-doctor",
     "build:android": "expo export --platform android",
@@ -32,7 +32,8 @@
     "check:asset-size": "bash scripts/check-asset-size.sh",
     "check:eas-env": "bash scripts/check-eas-env.sh",
     "check:app-identity": "bash scripts/check-app-identity.sh",
-    "check:apk-direct-distribution": "bash scripts/check-apk-direct-distribution.sh"
+    "check:apk-direct-distribution": "bash scripts/check-apk-direct-distribution.sh",
+    "lint:ci": "eslint . --max-warnings=0"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.0.14",
@@ -73,7 +74,8 @@
       "^@react-native-community/netinfo$": "<rootDir>/src/__mocks__/netinfo.js"
     },
     "setupFilesAfterEnv": [
-      "@testing-library/jest-native/extend-expect"
+      "@testing-library/jest-native/extend-expect",
+      "<rootDir>/test/jest.setup.ts"
     ],
     "collectCoverageFrom": [
       "src/**/*.{ts,tsx}",
@@ -82,10 +84,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "statements": 98,
-        "branches": 97,
-        "functions": 97,
-        "lines": 98
+        "statements": 99,
+        "branches": 99,
+        "functions": 99,
+        "lines": 99
       }
     }
   },

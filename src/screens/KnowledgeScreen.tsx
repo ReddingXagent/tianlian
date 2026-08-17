@@ -75,9 +75,42 @@ const KnowledgeScreen: React.FC = () => {
   }, [searchQuery]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchArticles();
-  }, [activeCategory, fetchArticles]);
+    let cancelled = false;
+    (async () => {
+      try {
+        let response: { data: { items: KnowledgeArticleItem[] } };
+        const mapItem = (it: KnowledgeArticleItem): KnowledgeArticle => ({
+          id: it.id,
+          title: it.title,
+          summary: it.summary,
+          content: it.content,
+          category: 'other',
+          tags: it.tags,
+          authorId: 0,
+          authorName: it.author,
+          viewCount: it.viewCount,
+          createdAt: it.createdAt,
+          updatedAt: it.updatedAt,
+        });
+        if (searchQuery.trim()) {
+          response = await knowledgeApi.search(searchQuery.trim());
+          if (cancelled) return;
+          setArticles(response.data.items.map(mapItem));
+        } else {
+          response = await knowledgeApi.getArticles({ page: 1, page_size: 50 });
+          if (cancelled) return;
+          setArticles(response.data.items.map(mapItem));
+        }
+      } catch {
+        if (!cancelled) setError('加载知识库失败，请下拉刷新重试');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeCategory, searchQuery]);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);

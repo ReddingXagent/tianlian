@@ -268,6 +268,8 @@ export interface ApiResponse<T = unknown> {
   code: number;
   message: string;
   data: T;
+  /** 后端部分端点随响应携带的服务器时间戳（秒） */
+  timestamp?: number;
 }
 
 export interface PaginatedData<T> {
@@ -453,21 +455,21 @@ export interface InspectionTemplateCreate {
   name: string;
   category?: string;
   description?: string;
-  items?: Array<{ name: string; required?: boolean }>;
+  items?: { name: string; required?: boolean }[];
 }
 
 export interface InspectionTemplateUpdate {
   name?: string;
   category?: string;
   description?: string;
-  items?: Array<{ name: string; required?: boolean }>;
+  items?: { name: string; required?: boolean }[];
 }
 
 export interface InspectionTemplateCreated {
   id: number;
   name: string;
   description: string | null;
-  items: Array<{ name: string; required: boolean }>;
+  items: { name: string; required: boolean }[];
   itemCount: number;
   deviceTypes: string[];
   target: string | null;
