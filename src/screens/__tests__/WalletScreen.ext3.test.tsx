@@ -47,8 +47,14 @@ describe('WalletScreen ext3 — recharging=true render branch (L163)', () => {
   });
 
   it('shows "充值中..." and disables button during recharge', async () => {
-    // Make recharge slow so recharging=true is rendered
-    mockRecharge.mockImplementation(() => new Promise(r => setTimeout(r, 5000)));
+    // Make recharge slow so recharging=true is rendered.
+    // 用受控 pending promise 挂起而非裸 setTimeout(5000):
+    // 裸真实定时器会在测试环境拆除后仍触发 → teardown 后 Alert.alert
+    // → "worker process failed to exit gracefully"(F1198 实证根因)。
+    let resolveRecharge!: () => void;
+    mockRecharge.mockImplementation(
+      () => new Promise<void>(r => { resolveRecharge = r; })
+    );
     mockGetProfile.mockResolvedValue({ data: { id: 1, balance: 210 } });
 
     const { getByText, queryByText } = render(
@@ -67,7 +73,7 @@ describe('WalletScreen ext3 — recharging=true render branch (L163)', () => {
 
     mockAlertAlert.mockClear();
 
-    // Start recharge (won't complete due to 5s delay)
+    // Start recharge (won't complete until we resolve it)
     act(() => {
       tenBtn.onPress();
     });
@@ -77,5 +83,15 @@ describe('WalletScreen ext3 — recharging=true render branch (L163)', () => {
       expect(getByText('充值中...')).toBeTruthy();
     });
     expect(queryByText('充值')).toBeNull();
+
+    // 清理: 显式 resolve 挂起的 recharge 并 flush 后续异步链
+    // (getProfile → setUser/loadRecords → Alert), 避免句柄逃逸到 teardown 后
+    await act(async () => {
+      resolveRecharge();
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
   });
 });
