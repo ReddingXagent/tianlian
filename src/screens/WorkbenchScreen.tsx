@@ -121,7 +121,7 @@ const WorkbenchScreen: React.FC = () => {
           style={[styles.statCard, { backgroundColor: '#fff8e1' }]}
           activeOpacity={0.7}
           onPress={() => handleNavigateTab('WorkOrders')}
-        >
+         accessibilityRole="button">
           <Text style={[styles.statNumber, { color: '#f57f17' }]}>
             {stats?.pendingOrders ?? '-'}
           </Text>
@@ -180,7 +180,7 @@ const WorkbenchScreen: React.FC = () => {
               }
             }}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             <Text style={styles.quickActionIcon}>{action.icon}</Text>
             <Text style={styles.quickActionLabel}>{action.label}</Text>
           </TouchableOpacity>
@@ -190,7 +190,7 @@ const WorkbenchScreen: React.FC = () => {
       {/* 待办工单 */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>待办工单</Text>
-        <TouchableOpacity onPress={() => handleNavigateTab('WorkOrders')}>
+        <TouchableOpacity onPress={() => handleNavigateTab('WorkOrders')} accessibilityRole="button">
           <Text style={styles.viewAll}>
             查看全部 {stats && stats.pendingOrders > 0 ? `(${stats.pendingOrders})` : ''}
           </Text>

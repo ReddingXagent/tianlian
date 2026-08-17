@@ -96,7 +96,7 @@ const DiagnosisScreen: React.FC = () => {
             onPress={handleSearch}
             disabled={loading}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
@@ -115,7 +115,7 @@ const DiagnosisScreen: React.FC = () => {
               key={item.code}
               style={styles.exampleBtn}
               onPress={() => handleQuickInput(item.code)}
-            >
+             accessibilityRole="button">
               <Text style={styles.exampleBtnText}>{item.label}</Text>
             </TouchableOpacity>
           ))}

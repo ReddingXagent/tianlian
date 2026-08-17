@@ -164,13 +164,13 @@ const InspectionDetailScreen: React.FC = () => {
 
             {task.status === 'in_progress' && !item.result && (
               <View style={styles.itemActions}>
-                <TouchableOpacity style={styles.passBtn} onPress={() => handleItemResult(item, 'pass')} disabled={submitting}>
+                <TouchableOpacity style={styles.passBtn} onPress={() => handleItemResult(item, 'pass')} disabled={submitting} accessibilityRole="button">
                   <Text style={styles.actionBtnText}>✅ 通过</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.failBtn} onPress={() => handleItemResult(item, 'fail')} disabled={submitting}>
+                <TouchableOpacity style={styles.failBtn} onPress={() => handleItemResult(item, 'fail')} disabled={submitting} accessibilityRole="button">
                   <Text style={styles.actionBtnText}>❌ 不通过</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.naBtn} onPress={() => handleItemResult(item, 'na')} disabled={submitting}>
+                <TouchableOpacity style={styles.naBtn} onPress={() => handleItemResult(item, 'na')} disabled={submitting} accessibilityRole="button">
                   <Text style={styles.actionBtnText}>N/A</Text>
                 </TouchableOpacity>
               </View>
@@ -203,7 +203,7 @@ const InspectionDetailScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>操作</Text>
         <View style={styles.actionCard}>
           {task?.status === 'pending' && (
-            <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary]} onPress={handleStart} disabled={submitting} activeOpacity={0.7}>
+            <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary]} onPress={handleStart} disabled={submitting} activeOpacity={0.7} accessibilityRole="button">
               {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.actionBtnText}>开始巡检</Text>}
             </TouchableOpacity>
           )}
@@ -211,7 +211,7 @@ const InspectionDetailScreen: React.FC = () => {
           {task?.status === 'in_progress' && (
             <>
               {!showCompleteForm ? (
-                <TouchableOpacity style={[styles.actionBtn, styles.actionSuccess]} onPress={() => setShowCompleteForm(true)} activeOpacity={0.7}>
+                <TouchableOpacity style={[styles.actionBtn, styles.actionSuccess]} onPress={() => setShowCompleteForm(true)} activeOpacity={0.7} accessibilityRole="button">
                   <Text style={styles.actionBtnText}>完成巡检</Text>
                 </TouchableOpacity>
               ) : (
@@ -228,10 +228,10 @@ const InspectionDetailScreen: React.FC = () => {
                     textAlignVertical="top"
                   />
                   <View style={styles.completeFormActions}>
-                    <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowCompleteForm(false); setCompletionNote(''); }}>
+                    <TouchableOpacity style={styles.cancelBtn} onPress={() => { setShowCompleteForm(false); setCompletionNote(''); }} accessibilityRole="button">
                       <Text style={styles.cancelBtnText}>取消</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.submitCompleteBtn, submitting && { opacity: 0.6 }]} onPress={handleComplete} disabled={submitting}>
+                    <TouchableOpacity style={[styles.submitCompleteBtn, submitting && { opacity: 0.6 }]} onPress={handleComplete} disabled={submitting} accessibilityRole="button">
                       {submitting ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.submitCompleteBtnText}>提交结果</Text>}
                     </TouchableOpacity>
                   </View>

@@ -137,7 +137,7 @@ const KnowledgeScreen: React.FC = () => {
       style={styles.articleCard}
       onPress={() => handleArticlePress(item)}
       activeOpacity={0.7}
-    >
+     accessibilityRole="button">
       <View style={styles.articleHeader}>
         <Text style={styles.articleTitle} numberOfLines={1}>
           {item.title}
@@ -193,7 +193,7 @@ const KnowledgeScreen: React.FC = () => {
               setSearchQuery('');
               setActiveCategory(cat.key);
             }}
-          >
+           accessibilityRole="button">
             <Text style={styles.categoryIcon}>{cat.icon}</Text>
             <Text
               style={[

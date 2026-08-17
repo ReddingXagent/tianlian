@@ -200,7 +200,7 @@ const MonitorScreen: React.FC = () => {
               key={tab.key}
               style={[styles.tab, activeTab === tab.key && styles.tabActive]}
               onPress={() => setActiveTab(tab.key)}
-            >
+             accessibilityRole="button">
               <Text
                 style={[
                   styles.tabText,

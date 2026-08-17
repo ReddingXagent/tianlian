@@ -167,7 +167,7 @@ const ScanScreen: React.FC = () => {
           onPress={handleScan}
           disabled={loading}
           activeOpacity={0.7}
-        >
+         accessibilityRole="button">
           {loading ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
@@ -183,19 +183,19 @@ const ScanScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.quickBtn}
             onPress={() => handleQuickInput('DEV-001')}
-          >
+           accessibilityRole="button">
             <Text style={styles.quickBtnText}>DEV-001</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickBtn}
             onPress={() => handleQuickInput('STATION-A01')}
-          >
+           accessibilityRole="button">
             <Text style={styles.quickBtnText}>STATION-A01</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.quickBtn}
             onPress={() => handleQuickInput('CHARGER-005')}
-          >
+           accessibilityRole="button">
             <Text style={styles.quickBtnText}>CHARGER-005</Text>
           </TouchableOpacity>
         </View>
@@ -243,7 +243,7 @@ const ScanScreen: React.FC = () => {
               style={styles.resultActionBtn}
               onPress={handleSignIn}
               activeOpacity={0.7}
-            >
+             accessibilityRole="button">
               <Text style={styles.resultActionIcon}>📌</Text>
               <Text style={styles.resultActionLabel}>扫码签到</Text>
             </TouchableOpacity>
@@ -251,7 +251,7 @@ const ScanScreen: React.FC = () => {
               style={styles.resultActionBtn}
               onPress={handleReportFault}
               activeOpacity={0.7}
-            >
+             accessibilityRole="button">
               <Text style={styles.resultActionIcon}>🔧</Text>
               <Text style={styles.resultActionLabel}>报修</Text>
             </TouchableOpacity>

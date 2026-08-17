@@ -79,7 +79,7 @@ const DashboardScreen: React.FC = () => {
             key={p.key}
             style={[styles.periodBtn, selectedPeriod === p.key && styles.periodBtnActive]}
             onPress={() => setPeriod(p.key)}
-          >
+           accessibilityRole="button">
             <Text style={[styles.periodBtnText, selectedPeriod === p.key && styles.periodBtnTextActive]}>
               {p.label}
             </Text>

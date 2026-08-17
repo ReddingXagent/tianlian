@@ -108,7 +108,7 @@ const WorkOrderTransferScreen: React.FC = () => {
             onPress={handleTransfer}
             disabled={transferring}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             {transferring ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
@@ -130,7 +130,7 @@ const WorkOrderTransferScreen: React.FC = () => {
             onPress={handleUrge}
             disabled={transferring}
             activeOpacity={0.7}
-          >
+           accessibilityRole="button">
             {transferring ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (

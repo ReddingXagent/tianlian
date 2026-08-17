@@ -59,7 +59,7 @@ const WorkOrderCard: React.FC<WorkOrderCardProps> = ({
       <TouchableOpacity
         onPress={() => onPress(order)}
         activeOpacity={0.7}
-      >
+       accessibilityRole="button">
         {content}
       </TouchableOpacity>
     );

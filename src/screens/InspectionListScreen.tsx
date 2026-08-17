@@ -73,7 +73,7 @@ const InspectionListScreen: React.FC = () => {
       style={styles.card}
       onPress={() => handleTaskPress(item)}
       activeOpacity={0.7}
-    >
+     accessibilityRole="button">
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleRow}>
           <Text style={styles.cardTitle} numberOfLines={1}>
@@ -113,7 +113,7 @@ const InspectionListScreen: React.FC = () => {
             key={f.key}
             style={[styles.filterBtn, activeFilter === f.key && styles.filterBtnActive]}
             onPress={() => setActiveFilter(f.key)}
-          >
+           accessibilityRole="button">
             <Text style={[styles.filterBtnText, activeFilter === f.key && styles.filterBtnTextActive]}>
               {f.label}
             </Text>

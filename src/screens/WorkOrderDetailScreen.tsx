@@ -250,7 +250,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 onPress={() => handleAction('accept')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
-              >
+               accessibilityRole="button">
                 {statusUpdating ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
@@ -266,7 +266,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 onPress={() => handleAction('execute')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
-              >
+               accessibilityRole="button">
                 {statusUpdating ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
@@ -278,7 +278,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 onPress={() => handleAction('complete')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
-              >
+               accessibilityRole="button">
                 {statusUpdating ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (

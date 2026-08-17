@@ -155,7 +155,7 @@ const WorkOrderCreateScreen: React.FC = () => {
                 style={[styles.chip, type === ot.key && styles.chipActive]}
                 onPress={() => setType(ot.key)}
                 disabled={creating}
-              >
+               accessibilityRole="button">
                 <Text style={[styles.chipText, type === ot.key && styles.chipTextActive]}>
                   {ot.label}
                 </Text>
@@ -177,7 +177,7 @@ const WorkOrderCreateScreen: React.FC = () => {
                 ]}
                 onPress={() => setPriority(p.key)}
                 disabled={creating}
-              >
+               accessibilityRole="button">
                 <Text
                   style={[
                     styles.chipText,
@@ -197,7 +197,7 @@ const WorkOrderCreateScreen: React.FC = () => {
           onPress={handleSubmit}
           disabled={creating}
           activeOpacity={0.7}
-        >
+         accessibilityRole="button">
           {creating ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (

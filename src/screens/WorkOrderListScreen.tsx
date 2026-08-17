@@ -85,7 +85,7 @@ const WorkOrderListScreen: React.FC = () => {
           style={styles.createBtn}
           onPress={handleCreateOrder}
           activeOpacity={0.7}
-        >
+         accessibilityRole="button">
           <Text style={styles.createBtnText}>+ 新建</Text>
         </TouchableOpacity>
       </View>
@@ -158,7 +158,7 @@ const ScrollableFilter: React.FC<{
           active === f.key && styles.filterBtnActive,
         ]}
         onPress={() => onSelect(f.key as WorkOrderStatus | 'all')}
-      >
+       accessibilityRole="button">
         <Text
           style={[
             styles.filterBtnText,
