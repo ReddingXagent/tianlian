@@ -1,4 +1,3 @@
-import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +8,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useInspectionStore } from '../store/inspectionStore';
+import { useInspectionList } from '../hooks/useInspectionList';
 import { InspectionTask, InspectionStatus, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
@@ -36,33 +35,8 @@ const TYPE_LABELS: Record<string, string> = {
 
 const InspectionListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { tasks, loading, error, total, fetchTasks } = useInspectionStore();
-  const [activeFilter, setActiveFilter] = useState<InspectionStatus | 'all'>('all');
-  const [refreshing, setRefreshing] = useState(false);
-
-  const loadCore = useCallback(
-    () =>
-      fetchTasks(
-        activeFilter === 'all' ? undefined : { status: activeFilter }
-      ),
-    [fetchTasks, activeFilter]
-  );
-
-  const loadData = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) setRefreshing(true);
-      try {
-        await loadCore();
-      } finally {
-        if (isRefresh) setRefreshing(false);
-      }
-    },
-    [loadCore]
-  );
-
-  useEffect(() => {
-    void loadCore();
-  }, [loadCore]);
+  const { tasks, loading, error, total, activeFilter, refreshing, setActiveFilter, loadData } =
+    useInspectionList();
 
   const handleTaskPress = (task: InspectionTask) => {
     navigation.navigate('InspectionDetail', { taskId: task.id });

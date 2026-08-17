@@ -1,4 +1,3 @@
-import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,8 +5,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { knowledgeApi } from '../services/api';
-import { RootStackParamList, KnowledgeArticle } from '../types';
+import { useKnowledgeDetail } from '../hooks/useKnowledgeDetail';
+import { RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
@@ -15,71 +14,8 @@ type DetailRouteProp = RouteProp<RootStackParamList, 'KnowledgeDetail'>;
 
 const KnowledgeDetailScreen: React.FC = () => {
   const route = useRoute<DetailRouteProp>();
-  const { articleId } = route.params;
-  const [article, setArticle] = useState<KnowledgeArticle | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // No dedicated detail endpoint; fetch from list and find by id
-      const response = await knowledgeApi.getArticles({ page: 1, page_size: 100 });
-      const item = response.data.items.find((it) => it.id === articleId);
-      if (!item) throw new Error('Article not found');
-      setArticle({
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        content: item.content,
-        category: 'other',
-        tags: item.tags,
-        authorId: 0,
-        authorName: item.author,
-        viewCount: item.viewCount,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-      });
-    } catch {
-      setError('加载文章详情失败，请重试');
-    } finally {
-      setLoading(false);
-    }
-  }, [articleId]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        // No dedicated detail endpoint; fetch from list and find by id
-        const response = await knowledgeApi.getArticles({ page: 1, page_size: 100 });
-        const item = response.data.items.find((it) => it.id === articleId);
-        if (!item) throw new Error('Article not found');
-        if (cancelled) return;
-        setArticle({
-          id: item.id,
-          title: item.title,
-          summary: item.summary,
-          content: item.content,
-          category: 'other',
-          tags: item.tags,
-          authorId: 0,
-          authorName: item.author,
-          viewCount: item.viewCount,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-        });
-      } catch {
-        if (!cancelled) setError('加载文章详情失败，请重试');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [articleId]);
+  void route; // route consumed by hook
+  const { article, loading, error, fetchDetail } = useKnowledgeDetail();
 
   if (loading) {
     return <LoadingSpinner text="加载文章详情..." />;
