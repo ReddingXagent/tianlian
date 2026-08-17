@@ -1,28 +1,10 @@
 /**
  * types/modules/energy.ts — 能源/报告概览类型
  */
-export interface EnergySummary {
-  period: string;
-  days: number;
-  pvGeneration: number;
-  chargingAmount: number;
-  dischargeAmount: number;
-  pvRevenue: number;
-  chargingRevenue: number;
-  dischargeRevenue: number;
-  totalRevenue: number;
-  yoy: {
-    pvGenerationYoy: number;
-    chargingAmountYoy: number;
-    dischargeAmountYoy: number;
-    totalRevenueYoy: number;
-  };
-  priceInfo: {
-    feedInTariff: number;
-    chargingPrice: number;
-    dischargePrice: number;
-  };
-}
+import type { EnergyYoY, EnergyPriceInfo, EnergySummary } from '@tianlian/shared-types';
+export { type EnergyYoY, type EnergyPriceInfo, type EnergySummary } from '@tianlian/shared-types';
+
+// ops-app 专属能源类型 (EnergyTrendItem / ReportSummary 保留仓内)
 
 export interface EnergyTrendItem {
   date: string;

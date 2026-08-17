@@ -3,20 +3,11 @@
  */
 import type { DeviceType, DeviceStatus } from '@tianlian/shared-types';
 export { type DeviceType, type DeviceStatus } from '@tianlian/shared-types';
+import type { Device as SharedDevice } from '@tianlian/shared-types';
 
-export interface Device {
-  id: number;
-  stationId: number;
+/** ops-app Device (共享基础 + stationName 扩展) */
+export interface Device extends SharedDevice {
   stationName?: string;
-  name: string;
-  code: string;
-  type: DeviceType;
-  status: DeviceStatus;
-  model: string;
-  manufacturer: string;
-  lastHeartbeat: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface DeviceMetrics {

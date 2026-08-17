@@ -78,10 +78,10 @@ describe('api ext6 — energy API (GET /energy/summary)', () => {
       dischargeRevenue: 294.84,
       totalRevenue: 1434.09,
       yoy: {
-        pvGenerationYoy: 8.7,
-        chargingAmountYoy: 5.3,
-        dischargeAmountYoy: 11.1,
-        totalRevenueYoy: 13.6,
+        pvGenerationYoY: 8.7,
+        chargingAmountYoY: 5.3,
+        dischargeAmountYoY: 11.1,
+        totalRevenueYoY: 13.6,
       },
       priceInfo: {
         feedInTariff: 0.42,
@@ -106,7 +106,7 @@ describe('api ext6 — energy API (GET /energy/summary)', () => {
     expect(res.data.days).toBe(0);
     expect(res.data.pvGeneration).toBe(0);
     expect(res.data.totalRevenue).toBe(0);
-    expect(res.data.yoy.pvGenerationYoy).toBe(0);
+    expect(res.data.yoy.pvGenerationYoY).toBe(0);
     expect(res.data.priceInfo.feedInTariff).toBe(0);
   });
 

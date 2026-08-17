@@ -1,8 +1,8 @@
 /**
  * types/modules/work-order.ts — 工单相关类型
  */
-import type { WorkOrderType, WorkOrderPriority, WorkOrderStatus } from '@tianlian/shared-types';
-export { type WorkOrderType, type WorkOrderPriority, type WorkOrderStatus } from '@tianlian/shared-types';
+import type { WorkOrderType, WorkOrderPriority, WorkOrderStatus, WorkOrder, WorkOrderReport } from '@tianlian/shared-types';
+export { type WorkOrderType, type WorkOrderPriority, type WorkOrderStatus, type WorkOrder, type WorkOrderReport } from '@tianlian/shared-types';
 
 export type WorkOrderAction =
   | 'created'
@@ -12,27 +12,6 @@ export type WorkOrderAction =
   | 'completed'
   | 'cancelled'
   | 'reassigned';
-
-export interface WorkOrder {
-  id: string;
-  stationId: number;
-  stationName: string;
-  title: string;
-  description: string;
-  type: WorkOrderType;
-  priority: WorkOrderPriority;
-  status: WorkOrderStatus;
-  assigneeId?: number;
-  assigneeName?: string;
-  creatorId: number;
-  creatorName: string;
-  alarmId?: number;
-  scheduledAt?: string;
-  completedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  solution?: string;
-}
 
 export interface WorkOrderStats {
   total: number;
@@ -61,25 +40,9 @@ export interface WorkOrderRating {
   comment?: string;
 }
 
-// 工单报告 (WorkOrderReport — from /reports/workorders)
-export interface WorkOrderReport {
-  periodDays: number;
-  totalWorkorders: number;
-  typeDistribution: Record<string, number>;
-  levelDistribution: Record<string, number>;
-  statusDistribution: Record<string, number>;
-  completionRate: number;
-  efficiency: {
-    avgResponseHours: number;
-    avgCompletionHours: number;
-  };
-  engineerPerformance: {
-    engineerId: number;
-    engineerName: string;
-    completedCount: number;
-    avgCompletionHours: number;
-  }[];
-}
+// 工单报告已移入 @tianlian/shared-types
+// 以下为 ops-app 专属类型
+
 
 // 工单趋势
 export interface WorkOrderTrend {

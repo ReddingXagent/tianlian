@@ -37,10 +37,10 @@ export const energyApi = {
           dischargeRevenue: (d.discharge_revenue as number) ?? 0,
           totalRevenue: (d.total_revenue as number) ?? 0,
           yoy: {
-            pvGenerationYoy: (yoy.pv_generation_yoy as number) ?? 0,
-            chargingAmountYoy: (yoy.charging_amount_yoy as number) ?? 0,
-            dischargeAmountYoy: (yoy.discharge_amount_yoy as number) ?? 0,
-            totalRevenueYoy: (yoy.total_revenue_yoy as number) ?? 0,
+            pvGenerationYoY: (yoy.pv_generation_yoy as number) ?? 0,
+            chargingAmountYoY: (yoy.charging_amount_yoy as number) ?? 0,
+            dischargeAmountYoY: (yoy.discharge_amount_yoy as number) ?? 0,
+            totalRevenueYoY: (yoy.total_revenue_yoy as number) ?? 0,
           },
           priceInfo: {
             feedInTariff: (price.feed_in_tariff as number) ?? 0,

@@ -97,7 +97,7 @@ describe('adapter empty-field fallback coverage', () => {
         period: 'month', days: 0,
         pvGeneration: 0, chargingAmount: 0, dischargeAmount: 0,
         pvRevenue: 0, chargingRevenue: 0, dischargeRevenue: 0, totalRevenue: 0,
-        yoy: { pvGenerationYoy: 0, chargingAmountYoy: 0, dischargeAmountYoy: 0, totalRevenueYoy: 0 },
+        yoy: { pvGenerationYoY: 0, chargingAmountYoY: 0, dischargeAmountYoY: 0, totalRevenueYoY: 0 },
         priceInfo: { feedInTariff: 0, chargingPrice: 0, dischargePrice: 0 },
       });
     });

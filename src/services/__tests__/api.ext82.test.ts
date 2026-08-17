@@ -135,7 +135,7 @@ describe('ext82 — conditional branch + mapper truthy batch 2', () => {
     expect(res.data).toMatchObject({
       period: '2025-08', days: 30, pvGeneration: 5000,
       pvRevenue: 200, totalRevenue: 400,
-      yoy: { pvGenerationYoy: 0.1, totalRevenueYoy: 0.15 },
+      yoy: { pvGenerationYoY: 0.1, totalRevenueYoY: 0.15 },
       priceInfo: { feedInTariff: 0.4, chargingPrice: 0.6 },
     });
   });
