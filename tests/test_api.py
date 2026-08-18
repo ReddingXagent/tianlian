@@ -517,3 +517,62 @@ class TestCacheStatsNoCache:
         app = create_app(cache=None, start_time=time.monotonic())
         resp = TestClient(app).get("/api/v1/cache/stats")
         assert resp.status_code == 500
+
+
+# ── API Key Auth Tests ──────────────────────────────────────────────────
+
+
+class TestRequireApiKey:
+    """Cover require_api_key dependency (lines 39-41: 403 + valid return)."""
+
+    def test_403_when_api_key_missing_and_debug_key_set(self, monkeypatch):
+        """Line 39-40: DEBUG_API_KEY set but request has no X-API-Key → 403."""
+        monkeypatch.setenv("DEBUG_API_KEY", "secret123")
+        app = create_app(
+            cache=TelemetryCache(StorageConfig(db_path=":memory:")),
+            start_time=time.monotonic(),
+        )
+        resp = TestClient(app).post("/api/v1/simulate/telemetry", json={"device_type": "modbus"})
+        assert resp.status_code == 403
+        assert "Invalid or missing API key" in resp.json()["detail"]
+
+    def test_403_when_api_key_wrong_and_debug_key_set(self, monkeypatch):
+        """Line 39-40: DEBUG_API_KEY set but X-API-Key mismatches → 403."""
+        monkeypatch.setenv("DEBUG_API_KEY", "secret123")
+        app = create_app(
+            cache=TelemetryCache(StorageConfig(db_path=":memory:")),
+            start_time=time.monotonic(),
+        )
+        resp = TestClient(app).post(
+            "/api/v1/simulate/telemetry",
+            json={"device_type": "modbus"},
+            headers={"X-API-Key": "wrong-key"},
+        )
+        assert resp.status_code == 403
+
+    def test_200_when_api_key_correct(self, monkeypatch):
+        """Line 41: DEBUG_API_KEY set and X-API-Key matches → request succeeds."""
+        monkeypatch.setenv("DEBUG_API_KEY", "secret123")
+        cache = TelemetryCache(StorageConfig(db_path=":memory:"))
+        app = create_app(
+            cache=cache,
+            start_time=time.monotonic(),
+        )
+        resp = TestClient(app).post(
+            "/api/v1/simulate/telemetry",
+            json={"device_type": "modbus"},
+            headers={"X-API-Key": "secret123"},
+        )
+        # Should not be 403 — auth passed, may be 400/200 depending on adapter
+        assert resp.status_code != 403
+        cache.close()
+
+    def test_open_when_debug_key_unset(self, monkeypatch):
+        """Line 38: DEBUG_API_KEY unset → auth disabled, no 403."""
+        monkeypatch.delenv("DEBUG_API_KEY", raising=False)
+        app = create_app(
+            cache=TelemetryCache(StorageConfig(db_path=":memory:")),
+            start_time=time.monotonic(),
+        )
+        resp = TestClient(app).post("/api/v1/simulate/telemetry", json={"device_type": "modbus"})
+        assert resp.status_code != 403
