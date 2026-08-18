@@ -2,6 +2,7 @@
  * types/modules/device.ts — 设备相关类型
  */
 import type { DeviceStatus, Device as SharedDevice } from '@tianlian/shared-types';
+import type { PaginatedData } from './common';
 export { type DeviceType, type DeviceStatus } from '@tianlian/shared-types';
 
 /** ops-app Device (共享基础 + stationName 扩展) */
@@ -89,4 +90,22 @@ export interface DeviceReport {
   };
   onlineRate?: number;
   faultRate?: number;
+}
+
+// 设备维保记录 (Device Maintenance Record — from /devices/{id}/maintenance-records)
+export interface DeviceMaintenanceRecord {
+  id: number;
+  deviceId: number;
+  type: string;
+  title: string;
+  description: string;
+  status: string;
+  scheduledDate: string | null;
+  completedDate: string | null;
+  engineerId: number | null;
+  engineerName: string | null;
+  cost: number | null;
+  remark: string | null;
+  createdAt: string;
+  updatedAt: string | null;
 }

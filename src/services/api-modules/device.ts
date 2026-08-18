@@ -30,6 +30,7 @@ import {
   KnowledgeFaqCreate,
   KnowledgeFaqCreated,
   FaqCategory,
+  DeviceMaintenanceRecord,
 } from '../../types';
 
 export const deviceApi = {
@@ -90,6 +91,22 @@ export const deviceApi = {
         timePeriods: ((d.time_periods as { start_time: string; end_time: string; power_limit: number }[]) ?? []).map((tp) => ({ startTime: tp.start_time, endTime: tp.end_time, powerLimit: tp.power_limit })),
         createdAt: (d.created_at as string | null) ?? null, updatedAt: (d.updated_at as string | null) ?? null,
       }};
+    });
+  },
+  /** GET /devices/{id}/maintenance-records — 设备维保记录列表 (分页) */
+  getMaintenanceRecords(id: number, params?: { page?: number; pageSize?: number }): Promise<ApiResponse<PaginatedData<DeviceMaintenanceRecord>>> {
+    return api.get(`/devices/${id}/maintenance-records`, { params }).then((res) => {
+      const raw = res.data as ApiResponse<Record<string, unknown>>;
+      const d = (raw.data ?? {}) as Record<string, unknown>;
+      const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
+        id: (it.id as number) ?? 0, deviceId: (it.device_id as number) ?? id, type: (it.type as string) ?? '',
+        title: (it.title as string) ?? '', description: (it.description as string) ?? '', status: (it.status as string) ?? '',
+        scheduledDate: (it.scheduled_date as string | null) ?? null, completedDate: (it.completed_date as string | null) ?? null,
+        engineerId: (it.engineer_id as number | null) ?? null, engineerName: (it.engineer_name as string | null) ?? null,
+        cost: (it.cost as number | null) ?? null, remark: (it.remark as string | null) ?? null,
+        createdAt: (it.created_at as string) ?? '', updatedAt: (it.updated_at as string | null) ?? null,
+      }));
+      return { ...raw, data: { items, total: (d.total as number) ?? items.length, page: (d.page as number) ?? 1, pageSize: (d.page_size as number) ?? items.length } };
     });
   },
 };
