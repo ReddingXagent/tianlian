@@ -212,7 +212,7 @@ const DashboardScreen: React.FC = () => {
       <View style={styles.topListCard}>
         {data?.topFaultDevices && data.topFaultDevices.length > 0 ? (
           data.topFaultDevices.map((device, idx) => (
-            <View key={device.deviceId} style={[styles.topItem, idx < (data?.topFaultDevices?.length || 1) - 1 && styles.topItemBorder]}>
+            <View key={device.deviceId} style={[styles.topItem, idx < data.topFaultDevices.length - 1 && styles.topItemBorder]}>
               <View style={styles.topRank}>
                 <Text style={[styles.topRankText, idx < 3 && { color: '#c62828' }]}>{idx + 1}</Text>
               </View>

@@ -29,14 +29,10 @@ const ScanScreen: React.FC = () => {
   const [signInMode, setSignInMode] = useState(false);
 
   const handleSignIn = useCallback(async () => {
-    if (!lastResult) {
-      Alert.alert('提示', '请先扫码查询设备信息');
-      return;
-    }
     setSignInMode(true);
     Alert.alert(
       '扫码签到',
-      `确认在 ${lastResult.name || lastResult.code} 处签到？`,
+      `确认在 ${lastResult!.name || lastResult!.code} 处签到？`,
       [
         { text: '取消', style: 'cancel', onPress: () => setSignInMode(false) },
         {
@@ -44,7 +40,7 @@ const ScanScreen: React.FC = () => {
           onPress: async () => {
             const ok = await performCheckIn();
             if (ok) {
-              Alert.alert('签到成功', `已在 ${lastResult.name || lastResult.code} 签到`);
+              Alert.alert('签到成功', `已在 ${lastResult!.name || lastResult!.code} 签到`);
             } else {
               Alert.alert('签到失败', '请重试或联系管理员');
             }
@@ -56,11 +52,7 @@ const ScanScreen: React.FC = () => {
   }, [lastResult, performCheckIn]);
 
   const handleReportFault = () => {
-    if (!lastResult) {
-      Alert.alert('提示', '请先扫码查询设备信息');
-      return;
-    }
-    Alert.alert('报修', `是否提交 ${lastResult.name || lastResult.code} 的报修请求？`, [
+    Alert.alert('报修', `是否提交 ${lastResult!.name || lastResult!.code} 的报修请求？`, [
       { text: '取消', style: 'cancel' },
       {
         text: '提交',
@@ -189,11 +181,11 @@ const ScanScreen: React.FC = () => {
                 类型: {resultTypeLabel(lastResult.type)}
               </Text>
               <Text style={styles.resultCode}>
-                编码: {lastResult.code}
+                编码: {lastResult!.code}
               </Text>
-              {lastResult.name && (
+              {lastResult!.name && (
                 <Text style={styles.resultName}>
-                  名称: {lastResult.name}
+                  名称: {lastResult!.name}
                 </Text>
               )}
               <Text style={styles.resultId}>ID: {lastResult.id}</Text>
