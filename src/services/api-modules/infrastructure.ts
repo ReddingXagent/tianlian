@@ -566,7 +566,7 @@ export const vppApi = {
 // =====================
 // AI 对话 API (POST /chat)
 // =====================
-/** @cloud-down 2026-08-18 F1389: POST /chat → 404 (still down since F1368, was 200 降级 in F1367) */
+/** @cloud-down 2026-08-18 F1390: POST /chat → 404 (still down since F1368, was 200 降级 in F1367) */
 export const chatApi = {
   /** POST /chat — 发送消息给AI助手 */
   send(message: string, options?: {
