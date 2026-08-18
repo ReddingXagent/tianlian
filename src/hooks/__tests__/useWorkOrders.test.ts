@@ -182,3 +182,23 @@ describe('useWorkOrders', () => {
     expect(ok).toBe(false);
   });
 });
+
+describe('useWorkOrders — default-arg branch coverage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (workOrderApi.getList as jest.Mock).mockResolvedValue({
+      data: { items: mockOrders, total: 2 },
+    });
+  });
+
+  it('fetchData() with no args — defaults to isRefresh=false, p=1', async () => {
+    const { result } = renderHook(() =>
+      useWorkOrders({ stationId: 1, statusFilter: 'all' })
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    // Call fetchData with no arguments — exercises default-arg branches
+    await act(async () => { await result.current.fetchData(); });
+    expect(result.current.error).toBeNull();
+    expect(result.current.orders).toHaveLength(2);
+  });
+});
