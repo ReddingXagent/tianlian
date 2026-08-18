@@ -110,4 +110,48 @@ describe('useWorkOrderDetail', () => {
     expect(success).toBe(false);
     expect(result.current.statusUpdating).toBe(false);
   });
+
+  it('loadData(isRefresh=false) 不设置refreshing', async () => {
+    const { result } = renderHook(() => useWorkOrderDetail());
+    await waitFor(() => expect(mockFetchOrderDetail).toHaveBeenCalled());
+    mockFetchOrderDetail.mockClear();
+    mockGetRecords.mockClear();
+    await act(async () => { await result.current.loadData(false); });
+    expect(result.current.refreshing).toBe(false);
+    expect(mockFetchOrderDetail).toHaveBeenCalledWith('WO-1');
+  });
+
+  it('loadData() 无参数默认不refreshing', async () => {
+    const { result } = renderHook(() => useWorkOrderDetail());
+    await waitFor(() => expect(mockFetchOrderDetail).toHaveBeenCalled());
+    mockFetchOrderDetail.mockClear();
+    await act(async () => { await result.current.loadData(); });
+    expect(result.current.refreshing).toBe(false);
+  });
+
+  it('loadData(isRefresh=true) 出错时finally仍清除refreshing', async () => {
+    const { result } = renderHook(() => useWorkOrderDetail());
+    await waitFor(() => expect(mockFetchOrderDetail).toHaveBeenCalled());
+    mockFetchOrderDetail.mockClear();
+    mockFetchOrderDetail.mockRejectedValueOnce(new Error('network') as never);
+    await act(async () => {
+      try { await result.current.loadData(true); } catch { /* expected */ }
+    });
+    expect(result.current.refreshing).toBe(false);
+  });
+
+  it('performAction 未知action走else分支不调用任何API', async () => {
+    const { result } = renderHook(() => useWorkOrderDetail());
+    await waitFor(() => expect(mockFetchOrderDetail).toHaveBeenCalled());
+    mockFetchOrderDetail.mockClear();
+    let success;
+    await act(async () => {
+      // @ts-expect-error: 测试运行时else分支, TS类型不允许
+      success = await result.current.performAction('unknown');
+    });
+    expect(success).toBe(true);
+    expect(mockAccept).not.toHaveBeenCalled();
+    expect(mockStart).not.toHaveBeenCalled();
+    expect(mockComplete).not.toHaveBeenCalled();
+  });
 });
