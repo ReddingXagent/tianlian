@@ -89,7 +89,10 @@
         "functions": 99,
         "lines": 99
       }
-    }
+    },
+    "modulePaths": [
+      "<rootDir>/node_modules"
+    ]
   },
   "private": true,
   "engines": {

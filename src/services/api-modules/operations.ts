@@ -51,7 +51,7 @@ export const workOrderRecordApi = {
       };
     });
   },
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/notes → 404 (F1445确认仍下线, 自F1368从未复活) */
+/** @cloud-down 2026-08-18 POST /work-orders/{id}/notes → 404 (F1445确认仍下线, 自F1368从未复活) */
   addRecord(orderId: string, data: { action: string; note: string }): Promise<ApiResponse<WorkOrderRecord>> {
     return api.post(`/work-orders/${orderId}/notes`, data).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;
@@ -73,17 +73,21 @@ export const workOrderRecordApi = {
 };
 
 export const workOrderActionApi = {
+  /** F1417复活: 真ID全生命周期实测200, 此前404=假阴性(TEST字符串id查无记录, 404是"记录不存在"语义) */
   accept(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/accept`).then((res) => res.data);
   },
+  /** F1417复活: 真ID start 实测200 */
   start(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/start`).then((res) => res.data);
   },
+  /** F1417复活: 真ID complete 实测200 */
   complete(id: string, solution?: string): Promise<ApiResponse<unknown>> {
     return api
       .post(`/work-orders/${id}/complete`, null, { params: solution ? { solution } : {} })
       .then((res) => res.data);
   },
+  /** F1417复活: 真ID verify 实测200 */
   verify(id: string): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/verify`).then((res) => res.data);
   },
@@ -242,6 +246,7 @@ export const workOrderTransferApi = {
       })
       .then((res) => res.data);
   },
+  /** F1417复活: 真ID urge 实测200 */
   urge(id: string, message = '请尽快处理'): Promise<ApiResponse<unknown>> {
     return api.post(`/work-orders/${id}/urge`, { message }).then((res) => res.data);
   },

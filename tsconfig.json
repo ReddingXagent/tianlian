@@ -14,7 +14,9 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@tianlian/shared-types": ["../shared-types/src"],
+      "@tianlian/shared-types/*": ["../shared-types/src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

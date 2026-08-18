@@ -1,9 +1,8 @@
 /**
  * types/modules/device.ts — 设备相关类型
  */
-import type { DeviceType, DeviceStatus } from '@tianlian/shared-types';
+import type { DeviceStatus, Device as SharedDevice } from '@tianlian/shared-types';
 export { type DeviceType, type DeviceStatus } from '@tianlian/shared-types';
-import type { Device as SharedDevice } from '@tianlian/shared-types';
 
 /** ops-app Device (共享基础 + stationName 扩展) */
 export interface Device extends SharedDevice {

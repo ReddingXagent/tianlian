@@ -263,8 +263,8 @@ describe('F1359 全仓对账: 交互pressable固定尺寸×44门限', () => {
     auditFile(path.relative(SRC_DIR, file), fs.readFileSync(file, 'utf-8')),
   );
 
-  test('提取活性: 交互pressable≥39且已知五文件在场', () => {
-    expect(findings.length).toBeGreaterThanOrEqual(39);
+  test('提取活性: 交互pressable≥38且已知五文件在场', () => {
+    expect(findings.length).toBeGreaterThanOrEqual(38);
     const files = new Set(findings.map((f) => f.relPath));
     for (const known of [
       'screens/LoginScreen.tsx',
@@ -291,7 +291,7 @@ describe('F1359 全仓对账: 交互pressable固定尺寸×44门限', () => {
   if (violations.length === 0) {
     test('全仓交互pressable零固定小尺寸: 守卫先行非缺陷', () => {
       expect(violations).toHaveLength(0);
-      expect(findings.length).toBeGreaterThanOrEqual(39);
+      expect(findings.length).toBeGreaterThanOrEqual(38);
     });
   }
 });

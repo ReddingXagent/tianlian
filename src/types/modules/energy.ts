@@ -1,7 +1,6 @@
 /**
  * types/modules/energy.ts — 能源/报告概览类型
  */
-import type { EnergyYoY, EnergyPriceInfo, EnergySummary } from '@tianlian/shared-types';
 export { type EnergyYoY, type EnergyPriceInfo, type EnergySummary } from '@tianlian/shared-types';
 
 // ops-app 专属能源类型 (EnergyTrendItem / ReportSummary 保留仓内)
