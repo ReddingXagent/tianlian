@@ -1,7 +1,7 @@
 /**
  * types/modules/work-order.ts — 工单类型
  */
-import type { WorkOrderType, WorkOrderPriority, WorkOrderStatus, WorkOrder, WorkOrderReport } from '@tianlian/shared-types';
+import type { WorkOrderStatus, WorkOrderType, WorkOrderPriority } from '@tianlian/shared-types';
 export { type WorkOrderType, type WorkOrderPriority, type WorkOrderStatus, type WorkOrder, type WorkOrderReport } from '@tianlian/shared-types';
 
 export interface WorkOrderQuery {

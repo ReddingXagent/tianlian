@@ -1,7 +1,6 @@
 /**
  * types/modules/device.ts — 设备/设备健康/设备配置/设备报告类型
  */
-import type { DeviceType, DeviceStatus, Device } from '@tianlian/shared-types';
 export { type DeviceType, type DeviceStatus, type Device } from '@tianlian/shared-types';
 
 export interface DeviceTelemetry {

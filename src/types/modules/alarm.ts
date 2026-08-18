@@ -1,7 +1,7 @@
 /**
  * types/modules/alarm.ts — 告警类型
  */
-import type { AlarmType, AlarmLevel, AlarmStatus, Alarm } from '@tianlian/shared-types';
+import type { AlarmLevel, AlarmStatus } from '@tianlian/shared-types';
 export { type AlarmType, type AlarmLevel, type AlarmStatus, type Alarm } from '@tianlian/shared-types';
 
 export interface AlarmQuery {
