@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { knowledgeApi } from '../services/api';
-import { KnowledgeArticle, KnowledgeArticleItem } from '../types';
+import { KnowledgeArticle, KnowledgeArticleItem, KnowledgeSearchResult } from '../types';
 
 const mapItem = (it: KnowledgeArticleItem): KnowledgeArticle => ({
   id: it.id,
@@ -14,6 +14,20 @@ const mapItem = (it: KnowledgeArticleItem): KnowledgeArticle => ({
   viewCount: it.viewCount,
   createdAt: it.createdAt,
   updatedAt: it.updatedAt,
+});
+
+const mapSearchResult = (it: KnowledgeSearchResult): KnowledgeArticle => ({
+  id: it.id,
+  title: it.title,
+  summary: it.summary,
+  content: it.summary,
+  category: it.category as KnowledgeArticle['category'],
+  tags: [],
+  authorId: 0,
+  authorName: it.author ?? '',
+  viewCount: 0,
+  createdAt: '',
+  updatedAt: it.updatedAt ?? '',
 });
 
 interface UseKnowledgeReturn {
@@ -46,13 +60,14 @@ export function useKnowledge(): UseKnowledgeReturn {
     setError(null);
 
     try {
-      let response: { data: { items: KnowledgeArticleItem[] } };
+      let response: { data: { items: KnowledgeArticleItem[] | KnowledgeSearchResult[] } };
       if (searchQuery.trim()) {
         response = await knowledgeApi.search(searchQuery.trim());
+        setArticles((response.data.items as KnowledgeSearchResult[]).map(mapSearchResult));
       } else {
         response = await knowledgeApi.getArticles({ page: 1, page_size: 50 });
+        setArticles((response.data.items as KnowledgeArticleItem[]).map(mapItem));
       }
-      setArticles(response.data.items.map(mapItem));
     } catch {
       setError('加载知识库失败，请下拉刷新重试');
     } finally {
@@ -65,14 +80,16 @@ export function useKnowledge(): UseKnowledgeReturn {
     let cancelled = false;
     (async () => {
       try {
-        let response: { data: { items: KnowledgeArticleItem[] } };
+        let response: { data: { items: KnowledgeArticleItem[] | KnowledgeSearchResult[] } };
         if (searchQuery.trim()) {
           response = await knowledgeApi.search(searchQuery.trim());
+          if (cancelled) return;
+          setArticles((response.data.items as KnowledgeSearchResult[]).map(mapSearchResult));
         } else {
           response = await knowledgeApi.getArticles({ page: 1, page_size: 50 });
+          if (cancelled) return;
+          setArticles((response.data.items as KnowledgeArticleItem[]).map(mapItem));
         }
-        if (cancelled) return;
-        setArticles(response.data.items.map(mapItem));
       } catch {
         if (!cancelled) setError('加载知识库失败，请下拉刷新重试');
       } finally {

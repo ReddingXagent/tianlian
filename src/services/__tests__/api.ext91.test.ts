@@ -327,7 +327,7 @@ describe('api ext91 — raw.data ?? {} right side (data:null) cluster sweep', ()
       data: { items: [{ items: [{}] }] },
     });
     const r = await inspectionTemplateApi.getList();
-    expect(r.data?.items?.[0]?.type).toBe('daily');
+    expect(r.data?.items?.[0]?.status).toBe('active');
     expect(r.data?.items?.[0]?.items?.[0]).toMatchObject({ id: 0, name: '', expected: '' });
   });
 

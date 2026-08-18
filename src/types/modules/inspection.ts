@@ -63,10 +63,12 @@ export interface InspectionPlan {
 export interface InspectionTemplate {
   id: number;
   name: string;
-  type: InspectionType;
+  description: string | null;
   items: InspectionItem[];
-  description?: string;
-  enabled: boolean;
+  itemCount: number;
+  deviceTypes: string[];
+  target: string | null;
+  status: string;
   createdAt: string;
   updatedAt: string;
 }

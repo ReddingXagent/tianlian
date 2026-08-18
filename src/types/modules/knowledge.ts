@@ -67,6 +67,18 @@ export interface KnowledgeCategoryItem {
   updatedAt: string;
 }
 
+// 知识库搜索结果 (KnowledgeSearchResult — from /knowledge/search API)
+// API returns: id, title, category, summary(HTML highlight), author, updated_at, highlight
+export interface KnowledgeSearchResult {
+  id: number;
+  title: string;
+  category: string;
+  summary: string;
+  author: string | null;
+  updatedAt: string | null;
+  highlight: string;
+}
+
 // 知识库文章创建 (POST /knowledge/articles)
 export interface KnowledgeArticleCreate {
   title: string;

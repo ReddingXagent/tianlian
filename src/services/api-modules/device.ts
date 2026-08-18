@@ -31,6 +31,7 @@ import {
   KnowledgeFaqCreated,
   FaqCategory,
   DeviceMaintenanceRecord,
+  KnowledgeSearchResult,
 } from '../../types';
 
 export const deviceApi = {
@@ -162,16 +163,19 @@ export const knowledgeApi = {
       return { ...raw, data: mapped };
     });
   },
-  search(keyword: string, params?: { page?: number; page_size?: number }): Promise<ApiResponse<PaginatedData<KnowledgeArticleItem>>> {
+  search(keyword: string, params?: { page?: number; page_size?: number }): Promise<ApiResponse<PaginatedData<KnowledgeSearchResult>>> {
     const page = params?.page ?? 1; const pageSize = params?.page_size ?? 20;
     return api.get(`/knowledge/search?q=${encodeURIComponent(keyword)}&page=${page}&page_size=${pageSize}`).then((res) => {
       const raw = res.data as ApiResponse<Record<string, unknown>>;
       const d = (raw.data ?? {}) as Record<string, unknown>;
       const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
-        id: (it.id as number) ?? 0, title: (it.title as string) ?? '', content: (it.content as string) ?? '', summary: (it.summary as string) ?? '',
-        categoryId: (it.category_id as number) ?? 0, categoryName: (it.category_name as string) ?? undefined, tags: ((it.tags as string[]) ?? []),
-        author: (it.author as string) ?? '', viewCount: (it.view_count as number) ?? 0, status: (it.status as 'published' | 'draft' | 'archived') ?? 'draft',
-        createdAt: (it.created_at as string) ?? '', updatedAt: (it.updated_at as string) ?? '',
+        id: (it.id as number) ?? 0,
+        title: (it.title as string) ?? '',
+        category: (it.category as string) ?? 'general',
+        summary: (it.summary as string) ?? '',
+        author: (it.author as string | null) ?? null,
+        updatedAt: (it.updated_at as string | null) ?? null,
+        highlight: (it.highlight as string) ?? '',
       }));
       return { ...raw, data: { items, total: (d.total as number) ?? 0, page: (d.page as number) ?? 1, pageSize: (d.page_size as number) ?? 20 } };
     });

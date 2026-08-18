@@ -198,16 +198,11 @@ describe('ext74 — mapper fallback branch coverage', () => {
     expect(item).toEqual({
       id: 0,
       title: '',
-      content: '',
+      category: 'general',
       summary: '',
-      categoryId: 0,
-      categoryName: undefined,
-      tags: [],
-      author: '',
-      viewCount: 0,
-      status: 'draft',
-      createdAt: '',
-      updatedAt: '',
+      author: null,
+      updatedAt: null,
+      highlight: '',
     });
   });
 

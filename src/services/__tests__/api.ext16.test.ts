@@ -100,13 +100,15 @@ describe('inspectionTemplateApi.getList', () => {
       items: [{
         id: 1,
         name: '充电桩日常巡检模板',
-        type: 'daily',
         items: [
           { id: 1, name: '外观检查', expected: '无损坏' },
           { id: 2, name: '连接器检查', expected: '正常' },
         ],
         description: '标准日常巡检',
-        enabled: true,
+        item_count: 2,
+        device_types: ['charger_dc'],
+        target: 'charger',
+        status: 'active',
         created_at: '2026-08-01T00:00:00Z',
         updated_at: '2026-08-01T00:00:00Z',
       }],
@@ -118,7 +120,8 @@ describe('inspectionTemplateApi.getList', () => {
     expect(result.data.items[0].name).toBe('充电桩日常巡检模板');
     expect(result.data.items[0].items).toHaveLength(2);
     expect(result.data.items[0].items[0].name).toBe('外观检查');
-    expect(result.data.items[0].enabled).toBe(true);
+    expect(result.data.items[0].itemCount).toBe(2);
+    expect(result.data.items[0].status).toBe('active');
   });
 
   it('handles empty templates', async () => {
@@ -132,12 +135,13 @@ describe('inspectionTemplateApi.getList', () => {
 
   it('handles template without items array', async () => {
     api.get.mockResolvedValueOnce(makeResponse({
-      items: [{ id: 3, name: '空模板', type: 'weekly', enabled: false }],
+      items: [{ id: 3, name: '空模板', item_count: 0, device_types: [], target: null, status: 'draft' }],
       total: 1, page: 1, page_size: 20,
     }));
     const result = await inspectionTemplateApi.getList();
     expect(result.data.items[0].items).toHaveLength(0);
-    expect(result.data.items[0].enabled).toBe(false);
+    expect(result.data.items[0].itemCount).toBe(0);
+    expect(result.data.items[0].status).toBe('draft');
   });
 });
 

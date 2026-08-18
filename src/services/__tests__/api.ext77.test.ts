@@ -74,10 +74,12 @@ describe('ext77 — mapper fallback branch coverage batch 4', () => {
     expect(res.data.items[0]).toEqual({
       id: 0,
       name: '',
-      type: 'daily',
+      description: null,
       items: [],
-      description: undefined,
-      enabled: true,
+      itemCount: 0,
+      deviceTypes: [],
+      target: null,
+      status: 'active',
       createdAt: '',
       updatedAt: '',
     });

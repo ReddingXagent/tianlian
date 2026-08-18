@@ -268,7 +268,7 @@ export const inspectionTemplateApi = {
         const items = ((d.items as Record<string, unknown>[]) ?? []).map((it) => ({
           id: (it.id as number) ?? 0,
           name: (it.name as string) ?? '',
-          type: (it.type as InspectionTemplate['type']) ?? 'daily',
+          description: (it.description as string | null) ?? null,
           items: ((it.items as Record<string, unknown>[]) ?? []).map((item) => ({
             id: (item.id as number) ?? 0,
             name: (item.name as string) ?? '',
@@ -276,8 +276,10 @@ export const inspectionTemplateApi = {
             result: item.result as 'pass' | 'fail' | 'na' | undefined,
             note: item.note as string | undefined,
           })),
-          description: it.description as string | undefined,
-          enabled: (it.enabled as boolean) ?? true,
+          itemCount: (it.item_count as number) ?? 0,
+          deviceTypes: ((it.device_types as string[]) ?? []),
+          target: (it.target as string | null) ?? null,
+          status: (it.status as string) ?? 'active',
           createdAt: (it.created_at as string) ?? '',
           updatedAt: (it.updated_at as string) ?? '',
         }));

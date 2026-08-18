@@ -119,7 +119,7 @@ describe('api ext90 — top branch-gap clusters', () => {
     mockAxios.onGet(/\/inspection\/templates/).reply(200, { ...OK, data: { items: [{}] } });
     const r = await inspectionTemplateApi.getList();
     expect(r.data?.items?.[0]).toEqual(
-      expect.objectContaining({ name: '', enabled: true, createdAt: '', updatedAt: '' }),
+      expect.objectContaining({ name: '', status: 'active', createdAt: '', updatedAt: '' }),
     );
   });
 

@@ -176,15 +176,11 @@ describe('knowledgeApi (ext19)', () => {
               {
                 id: 10,
                 title: '逆变器故障处理',
-                content: '当逆变器报警...',
-                summary: '逆变器故障',
-                category_id: 2,
-                tags: ['逆变器'],
+                summary: '<mark>逆变器</mark>故障处理指南',
+                category: 'maintenance',
                 author: 'engineer1',
-                view_count: 10,
-                status: 'published',
-                created_at: '2026-03-01T00:00:00Z',
                 updated_at: '2026-03-01T00:00:00Z',
+                highlight: '<mark>逆变器</mark>故障',
               },
             ],
             total: 1,
@@ -200,6 +196,8 @@ describe('knowledgeApi (ext19)', () => {
       expect(mockInstance.get).toHaveBeenCalledWith('/knowledge/search?q=%E9%80%86%E5%8F%98%E5%99%A8&page=1&page_size=20');
       expect(res.data.items).toHaveLength(1);
       expect(res.data.items[0].title).toBe('逆变器故障处理');
+      expect(res.data.items[0].category).toBe('maintenance');
+      expect(res.data.items[0].highlight).toBe('<mark>逆变器</mark>故障');
     });
 
     it('should encode special characters in keyword', async () => {
