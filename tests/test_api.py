@@ -432,7 +432,7 @@ class TestCORS:
             },
         )
         assert resp.status_code == 200
-        # CORSMiddleware echoes the requesting origin when allow_origins=[*]
+        # CORSMiddleware echoes the requesting origin when it matches allow_origins
         assert resp.headers.get("access-control-allow-origin") == "http://localhost:3000"
 
     def test_cors_allows_post(self, client):
@@ -445,6 +445,19 @@ class TestCORS:
             },
         )
         assert resp.status_code == 200
+
+    def test_cors_rejects_unknown_origin(self, client):
+        """Unknown origins must not get CORS headers (security fix)."""
+        resp = client.options(
+            "/health",
+            headers={
+                "Origin": "http://evil.example.com",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        # Starlette returns 400 when origin is not in allow_origins
+        assert resp.status_code == 400
+        assert resp.headers.get("access-control-allow-origin") is None
 
 
 # ── Format Uptime Helper ────────────────────────────────────────────────

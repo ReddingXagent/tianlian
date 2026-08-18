@@ -3,15 +3,42 @@
 import logging
 import time
 
+import os
+import secrets
+
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 
 from config import LocalAPIConfig
 from storage.cache import TelemetryCache
 
 logger = logging.getLogger(__name__)
+
+# ── API Key Auth (for sensitive endpoints) ────────────────────────────────
+
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+def _get_debug_api_key() -> str | None:
+    """Read debug API key from env. Empty/absent = auth disabled (back-compat)."""
+    return os.environ.get("DEBUG_API_KEY") or None
+
+
+def require_api_key(api_key: str | None = Depends(_api_key_header)) -> str:
+    """Dependency: require valid X-API-Key for sensitive endpoints.
+
+    If DEBUG_API_KEY env var is unset, endpoint is open (backward compatible
+    for local dev). When set, requests must include matching X-API-Key header.
+    """
+    expected = _get_debug_api_key()
+    if expected is None:
+        return "disabled"  # auth not configured
+    if not api_key or not secrets.compare_digest(api_key, expected):
+        raise HTTPException(status_code=403, detail="Invalid or missing API key")
+    return api_key
 
 # Module-level references set by create_app
 _cache: TelemetryCache | None = None
@@ -84,13 +111,16 @@ def create_app(
         version="0.2.0",
     )
 
-    # CORS - allow local development
+    # CORS — restrict to local network; credentials + wildcard is unsafe
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=["http://localhost:3000", "http://127.0.0.1:3000",
+                       "http://localhost:8081", "http://127.0.0.1:8081",
+                       "http://localhost:19006", "http://127.0.0.1:19006",
+                       "http://192.168.31.10:8081"],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["Authorization", "Content-Type"],
     )
 
     # ── Routes ─────────────────────────────────────────────────────────
@@ -159,7 +189,7 @@ def create_app(
     # ── Debug / Simulation Endpoints ────────────────────────────────────
 
     @app.post("/api/v1/simulate/telemetry")
-    async def simulate_telemetry(req: SimulateTelemetryRequest):
+    async def simulate_telemetry(req: SimulateTelemetryRequest, _auth: str = Depends(require_api_key)):
         """Manually inject a simulated telemetry point.
 
         Supports both OCPP and Modbus device types.
@@ -198,7 +228,7 @@ def create_app(
         }
 
     @app.post("/api/v1/simulate/alarm")
-    async def simulate_alarm(req: SimulateAlarmRequest):
+    async def simulate_alarm(req: SimulateAlarmRequest, _auth: str = Depends(require_api_key)):
         """Manually trigger a simulated alarm.
 
         The alarm flows through the normal pipeline (MQTT + cloud buffer).
