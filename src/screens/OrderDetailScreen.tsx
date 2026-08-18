@@ -57,9 +57,7 @@ const OrderDetailScreen: React.FC = () => {
   };
 
   const handlePay = () => {
-    if (selectedOrder) {
-      navigation.navigate('Payment', { orderId: selectedOrder.id, amount: selectedOrder.amount });
-    }
+    navigation.navigate('Payment', { orderId: selectedOrder!.id, amount: selectedOrder!.amount });
   };
 
   if (loading && !selectedOrder) {
