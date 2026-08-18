@@ -15,7 +15,9 @@ jest.mock('expo-secure-store', () => ({
   deleteItemAsync: jest.fn(),
 }));
 
+// eslint-disable-next-line import/first
 import { useStationStore } from '../store/stationStore';
+// eslint-disable-next-line import/first
 import { useStationList } from '../hooks/useStationList';
 
 const renderHook = <T,>(fn: () => T) => {
