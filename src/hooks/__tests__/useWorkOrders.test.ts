@@ -181,4 +181,14 @@ describe('useWorkOrders', () => {
     await act(async () => { ok = await result.current.completeWorkOrder('WO-1'); });
     expect(ok).toBe(false);
   });
+
+  it('fetchData() 无参调用 → 默认isRefresh=false, p=1 → loading路径', async () => {
+    const { result } = renderHook(() =>
+      useWorkOrders({ stationId: 1, statusFilter: 'all' })
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    // 显式无参调用 fetchData() 触发默认参数分支
+    await act(async () => { await result.current.fetchData(); });
+    expect(result.current.loading).toBe(false);
+  });
 });

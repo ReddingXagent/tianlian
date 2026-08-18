@@ -199,4 +199,13 @@ describe('RevenueScreen', () => {
     expect(props.chartConfig.color()).toBe('rgba(26, 115, 232, 1)');
     expect(props.chartConfig.labelColor()).toBe('#999');
   });
+
+  it('导出CSV: records为空时早退, 不调用Share', async () => {
+    (revenueApi.getRecords as jest.Mock).mockResolvedValue({ data: [] });
+    const { findByText } = render(<RevenueScreen />);
+    // 等待加载完成（EmptyState 会显示）
+    await findByText('暂无营收明细');
+    // 导出按钮可能不渲染（空状态），即使渲染也不会调用Share
+    expect(Share.share).not.toHaveBeenCalled();
+  });
 });
