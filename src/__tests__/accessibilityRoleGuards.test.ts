@@ -154,8 +154,8 @@ describe('F388 全仓对账: 交互pressable必声明accessibilityRole', () => {
     auditFile(path.relative(SRC_DIR, file), fs.readFileSync(file, 'utf-8')),
   );
 
-  test('提取活性: 交互pressable≥38且已知五文件在场(防豁免吞掉全部断言)', () => {
-    expect(findings.length).toBeGreaterThanOrEqual(38);
+  test('提取活性: 交互pressable≥37且已知五文件在场(防豁免吞掉全部断言)', () => {
+    expect(findings.length).toBeGreaterThanOrEqual(37);
     const files = new Set(findings.map((f) => f.relPath));
     for (const known of [
       'screens/LoginScreen.tsx',
@@ -168,9 +168,9 @@ describe('F388 全仓对账: 交互pressable必声明accessibilityRole', () => {
     }
   });
 
-  test('提取活性: 声明覆盖文件≥16个(防审计域收缩F380形态)', () => {
+  test('提取活性: 声明覆盖文件≥15个(防审计域收缩F380形态, F1396 shared-ui提取后-1)', () => {
     const files = new Set(findings.map((f) => f.relPath));
-    expect(files.size).toBeGreaterThanOrEqual(16);
+    expect(files.size).toBeGreaterThanOrEqual(15);
   });
 
   const violations = findings.filter(isViolation);
@@ -187,7 +187,7 @@ describe('F388 全仓对账: 交互pressable必声明accessibilityRole', () => {
   if (violations.length === 0) {
     test('全仓交互pressable全声明accessibilityRole: F388修复轮38处补齐后门禁防新欠账', () => {
       expect(violations).toHaveLength(0);
-      expect(findings.length).toBeGreaterThanOrEqual(38);
+      expect(findings.length).toBeGreaterThanOrEqual(37);
     });
   }
 });

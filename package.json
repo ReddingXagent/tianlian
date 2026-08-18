@@ -56,7 +56,9 @@
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1",
       "^expo-secure-store$": "<rootDir>/__mocks__/expo-secure-store.ts",
-      "^expo-status-bar$": "<rootDir>/__mocks__/expo-status-bar.ts"
+      "^expo-status-bar$": "<rootDir>/__mocks__/expo-status-bar.ts",
+      "^react-native$": "<rootDir>/node_modules/react-native",
+      "^react$": "<rootDir>/node_modules/react"
     },
     "setupFilesAfterEnv": [
       "@testing-library/jest-native/extend-expect",
@@ -74,7 +76,10 @@
         "functions": 99,
         "lines": 99
       }
-    }
+    },
+    "modulePaths": [
+      "<rootDir>/node_modules"
+    ]
   },
   "private": true,
   "engines": {

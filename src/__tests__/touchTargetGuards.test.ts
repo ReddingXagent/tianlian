@@ -350,8 +350,8 @@ describe('F318 全仓对账: 交互pressable固定尺寸×44门限', () => {
     auditFile(path.relative(SRC_DIR, file), fs.readFileSync(file, 'utf-8')),
   );
 
-  test('提取活性: 交互pressable≥38且已知五文件在场(防豁免吞掉全部断言)', () => {
-    expect(findings.length).toBeGreaterThanOrEqual(38);
+  test('提取活性: 交互pressable≥37且已知五文件在场(防豁免吞掉全部断言)', () => {
+    expect(findings.length).toBeGreaterThanOrEqual(37);
     const files = new Set(findings.map((f) => f.relPath));
     for (const known of [
       'screens/LoginScreen.tsx',
@@ -364,9 +364,9 @@ describe('F318 全仓对账: 交互pressable固定尺寸×44门限', () => {
     }
   });
 
-  test('提取活性: styles引用解析≥50处(StyleSheet定义对账通路活着)', () => {
+  test('提取活性: styles引用解析≥49处(StyleSheet定义对账通路活着)', () => {
     const refCount = findings.reduce((acc, f) => acc + f.styleRefs.length, 0);
-    expect(refCount).toBeGreaterThanOrEqual(50);
+    expect(refCount).toBeGreaterThanOrEqual(49);
   });
 
   const violations = findings.filter(isViolation);
@@ -387,7 +387,7 @@ describe('F318 全仓对账: 交互pressable固定尺寸×44门限', () => {
   if (violations.length === 0) {
     test('全仓交互pressable零固定小尺寸: 零命中=守卫先行非缺陷(F258/F306/F312型)', () => {
       expect(violations).toHaveLength(0);
-      expect(findings.length).toBeGreaterThanOrEqual(38);
+      expect(findings.length).toBeGreaterThanOrEqual(37);
     });
   }
 });
