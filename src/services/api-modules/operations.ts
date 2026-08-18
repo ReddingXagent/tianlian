@@ -51,7 +51,7 @@ export const workOrderRecordApi = {
       };
     });
   },
-  /** @cloud-down 2026-08-18 POST /work-orders/{id}/notes → 404 (still down in F1384) */
+  /** @cloud-down 2026-08-18 POST /work-orders/{id}/notes → 404 (F1445确认仍下线, 自F1368从未复活) */
   addRecord(orderId: string, data: { action: string; note: string }): Promise<ApiResponse<WorkOrderRecord>> {
     return api.post(`/work-orders/${orderId}/notes`, data).then((res) => {
       const env = res.data as ApiResponse<Record<string, unknown>>;

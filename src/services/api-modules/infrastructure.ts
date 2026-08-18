@@ -566,7 +566,7 @@ export const vppApi = {
 // =====================
 // AI 对话 API (POST /chat)
 // =====================
-/** @cloud-down 2026-08-18 POST /chat → 404 (still down in F1384, was 200 降级 in F1367) */
+/** F1445实测: POST /chat → 200 (降级模式, needs_human=true), /ai/chat 404 — 稳定存活 */
 export const chatApi = {
   /** POST /chat — 发送消息给AI助手 */
   send(message: string, options?: {
