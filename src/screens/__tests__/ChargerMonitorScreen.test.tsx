@@ -95,7 +95,7 @@ const MOCK_CHARGERS = [
     power: 0,
     voltage: 220,
     current: 0,
-    temperature: 28,
+    temperature: 50,
     energyTotal: 5678.9,
     sessionEnergy: 0,
     sessionDuration: 0,

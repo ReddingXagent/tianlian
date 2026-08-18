@@ -47,7 +47,6 @@ const RevenueScreen: React.FC = () => {
 
   // 导出 CSV
   const handleExport = useCallback(async () => {
-    if (records.length === 0) return;
     const csv = buildRevenueCsv(records, summary, period);
     try {
       await Share.share({

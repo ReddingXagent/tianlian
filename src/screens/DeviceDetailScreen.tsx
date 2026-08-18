@@ -55,15 +55,14 @@ const DeviceDetailScreen: React.FC = () => {
 
   // 确认后真正下发指令，并写入操作日志
   const executeControl = async () => {
-    if (!confirmCommand || !device) return;
-    const { command, label } = confirmCommand;
+    const { command, label } = confirmCommand!;
     const result = await controlDevice(command);
 
     if (result.success) {
       const message = result.message || `${label}指令已发送`;
       addLog({
         deviceId,
-        deviceName: device.name,
+        deviceName: device!.name,
         command: command as DeviceControlLog['command'],
         commandLabel: label,
         status: 'success',
@@ -75,7 +74,7 @@ const DeviceDetailScreen: React.FC = () => {
       const failMsg = `发送${label}指令失败`;
       addLog({
         deviceId,
-        deviceName: device.name,
+        deviceName: device!.name,
         command: command as DeviceControlLog['command'],
         commandLabel: label,
         status: 'failed',

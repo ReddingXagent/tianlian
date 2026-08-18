@@ -282,7 +282,7 @@ const WorkOrderScreen: React.FC = () => {
                     onPress={() => setCreateType(t)}
                    accessibilityRole="button">
                     <Text style={[styles.pickerItemText, createType === t && styles.pickerItemTextActive]}>
-                      {WORK_ORDER_TYPE_LABEL[t] || t}
+                      {WORK_ORDER_TYPE_LABEL[t]}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -291,7 +291,7 @@ const WorkOrderScreen: React.FC = () => {
               <Text style={styles.modalLabel}>优先级</Text>
               <View style={styles.pickerRow}>
                 {PRIORITIES.map((p) => {
-                  const pc = PRIORITY_CONFIG[p] ?? { label: p, color: '#666' };
+                  const pc = PRIORITY_CONFIG[p]!;
                   return (
                     <TouchableOpacity
                       key={p}
