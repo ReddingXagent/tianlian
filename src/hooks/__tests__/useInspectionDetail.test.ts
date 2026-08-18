@@ -137,4 +137,31 @@ describe('useInspectionDetail', () => {
     await act(async () => { await result.current.handleComplete('empty'); });
     expect(mockCompleteTask).toHaveBeenCalledWith(1, 'empty', 'fail');
   });
+
+  it('loadData(isRefresh=false) — non-refresh path', async () => {
+    const { result } = renderHook(() => useInspectionDetail());
+    await waitFor(() => expect(mockFetchTaskDetail).toHaveBeenCalled());
+    mockFetchTaskDetail.mockClear();
+    await act(async () => { await result.current.loadData(false); });
+    expect(result.current.refreshing).toBe(false);
+    expect(mockFetchTaskDetail).toHaveBeenCalledWith(1);
+  });
+
+  it('loadData() no args — default isRefresh=false path', async () => {
+    const { result } = renderHook(() => useInspectionDetail());
+    await waitFor(() => expect(mockFetchTaskDetail).toHaveBeenCalled());
+    mockFetchTaskDetail.mockClear();
+    await act(async () => { await result.current.loadData(); });
+    expect(result.current.refreshing).toBe(false);
+    expect(mockFetchTaskDetail).toHaveBeenCalledWith(1);
+  });
+
+  it('handleComplete: selectedTask=null → overall=fail (optional chain coverage)', async () => {
+    // @ts-expect-error testing null selectedTask
+    mockStore.selectedTask = null;
+    const { result } = renderHook(() => useInspectionDetail());
+    await waitFor(() => expect(mockFetchTaskDetail).toHaveBeenCalled());
+    await act(async () => { await result.current.handleComplete('null task'); });
+    expect(mockCompleteTask).toHaveBeenCalledWith(1, 'null task', 'fail');
+  });
 });
