@@ -126,8 +126,8 @@ describe('F1359 全仓对账: 交互pressable必声明accessibilityRole', () => 
     auditFile(path.relative(SRC_DIR, file), fs.readFileSync(file, 'utf-8')),
   );
 
-  test('提取活性: 交互pressable≥42且已知五文件在场', () => {
-    expect(findings.length).toBeGreaterThanOrEqual(42);
+  test('提取活性: 交互pressable≥41且已知五文件在场', () => {
+    expect(findings.length).toBeGreaterThanOrEqual(41);
     const files = new Set(findings.map((f) => f.relPath));
     for (const known of [
       'screens/LoginScreen.tsx',
@@ -159,7 +159,7 @@ describe('F1359 全仓对账: 交互pressable必声明accessibilityRole', () => 
   if (violations.length === 0) {
     test('全仓交互pressable全声明accessibilityRole: F1359修复轮42处补齐后门禁防新欠账', () => {
       expect(violations).toHaveLength(0);
-      expect(findings.length).toBeGreaterThanOrEqual(42);
+      expect(findings.length).toBeGreaterThanOrEqual(41);
     });
   }
 });

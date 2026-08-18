@@ -52,10 +52,12 @@
     "preset": "react-native",
     "testTimeout": 15000,
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*)"
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@sentry/.*|@tianlian/shared-ui)"
     ],
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
+      "^@/(.*)$": "<rootDir>/src/$1",
+      "^react-native$": "<rootDir>/node_modules/react-native",
+      "^react$": "<rootDir>/node_modules/react"
     },
     "setupFilesAfterEnv": [
       "@testing-library/jest-native/extend-expect"
@@ -72,7 +74,10 @@
         "functions": 99,
         "lines": 99
       }
-    }
+    },
+    "modulePaths": [
+      "<rootDir>/node_modules"
+    ]
   },
   "private": true,
   "expo": {

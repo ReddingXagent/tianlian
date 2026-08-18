@@ -135,3 +135,58 @@ describe('useNotifications', () => {
     expect(result.current.loading).toBe(false);
   });
 });
+
+describe('useNotifications — default-arg branch coverage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (notificationApi.getList as jest.Mock).mockResolvedValue({
+      data: { items: mockNotifs, total: 3 },
+    });
+    (notificationApi.getUnreadCount as jest.Mock).mockResolvedValue({ data: { count: 2 } });
+  });
+
+  it('fetchData() with no args — defaults to isRefresh=false, p=1', async () => {
+    const { result } = renderHook(() => useNotifications());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    // Call fetchData with no arguments — exercises both default-arg branches
+    await act(async () => { await result.current.fetchData(); });
+    expect(result.current.error).toBeNull();
+    expect(result.current.notifications).toHaveLength(3);
+  });
+});
+
+describe('useNotifications — isRefresh=true branch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (notificationApi.getList as jest.Mock).mockResolvedValue({
+      data: { items: mockNotifs, total: 3 },
+    });
+    (notificationApi.getUnreadCount as jest.Mock).mockResolvedValue({ data: { count: 2 } });
+  });
+
+  it('fetchData(true) sets refreshing flag', async () => {
+    const { result } = renderHook(() => useNotifications());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await act(async () => { await result.current.fetchData(true); });
+    expect(result.current.refreshing).toBe(false);
+    expect(result.current.notifications).toHaveLength(3);
+  });
+});
+
+describe('useNotifications — handleLoadMore guard branch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (notificationApi.getList as jest.Mock).mockResolvedValue({
+      data: { items: mockNotifs, total: 3 },
+    });
+    (notificationApi.getUnreadCount as jest.Mock).mockResolvedValue({ data: { count: 2 } });
+  });
+
+  it('handleLoadMore when all loaded — does not fetch', async () => {
+    const { result } = renderHook(() => useNotifications());
+    await waitFor(() => expect(result.current.notifications).toHaveLength(3));
+    const callsBefore = (notificationApi.getList as jest.Mock).mock.calls.length;
+    act(() => result.current.handleLoadMore());
+    expect((notificationApi.getList as jest.Mock).mock.calls.length).toBe(callsBefore);
+  });
+});
