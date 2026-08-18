@@ -6,6 +6,7 @@ data/
 node_modules/
 .venv*/
 .coverage
+coverage.json
 # 运行时产物(deploy.sh/watchdog.sh 在部署目录生成)
 .pid
 .watchdog.lock
