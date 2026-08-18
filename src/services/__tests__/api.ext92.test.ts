@@ -119,4 +119,53 @@ describe('F1473 deviceApi.getMaintenanceRecords', () => {
     expect(r.createdAt).toBe('');
     expect(r.updatedAt).toBeNull();
   });
+
+  it('handles data:null with empty items and default pagination', async () => {
+    mock.onGet('/devices/7/maintenance-records').reply(200, {
+      code: 200,
+      message: 'success',
+      data: null,
+      timestamp: 1787075900,
+    });
+
+    const res = await deviceApi.getMaintenanceRecords(7);
+    expect(res.data.items).toEqual([]);
+    expect(res.data.total).toBe(0);
+    expect(res.data.page).toBe(1);
+    expect(res.data.pageSize).toBe(0);
+  });
+
+  it('handles items:null and missing pagination fields', async () => {
+    mock.onGet('/devices/8/maintenance-records').reply(200, {
+      code: 200,
+      message: 'success',
+      data: { items: null },
+      timestamp: 1787076000,
+    });
+
+    const res = await deviceApi.getMaintenanceRecords(8);
+    expect(res.data.items).toEqual([]);
+    expect(res.data.total).toBe(0);
+    expect(res.data.page).toBe(1);
+    expect(res.data.pageSize).toBe(0);
+  });
+
+  it('handles item with null/undefined id field', async () => {
+    mock.onGet('/devices/9/maintenance-records').reply(200, {
+      code: 200,
+      message: 'success',
+      data: {
+        items: [{ id: null, device_id: null, type: null, title: null }],
+        total: 1, page: 1, page_size: 10,
+      },
+      timestamp: 1787076100,
+    });
+
+    const res = await deviceApi.getMaintenanceRecords(9);
+    const r = res.data.items[0];
+    expect(r.id).toBe(0);
+    expect(r.deviceId).toBe(9); // falls back to path id
+    expect(r.type).toBe('');
+    expect(r.title).toBe('');
+  });
 });
