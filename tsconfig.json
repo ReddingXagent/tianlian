@@ -15,8 +15,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@tianlian/shared-types": ["../shared-types/src"],
-      "@tianlian/shared-types/*": ["../shared-types/src/*"]
+      "@tianlian/shared-types": ["../tianlian-shared/shared-types/src"],
+      "@tianlian/shared-types/*": ["../tianlian-shared/shared-types/src/*"],
+      "@tianlian/shared-ui": ["../tianlian-shared/shared-ui/src"],
+      "@tianlian/shared-ui/*": ["../tianlian-shared/shared-ui/src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],
