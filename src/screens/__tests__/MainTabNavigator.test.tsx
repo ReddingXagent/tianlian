@@ -5,7 +5,7 @@ import MainTabNavigator from '../MainTabNavigator';
 
 // Mock四个Tab页为纯文本占位, 避免真实屏幕触发API/导航副作用
 // (jest.mock工厂被hoisting, 内部用require避免TDZ)
-// 注: AI 助手 Tab 已移除(云端 /ai/chat 下线, 2026-08-15), 恢复时需同步加回 mock 与断言
+// 注: AI 助手 Tab 已适配新 /chat 端点(2026-08-20), 当前AI降级模式
 jest.mock('../DashboardScreen', () => {
   const MockDashboard = () => {
   const React = require('react');

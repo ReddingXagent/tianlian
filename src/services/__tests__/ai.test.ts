@@ -81,6 +81,7 @@ describe('AI_FUNCTIONS', () => {
 });
 
 // =====================
+// =====================
 // executeToolCall 测试
 // =====================
 
@@ -304,7 +305,7 @@ describe('executeToolCall', () => {
 });
 
 // =====================
-// sendChatMessage 测试
+// sendChatMessage 测试 (新 /chat 端点格式)
 // =====================
 
 describe('sendChatMessage', () => {
@@ -313,30 +314,25 @@ describe('sendChatMessage', () => {
     jest.clearAllMocks();
   });
 
-  it('should send non-streaming chat request and return response', async () => {
+  it('应发送非流式请求并返回回答', async () => {
     const chatResponse = {
-      id: 'resp-1',
-      choices: [
-        {
-          message: {
-            role: 'assistant',
-            content: '你好！有什么可以帮助你的？',
-          },
-          finishReason: 'stop',
-        },
-      ],
-      usage: { promptTokens: 50, completionTokens: 20, totalTokens: 70 },
+      code: 200,
+      message: '对话成功',
+      data: {
+        answer: '你好！有什么可以帮助你的？',
+        confidence: 0.95,
+        sources: [],
+        actions: [],
+        needs_human: false,
+        usage: { prompt_tokens: 10, completion_tokens: 20, total_tokens: 30 },
+      },
+      timestamp: Date.now(),
     };
 
-    mockAxios.onPost('/ai/chat').reply(200, chatResponse);
+    mockAxios.onPost('/chat').reply(200, chatResponse);
 
     const messages: ChatMessage[] = [
-      {
-        id: '1',
-        role: 'user',
-        content: '你好',
-        timestamp: Date.now(),
-      },
+      { id: '1', role: 'user', content: '你好', timestamp: Date.now() },
     ];
 
     const result = await sendChatMessage(messages);
@@ -345,60 +341,53 @@ describe('sendChatMessage', () => {
     expect(result.content).toBe('你好！有什么可以帮助你的？');
   });
 
-  it('should include function call in response when AI requests it', async () => {
-    const chatResponse = {
-      id: 'resp-2',
-      choices: [
-        {
-          message: {
-            role: 'assistant',
-            content: null,
-            toolCalls: [
-              {
-                id: 'call-1',
-                type: 'function',
-                function: {
-                  name: 'get_dashboard_summary',
-                  arguments: '{}',
-                },
-              },
-            ],
-          },
-          finishReason: 'tool_calls',
-        },
-      ],
-    };
-
-    mockAxios.onPost('/ai/chat').reply(200, chatResponse);
-
-    const messages: ChatMessage[] = [
-      { id: '1', role: 'user', content: '仪表盘概览', timestamp: Date.now() },
-    ];
-
-    const result = await sendChatMessage(messages);
-
-    expect(result.role).toBe('assistant');
-    expect(result.toolCalls).toBeDefined();
-    expect(result.toolCalls![0].function.name).toBe('get_dashboard_summary');
-  });
-
-  it('should include functions in the request body', async () => {
-    mockAxios.onPost('/ai/chat').reply((config) => {
+  it('应提取最后一条用户消息作为请求体', async () => {
+    mockAxios.onPost('/chat').reply((config) => {
       const body = JSON.parse(config.data);
-      expect(body.functions).toBeDefined();
-      expect(body.functions.length).toBe(6);
-      expect(body.messages[0].role).toBe('system');
-      return [200, { id: 'ok', choices: [{ message: { role: 'assistant', content: 'ok' }, finishReason: 'stop' }] }];
+      expect(body.message).toBe('最新问题');
+      expect(body.messages).toBeUndefined();
+      return [200, {
+        code: 200,
+        message: 'ok',
+        data: { answer: '回答', confidence: 1, sources: [], actions: [], needs_human: false, usage: null },
+        timestamp: 0,
+      }];
     });
 
     await sendChatMessage([
+      { id: '1', role: 'user', content: '旧问题', timestamp: Date.now() },
+      { id: '2', role: 'assistant', content: '旧回答', timestamp: Date.now() },
+      { id: '3', role: 'user', content: '最新问题', timestamp: Date.now() },
+    ]);
+  });
+
+  it('无用户消息时应返回提示', async () => {
+    const result = await sendChatMessage([
+      { id: '1', role: 'assistant', content: '你好', timestamp: Date.now() },
+    ]);
+
+    expect(result.role).toBe('assistant');
+    expect(result.content).toBe('请输入您的问题。');
+  });
+
+  it('answer为空时应返回空字符串', async () => {
+    mockAxios.onPost('/chat').reply(200, {
+      code: 200,
+      message: 'ok',
+      data: { answer: '', confidence: 0, sources: [], actions: [], needs_human: true, usage: null },
+      timestamp: 0,
+    });
+
+    const result = await sendChatMessage([
       { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
     ]);
+
+    expect(result.content).toBe('');
   });
 });
 
 // =====================
-// streamChatMessage 测试
+// streamChatMessage 测试 (新 JSON Lines 流格式)
 // =====================
 
 describe('streamChatMessage', () => {
@@ -407,39 +396,36 @@ describe('streamChatMessage', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
   });
 
-  it('should yield stream chunks', async () => {
-    // Mock fetch for streaming
+  it('应解析 JSON Lines chunk 并yield content', async () => {
     const mockReader = {
       read: jest
         .fn()
         .mockResolvedValueOnce({
           done: false,
           value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"content":"你好"}}]}\n\n'
+            '{"type":"chunk","content":"你好"}\n'
           ),
         })
         .mockResolvedValueOnce({
           done: false,
           value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"content":"，我是AI助手"}}]}\n\n'
+            '{"type":"chunk","content":"，我是AI助手"}\n'
           ),
         })
         .mockResolvedValueOnce({
           done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
+          value: new TextEncoder().encode(
+            '{"type":"done"}\n'
+          ),
         })
         .mockResolvedValueOnce({ done: true }),
       releaseLock: jest.fn(),
     };
 
-    const mockResponse = {
+    global.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      body: {
-        getReader: () => mockReader,
-      },
-    };
-
-    global.fetch = jest.fn().mockResolvedValue(mockResponse as unknown);
+      body: { getReader: () => mockReader },
+    } as unknown);
 
     const messages: ChatMessage[] = [
       { id: '1', role: 'user', content: '你好', timestamp: Date.now() },
@@ -447,8 +433,8 @@ describe('streamChatMessage', () => {
 
     const chunks: string[] = [];
     for await (const chunk of streamChatMessage(messages)) {
-      if (chunk.choices[0]?.delta?.content) {
-        chunks.push(chunk.choices[0].delta.content);
+      if (chunk.content) {
+        chunks.push(chunk.content);
       }
     }
 
@@ -456,15 +442,15 @@ describe('streamChatMessage', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
 
     const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
-    expect(fetchCall[0]).toBe(`${BASE_URL}/ai/chat`);
+    expect(fetchCall[0]).toBe(`${BASE_URL}/chat`);
     expect(fetchCall[1].headers.Authorization).toBe(`Bearer ${TEST_TOKEN}`);
 
     const body = JSON.parse(fetchCall[1].body);
+    expect(body.message).toBe('你好');
     expect(body.stream).toBe(true);
-    expect(body.functions).toBeDefined();
   });
 
-  it('should throw on non-ok response', async () => {
+  it('非200响应应抛出错误', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 500,
@@ -476,13 +462,13 @@ describe('streamChatMessage', () => {
     ];
 
     await expect(async () => {
-    for await (const _ of streamChatMessage(messages)) {
-        // should throw before yielding
+      for await (const _ of streamChatMessage(messages)) {
+        // should throw
       }
     }).rejects.toThrow('AI API error 500');
   });
 
-  it('should fallback to empty error body when text() rejects', async () => {
+  it('text()拒绝时应回退到空错误体', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 503,
@@ -495,19 +481,19 @@ describe('streamChatMessage', () => {
 
     await expect(async () => {
       for await (const _ of streamChatMessage(messages)) {
-        // should throw before yielding
+        // should throw
       }
     }).rejects.toThrow('AI API error 503: ');
   });
 
-  it('should end gracefully when reader signals done without [DONE]', async () => {
+  it('reader done但无done标记时应正常结束', async () => {
     const mockReader = {
       read: jest
         .fn()
         .mockResolvedValueOnce({
           done: false,
           value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"content":"一段"}}]}\n\n'
+            '{"type":"chunk","content":"一段"}\n'
           ),
         })
         .mockResolvedValueOnce({ done: true }),
@@ -525,16 +511,14 @@ describe('streamChatMessage', () => {
 
     const chunks: string[] = [];
     for await (const chunk of streamChatMessage(messages)) {
-      if (chunk.choices[0]?.delta?.content) {
-        chunks.push(chunk.choices[0].delta.content);
-      }
+      if (chunk.content) chunks.push(chunk.content);
     }
 
     expect(chunks).toEqual(['一段']);
     expect(mockReader.releaseLock).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle request without token', async () => {
+  it('无token时请求头不应含Authorization', async () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
 
     const mockReader = {
@@ -542,7 +526,7 @@ describe('streamChatMessage', () => {
         .fn()
         .mockResolvedValueOnce({
           done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
+          value: new TextEncoder().encode('{"type":"done"}\n'),
         })
         .mockResolvedValueOnce({ done: true }),
       releaseLock: jest.fn(),
@@ -564,10 +548,90 @@ describe('streamChatMessage', () => {
     const fetchCall = (global.fetch as jest.Mock).mock.calls[0];
     expect(fetchCall[1].headers.Authorization).toBeUndefined();
   });
+
+  it('无body时应抛出Streaming not supported', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, body: undefined });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: 'test', timestamp: Date.now() },
+    ];
+
+    await expect(async () => {
+      for await (const _ of streamChatMessage(messages)) {
+        // should throw
+      }
+    }).rejects.toThrow('Streaming not supported');
+  });
+
+  it('跨块行重组: 不完整行通过buffer拼接', async () => {
+    const mockReader = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            '{"type":"chunk","content":"跨块'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('拼接"}\n{"type":"done"}\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
+    ];
+    const contents: string[] = [];
+    for await (const chunk of streamChatMessage(messages)) {
+      if (chunk.content) contents.push(chunk.content);
+    }
+    expect(contents).toEqual(['跨块拼接']);
+  });
+
+  it('无法解析的行应跳过', async () => {
+    const mockReader = {
+      read: jest
+        .fn()
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode(
+            'invalid json line\n{"type":"chunk","content":"有效"}\n'
+          ),
+        })
+        .mockResolvedValueOnce({
+          done: false,
+          value: new TextEncoder().encode('{"type":"done"}\n'),
+        })
+        .mockResolvedValueOnce({ done: true }),
+      releaseLock: jest.fn(),
+    };
+
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    });
+
+    const messages: ChatMessage[] = [
+      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
+    ];
+    const contents: string[] = [];
+    for await (const chunk of streamChatMessage(messages)) {
+      if (chunk.content) contents.push(chunk.content);
+    }
+    expect(contents).toEqual(['有效']);
+  });
 });
 
 // =====================
-// chat 多轮对话测试
+// chat 多轮对话测试 (新简化格式, 无function calling)
 // =====================
 
 describe('chat', () => {
@@ -577,26 +641,25 @@ describe('chat', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
   });
 
-  it('should return plain text response when no tool call needed', async () => {
-    // Mock streaming fetch for plain text response
+  it('应返回流式文本响应并通过onToken回调', async () => {
     const mockReader = {
       read: jest
         .fn()
         .mockResolvedValueOnce({
           done: false,
           value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"content":"你好！"}}]}\n\n'
+            '{"type":"chunk","content":"你好！"}\n'
           ),
         })
         .mockResolvedValueOnce({
           done: false,
           value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"content":"有什么可以帮你？"}}]}\n\n'
+            '{"type":"chunk","content":"有什么可以帮你？"}\n'
           ),
         })
         .mockResolvedValueOnce({
           done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
+          value: new TextEncoder().encode('{"type":"done"}\n'),
         })
         .mockResolvedValueOnce({ done: true }),
       releaseLock: jest.fn(),
@@ -619,74 +682,7 @@ describe('chat', () => {
     expect(tokens).toEqual(['你好！', '有什么可以帮你？']);
   });
 
-  it('should execute tool calls and return final response', async () => {
-    // First response: tool call
-    const reader1 = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"id":"call-1","type":"function","function":{"name":"get_dashboard_summary","arguments":"{}"}}]}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-
-    // Second response: final text
-    const reader2 = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s2","choices":[{"delta":{"content":"您的站点共10个，在线8个。"}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader1 } })
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader2 } });
-
-    // Mock the tool call API
-    mockAxios.onGet('/dashboard/stats').reply(200, {
-      code: 0,
-      message: 'ok',
-      data: {
-        totalStations: 10,
-        onlineStations: 8,
-        offlineStations: 2,
-        totalAlarms: 5,
-        unhandledAlarms: 2,
-        revenueSummary: { today: 5000, week: 35000, month: 150000, total: 2000000 },
-      },
-    });
-
-    const messages: ChatMessage[] = [
-      { id: '1', role: 'user', content: '仪表盘概览', timestamp: Date.now() },
-    ];
-
-    const result = await chat(messages);
-
-    expect(result.role).toBe('assistant');
-    expect(result.content).toContain('您的站点');
-    expect(global.fetch).toHaveBeenCalledTimes(2);
-  });
-
-  it('should handle fetch error gracefully', async () => {
+  it('fetch错误应返回友好的错误消息', async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
 
     const messages: ChatMessage[] = [
@@ -700,218 +696,23 @@ describe('chat', () => {
     expect(result.content).toContain('Network error');
   });
 
-  it('should stop after max tool rounds', async () => {
-    // Simulate: every response is a tool call to get_dashboard_summary,
-    // so the loop keeps going until MAX_TOOL_ROUNDS (5) is reached.
-    let fetchCount = 0;
-
-    const makeToolCallReader = (callId: string) => ({
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            `data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"id":"${callId}","type":"function","function":{"name":"get_dashboard_summary","arguments":"{}"}}]}}]}\n\n`
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    });
-
-    // Each fetch returns a tool call (no text content),
-    // so the loop runs MAX_TOOL_ROUNDS times then bails out.
-    global.fetch = jest.fn().mockImplementation(() => {
-      fetchCount++;
-      return Promise.resolve({
-        ok: true,
-        body: { getReader: () => makeToolCallReader(`call-${fetchCount}`) },
-      });
-    });
-
-    mockAxios.onGet('/dashboard/stats').reply(200, {
-      code: 0,
-      message: 'ok',
-      data: {
-        totalStations: 10,
-        onlineStations: 8,
-        offlineStations: 2,
-        totalAlarms: 5,
-        unhandledAlarms: 2,
-        revenueSummary: { today: 5000, week: 35000, month: 150000, total: 2000000 },
-      },
-    });
-
-    const messages: ChatMessage[] = [
-      { id: '1', role: 'user', content: 'test', timestamp: Date.now() },
-    ];
-
-    const result = await chat(messages);
-
-    // After 5 rounds of tool-only responses, chat() bails out
-    expect(result.content).toContain('查询过于复杂');
-  });
-});
-
-// =====================
-// F187: 残余分支补齐 — 流无body / tool call 参数跨chunk累积
-// =====================
-
-describe('streamChatMessage edge branches (F187)', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
-  });
-
-  it('should throw "Streaming not supported" when response has no body', async () => {
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, body: undefined });
-
-    const messages: ChatMessage[] = [
-      { id: '1', role: 'user', content: 'test', timestamp: Date.now() },
-    ];
-
-    await expect(async () => {
-      for await (const _ of streamChatMessage(messages)) {
-        // should throw before yielding
-      }
-    }).rejects.toThrow('Streaming not supported');
-  });
-});
-
-describe('chat tool-call accumulation edge branches (F187)', () => {
-  beforeEach(() => {
-    mockAxios.reset();
-    jest.clearAllMocks();
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
-  });
-
-  it('should accumulate split tool-call arguments across chunks', async () => {
-    // 同index多chunk: 首块带id+name(空arguments), 第二块补arguments → existing累积分支;
-    // 第三块existing但无arguments → 内层false分支
-    const reader1 = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"id":"call-acc","type":"function","function":{"name":"get_dashboard_summary","arguments":""}}]}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"function":{"arguments":"{}"}}]}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"function":{}}]}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-
-    const reader2 = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s2","choices":[{"delta":{"content":"汇总完成"}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader1 } })
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader2 } });
-
-    mockAxios.onGet('/dashboard/stats').reply(200, {
-      code: 0,
-      message: 'ok',
-      data: {
-        totalStations: 1,
-        onlineStations: 1,
-        offlineStations: 0,
-        totalAlarms: 0,
-        unhandledAlarms: 0,
-      },
-    });
-
-    const messages: ChatMessage[] = [
-      { id: '1', role: 'user', content: '概览', timestamp: Date.now() },
-    ];
-
-    const result = await chat(messages);
-    expect(result.content).toContain('汇总完成');
-    expect(global.fetch).toHaveBeenCalledTimes(2);
-  });
-});
-// =====================
-// F257: 兜底分支定向补测（catch链 / id生成兜底 / 非Error异常 / 空内容 / tool call分片累积）
-// =====================
-describe('F257 fallback branches', () => {
-  beforeEach(() => {
-    mockAxios.reset();
-    jest.clearAllMocks();
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
-  });
-
-  it('executeToolCall API报错带 response.data.message → 消息透传', async () => {
-    mockAxios.onPost('/devices/1/control').reply(400, { message: '设备离线' });
-    const result = await executeToolCall('control_device', { device_id: 1, action: 'start' });
-    expect(result).toContain('设备离线');
-    expect(result).toContain('Failed to execute control_device');
-  });
-
-  it('executeToolCall 网络错误无 response → err.message 兜底', async () => {
-    mockAxios.onPost('/devices/1/control').networkError();
-    const result = await executeToolCall('control_device', { device_id: 1, action: 'start' });
-    expect(result).toContain('Failed to execute control_device');
-  });
-
-  it('sendChatMessage 响应缺 id → generateId 兜底', async () => {
-    mockAxios.onPost('/ai/chat').reply(200, {
-      choices: [{ message: { content: '你好' } }],
-    });
-    const result = await sendChatMessage([
-      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
-    ]);
-    expect(result.id).toBeTruthy();
-    expect(result.content).toBe('你好');
-  });
-
-  it('chat 流式异常为非Error抛出 → 未知错误文案', async () => {
+  it('非Error异常应返回未知错误', async () => {
     global.fetch = jest.fn().mockRejectedValue('boom');
+
     const result = await chat([
       { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
     ]);
+
     expect(result.content).toContain('未知错误');
   });
 
-  it('chat 流式零内容 → 未理解兜底文案', async () => {
+  it('流式零内容应返回未理解兜底文案', async () => {
     const mockReader = {
       read: jest
         .fn()
         .mockResolvedValueOnce({
           done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
+          value: new TextEncoder().encode('{"type":"done"}\n'),
         })
         .mockResolvedValueOnce({ done: true }),
       releaseLock: jest.fn(),
@@ -920,174 +721,11 @@ describe('F257 fallback branches', () => {
       ok: true,
       body: { getReader: () => mockReader },
     });
+
     const result = await chat([
       { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
     ]);
+
     expect(result.content).toContain('没有理解您的问题');
-  });
-
-  it('chat tool call arguments 分片到达 → existing 累积合并执行', async () => {
-    const toolReader = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"choices":[{"delta":{"toolCalls":[{"index":0,"id":"tc1","function":{"name":"control_device","arguments":"{\\"de"}}]}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"choices":[{"delta":{"toolCalls":[{"index":0,"function":{"arguments":"vice_id\\":1,\\"action\\":\\"start\\"}"}}]}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-    const textReader = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"choices":[{"delta":{"content":"执行完成"}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => toolReader } })
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => textReader } });
-    mockAxios
-      .onPost('/devices/1/control')
-      .reply(200, { code: 200, message: 'success', data: { success: true, message: 'ok' } });
-
-    const result = await chat([
-      { id: '1', role: 'user', content: '启动1号桩', timestamp: Date.now() },
-    ]);
-    expect(result.content).toBe('执行完成');
-    expect(mockAxios.history.post.length).toBe(1);
-    expect(JSON.parse(mockAxios.history.post[0].data)).toEqual({ command: 'start' });
-  });
-});
-
-// =====================
-// F316 定向补测：ai.ts 残余兜底分支（executeToolCall 无 message 错误兜底 /
-// streamChatMessage 跨块行重组 / chat() 无名 tool call 跳过+generateId 兜底）
-// =====================
-
-describe('ai.ts residual fallback branches (F316)', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(TEST_TOKEN);
-  });
-
-  it('executeToolCall: error without message/response falls back to Unknown error', async () => {
-    // ai.ts:358 的 err?.message || 'Unknown error' 末段兜底——抛无 message 对象触发
-    mockAxios.onAny().reply(() => {
-      throw Object.create(null);
-    });
-
-    const result = await executeToolCall('get_device_status', { device_id: 1 });
-    const parsed = JSON.parse(result);
-    expect(parsed.error).toBe('Failed to execute get_device_status: Unknown error');
-  });
-
-  it('streamChatMessage: incomplete line split across chunks is reassembled via buffer', async () => {
-    // ai.ts:432 buffer = lines.pop() || '' 的左侧真值分支——
-    // 首块不以换行结尾时 pop 返回半行残留（truthy），次块拼接后才成行解析
-    const mockReader = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"content":"跨块'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('拼接"}}]}\n\ndata: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      body: { getReader: () => mockReader },
-    });
-
-    const messages: ChatMessage[] = [
-      { id: '1', role: 'user', content: 'hi', timestamp: Date.now() },
-    ];
-    const contents: string[] = [];
-    for await (const chunk of streamChatMessage(messages)) {
-      const content = chunk.choices[0]?.delta?.content;
-      if (content) contents.push(content);
-    }
-    expect(contents).toEqual(['跨块拼接']);
-  });
-
-  it('chat: unnamed tool call with missing id is skipped with generateId/empty-string fallbacks', async () => {
-    // ai.ts:501-504 else 新建分支的三处 || 兜底（tc.id 缺失→generateId /
-    // name 缺失→'' / arguments 缺失→''）+ ai.ts:543 !tc.function.name continue 跳过分支
-    const reader1 = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s1","choices":[{"delta":{"toolCalls":[{"index":0,"function":{}}]}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-    const reader2 = {
-      read: jest
-        .fn()
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode(
-            'data: {"id":"s2","choices":[{"delta":{"content":"好的"}}]}\n\n'
-          ),
-        })
-        .mockResolvedValueOnce({
-          done: false,
-          value: new TextEncoder().encode('data: [DONE]\n\n'),
-        })
-        .mockResolvedValueOnce({ done: true }),
-      releaseLock: jest.fn(),
-    };
-
-    global.fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader1 } })
-      .mockResolvedValueOnce({ ok: true, body: { getReader: () => reader2 } });
-
-    const getsBefore = mockAxios.history.get.length;
-    const result = await chat([
-      { id: '1', role: 'user', content: '查一下', timestamp: Date.now() },
-    ]);
-
-    // 无名 tool call 被 continue 跳过 → 无业务 API 请求，第二轮纯文本收尾
-    expect(result.content).toBe('好的');
-    expect(mockAxios.history.get.length).toBe(getsBefore);
   });
 });

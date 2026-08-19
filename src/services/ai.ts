@@ -1,8 +1,8 @@
 /**
  * AI 助手服务
  *
- * 对接云端 AI API (/api/v1/ai/chat)，支持流式和非流式对话。
- * 内置 function calling 框架，让 AI 可以调用已有的业务 API。
+ * 对接云端 AI API (/api/v1/chat)，简单对话格式 {message}→{answer}。
+ * 原OpenAI兼容格式(/ai/chat)已下线, 2026-08-20适配新端点。
  *
  * @module services/ai
  */
@@ -120,6 +120,7 @@ export interface FunctionDefinition {
 // 系统提示词
 // =====================
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- 保留系统提示词, 待云端AI上线function calling后启用
 const SYSTEM_PROMPT = `你是天链V3充电站管理系统的 AI 助手，专门为站长提供智能运维服务。
 
 你的核心能力：
@@ -364,41 +365,71 @@ export async function executeToolCall(
 // AI 对话 API
 // =====================
 
-const AI_CHAT_ENDPOINT = '/ai/chat';
+const AI_CHAT_ENDPOINT = '/chat';
+
+/** 新端点响应类型 (非OpenAI兼容, 简单{message}→{answer}格式) */
+interface ChatEndpointResponse {
+  code: number;
+  message: string;
+  data: {
+    answer: string;
+    confidence: number;
+    sources: unknown[];
+    actions: unknown[];
+    needs_human: boolean;
+    usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number } | null;
+  };
+  timestamp: number;
+}
+
+/** 流式chunk类型 (JSON Lines格式, 非SSE) */
+interface ChatStreamChunkNew {
+  type: 'chunk' | 'done';
+  content?: string;
+}
 
 /**
- * 非流式对话
+ * 非流式对话 — 适配新 /chat 端点
+ * 新端点只接受 {message: string}, 不支持 messages 数组/function calling
  */
 export async function sendChatMessage(
   messages: ChatMessage[]
 ): Promise<ChatMessage> {
-  const requestMessages = [SYSTEM_MESSAGE, ...messages.map((m) => pickMessage(m))];
+  // 提取最后一条用户消息 (新端点是单轮对话)
+  const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
+  if (!lastUserMsg) {
+    return {
+      id: generateId(),
+      role: 'assistant',
+      content: '请输入您的问题。',
+      timestamp: Date.now(),
+    };
+  }
 
-  const resp = await api.post<ChatResponse>(AI_CHAT_ENDPOINT, {
-    messages: requestMessages,
-    functions: AI_FUNCTIONS,
+  const resp = await api.post<ChatEndpointResponse>(AI_CHAT_ENDPOINT, {
+    message: lastUserMsg.content,
   });
 
-  const choice = resp.data.choices[0]!;
-  const msg = choice.message;
-
+  const data = resp.data.data;
   return {
-    id: resp.data.id || generateId(),
+    id: generateId(),
     role: 'assistant',
-    content: msg.content ?? '',
-    toolCalls: msg.toolCalls,
+    content: data.answer || '',
     timestamp: Date.now(),
   };
 }
 
 /**
- * 流式对话 — 使用 fetch 原生 API 以支持 ReadableStream
+ * 流式对话 — 适配新 /chat 端点的 JSON Lines 流格式
+ * 格式: {"type":"chunk","content":"..."}\n{"type":"done"}
  */
 export async function* streamChatMessage(
   messages: ChatMessage[]
-): AsyncGenerator<ChatStreamChunk> {
+): AsyncGenerator<{ type: string; content?: string }> {
   const token = await tokenStorage.getToken();
-  const requestMessages = [SYSTEM_MESSAGE, ...messages.map((m) => pickMessage(m))];
+  // 提取最后一条用户消息
+  const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
+  if (!lastUserMsg) return;
 
   const response = await fetch(`${api.defaults.baseURL}${AI_CHAT_ENDPOINT}`, {
     method: 'POST',
@@ -407,8 +438,7 @@ export async function* streamChatMessage(
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({
-      messages: requestMessages,
-      functions: AI_FUNCTIONS,
+      message: lastUserMsg.content,
       stream: true,
     }),
   });
@@ -437,15 +467,16 @@ export async function* streamChatMessage(
 
       for (const line of lines) {
         const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith('data: ')) continue;
-        const data = trimmed.slice(6);
-        if (data === '[DONE]') return;
+        if (!trimmed) continue;
 
         try {
-          const chunk: ChatStreamChunk = JSON.parse(data);
-          yield chunk;
+          const chunk: ChatStreamChunkNew = JSON.parse(trimmed);
+          if (chunk.type === 'done') return;
+          if (chunk.type === 'chunk' && chunk.content) {
+            yield chunk;
+          }
         } catch {
-          // 跳过无法解析的 chunk
+          // 跳过无法解析的行
         }
       }
     }
@@ -458,116 +489,36 @@ export async function* streamChatMessage(
 // 多轮对话引擎
 // =====================
 
-const MAX_TOOL_ROUNDS = 5;
-
 /**
- * 完整的多轮对话：自动处理 function calling 循环
- * 返回最终的 assistant 消息（纯文本回答）
- *
- * @param messages - 历史消息（不含 system message）
- * @param onToken - 可选的流式 token 回调，用于 UI 实时展示
+ * 多轮对话引擎 — 适配新 /chat 端点
+ * 新端点不支持 function calling, 简化为流式调用 + onToken 回调
  */
 export async function chat(
   messages: ChatMessage[],
   onToken?: (text: string) => void
 ): Promise<ChatMessage> {
-  const conversation: ChatMessage[] = [...messages];
+  let fullContent = '';
 
-  for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-    // 使用流式 API，但在此收集完整响应
-    let fullContent = '';
-    let toolCalls: ToolCall[] | undefined;
-
-    try {
-      for await (const chunk of streamChatMessage(conversation)) {
-        const delta = chunk.choices[0]?.delta;
-
-        if (delta?.content) {
-          fullContent += delta.content;
-          onToken?.(delta.content);
-        }
-
-        if (delta?.toolCalls) {
-          for (const tc of delta.toolCalls) {
-            if (!toolCalls) toolCalls = [];
-            // 累积 tool call 数据
-            const existing = toolCalls[tc.index];
-            if (existing) {
-              if (tc.function?.arguments) {
-                existing.function.arguments += tc.function.arguments;
-              }
-            } else {
-              toolCalls[tc.index] = {
-                id: tc.id || generateId(),
-                type: 'function',
-                function: {
-                  name: tc.function?.name || '',
-                  arguments: tc.function?.arguments || '',
-                },
-              };
-            }
-          }
-        }
+  try {
+    for await (const chunk of streamChatMessage(messages)) {
+      if (chunk.content) {
+        fullContent += chunk.content;
+        onToken?.(chunk.content);
       }
-    } catch (error) {
-      return {
-        id: generateId(),
-        role: 'assistant',
-        content: `抱歉，AI 服务暂时不可用：${error instanceof Error ? error.message : '未知错误'}`,
-        timestamp: Date.now(),
-      };
     }
-
-    // 没有 tool call，返回纯文本回答
-    if (!toolCalls || toolCalls.length === 0) {
-      return {
-        id: generateId(),
-        role: 'assistant',
-        content: fullContent || '抱歉，我没有理解您的问题，请换个方式描述。',
-        timestamp: Date.now(),
-      };
-    }
-
-    // 添加 assistant 消息到对话历史
-    const assistantMsg: ChatMessage = {
+  } catch (error) {
+    return {
       id: generateId(),
       role: 'assistant',
-      content: fullContent || '',
-      toolCalls,
+      content: `抱歉，AI 服务暂时不可用：${error instanceof Error ? error.message : '未知错误'}`,
       timestamp: Date.now(),
     };
-    conversation.push(assistantMsg);
-
-    // 执行每个 tool call 并将结果加入对话
-    for (const tc of toolCalls) {
-      if (!tc.function.name) continue;
-
-      let args: Record<string, unknown> = {};
-      try {
-        args = JSON.parse(tc.function.arguments);
-      } catch {
-        // 解析失败使用空对象
-      }
-
-      const result = await executeToolCall(tc.function.name, args);
-
-      conversation.push({
-        id: generateId(),
-        role: 'tool',
-        content: result,
-        toolCallId: tc.id,
-        timestamp: Date.now(),
-      });
-    }
-
-    // 继续循环，让 AI 基于 tool 结果生成最终回答
   }
 
-  // 超过最大轮次，强制让 AI 生成总结
   return {
     id: generateId(),
     role: 'assistant',
-    content: '抱歉，查询过于复杂，请尝试简化您的问题。',
+    content: fullContent || '抱歉，我没有理解您的问题，请换个方式描述。',
     timestamp: Date.now(),
   };
 }
@@ -575,12 +526,6 @@ export async function chat(
 // =====================
 // 工具函数
 // =====================
-
-const SYSTEM_MESSAGE = { role: 'system' as const, content: SYSTEM_PROMPT };
-
-function pickMessage(m: ChatMessage) {
-  return { role: m.role, content: m.content };
-}
 
 function generateId(): string {
   return `chatcmpl-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
