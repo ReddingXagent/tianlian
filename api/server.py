@@ -1,13 +1,12 @@
 """Local debug API server (FastAPI)"""
 
 import logging
-import time
-
 import os
 import secrets
+import time
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends, Security
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
