@@ -16,8 +16,8 @@ select = [
     "RUF",               # ruff 专属
 ]
 ignore = [
-    "BLE001",   # 债务: 33处 blind-except，需逐步收窄异常类型
-    "E402",     # 债务: 14处 import不在顶部（scripts路径注入等，需人工确认）
+    "BLE001",   # 债务: 40处 blind-except，需逐步收窄异常类型
+    "E402",     # 债务: 27处 import不在顶部（main.py sys.path注入 + 测试文件patch后import，需人工确认）
     "RUF001", "RUF002", "RUF003",  # 中文注释/文档的全角标点，非歧义误报
     "UP017",   # datetime.UTC 是 Py3.11+, Pi 运行 Py3.10
 ]
