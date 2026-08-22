@@ -57,7 +57,7 @@ GATEWAY_ID=GW-002 python main.py  # 环境变量覆盖
 
 ```bash
 bash scripts/run_tests.sh   # 装依赖 + pytest + coverage
-python -m pytest tests/     # 198 用例全绿（含 mock CSMS）
+python -m pytest tests/     # 710 用例全绿（含 mock CSMS）
 ruff check .                # lint 门控（配置见 pyproject.toml，债务以 ignore 登记并逐条收窄）
 ```
 
