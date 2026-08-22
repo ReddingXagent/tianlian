@@ -1,6 +1,5 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { authApi } from '../../services/api';
-import { useAuthStore } from '../../store/authStore';
 import { useLogin } from '../useLogin';
 
 jest.mock('../../services/api', () => ({
