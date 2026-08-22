@@ -34,9 +34,9 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 470 全绿（45 suites）✅ |
-| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 78 / branches 70 / functions 77 / lines 78（只升不降）；实测 78.83 / 70.38 / 77.58 / 78.64（470 tests，2026-08-07） |
-| Lint 棘轮 | `npm run lint:ci` | 0 错误 / ≤54 警告（`--max-warnings=54`，只降不升；当前 54） |
+| 测试 | `npm run test:ci` | 903 全绿（109 suites）✅ |
+| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 99 / branches 99 / functions 99 / lines 99（只升不降）；实测 100 / 99.86 / 100 / 100（903 tests，2026-08-22，clover.xml 直算） |
+| Lint 棘轮 | `npm run lint:ci` | 0 错误 / 0 警告（`--max-warnings=0`，只降不升；当前 0） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（F25/F33 已决策清零 08-05：Expo 账号当前阶段不需要——测试走 Expo Go 扫码、内部分发走 APK 直装；OTA 延后到发布候选期再定，届时接账号须 app.json updates.url ↔ eas.json projectId 两侧同步，F302 守卫形态） |
 
 覆盖率与警告数均为棘轮门控：新增代码不得使指标回退。
@@ -47,7 +47,7 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 App.tsx                  # 入口：SafeAreaProvider + AppNavigator
 src/
   navigation/            # AppNavigator（登录态切换 + Tab 导航）
-  screens/               # 12 个页面（Home/Scan/Charging/Order/Payment/Profile...）
+  screens/               # 13 个页面（Home/Scan/Charging/Order/Payment/Profile/Coupon/Energy/Vehicle...）
   components/            # MapView / StationCard / StatusBadge / EmptyState / LoadingSpinner
   hooks/
     useAppLifecycle.ts   # 前后台(AppState) + 联网(NetInfo) 状态聚合
