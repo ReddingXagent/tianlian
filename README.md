@@ -39,18 +39,18 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（274 用例全绿）
+npm test             # jest 单测（213 套 / 1592 用例全绿）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo export --platform ios   # 产物构建验证
 ```
 
-- 测试覆盖率（`src/**` 全量口径，F248 起；排除 `*.d.ts` 与 `types/`）：Statements 84.24% | Branches 70.93% | Functions 79.6% | Lines 85.91%
-- coverageThreshold 已配置（F348 落地高优卡）：global statements 84 / branches 70 / functions 79 / lines 85，取实测 84.24/70.93/79.6/85.91 下取整（station/user-app 同款下取整惯例），门限棘轮只升不降（F207）
-- components / store 层 100% 覆盖；screens 层 15 个页面均已补测试（F17 ✅ 已解决）
+- 测试覆盖率（`src/**` 全量口径，F248 起；排除 `*.d.ts` 与 `types/`）：Statements 99.9% | Branches 99.94% | Functions 100% | Lines 100%
+- coverageThreshold 已配置（F348 落地高优卡，后经棘轮上调）：global statements 99 / branches 99 / functions 99 / lines 99，实测 99.9/99.94/100/100（下取整惯例），门限棘轮只升不降（F207）
+- 全层满格：components / store / navigation / hooks / screens（15 页面）均 100%覆盖；全量口径 S 99.9 / B 99.94 为个别防御分支未覆盖极限
 
 `make ci-local` 模拟 CI 全流程 = `make check`（守卫链 + tsc + lint + jest）+ doctor 体检 + 双平台导出 + bundle 体积门控：
 
-**构建守卫族十九枚**（`make check` 内 18 个 check:* 脚本 + bundle-size；每枚均三源接线 package.json↔Makefile↔CI，由 F250 guard-wiring 自动对账，ci-parity 25 门控）：
+**构建守卫族二十枚**（`make check` 内 19 个 check:* 脚本 + bundle-size；每枚均三源接线 package.json↔Makefile↔CI，由 F250 guard-wiring 自动对账，ci-parity 26 门控）：
 
 | 守卫 | 对账语义 | 编号 |
 |------|---------|------|
@@ -111,12 +111,12 @@ src/
 - **F21**: ScanScreen 为手动输码，缺 expo-camera 真扫码能力
 - **F22**: `api.ts` BASE_URL 硬编码生产 IP，缺 dev/mock 环境切换
 - **F25**: ~~EAS Update 通道未配，需 Expo 账号~~ → 08-05 决策清零：当前阶段不需要 Expo 账号（测试 Expo Go 扫码/内部分发 APK 直装），OTA 延后到发布候选期
-- **F69**: InspectionDetailScreen 覆盖 57.4%、ScanScreen 65.62%、WorkOrderDetailScreen 65.45% 为薄弱 Screen
-- **F70**: AppNavigator 0% 覆盖（导航层，测试成本高）
+- **F69**: ~~InspectionDetailScreen 57.4%、ScanScreen 65.62%、WorkOrderDetailScreen 65.45% 薄弱~~ ✅ 已解决：三 Screen 均 100%（15 页面全 100%）
+- **F70**: ~~AppNavigator 0% 覆盖~~ ✅ 已解决：100%
 - **F74**: WorkOrderDetailScreen 测试有 act() 警告（不影响通过）
 - **F82**: LoginScreen Animated act() 警告（不影响测试通过）
-- **F86**: Branches 覆盖 71.65%，较上轮 64.19% 提升
-- **F92**: InspectionDetailScreen 为本仓覆盖最薄弱 Screen（57.4%）
+- **F86**: ~~Branches 71.65%~~ ✅ 已解决：当前 99.94%（全层接近满格）
+- **F92**: ~~InspectionDetailScreen 57.4% 最薄弱~~ ✅ 已解决：100%
 
 ## 领域边界
 
