@@ -58,10 +58,10 @@
       "^@/(.*)$": "<rootDir>/src/$1",
       "^react-native$": "<rootDir>/node_modules/react-native",
       "^react$": "<rootDir>/node_modules/react",
-      "^@tianlian/shared-ui$": "<rootDir>/../shared-ui/src",
-      "^@tianlian/shared-ui/(.*)$": "<rootDir>/../shared-ui/src/$1",
-      "^@tianlian/shared-types$": "<rootDir>/../shared-types/src",
-      "^@tianlian/shared-types/(.*)$": "<rootDir>/../shared-types/src/$1"
+      "^@tianlian/shared-ui$": "<rootDir>/../tianlian-shared/shared-ui/src",
+      "^@tianlian/shared-ui/(.*)$": "<rootDir>/../tianlian-shared/shared-ui/src/$1",
+      "^@tianlian/shared-types$": "<rootDir>/../tianlian-shared/shared-types/src",
+      "^@tianlian/shared-types/(.*)$": "<rootDir>/../tianlian-shared/shared-types/src/$1"
     },
     "setupFilesAfterEnv": [
       "@testing-library/jest-native/extend-expect"
