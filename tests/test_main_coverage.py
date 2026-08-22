@@ -393,7 +393,7 @@ class TestSyncCachedAlarmsBody:
 
         await gw._sync_cached_alarms()
 
-        topic, payload = gw.mqtt.publish_raw.call_args[0]
+        _topic, payload = gw.mqtt.publish_raw.call_args[0]
         data = json.loads(payload)
         assert data["replayed"] is True
 

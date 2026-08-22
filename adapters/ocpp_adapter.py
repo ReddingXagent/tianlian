@@ -1029,7 +1029,7 @@ class OCPPAdapter:
                     )
 
                     # Wait for either task to complete or connection to close
-                    done, pending = await asyncio.wait(
+                    _done, pending = await asyncio.wait(
                         [heartbeat_task, meter_task],
                         return_when=asyncio.FIRST_COMPLETED,
                     )

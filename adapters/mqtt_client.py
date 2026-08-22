@@ -192,7 +192,7 @@ class MQTTClient:
         )
         return {"success_count": success_count, "failure_count": failure_count, "total": len(points)}
 
-    async def publish_status(self, status: str, extra: dict = None) -> bool:
+    async def publish_status(self, status: str, extra: dict | None = None) -> bool:
         """Publish gateway status message (online/offline/heartbeat)"""
         if not self._connected or not self._client:
             return False

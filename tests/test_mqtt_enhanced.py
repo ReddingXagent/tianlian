@@ -59,7 +59,7 @@ class TestLWT:
     """Test Last Will and Testament construction"""
 
     def test_lwt_topic(self, mqtt_client, mqtt_config):
-        topic, payload, qos, retain = mqtt_client._build_lwt()
+        topic, _payload, qos, retain = mqtt_client._build_lwt()
         assert topic == f"{mqtt_config.topic_prefix}/status/offline"
         assert qos == mqtt_config.qos
         assert retain is True

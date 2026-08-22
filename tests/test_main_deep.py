@@ -503,7 +503,7 @@ class TestSyncTelemetryMultiDevice:
 
         await gw._sync_cached_telemetry()
 
-        topic, payload = gw.mqtt.publish_raw.call_args[0]
+        _topic, payload = gw.mqtt.publish_raw.call_args[0]
         data = json.loads(payload)
         assert data["replayed"] is True
         assert data["device_id"] == "DEV-X"

@@ -10,6 +10,7 @@ import contextlib
 import logging
 import random
 from collections.abc import Callable
+from typing import ClassVar
 
 from config import ModbusConfig
 from models import TelemetryPoint
@@ -26,7 +27,7 @@ class ModbusAdapter:
     """
 
     # Register mapping: register index → (field_name, unit, scale_factor)
-    REGISTER_MAP = {
+    REGISTER_MAP: ClassVar[dict[int, tuple[str, str, float]]] = {
         0: ("voltage", "V", 1.0),        # register[0] → voltage (V)
         1: ("current", "A", 1.0),         # register[1] → current (A)
         2: ("power", "kW", 1.0),          # register[2] → power (kW)
@@ -35,7 +36,7 @@ class ModbusAdapter:
         5: ("status", "", 1.0),           # register[5] → status code
     }
 
-    STATUS_MAP = {
+    STATUS_MAP: ClassVar[dict[int, str]] = {
         0: "normal",
         1: "warning",
         2: "fault",
@@ -196,7 +197,7 @@ class ModbusAdapter:
             values = {}
             for idx, reg_idx in enumerate(self.config.registers):
                 if reg_idx in self.REGISTER_MAP:
-                    field_name, unit, scale = self.REGISTER_MAP[reg_idx]
+                    field_name, _unit, scale = self.REGISTER_MAP[reg_idx]
                     raw_value = registers[idx]
                     values[field_name] = raw_value * scale
 

@@ -19,9 +19,6 @@ ignore = [
     "BLE001",   # 债务: 33处 blind-except，需逐步收窄异常类型
     "E402",     # 债务: 14处 import不在顶部（scripts路径注入等，需人工确认）
     "RUF001", "RUF002", "RUF003",  # 中文注释/文档的全角标点，非歧义误报
-    "RUF012",   # 债务: 2处 mutable-class-default
-    "RUF013",   # 债务: 1处 implicit-optional
-    "RUF059",   # 债务: 3处 unused-unpacked-variable
     "UP017",   # datetime.UTC 是 Py3.11+, Pi 运行 Py3.10
 ]
 
