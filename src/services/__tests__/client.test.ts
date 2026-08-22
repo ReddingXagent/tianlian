@@ -158,7 +158,6 @@ describe('client.ts — full branch coverage', () => {
       (global as unknown as { __DEV__: boolean }).__DEV__ = false;
       try {
         jest.isolateModules(() => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const mod = require('../api-modules/client');
           void mod;
         });
