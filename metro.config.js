@@ -26,4 +26,14 @@ config.resolver.extraNodeModules = {
   '@tianlian/shared-types': path.resolve(sharedRoot, 'shared-types/src'),
 };
 
+// nodeModulesPaths: 显式把 projectRoot 自己的 node_modules 加入裸依赖(hashless bare specifier)解析路径
+// 根因(F1995 破解): shared-ui/src 经 babel-preset-expo 变换生成的 @babel/runtime/helpers/*
+// 是相对 shared 源文件解析的缺module-root裸依赖, metro 默认 hierarchical lookup 沿
+// sharedRoot 向上爬只得到 tianlian-shared/../../node_modules(不存在), 找不到项目自己的
+// node_modules/@babel/runtime。显式指定 projectRoot/node_modules 后, runtime helper 从
+// 各仓自己 node_modules 解析, 彻底摆脱对 tianlian-shared/node_modules 软链的巧合依赖。
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, 'node_modules'),
+];
+
 module.exports = config;
