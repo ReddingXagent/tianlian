@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useProfile } from '../hooks/useProfile';
+import { useTheme } from '../hooks/useTheme';
 import { RootStackParamList } from '../types';
+import type { ThemeColors } from '../theme/colors';
 import { formatMoney, formatEnergy } from '../utils/format';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -27,6 +29,9 @@ const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { user, logout } = useAuthStore();
   const { stats } = useProfile();
+  const { colors } = useTheme();
+
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handleLogout = useCallback(() => {
     Alert.alert(
@@ -125,154 +130,155 @@ const ProfileScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f6fa',
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  profileCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  avatarContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#1a73e8',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  avatarText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  nickname: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  phone: {
-    fontSize: 14,
-    color: '#999',
-    marginBottom: 12,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e3f2fd',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  balanceLabel: {
-    fontSize: 13,
-    color: '#1565c0',
-    marginRight: 6,
-  },
-  balanceValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1565c0',
-  },
-  statsCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statNum: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: '#eee',
-    marginHorizontal: 8,
-  },
-  menuCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  menuIcon: {
-    fontSize: 18,
-    marginRight: 12,
-  },
-  menuLabel: {
-    flex: 1,
-    fontSize: 15,
-    color: '#333',
-  },
-  menuArrow: {
-    fontSize: 20,
-    color: '#ccc',
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginLeft: 50,
-  },
-  logoutButton: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#fce4ec',
-  },
-  logoutText: {
-    fontSize: 16,
-    color: '#c62828',
-    fontWeight: '500',
-  },
-  version: {
-    textAlign: 'center',
-    fontSize: 12,
-    color: '#ccc',
-  },
-});
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.pageBg,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 40,
+    },
+    profileCard: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 16,
+      padding: 24,
+      alignItems: 'center',
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    avatarContainer: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    avatarText: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.onPrimary,
+    },
+    nickname: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: 4,
+    },
+    phone: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: 12,
+    },
+    balanceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.infoBg,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+    },
+    balanceLabel: {
+      fontSize: 13,
+      color: colors.primary,
+      marginRight: 6,
+    },
+    balanceValue: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: colors.primary,
+    },
+    statsCard: {
+      flexDirection: 'row',
+      backgroundColor: colors.cardBg,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    statItem: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    statNum: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    statLabel: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    statDivider: {
+      width: 1,
+      backgroundColor: colors.border,
+      marginHorizontal: 8,
+    },
+    menuCard: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 12,
+      marginBottom: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    menuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    },
+    menuIcon: {
+      fontSize: 18,
+      marginRight: 12,
+    },
+    menuLabel: {
+      flex: 1,
+      fontSize: 15,
+      color: colors.textPrimary,
+    },
+    menuArrow: {
+      fontSize: 20,
+      color: colors.textMuted,
+    },
+    menuDivider: {
+      height: 1,
+      backgroundColor: colors.divider,
+      marginLeft: 50,
+    },
+    logoutButton: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 12,
+      paddingVertical: 14,
+      alignItems: 'center',
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.errorBg,
+    },
+    logoutText: {
+      fontSize: 16,
+      color: colors.error,
+      fontWeight: '500',
+    },
+    version: {
+      textAlign: 'center',
+      fontSize: 12,
+      color: colors.textMuted,
+    },
+  });
 
 export default ProfileScreen;
