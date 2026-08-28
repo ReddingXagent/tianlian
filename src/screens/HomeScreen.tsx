@@ -181,14 +181,14 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   searchContainer: {
     backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'colors.divider',
+    borderBottomColor: colors.divider,
   },
   searchRow: {
     flexDirection: 'row',
@@ -196,12 +196,12 @@ const createStyles = (colors: ThemeColors) =>
   },
   searchInput: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
   },
   searchBtn: {
     backgroundColor: colors.primary,

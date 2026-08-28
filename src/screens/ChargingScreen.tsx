@@ -171,7 +171,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
     padding: 16,
   },
   centerContainer: {
@@ -183,7 +183,7 @@ const createStyles = (colors: ThemeColors) =>
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
   animationArea: {
     alignItems: 'center',
@@ -208,7 +208,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   powerUnit: {
     fontSize: 14,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   infoCard: {
@@ -228,15 +228,15 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'colors.divider',
+    borderBottomColor: colors.divider,
   },
   infoLabel: {
     fontSize: 14,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
   infoValue: {
     fontSize: 14,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   amountCard: {
@@ -253,12 +253,12 @@ const createStyles = (colors: ThemeColors) =>
   },
   amountLabel: {
     fontSize: 14,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   amountValue: {
     fontSize: 16,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
   },
   amountNum: {
     fontSize: 32,

@@ -212,7 +212,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   content: {
     padding: 16,
@@ -240,11 +240,11 @@ const createStyles = (colors: ThemeColors) =>
   scannerHint: {
     fontSize: 15,
     fontWeight: '500',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
   },
   scannerSubHint: {
     fontSize: 12,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginTop: 4,
     textAlign: 'center',
     paddingHorizontal: 20,
@@ -261,7 +261,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     borderWidth: 1,
     borderColor: '#ddd',
   },
@@ -285,7 +285,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   quickLabel: {
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 8,
   },
   quickRow: {
@@ -321,7 +321,7 @@ const createStyles = (colors: ThemeColors) =>
   resultTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   resultCard: {
@@ -347,13 +347,13 @@ const createStyles = (colors: ThemeColors) =>
   resultName: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     flex: 1,
     marginRight: 8,
   },
   resultStation: {
     fontSize: 14,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 8,
   },
   resultMeta: {
@@ -363,7 +363,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   resultMetaItem: {
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
   priceRow: {
     marginTop: 4,

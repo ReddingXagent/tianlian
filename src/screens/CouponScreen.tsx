@@ -106,7 +106,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   listContent: {
     padding: 16,
@@ -132,11 +132,11 @@ const createStyles = (colors: ThemeColors) =>
   couponTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
   },
   couponDesc: {
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 12,
   },
   couponMeta: {
@@ -146,8 +146,8 @@ const createStyles = (colors: ThemeColors) =>
   },
   couponMetaItem: {
     fontSize: 11,
-    color: 'colors.textSecondary',
-    backgroundColor: 'colors.pageBg',
+    color: colors.textSecondary,
+    backgroundColor: colors.pageBg,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,

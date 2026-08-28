@@ -180,7 +180,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   content: {
     padding: 16,
@@ -206,7 +206,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   statusNo: {
     fontSize: 12,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   section: {
@@ -215,7 +215,7 @@ const createStyles = (colors: ThemeColors) =>
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   infoCard: {
@@ -235,15 +235,15 @@ const createStyles = (colors: ThemeColors) =>
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'colors.divider',
+    borderBottomColor: colors.divider,
   },
   infoLabel: {
     fontSize: 14,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
   infoValue: {
     fontSize: 14,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   cancelBtn: {

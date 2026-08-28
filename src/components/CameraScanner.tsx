@@ -139,7 +139,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   permissionText: {
     fontSize: 13,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     marginBottom: 12,
     textAlign: 'center',
   },
@@ -156,7 +156,7 @@ const createStyles = (colors: ThemeColors) =>
   cancelText: {
     marginTop: 12,
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
 });
 

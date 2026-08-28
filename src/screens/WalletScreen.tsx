@@ -161,7 +161,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   balanceCard: {
     backgroundColor: colors.primary,
@@ -196,7 +196,7 @@ const createStyles = (colors: ThemeColors) =>
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     padding: 16,
     paddingBottom: 8,
   },
@@ -223,12 +223,12 @@ const createStyles = (colors: ThemeColors) =>
   recordType: {
     fontSize: 14,
     fontWeight: '500',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     marginBottom: 2,
   },
   recordDesc: {
     fontSize: 12,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   recordTime: {

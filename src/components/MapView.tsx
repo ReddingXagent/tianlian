@@ -180,7 +180,7 @@ const createStyles = (colors: ThemeColors) =>
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   emptyIcon: {
     fontSize: 48,
@@ -188,7 +188,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   emptyText: {
     fontSize: 14,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
   mapBackground: {
     flex: 1,
@@ -249,7 +249,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   markerLabel: {
     fontSize: 10,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     fontWeight: '600',
     marginTop: 2,
     backgroundColor: 'rgba(255,255,255,0.9)',
@@ -263,7 +263,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   markerDistance: {
     fontSize: 9,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     backgroundColor: 'rgba(255,255,255,0.8)',
     paddingHorizontal: 3,
     borderRadius: 2,
@@ -288,12 +288,12 @@ const createStyles = (colors: ThemeColors) =>
   },
   legendText: {
     fontSize: 11,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
   legendCount: {
     marginLeft: 'auto',
     fontSize: 11,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
 });

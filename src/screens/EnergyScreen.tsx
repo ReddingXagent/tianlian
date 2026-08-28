@@ -203,7 +203,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   content: {
     padding: 16,
@@ -234,7 +234,7 @@ const createStyles = (colors: ThemeColors) =>
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 8,
     marginLeft: 4,
   },

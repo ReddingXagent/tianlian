@@ -180,7 +180,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   filterRow: {
     flexDirection: 'row',
@@ -189,20 +189,20 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: 10,
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: 'colors.divider',
+    borderBottomColor: colors.divider,
   },
   filterBtn: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   filterBtnActive: {
     backgroundColor: colors.primary,
   },
   filterBtnText: {
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   filterBtnTextActive: {
@@ -232,18 +232,18 @@ const createStyles = (colors: ThemeColors) =>
   orderStation: {
     fontSize: 15,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     flex: 1,
     marginRight: 8,
   },
   orderNo: {
     fontSize: 12,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 10,
   },
   orderMeta: {
     flexDirection: 'row',
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
     borderRadius: 8,
     padding: 10,
     marginBottom: 8,
@@ -254,12 +254,12 @@ const createStyles = (colors: ThemeColors) =>
   },
   metaLabel: {
     fontSize: 11,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   metaValue: {
     fontSize: 13,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   orderTime: {

@@ -95,18 +95,18 @@ const createStyles = (colors: ThemeColors) =>
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     flex: 1,
     marginRight: 8,
   },
   address: {
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 10,
   },
   priceRow: {
     flexDirection: 'row',
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
@@ -117,12 +117,12 @@ const createStyles = (colors: ThemeColors) =>
   },
   priceLabel: {
     fontSize: 12,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   priceValue: {
     fontSize: 13,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
   },
   priceNum: {
     fontSize: 18,
@@ -130,7 +130,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   priceUnit: {
     fontSize: 12,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
   priceDivider: {
     width: 1,
@@ -156,7 +156,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   distance: {
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
   },
 });
 

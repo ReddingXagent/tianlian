@@ -270,7 +270,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'colors.pageBg',
+    backgroundColor: colors.pageBg,
   },
   listContent: {
     padding: 16,
@@ -295,7 +295,7 @@ const createStyles = (colors: ThemeColors) =>
   vehiclePlate: {
     fontSize: 18,
     fontWeight: '700',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     marginRight: 8,
   },
   defaultBadge: {
@@ -314,7 +314,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   vehicleDetail: {
     fontSize: 13,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   vehicleActions: {
@@ -368,7 +368,7 @@ const createStyles = (colors: ThemeColors) =>
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -379,8 +379,8 @@ const createStyles = (colors: ThemeColors) =>
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: 'colors.textPrimary',
-    backgroundColor: 'colors.inputBg',
+    color: colors.textPrimary,
+    backgroundColor: colors.inputBg,
     marginBottom: 12,
   },
   defaultCheck: {
@@ -409,7 +409,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   defaultCheckLabel: {
     fontSize: 14,
-    color: 'colors.textPrimary',
+    color: colors.textPrimary,
   },
   modalActions: {
     flexDirection: 'row',
@@ -425,7 +425,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   modalCancelText: {
     fontSize: 15,
-    color: 'colors.textSecondary',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   modalSaveBtn: {
