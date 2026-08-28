@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,11 +18,16 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
 import { formatMoney } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 type StationDetailRouteProp = RouteProp<RootStackParamList, 'StationDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const StationDetailScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const route = useRoute<StationDetailRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { stationId } = route.params;
@@ -123,8 +128,8 @@ const StationDetailScreen: React.FC = () => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={() => loadData(true)}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
@@ -234,7 +239,8 @@ const StationDetailScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -317,7 +323,7 @@ const styles = StyleSheet.create({
   priceNum: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a73e8',
+    color: colors.primary,
   },
   priceUnit: {
     fontSize: 12,
@@ -345,7 +351,7 @@ const styles = StyleSheet.create({
   },
   navButtonText: {
     fontSize: 15,
-    color: '#1a73e8',
+    color: colors.primary,
     fontWeight: '500',
   },
   summaryRow: {

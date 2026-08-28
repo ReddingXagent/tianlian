@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
 import { formatShortDateTime, formatMoney, formatEnergy } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -27,6 +29,9 @@ const ORDER_STATUS_FILTERS = [
 ];
 
 const OrderListScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const navigation = useNavigation<NavigationProp>();
   const { orders, loading, error, fetchOrders, loadMoreOrders, hasMore, loadingMore } =
     useOrderStore();
@@ -152,7 +157,7 @@ const OrderListScreen: React.FC = () => {
           onEndReachedThreshold={0.3}
           ListFooterComponent={
             loadingMore ? (
-              <ActivityIndicator color="#1a73e8" style={styles.footer} />
+              <ActivityIndicator color={colors.primary} style={styles.footer} />
             ) : !hasMore && orders.length > 0 ? (
               <Text style={styles.footerText}>没有更多了</Text>
             ) : null
@@ -161,8 +166,8 @@ const OrderListScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={['#1a73e8']}
-              tintColor="#1a73e8"
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
         />
@@ -171,7 +176,8 @@ const OrderListScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -192,7 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f6fa',
   },
   filterBtnActive: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
   },
   filterBtnText: {
     fontSize: 13,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePayment } from '../hooks/usePayment';
 import { RootStackParamList, PaymentMethod } from '../types';
 import { formatMoney } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 type PaymentRouteProp = RouteProp<RootStackParamList, 'Payment'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -24,6 +26,9 @@ const PAYMENT_METHODS: { key: PaymentMethod; label: string; icon: string }[] = [
 ];
 
 const PaymentScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const route = useRoute<PaymentRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { orderId, amount } = route.params;
@@ -108,7 +113,8 @@ const PaymentScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -192,16 +198,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   radioSelected: {
-    borderColor: '#1a73e8',
+    borderColor: colors.primary,
   },
   radioInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
   },
   payBtn: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

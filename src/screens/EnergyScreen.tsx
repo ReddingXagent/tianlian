@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,13 @@ import { useEnergy } from '../hooks/useEnergy';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import { formatEnergy, formatMoney } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 const EnergyScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const { summary, loading, refreshing, error, refresh } = useEnergy();
 
   const handleRefresh = useCallback(() => {
@@ -54,8 +59,8 @@ const EnergyScreen: React.FC = () => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
@@ -165,16 +170,43 @@ interface StatRowProps {
   isLast?: boolean;
 }
 
+// StatRow 消费的样式(statRow/statLabel/statValue)均为主题无关的中性色,
+// 独立 staticStyles 定义即可, 无需 useTheme 动态注入。
 const StatRow: React.FC<StatRowProps> = ({ label, value, valueColor, isLast }) => (
-  <View style={[styles.statRow, isLast && styles.statRowLast]}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <Text style={[styles.statValue, valueColor ? { color: valueColor } : null]}>
+  <View style={[staticStyles.statRow, isLast && staticStyles.statRowLast]}>
+    <Text style={staticStyles.statLabel}>{label}</Text>
+    <Text style={[staticStyles.statValue, valueColor ? { color: valueColor } : null]}>
       {value}
     </Text>
   </View>
 );
 
-const styles = StyleSheet.create({
+const staticStyles = StyleSheet.create({
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  statRowLast: {
+    borderBottomWidth: 0,
+  },
+  statLabel: {
+    fontSize: 15,
+    color: '#333',
+  },
+  statValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+  },
+});
+
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -184,7 +216,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   periodCard: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -222,27 +254,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  statRowLast: {
-    borderBottomWidth: 0,
-  },
-  statLabel: {
-    fontSize: 15,
-    color: '#333',
-  },
-  statValue: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#333',
-  },
   totalCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -258,7 +269,7 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1a73e8',
+    color: colors.primary,
   },
   totalYoY: {
     fontSize: 14,

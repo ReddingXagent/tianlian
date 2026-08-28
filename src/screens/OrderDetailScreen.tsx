@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,11 +15,16 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
 import { formatDateTime, formatMoney, formatEnergy } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 type OrderDetailRouteProp = RouteProp<RootStackParamList, 'OrderDetail'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const OrderDetailScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const route = useRoute<OrderDetailRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { orderId } = route.params;
@@ -171,7 +176,8 @@ const OrderDetailScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -254,7 +260,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   payBtn: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',

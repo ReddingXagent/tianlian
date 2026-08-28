@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,13 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import StatusBadge from '../components/StatusBadge';
 import { formatDate, formatMoney } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 const CouponScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const {
     coupons,
     loading,
@@ -78,7 +83,7 @@ const CouponScreen: React.FC = () => {
           onEndReachedThreshold={0.3}
           ListFooterComponent={
             loadingMore ? (
-              <ActivityIndicator color="#1a73e8" style={styles.footer} />
+              <ActivityIndicator color={colors.primary} style={styles.footer} />
             ) : !hasMore && coupons.length > 0 ? (
               <Text style={styles.footerText}>没有更多了</Text>
             ) : null
@@ -87,8 +92,8 @@ const CouponScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={["#1a73e8"]}
-              tintColor="#1a73e8"
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
         />
@@ -97,7 +102,8 @@ const CouponScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',

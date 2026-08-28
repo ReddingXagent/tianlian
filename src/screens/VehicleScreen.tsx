@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,8 +17,13 @@ import { useVehicles } from '../hooks/useVehicles';
 import { Vehicle } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 const VehicleScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const { vehicles, loading, error, refreshing, loadVehicles, handleRefresh, addVehicle, removeVehicle, setDefaultVehicle } =
     useVehicles();
 
@@ -148,8 +153,8 @@ const VehicleScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={["#1a73e8"]}
-            tintColor="#1a73e8"
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
         }
         ListEmptyComponent={
@@ -261,7 +266,8 @@ const VehicleScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -337,7 +343,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 16,
     right: 16,
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -393,8 +399,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   checkboxChecked: {
-    backgroundColor: '#1a73e8',
-    borderColor: '#1a73e8',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   checkmark: {
     color: '#fff',
@@ -427,7 +433,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 8,
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
   },
   modalSaveBtnDisabled: {
     opacity: 0.6,

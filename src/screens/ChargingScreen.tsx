@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,11 +13,16 @@ import { useOrderStore } from '../store/orderStore';
 import { useChargingPolling } from '../hooks/useChargingPolling';
 import { ChargingStatus, RootStackParamList } from '../types';
 import { formatMoney, formatEnergy } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 type ChargingRouteProp = RouteProp<RootStackParamList, 'Charging'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ChargingScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const route = useRoute<ChargingRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { orderId } = route.params;
@@ -74,7 +79,7 @@ const ChargingScreen: React.FC = () => {
     }
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#1a73e8" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>获取充电状态...</Text>
       </View>
     );
@@ -162,7 +167,8 @@ const ChargingScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -198,7 +204,7 @@ const styles = StyleSheet.create({
   powerValue: {
     fontSize: 40,
     fontWeight: '700',
-    color: '#1a73e8',
+    color: colors.primary,
   },
   powerUnit: {
     fontSize: 14,
@@ -281,7 +287,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   retryBtn: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingHorizontal: 32,
     paddingVertical: 10,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,15 @@ import { RootStackParamList } from '../types';
 import StatusBadge from '../components/StatusBadge';
 import CameraScanner from '../components/CameraScanner';
 import { formatMoney } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ScanScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const navigation = useNavigation<NavigationProp>();
   const {
     codeInput,
@@ -203,7 +208,8 @@ const ScanScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -221,7 +227,7 @@ const styles = StyleSheet.create({
     width: 240,
     height: 200,
     borderWidth: 2,
-    borderColor: '#1a73e8',
+    borderColor: colors.primary,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
@@ -260,7 +266,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   scanBtn: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingHorizontal: 24,
     justifyContent: 'center',
@@ -367,7 +373,7 @@ const styles = StyleSheet.create({
     color: '#e65100',
   },
   startBtn: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

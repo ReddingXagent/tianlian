@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,10 +17,15 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import StationCard from '../components/StationCard';
 import MapView from '../components/MapView';
+import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const HomeScreen: React.FC = () => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const navigation = useNavigation<NavigationProp>();
   const {
     stations,
@@ -144,8 +149,8 @@ const HomeScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              colors={['#1a73e8']}
-              tintColor="#1a73e8"
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
           keyboardShouldPersistTaps="handled"
@@ -172,7 +177,8 @@ const HomeScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f6fa',
@@ -198,7 +204,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   searchBtn: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingHorizontal: 20,
     justifyContent: 'center',
@@ -215,7 +221,7 @@ const styles = StyleSheet.create({
   },
   clearSearchText: {
     fontSize: 13,
-    color: '#1a73e8',
+    color: colors.primary,
   },
   list: {
     flex: 1,
