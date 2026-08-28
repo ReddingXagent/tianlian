@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colorsLight.cardBg,
     padding: 24,
   },
   icon: {
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: colorsLight.onPrimary,
     fontSize: 15,
     fontWeight: '500',
   },

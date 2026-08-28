@@ -184,7 +184,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   filterRow: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     paddingHorizontal: 16,
     paddingVertical: 10,
     gap: 8,
@@ -206,14 +206,14 @@ const createStyles = (colors: ThemeColors) =>
     fontWeight: '500',
   },
   filterBtnTextActive: {
-    color: '#fff',
+    color: colors.onPrimary,
   },
   listContent: {
     padding: 16,
     paddingBottom: 32,
   },
   orderCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,

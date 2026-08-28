@@ -187,7 +187,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingBottom: 40,
   },
   statusCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -219,7 +219,7 @@ const createStyles = (colors: ThemeColors) =>
     marginBottom: 10,
   },
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 4,
     shadowColor: '#000',
@@ -247,7 +247,7 @@ const createStyles = (colors: ThemeColors) =>
     fontWeight: '500',
   },
   cancelBtn: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -267,7 +267,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   payBtnText: {
     fontSize: 16,
-    color: '#fff',
+    color: colors.onPrimary,
     fontWeight: '600',
   },
 });

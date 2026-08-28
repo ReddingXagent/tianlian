@@ -97,7 +97,7 @@ const PaymentScreen: React.FC = () => {
         activeOpacity={0.7}
       >
         {paying ? (
-          <ActivityIndicator color="#fff" size="small" />
+          <ActivityIndicator color={colors.onPrimary} size="small" />
         ) : (
           <Text style={styles.payBtnText}>
             确认支付 ¥{formatMoney(amount)}
@@ -124,7 +124,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingBottom: 40,
   },
   amountCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
@@ -156,7 +156,7 @@ const createStyles = (colors: ThemeColors) =>
     marginBottom: 10,
   },
   methodCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     marginBottom: 24,
     shadowColor: '#000',
@@ -217,7 +217,7 @@ const createStyles = (colors: ThemeColors) =>
     opacity: 0.6,
   },
   payBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 18,
     fontWeight: '600',
   },

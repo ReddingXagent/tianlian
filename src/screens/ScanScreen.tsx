@@ -118,7 +118,7 @@ const ScanScreen: React.FC = () => {
           activeOpacity={0.7}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={colors.onPrimary} size="small" />
           ) : (
             <Text style={styles.scanBtnText}>查询</Text>
           )}
@@ -195,7 +195,7 @@ const ScanScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             {starting ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={colors.onPrimary} size="small" />
             ) : (
               <Text style={styles.startBtnText}>
                 {lastResult.status === 'idle' ? '开始充电' : '当前不可用'}
@@ -256,7 +256,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   input: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -276,7 +276,7 @@ const createStyles = (colors: ThemeColors) =>
     opacity: 0.6,
   },
   scanBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -325,7 +325,7 @@ const createStyles = (colors: ThemeColors) =>
     marginBottom: 10,
   },
   resultCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -382,7 +382,7 @@ const createStyles = (colors: ThemeColors) =>
     opacity: 0.6,
   },
   startBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 18,
     fontWeight: '600',
   },

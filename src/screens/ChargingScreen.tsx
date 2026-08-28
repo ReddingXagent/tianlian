@@ -158,7 +158,7 @@ const ChargingScreen: React.FC = () => {
         activeOpacity={0.7}
       >
         {stopping ? (
-          <ActivityIndicator color="#fff" size="small" />
+          <ActivityIndicator color={colors.onPrimary} size="small" />
         ) : (
           <Text style={styles.stopBtnText}>停止充电</Text>
         )}
@@ -178,7 +178,7 @@ const createStyles = (colors: ThemeColors) =>
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.pageBg,
   },
   loadingText: {
     marginTop: 12,
@@ -212,7 +212,7 @@ const createStyles = (colors: ThemeColors) =>
     marginTop: 2,
   },
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -240,7 +240,7 @@ const createStyles = (colors: ThemeColors) =>
     fontWeight: '500',
   },
   amountCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -275,7 +275,7 @@ const createStyles = (colors: ThemeColors) =>
     opacity: 0.6,
   },
   stopBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -293,7 +293,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: 10,
   },
   retryBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 15,
     fontWeight: '600',
   },

@@ -259,7 +259,7 @@ const createStyles = (colors: ThemeColors) =>
     overflow: 'hidden',
   },
   markerLabelSelected: {
-    color: '#fff',
+    color: colors.onPrimary,
   },
   markerDistance: {
     fontSize: 9,

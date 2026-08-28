@@ -224,7 +224,7 @@ const createStyles = (colors: ThemeColors) =>
   periodValue: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#fff',
+    color: colors.onPrimary,
   },
   periodDays: {
     fontSize: 12,
@@ -239,7 +239,7 @@ const createStyles = (colors: ThemeColors) =>
     marginLeft: 4,
   },
   statsCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     marginBottom: 16,
     shadowColor: '#000',
@@ -249,7 +249,7 @@ const createStyles = (colors: ThemeColors) =>
     elevation: 2,
   },
   totalCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',

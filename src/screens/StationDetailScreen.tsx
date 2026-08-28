@@ -250,7 +250,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingBottom: 32,
   },
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -285,7 +285,7 @@ const createStyles = (colors: ThemeColors) =>
     color: colors.textSecondary,
   },
   priceCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -338,7 +338,7 @@ const createStyles = (colors: ThemeColors) =>
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
@@ -356,7 +356,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   summaryRow: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -381,7 +381,7 @@ const createStyles = (colors: ThemeColors) =>
     marginTop: 2,
   },
   chargerCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,

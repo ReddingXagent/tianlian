@@ -184,7 +184,7 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.pageBg,
   },
   searchContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -211,7 +211,7 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: 'center',
   },
   searchBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 15,
     fontWeight: '500',
   },

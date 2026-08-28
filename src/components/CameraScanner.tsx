@@ -111,7 +111,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: 4,
   },
   overlayHintText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 12,
   },
   closeBtn: {
@@ -124,7 +124,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: 4,
   },
   closeBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 12,
   },
   permissionBox: {
@@ -149,7 +149,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: 8,
   },
   permissionBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 14,
     fontWeight: '600',
   },

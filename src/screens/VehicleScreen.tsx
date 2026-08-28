@@ -253,7 +253,7 @@ const VehicleScreen: React.FC = () => {
                 disabled={saving}
               >
                 {saving ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
                 ) : (
                   <Text style={styles.modalSaveText}>保存</Text>
                 )}
@@ -277,7 +277,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingBottom: 100,
   },
   vehicleCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -349,7 +349,7 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: 'center',
   },
   addBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -359,7 +359,7 @@ const createStyles = (colors: ThemeColors) =>
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -403,7 +403,7 @@ const createStyles = (colors: ThemeColors) =>
     borderColor: colors.primary,
   },
   checkmark: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -440,7 +440,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   modalSaveText: {
     fontSize: 15,
-    color: '#fff',
+    color: colors.onPrimary,
     fontWeight: '600',
   },
 });

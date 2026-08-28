@@ -67,7 +67,7 @@ function MainTabs() {
         headerStyle: {
           backgroundColor: colors.primary,
         },
-        headerTintColor: '#fff',
+        headerTintColor: colors.onPrimary,
         headerTitleStyle: {
           fontWeight: '600',
         },
@@ -166,7 +166,7 @@ function MainWithDetail() {
         options={{
           title: '站点详情',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -176,7 +176,7 @@ function MainWithDetail() {
         options={{
           title: '充电中',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
           headerLeft: () => null, // 充电中禁止返回
           gestureEnabled: false,
@@ -188,7 +188,7 @@ function MainWithDetail() {
         options={{
           title: '订单详情',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -198,7 +198,7 @@ function MainWithDetail() {
         options={{
           title: '支付',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -208,7 +208,7 @@ function MainWithDetail() {
         options={{
           title: '车辆管理',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -218,7 +218,7 @@ function MainWithDetail() {
         options={{
           title: '我的钱包',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -228,7 +228,7 @@ function MainWithDetail() {
         options={{
           title: '我的优惠券',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -238,7 +238,7 @@ function MainWithDetail() {
         options={{
           title: '能源概览',
           headerStyle: { backgroundColor: colors.primary },
-          headerTintColor: '#fff',
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -254,11 +254,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
   },
 });

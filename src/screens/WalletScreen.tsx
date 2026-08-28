@@ -176,7 +176,7 @@ const createStyles = (colors: ThemeColors) =>
   balanceValue: {
     fontSize: 40,
     fontWeight: '700',
-    color: '#fff',
+    color: colors.onPrimary,
     marginBottom: 16,
   },
   rechargeBtn: {
@@ -189,7 +189,7 @@ const createStyles = (colors: ThemeColors) =>
     opacity: 0.6,
   },
   rechargeBtnText: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -205,7 +205,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingBottom: 32,
   },
   recordCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,

@@ -113,7 +113,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingBottom: 32,
   },
   couponCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
