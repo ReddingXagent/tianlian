@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { ThemeColors } from '../theme/colors';
+import { useTheme } from '../hooks/useTheme';
 
 export type StatusType =
   | 'online'
@@ -20,32 +22,46 @@ export type StatusType =
   | 'timeout';
 
 interface StatusBadgeProps {
-  /** 已知状态有预设样式/文案；未知字符串原样展示（灰色底） */
+  /** 已知状态有预设样式/文案；未知字符串原样展示（中性底） */
   status: StatusType | (string & {});
   label?: string;
 }
 
-const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
-  online:      { bg: '#e8f5e9', text: '#2e7d32', label: '在线' },
-  offline:     { bg: '#fce4ec', text: '#c62828', label: '离线' },
-  fault:       { bg: '#fff3e0', text: '#e65100', label: '故障' },
-  maintenance: { bg: '#fff8e1', text: '#f57f17', label: '维护' },
-  idle:        { bg: '#e8f5e9', text: '#2e7d32', label: '空闲' },
-  charging:    { bg: '#e3f2fd', text: '#1565c0', label: '充电中' },
-  completed:   { bg: '#e8f5e9', text: '#2e7d32', label: '已完成' },
-  cancelled:   { bg: '#f5f5f5', text: '#616161', label: '已取消' },
-  timeout:     { bg: '#fff3e0', text: '#e65100', label: '超时' },
-  unpaid:      { bg: '#fff3e0', text: '#e65100', label: '未支付' },
-  paid:        { bg: '#e8f5e9', text: '#2e7d32', label: '已支付' },
-  unused:      { bg: '#e3f2fd', text: '#1565c0', label: '未使用' },
-  used:        { bg: '#f5f5f5', text: '#616161', label: '已使用' },
-  expired:     { bg: '#fce4ec', text: '#c62828', label: '已过期' },
-  dc:          { bg: '#e3f2fd', text: '#1565c0', label: '直流' },
-  ac:          { bg: '#f3e5f5', text: '#7b1fa2', label: '交流' },
+/** 状态 → 语义色键映射（F2783 Phase 4b：值改语义键，运行时经 createStyles 解析，随主题翻转） */
+type SemanticPair = { bg: keyof ThemeColors; text: keyof ThemeColors; label: string };
+
+const STATUS_SEMANTICS: Record<string, SemanticPair> = {
+  online:      { bg: 'successBg', text: 'success', label: '在线' },
+  offline:     { bg: 'errorBg',   text: 'error',   label: '离线' },
+  fault:       { bg: 'warningBg', text: 'warning', label: '故障' },
+  maintenance: { bg: 'warningAmberBg', text: 'warningAmber', label: '维护' },
+  idle:        { bg: 'successBg', text: 'success', label: '空闲' },
+  charging:    { bg: 'infoBg',    text: 'info',    label: '充电中' },
+  completed:   { bg: 'successBg', text: 'success', label: '已完成' },
+  cancelled:   { bg: 'neutralBg', text: 'neutralText', label: '已取消' },
+  timeout:     { bg: 'warningBg', text: 'warning', label: '超时' },
+  unpaid:      { bg: 'warningBg', text: 'warning', label: '未支付' },
+  paid:        { bg: 'successBg', text: 'success', label: '已支付' },
+  unused:      { bg: 'infoBg',    text: 'info',    label: '未使用' },
+  used:        { bg: 'neutralBg', text: 'neutralText', label: '已使用' },
+  expired:     { bg: 'errorBg',   text: 'error',   label: '已过期' },
+  dc:          { bg: 'infoBg',    text: 'info',    label: '直流' },
+  ac:          { bg: 'purpleBg',  text: 'purple',  label: '交流' },
+};
+
+export const createStyles = (colors: ThemeColors) => {
+  const resolve = (status: string): { bg: string; text: string; label: string } =>
+    STATUS_SEMANTICS[status]
+      ? { bg: colors[STATUS_SEMANTICS[status].bg], text: colors[STATUS_SEMANTICS[status].text], label: STATUS_SEMANTICS[status].label }
+      : { bg: colors.neutralBg, text: colors.neutralText, label: status };
+
+  return { resolve };
 };
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label }) => {
-  const config = STATUS_CONFIG[status] || { bg: '#f5f5f5', text: '#616161', label: status };
+  const { colors } = useTheme();
+  const { resolve } = useMemo(() => createStyles(colors), [colors]);
+  const config = resolve(status);
   const displayLabel = label || config.label;
 
   return (

@@ -25,6 +25,13 @@ export interface ThemeColors {
   infoBg: string;
   successBg: string;
   warningBg: string;
+  info: string;
+  neutralBg: string;
+  neutralText: string;
+  purple: string;
+  purpleBg: string;
+  warningAmber: string;
+  warningAmberBg: string;
 }
 
 export const colorsLight: ThemeColors = {
@@ -45,6 +52,13 @@ export const colorsLight: ThemeColors = {
   infoBg: '#e3f2fd',
   successBg: '#e8f5e9',
   warningBg: '#fff3e0',
+  info: '#1565c0',
+  neutralBg: '#f5f5f5',
+  neutralText: '#616161',
+  purple: '#7b1fa2',
+  purpleBg: '#f3e5f5',
+  warningAmber: '#f57f17',
+  warningAmberBg: '#fff8e1',
 };
 
 export const colorsDark: ThemeColors = {
@@ -65,4 +79,11 @@ export const colorsDark: ThemeColors = {
   infoBg: '#1a2b3e',
   successBg: '#1c2b1c',
   warningBg: '#33291c',
+  info: '#64b5f6',
+  neutralBg: '#2a2a2a',
+  neutralText: '#9e9e9e',
+  purple: '#ce93d8',
+  purpleBg: '#2e2135',
+  warningAmber: '#ffca28',
+  warningAmberBg: '#332f1e',
 };
