@@ -9,28 +9,28 @@
  */
 import { View, Text, StyleSheet } from 'react-native';
 import { useAppLifecycle } from '../hooks/useAppLifecycle';
+import { useTheme } from '../hooks/useTheme';
 
 export default function OfflineBanner() {
   const { isConnected } = useAppLifecycle();
+  const { colors } = useTheme();
 
   if (isConnected !== false) return null;
 
   return (
-    <View style={styles.banner} testID="offline-banner">
-      <Text style={styles.text}>网络已断开 · 显示缓存数据</Text>
+    <View style={[styles.banner, { backgroundColor: colors.warning }]} testID="offline-banner">
+      <Text style={[styles.text, { color: colors.cardBg }]}>网络已断开 · 显示缓存数据</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: '#e65100',
     paddingVertical: 6,
     paddingHorizontal: 16,
     alignItems: 'center',
   },
   text: {
-    color: '#fff',
     fontSize: 13,
     fontWeight: '500',
   },

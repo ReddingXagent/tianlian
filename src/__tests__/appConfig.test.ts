@@ -5,7 +5,7 @@ import appJson from '../../app.json';
  * - expo-camera 权限声明: 缺 NSCameraUsageDescription/Android CAMERA 权限,
  *   真机扫码权限请求直接失败(F196教训: 装了expo-camera却在plugins漏配)
  * - platforms 限定 android+ios(F179: 裸export曾误挂web)
- * - userInterfaceStyle 钉死 light(F400: 全仓零深色主题分支, 漂移automatic即原生容器静默深色分裂)
+ * - userInterfaceStyle 钉死 automatic(F2783: 深色模式主题分支已全仓落地, 漂回light即原生容器拒绝深色)
  * - orientation 钉死 portrait(F407: 全仓零响应式分支, 漂移default即横屏布局静默崩坏)
  */
 describe('app.json 配置回归防护', () => {
@@ -32,11 +32,11 @@ describe('app.json 配置回归防护', () => {
     expect(expo.platforms).toEqual(['android', 'ios']);
   });
 
-  it('userInterfaceStyle 钉死 light(全仓零深色主题分支, 漂移automatic即静默分裂)', () => {
-    // 全仓366处硬编码色值、零 useColorScheme/Appearance 主题分支: 无深色主题实现。
-    // 漂移 "automatic" 或删键(Expo缺省即automatic)→系统深色模式传入键盘/弹窗/状态栏
-    // 等原生容器而RN内容仍浅色→外观静默分裂, tsc盲区(F25/F33决策门禁同族)。
-    expect(expo.userInterfaceStyle).toBe('light');
+  it('userInterfaceStyle 钉死 automatic(深色模式主题分支已全仓落地, 漂回light即拒绝深色)', () => {
+    // F2783 Phase 1-4: useTheme 全仓覆盖(screen+component), 中性色/主蓝/语义色族均已语义化。
+    // 漂移 "light" → 系统深色模式下原生容器(键盘/弹窗/状态栏)强制浅色,
+    // 深色主题被容器层拒绝, F2783 适配失效(F400 反向门禁)。
+    expect(expo.userInterfaceStyle).toBe('automatic');
   });
 
   it('orientation 钉死 portrait(全仓零响应式分支, 漂移default即横屏静默崩坏)', () => {

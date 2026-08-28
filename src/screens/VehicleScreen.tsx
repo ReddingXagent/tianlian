@@ -301,7 +301,7 @@ const createStyles = (colors: ThemeColors) =>
   defaultBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    backgroundColor: '#e3f2fd',
+    backgroundColor: colors.infoBg,
     borderRadius: 4,
   },
   defaultBadgeText: {
@@ -325,7 +325,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 6,
-    backgroundColor: '#e3f2fd',
+    backgroundColor: colors.infoBg,
   },
   actionBtnDanger: {
     backgroundColor: '#fce4ec',
@@ -336,7 +336,7 @@ const createStyles = (colors: ThemeColors) =>
     fontWeight: '500',
   },
   actionBtnTextDanger: {
-    color: '#c62828',
+    color: colors.error,
   },
   addBtn: {
     position: 'absolute',
@@ -374,7 +374,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -393,7 +393,7 @@ const createStyles = (colors: ThemeColors) =>
     height: 22,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
@@ -421,7 +421,7 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: 'center',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
   },
   modalCancelText: {
     fontSize: 15,

@@ -132,11 +132,11 @@ const MapView: React.FC<MapViewProps> = ({
       {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#2e7d32' }]} />
+          <View style={[styles.legendDot, { backgroundColor: colors.success }]} />
           <Text style={styles.legendText}>可用</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#c62828' }]} />
+          <View style={[styles.legendDot, { backgroundColor: colors.error }]} />
           <Text style={styles.legendText}>已满</Text>
         </View>
         <Text style={styles.legendCount}>

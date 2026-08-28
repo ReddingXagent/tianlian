@@ -143,7 +143,7 @@ const createStyles = (colors: ThemeColors) =>
   amountValue: {
     fontSize: 40,
     fontWeight: '700',
-    color: '#e65100',
+    color: colors.warning,
   },
   amountSymbol: {
     fontSize: 24,
@@ -193,7 +193,7 @@ const createStyles = (colors: ThemeColors) =>
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -263,7 +263,7 @@ const createStyles = (colors: ThemeColors) =>
     fontSize: 16,
     color: colors.textPrimary,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
   },
   scanBtn: {
     backgroundColor: colors.primary,
@@ -296,7 +296,7 @@ const createStyles = (colors: ThemeColors) =>
   quickBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: '#e3f2fd',
+    backgroundColor: colors.infoBg,
     borderRadius: 8,
   },
   quickBtnText: {
@@ -311,7 +311,7 @@ const createStyles = (colors: ThemeColors) =>
     marginBottom: 16,
   },
   errorText: {
-    color: '#c62828',
+    color: colors.error,
     fontSize: 14,
     textAlign: 'center',
   },
@@ -370,7 +370,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   resultPrice: {
     fontSize: 13,
-    color: '#e65100',
+    color: colors.warning,
   },
   startBtn: {
     backgroundColor: colors.primary,

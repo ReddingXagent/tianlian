@@ -148,13 +148,13 @@ const OrderDetailScreen: React.FC = () => {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>优惠减免</Text>
-            <Text style={[styles.infoValue, { color: '#2e7d32' }]}>
+            <Text style={[styles.infoValue, { color: colors.success }]}>
               -¥{formatMoney(order.couponDiscount)}
             </Text>
           </View>
           <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
             <Text style={styles.infoLabel}>实付金额</Text>
-            <Text style={[styles.infoValue, { color: '#e65100', fontWeight: '700' }]}>
+            <Text style={[styles.infoValue, { color: colors.warning, fontWeight: '700' }]}>
               ¥{formatMoney(order.amount - order.couponDiscount)}
             </Text>
           </View>
@@ -201,7 +201,7 @@ const createStyles = (colors: ThemeColors) =>
   statusAmount: {
     fontSize: 36,
     fontWeight: '700',
-    color: '#e65100',
+    color: colors.warning,
     marginTop: 8,
   },
   statusNo: {
@@ -256,7 +256,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   cancelBtnText: {
     fontSize: 16,
-    color: '#c62828',
+    color: colors.error,
     fontWeight: '500',
   },
   payBtn: {

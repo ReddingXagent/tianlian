@@ -58,10 +58,10 @@ const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
       {/* 底部：距离 + 可用枪数 */}
       <View style={styles.bottomRow}>
         <View style={styles.availabilityRow}>
-          <Text style={[styles.availabilityDot, { color: hasAvailable ? '#2e7d32' : '#c62828' }]}>
+          <Text style={[styles.availabilityDot, { color: hasAvailable ? colors.success : colors.error }]}>
             ●
           </Text>
-          <Text style={[styles.availabilityText, { color: hasAvailable ? '#2e7d32' : '#c62828' }]}>
+          <Text style={[styles.availabilityText, { color: hasAvailable ? colors.success : colors.error }]}>
             {hasAvailable ? `可用 ${availableText}` : `已满 ${availableText}`}
           </Text>
         </View>
@@ -134,7 +134,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   priceDivider: {
     width: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: colors.border,
     marginHorizontal: 8,
   },
   bottomRow: {

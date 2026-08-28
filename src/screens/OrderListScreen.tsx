@@ -89,7 +89,7 @@ const OrderListScreen: React.FC = () => {
           </View>
           <View style={styles.metaItem}>
             <Text style={styles.metaLabel}>费用</Text>
-            <Text style={[styles.metaValue, { color: '#e65100', fontWeight: '700' }]}>
+            <Text style={[styles.metaValue, { color: colors.warning, fontWeight: '700' }]}>
               ¥{formatMoney(item.amount)}
             </Text>
           </View>

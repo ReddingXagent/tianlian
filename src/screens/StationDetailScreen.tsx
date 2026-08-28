@@ -178,7 +178,7 @@ const StationDetailScreen: React.FC = () => {
           <View style={styles.priceItem}>
             <Text style={styles.priceLabel}>合计</Text>
             <Text style={styles.priceValue}>
-              <Text style={[styles.priceNum, { color: '#e65100' }]}>
+              <Text style={[styles.priceNum, { color: colors.warning }]}>
                 {formatMoney(station ? station.pricePerKwh + station.serviceFee : 0)}
               </Text>
               <Text style={styles.priceUnit}> 元/度</Text>
@@ -200,7 +200,7 @@ const StationDetailScreen: React.FC = () => {
           <Text style={styles.summaryLabel}>总枪数</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryNum, { color: '#2e7d32' }]}>{availableCount}</Text>
+          <Text style={[styles.summaryNum, { color: colors.success }]}>{availableCount}</Text>
           <Text style={styles.summaryLabel}>空闲</Text>
         </View>
         <View style={styles.summaryItem}>
@@ -331,7 +331,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   priceDivider: {
     width: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: colors.border,
     marginHorizontal: 8,
   },
   navButton: {
@@ -343,7 +343,7 @@ const createStyles = (colors: ThemeColors) =>
     padding: 14,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#e3f2fd',
+    borderColor: colors.infoBg,
   },
   navButtonIcon: {
     fontSize: 18,
@@ -414,7 +414,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   chargerPrice: {
     fontSize: 13,
-    color: '#e65100',
+    color: colors.warning,
     fontWeight: '500',
   },
 });

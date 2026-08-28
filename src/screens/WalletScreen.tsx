@@ -79,7 +79,7 @@ const WalletScreen: React.FC = () => {
         <Text
           style={[
             styles.recordAmount,
-            { color: item.type === 'consume' ? '#c62828' : '#2e7d32' },
+            { color: item.type === 'consume' ? colors.error : colors.success },
           ]}
         >
           {item.type === 'consume' || item.type === 'withdraw' ? '-' : '+'}

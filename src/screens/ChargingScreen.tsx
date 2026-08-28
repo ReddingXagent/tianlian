@@ -193,7 +193,7 @@ const createStyles = (colors: ThemeColors) =>
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#e3f2fd',
+    backgroundColor: colors.infoBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -263,10 +263,10 @@ const createStyles = (colors: ThemeColors) =>
   amountNum: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#e65100',
+    color: colors.warning,
   },
   stopBtn: {
-    backgroundColor: '#c62828',
+    backgroundColor: colors.error,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -281,7 +281,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   errorText: {
     fontSize: 14,
-    color: '#c62828',
+    color: colors.error,
     marginBottom: 16,
     textAlign: 'center',
     paddingHorizontal: 24,

@@ -85,7 +85,7 @@ const EnergyScreen: React.FC = () => {
         <StatRow
           label="同比"
           value={`${summary.yoy.pvGenerationYoY >= 0 ? '+' : '-'}${(Math.abs(summary.yoy.pvGenerationYoY) * 100).toFixed(1)}%`}
-          valueColor={summary.yoy.pvGenerationYoY >= 0 ? '#2e7d32' : '#c62828'}
+          valueColor={summary.yoy.pvGenerationYoY >= 0 ? colors.success : colors.error}
           isLast
         />
       </View>
@@ -104,7 +104,7 @@ const EnergyScreen: React.FC = () => {
         <StatRow
           label="同比"
           value={`${summary.yoy.chargingAmountYoY >= 0 ? '+' : '-'}${(Math.abs(summary.yoy.chargingAmountYoY) * 100).toFixed(1)}%`}
-          valueColor={summary.yoy.chargingAmountYoY >= 0 ? '#2e7d32' : '#c62828'}
+          valueColor={summary.yoy.chargingAmountYoY >= 0 ? colors.success : colors.error}
           isLast
         />
       </View>
@@ -123,7 +123,7 @@ const EnergyScreen: React.FC = () => {
         <StatRow
           label="同比"
           value={`${summary.yoy.dischargeAmountYoY >= 0 ? '+' : '-'}${(Math.abs(summary.yoy.dischargeAmountYoY) * 100).toFixed(1)}%`}
-          valueColor={summary.yoy.dischargeAmountYoY >= 0 ? '#2e7d32' : '#c62828'}
+          valueColor={summary.yoy.dischargeAmountYoY >= 0 ? colors.success : colors.error}
           isLast
         />
       </View>
@@ -135,7 +135,7 @@ const EnergyScreen: React.FC = () => {
         <Text
           style={[
             styles.totalYoY,
-            { color: summary.yoy.totalRevenueYoY >= 0 ? '#2e7d32' : '#c62828' },
+            { color: summary.yoy.totalRevenueYoY >= 0 ? colors.success : colors.error },
           ]}
         >
           同比 {summary.yoy.totalRevenueYoY >= 0 ? '+' : '-'}{(Math.abs(summary.yoy.totalRevenueYoY) * 100).toFixed(1)}%
