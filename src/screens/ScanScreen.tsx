@@ -301,11 +301,11 @@ const createStyles = (colors: ThemeColors) =>
   },
   quickBtnText: {
     fontSize: 13,
-    color: '#1565c0',
+    color: colors.info,
     fontWeight: '500',
   },
   errorContainer: {
-    backgroundColor: '#fce4ec',
+    backgroundColor: colors.errorBg,
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,

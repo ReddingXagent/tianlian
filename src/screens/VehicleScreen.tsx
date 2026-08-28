@@ -306,7 +306,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   defaultBadgeText: {
     fontSize: 11,
-    color: '#1565c0',
+    color: colors.info,
     fontWeight: '500',
   },
   vehicleInfo: {
@@ -328,11 +328,11 @@ const createStyles = (colors: ThemeColors) =>
     backgroundColor: colors.infoBg,
   },
   actionBtnDanger: {
-    backgroundColor: '#fce4ec',
+    backgroundColor: colors.errorBg,
   },
   actionBtnText: {
     fontSize: 13,
-    color: '#1565c0',
+    color: colors.info,
     fontWeight: '500',
   },
   actionBtnTextDanger: {

@@ -252,7 +252,7 @@ const createStyles = (colors: ThemeColors) =>
     paddingVertical: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#fce4ec',
+    borderColor: colors.errorBg,
   },
   cancelBtnText: {
     fontSize: 16,

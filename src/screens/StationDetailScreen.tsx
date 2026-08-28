@@ -204,7 +204,7 @@ const StationDetailScreen: React.FC = () => {
           <Text style={styles.summaryLabel}>空闲</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[styles.summaryNum, { color: '#1565c0' }]}>{chargingCount}</Text>
+          <Text style={[styles.summaryNum, { color: colors.info }]}>{chargingCount}</Text>
           <Text style={styles.summaryLabel}>充电中</Text>
         </View>
       </View>

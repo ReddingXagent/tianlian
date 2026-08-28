@@ -298,7 +298,7 @@ const createStyles = (colors: ThemeColors) =>
     fontWeight: '600',
   },
   statusHint: {
-    backgroundColor: '#fff8e1',
+    backgroundColor: colors.warningAmberBg,
     borderRadius: 8,
     padding: 10,
     marginBottom: 12,
