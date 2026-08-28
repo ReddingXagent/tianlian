@@ -170,46 +170,40 @@ interface StatRowProps {
   isLast?: boolean;
 }
 
-// StatRow 消费的样式(statRow/statLabel/statValue)均为主题无关的中性色,
-// 独立 staticStyles 定义即可, 无需 useTheme 动态注入。
-const StatRow: React.FC<StatRowProps> = ({ label, value, valueColor, isLast }) => (
-  <View style={[staticStyles.statRow, isLast && staticStyles.statRowLast]}>
-    <Text style={staticStyles.statLabel}>{label}</Text>
-    <Text style={[staticStyles.statValue, valueColor ? { color: valueColor } : null]}>
-      {value}
-    </Text>
-  </View>
-);
-
-const staticStyles = StyleSheet.create({
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  statRowLast: {
-    borderBottomWidth: 0,
-  },
-  statLabel: {
-    fontSize: 15,
-    color: '#333',
-  },
-  statValue: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#333',
-  },
-});
+// StatRow 的中性色随主题翻转(textPrimary/divider), 需注入主题色。
+const StatRow: React.FC<StatRowProps> = ({ label, value, valueColor, isLast }) => {
+  const { colors } = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderBottomWidth: isLast ? 0 : 1,
+        borderBottomColor: colors.divider,
+      }}
+    >
+      <Text style={{ fontSize: 15, color: colors.textPrimary }}>{label}</Text>
+      <Text
+        style={{
+          fontSize: 15,
+          fontWeight: '600',
+          color: valueColor || colors.textPrimary,
+        }}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+};
 
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
   },
   content: {
     padding: 16,
@@ -240,7 +234,7 @@ const createStyles = (colors: ThemeColors) =>
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
+    color: 'colors.textSecondary',
     marginBottom: 8,
     marginLeft: 4,
   },

@@ -93,7 +93,7 @@ const HomeScreen: React.FC = () => {
           <TextInput
             style={styles.searchInput}
             placeholder="搜索充电站..."
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={searchText}
             onChangeText={setSearchText}
             returnKeyType="search"
@@ -181,14 +181,14 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
   },
   searchContainer: {
     backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: 'colors.divider',
   },
   searchRow: {
     flexDirection: 'row',
@@ -196,12 +196,12 @@ const createStyles = (colors: ThemeColors) =>
   },
   searchInput: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#333',
+    color: 'colors.textPrimary',
   },
   searchBtn: {
     backgroundColor: colors.primary,

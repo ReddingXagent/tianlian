@@ -1,8 +1,9 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useMemo,  useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { parseScanPayload } from '../utils/scanCode';
 import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 interface CameraScannerProps {
   /** 扫到并解析成功后回调(已冷却去重) */
@@ -16,6 +17,7 @@ const SCAN_COOLDOWN_MS = 2500;
 
 const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
   const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [permission, requestPermission] = useCameraPermissions();
   const lastScanRef = useRef<{ code: string; at: number }>({ code: '', at: 0 });
 
@@ -87,7 +89,8 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   cameraContainer: {
     width: 240,
     height: 200,
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
   },
   permissionText: {
     fontSize: 13,
-    color: '#333',
+    color: 'colors.textPrimary',
     marginBottom: 12,
     textAlign: 'center',
   },
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
   cancelText: {
     marginTop: 12,
     fontSize: 13,
-    color: '#999',
+    color: 'colors.textSecondary',
   },
 });
 

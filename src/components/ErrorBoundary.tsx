@@ -76,12 +76,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: colorsLight.textPrimary,
     marginBottom: 8,
   },
   message: {
     fontSize: 14,
-    color: '#666',
+    color: colorsLight.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   errorStack: {
     fontSize: 11,
-    color: '#999',
+    color: colorsLight.textMuted,
     fontFamily: 'monospace',
     lineHeight: 16,
   },

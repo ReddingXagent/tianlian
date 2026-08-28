@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
 import { Station } from '../types';
 import { formatDistance } from '../utils/format';
 import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 interface MapViewProps {
   stations: Station[];
@@ -33,6 +34,7 @@ const MapView: React.FC<MapViewProps> = ({
   height = 300,
 }) => {
   const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   if (!stations || stations.length === 0) {
     return (
       <View style={[styles.container, { height }]}>
@@ -167,7 +169,8 @@ function getStationPosition(index: number, total: number): { x: number; y: numbe
   };
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     borderRadius: 12,
     overflow: 'hidden',
@@ -177,7 +180,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
   },
   emptyIcon: {
     fontSize: 48,
@@ -185,7 +188,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#999',
+    color: 'colors.textSecondary',
   },
   mapBackground: {
     flex: 1,
@@ -246,7 +249,7 @@ const styles = StyleSheet.create({
   },
   markerLabel: {
     fontSize: 10,
-    color: '#333',
+    color: 'colors.textPrimary',
     fontWeight: '600',
     marginTop: 2,
     backgroundColor: 'rgba(255,255,255,0.9)',
@@ -260,7 +263,7 @@ const styles = StyleSheet.create({
   },
   markerDistance: {
     fontSize: 9,
-    color: '#666',
+    color: 'colors.textSecondary',
     backgroundColor: 'rgba(255,255,255,0.8)',
     paddingHorizontal: 3,
     borderRadius: 2,
@@ -285,12 +288,12 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 11,
-    color: '#666',
+    color: 'colors.textSecondary',
   },
   legendCount: {
     marginLeft: 'auto',
     fontSize: 11,
-    color: '#999',
+    color: 'colors.textSecondary',
     fontWeight: '500',
   },
 });

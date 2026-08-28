@@ -192,35 +192,35 @@ const VehicleScreen: React.FC = () => {
             <TextInput
               style={styles.modalInput}
               placeholder="车牌号 *"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={plate}
               onChangeText={setPlate}
             />
             <TextInput
               style={styles.modalInput}
               placeholder="品牌"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={brand}
               onChangeText={setBrand}
             />
             <TextInput
               style={styles.modalInput}
               placeholder="型号"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={model}
               onChangeText={setModel}
             />
             <TextInput
               style={styles.modalInput}
               placeholder="颜色"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={color}
               onChangeText={setColor}
             />
             <TextInput
               style={styles.modalInput}
               placeholder="VIN码"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={vin}
               onChangeText={setVin}
             />
@@ -270,7 +270,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
   },
   listContent: {
     padding: 16,
@@ -295,7 +295,7 @@ const createStyles = (colors: ThemeColors) =>
   vehiclePlate: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#333',
+    color: 'colors.textPrimary',
     marginRight: 8,
   },
   defaultBadge: {
@@ -314,7 +314,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   vehicleDetail: {
     fontSize: 13,
-    color: '#999',
+    color: 'colors.textSecondary',
     marginBottom: 2,
   },
   vehicleActions: {
@@ -368,7 +368,7 @@ const createStyles = (colors: ThemeColors) =>
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: 'colors.textPrimary',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -379,8 +379,8 @@ const createStyles = (colors: ThemeColors) =>
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#333',
-    backgroundColor: '#fafafa',
+    color: 'colors.textPrimary',
+    backgroundColor: 'colors.inputBg',
     marginBottom: 12,
   },
   defaultCheck: {
@@ -409,7 +409,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   defaultCheckLabel: {
     fontSize: 14,
-    color: '#333',
+    color: 'colors.textPrimary',
   },
   modalActions: {
     flexDirection: 'row',
@@ -425,7 +425,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   modalCancelText: {
     fontSize: 15,
-    color: '#666',
+    color: 'colors.textSecondary',
     fontWeight: '500',
   },
   modalSaveBtn: {

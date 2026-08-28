@@ -117,7 +117,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
   },
   content: {
     padding: 16,
@@ -137,7 +137,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   amountLabel: {
     fontSize: 14,
-    color: '#999',
+    color: 'colors.textSecondary',
     marginBottom: 8,
   },
   amountValue: {
@@ -152,7 +152,7 @@ const createStyles = (colors: ThemeColors) =>
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: 'colors.textPrimary',
     marginBottom: 10,
   },
   methodCard: {
@@ -173,7 +173,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   methodItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'colors.divider',
   },
   methodItemSelected: {
     backgroundColor: 'rgba(26, 115, 232, 0.03)',
@@ -185,7 +185,7 @@ const createStyles = (colors: ThemeColors) =>
   methodLabel: {
     flex: 1,
     fontSize: 15,
-    color: '#333',
+    color: 'colors.textPrimary',
     fontWeight: '500',
   },
   radio: {
@@ -224,7 +224,7 @@ const createStyles = (colors: ThemeColors) =>
   tipText: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#ccc',
+    color: 'colors.textMuted',
   },
 });
 

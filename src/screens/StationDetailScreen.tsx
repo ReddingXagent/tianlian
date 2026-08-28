@@ -243,7 +243,7 @@ const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
   },
   content: {
     padding: 16,
@@ -266,23 +266,23 @@ const createStyles = (colors: ThemeColors) =>
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'colors.divider',
   },
   infoLabel: {
     fontSize: 14,
-    color: '#999',
+    color: 'colors.textSecondary',
     flex: 1,
   },
   infoValue: {
     fontSize: 14,
-    color: '#333',
+    color: 'colors.textPrimary',
     fontWeight: '500',
     flex: 2,
     textAlign: 'right',
   },
   infoAddress: {
     fontSize: 13,
-    color: '#666',
+    color: 'colors.textSecondary',
   },
   priceCard: {
     backgroundColor: '#fff',
@@ -298,12 +298,12 @@ const createStyles = (colors: ThemeColors) =>
   sectionTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
+    color: 'colors.textPrimary',
     marginBottom: 10,
   },
   priceRow: {
     flexDirection: 'row',
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
     borderRadius: 8,
     padding: 12,
   },
@@ -313,12 +313,12 @@ const createStyles = (colors: ThemeColors) =>
   },
   priceLabel: {
     fontSize: 12,
-    color: '#999',
+    color: 'colors.textSecondary',
     marginBottom: 4,
   },
   priceValue: {
     fontSize: 13,
-    color: '#333',
+    color: 'colors.textPrimary',
   },
   priceNum: {
     fontSize: 20,
@@ -327,7 +327,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   priceUnit: {
     fontSize: 12,
-    color: '#666',
+    color: 'colors.textSecondary',
   },
   priceDivider: {
     width: 1,
@@ -373,11 +373,11 @@ const createStyles = (colors: ThemeColors) =>
   summaryNum: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#333',
+    color: 'colors.textPrimary',
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#999',
+    color: 'colors.textSecondary',
     marginTop: 2,
   },
   chargerCard: {
@@ -400,7 +400,7 @@ const createStyles = (colors: ThemeColors) =>
   chargerName: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#333',
+    color: 'colors.textPrimary',
   },
   chargerMeta: {
     flexDirection: 'row',
@@ -409,7 +409,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   chargerPower: {
     fontSize: 13,
-    color: '#666',
+    color: 'colors.textSecondary',
     fontWeight: '500',
   },
   chargerPrice: {

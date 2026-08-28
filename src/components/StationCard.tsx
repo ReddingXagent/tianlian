@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Station } from '../types';
 import { formatDistance, formatMoney } from '../utils/format';
 import StatusBadge from './StatusBadge';
 import { useTheme } from '../hooks/useTheme';
+import type { ThemeColors } from '../theme/colors';
 
 interface StationCardProps {
   station: Station;
@@ -12,6 +13,7 @@ interface StationCardProps {
 
 const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
   const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const distanceText = station.distance
     ? formatDistance(station.distance)
     : null;
@@ -71,7 +73,8 @@ const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -92,18 +95,18 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: 'colors.textPrimary',
     flex: 1,
     marginRight: 8,
   },
   address: {
     fontSize: 13,
-    color: '#999',
+    color: 'colors.textSecondary',
     marginBottom: 10,
   },
   priceRow: {
     flexDirection: 'row',
-    backgroundColor: '#f5f6fa',
+    backgroundColor: 'colors.pageBg',
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
@@ -114,12 +117,12 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 12,
-    color: '#999',
+    color: 'colors.textSecondary',
     marginBottom: 2,
   },
   priceValue: {
     fontSize: 13,
-    color: '#333',
+    color: 'colors.textPrimary',
   },
   priceNum: {
     fontSize: 18,
@@ -127,7 +130,7 @@ const styles = StyleSheet.create({
   },
   priceUnit: {
     fontSize: 12,
-    color: '#666',
+    color: 'colors.textSecondary',
   },
   priceDivider: {
     width: 1,
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
   },
   distance: {
     fontSize: 13,
-    color: '#999',
+    color: 'colors.textSecondary',
   },
 });
 
