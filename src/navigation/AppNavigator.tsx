@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/authStore';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import OfflineBanner from '../components/OfflineBanner';
 import { useAndroidBackExit } from '../hooks/useAndroidBackExit';
+import { useTheme } from '../hooks/useTheme';
 import { RootStackParamList, AuthStackParamList, MainTabParamList } from '../types';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -47,22 +48,24 @@ function TabBackHandler() {
 }
 
 function MainTabs() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#1a73e8',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           height: 56,
           paddingBottom: 6,
           paddingTop: 4,
+          backgroundColor: colors.cardBg,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '500',
         },
         headerStyle: {
-          backgroundColor: '#1a73e8',
+          backgroundColor: colors.primary,
         },
         headerTintColor: '#fff',
         headerTitleStyle: {
@@ -113,6 +116,7 @@ function MainTabs() {
 }
 
 export const AppNavigator: React.FC = () => {
+  const { colors } = useTheme();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
   const checkAuth = useAuthStore((s) => s.checkAuth);
@@ -123,9 +127,9 @@ export const AppNavigator: React.FC = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1a73e8" />
-        <Text style={styles.loadingText}>加载中...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.pageBg }]}>
+        <ActivityIndicator size={"large"} color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>加载中...</Text>
       </View>
     );
   }
@@ -152,6 +156,7 @@ export const AppNavigator: React.FC = () => {
 
 // 在 RootStack 中包裹 Main + 详情页面
 function MainWithDetail() {
+  const { colors } = useTheme();
   return (
     <RootStack.Navigator>
       <RootStack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
@@ -160,7 +165,7 @@ function MainWithDetail() {
         component={StationDetailScreen}
         options={{
           title: '站点详情',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
         }}
@@ -170,7 +175,7 @@ function MainWithDetail() {
         component={ChargingScreen}
         options={{
           title: '充电中',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
           headerLeft: () => null, // 充电中禁止返回
@@ -182,7 +187,7 @@ function MainWithDetail() {
         component={OrderDetailScreen}
         options={{
           title: '订单详情',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
         }}
@@ -192,7 +197,7 @@ function MainWithDetail() {
         component={PaymentScreen}
         options={{
           title: '支付',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
         }}
@@ -202,7 +207,7 @@ function MainWithDetail() {
         component={VehicleScreen}
         options={{
           title: '车辆管理',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
         }}
@@ -212,7 +217,7 @@ function MainWithDetail() {
         component={WalletScreen}
         options={{
           title: '我的钱包',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
         }}
@@ -222,7 +227,7 @@ function MainWithDetail() {
         component={CouponScreen}
         options={{
           title: '我的优惠券',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
         }}
@@ -232,7 +237,7 @@ function MainWithDetail() {
         component={EnergyScreen}
         options={{
           title: '能源概览',
-          headerStyle: { backgroundColor: '#1a73e8' },
+          headerStyle: { backgroundColor: colors.primary },
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: '600' },
         }}

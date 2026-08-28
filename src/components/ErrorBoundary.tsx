@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { colorsLight } from '../theme/colors';
 
 interface Props {
   children: ReactNode;
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   button: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: colorsLight.primary,
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 8,

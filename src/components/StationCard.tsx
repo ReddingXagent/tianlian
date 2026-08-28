@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Station } from '../types';
 import { formatDistance, formatMoney } from '../utils/format';
 import StatusBadge from './StatusBadge';
+import { useTheme } from '../hooks/useTheme';
 
 interface StationCardProps {
   station: Station;
@@ -10,6 +11,7 @@ interface StationCardProps {
 }
 
 const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
+  const { colors } = useTheme();
   const distanceText = station.distance
     ? formatDistance(station.distance)
     : null;
@@ -37,7 +39,7 @@ const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
         <View style={styles.priceItem}>
           <Text style={styles.priceLabel}>电费</Text>
           <Text style={styles.priceValue}>
-            <Text style={styles.priceNum}>{formatMoney(station.pricePerKwh)}</Text>
+            <Text style={[styles.priceNum, { color: colors.primary }]}>{formatMoney(station.pricePerKwh)}</Text>
             <Text style={styles.priceUnit}> 元/度</Text>
           </Text>
         </View>
@@ -45,7 +47,7 @@ const StationCard: React.FC<StationCardProps> = ({ station, onPress }) => {
         <View style={styles.priceItem}>
           <Text style={styles.priceLabel}>服务费</Text>
           <Text style={styles.priceValue}>
-            <Text style={styles.priceNum}>{formatMoney(station.serviceFee)}</Text>
+            <Text style={[styles.priceNum, { color: colors.primary }]}>{formatMoney(station.serviceFee)}</Text>
             <Text style={styles.priceUnit}> 元/度</Text>
           </Text>
         </View>
@@ -122,7 +124,6 @@ const styles = StyleSheet.create({
   priceNum: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a73e8',
   },
   priceUnit: {
     fontSize: 12,

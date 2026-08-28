@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { Station } from '../types';
 import { formatDistance } from '../utils/format';
+import { useTheme } from '../hooks/useTheme';
 
 interface MapViewProps {
   stations: Station[];
@@ -31,6 +32,7 @@ const MapView: React.FC<MapViewProps> = ({
   onStationPress,
   height = 300,
 }) => {
+  const { colors } = useTheme();
   if (!stations || stations.length === 0) {
     return (
       <View style={[styles.container, { height }]}>
@@ -95,8 +97,9 @@ const MapView: React.FC<MapViewProps> = ({
                   styles.markerDot,
                   isSelected && styles.markerDotSelected,
                   {
+                    borderColor: colors.primary,
                     backgroundColor:
-                      station.availableConnectors > 0 ? '#2e7d32' : '#c62828',
+                      station.availableConnectors > 0 ? colors.success : colors.error,
                   },
                 ]}
               >
@@ -105,7 +108,10 @@ const MapView: React.FC<MapViewProps> = ({
               <Text
                 style={[
                   styles.markerLabel,
-                  isSelected && styles.markerLabelSelected,
+                  isSelected && [
+                    styles.markerLabelSelected,
+                    { backgroundColor: colors.primary },
+                  ],
                 ]}
                 numberOfLines={1}
               >
@@ -234,7 +240,6 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: 3,
-    borderColor: '#1a73e8',
   },
   markerIcon: {
     fontSize: 14,
@@ -251,7 +256,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   markerLabelSelected: {
-    backgroundColor: '#1a73e8',
     color: '#fff',
   },
   markerDistance: {

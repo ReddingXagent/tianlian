@@ -2,6 +2,7 @@ import React, { useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { parseScanPayload } from '../utils/scanCode';
+import { useTheme } from '../hooks/useTheme';
 
 interface CameraScannerProps {
   /** 扫到并解析成功后回调(已冷却去重) */
@@ -14,6 +15,7 @@ interface CameraScannerProps {
 const SCAN_COOLDOWN_MS = 2500;
 
 const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
+  const { colors } = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
   const lastScanRef = useRef<{ code: string; at: number }>({ code: '', at: 0 });
 
@@ -35,11 +37,11 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
 
   if (!permission.granted) {
     return (
-      <View style={styles.permissionBox} testID="camera-permission-box">
+      <View style={[styles.permissionBox, { borderColor: colors.primary }]} testID="camera-permission-box">
         <Text style={styles.permissionText}>需要相机权限才能扫码</Text>
         {permission.canAskAgain ? (
           <TouchableOpacity accessibilityRole="button"
-            style={styles.permissionBtn}
+            style={[styles.permissionBtn, { backgroundColor: colors.primary }]}
             onPress={requestPermission}
             testID="camera-request-btn"
           >
@@ -47,7 +49,7 @@ const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose }) => {
           </TouchableOpacity>
         ) : (
           <TouchableOpacity accessibilityRole="button"
-            style={styles.permissionBtn}
+            style={[styles.permissionBtn, { backgroundColor: colors.primary }]}
             onPress={() => Linking.openSettings()}
             testID="camera-settings-btn"
           >
@@ -126,7 +128,6 @@ const styles = StyleSheet.create({
     width: 240,
     height: 200,
     borderWidth: 2,
-    borderColor: '#1a73e8',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
@@ -140,7 +141,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   permissionBtn: {
-    backgroundColor: '#1a73e8',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
