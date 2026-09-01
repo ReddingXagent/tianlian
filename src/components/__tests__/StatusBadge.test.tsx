@@ -88,7 +88,7 @@ describe('StatusBadge', () => {
       { status: 'high' as const, label: '高', color: '#c62828' },
       { status: 'normal' as const, label: '中', color: '#1565c0' },
       { status: 'low' as const, label: '低', color: '#2e7d32' },
-      { status: 'urgent' as const, label: '紧急', color: '#b71c1c' },
+      { status: 'urgent' as const, label: '紧急', color: '#c62828' },
     ];
 
     priorities.forEach(({ status, label, color }) => {

@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { WorkOrder } from '../types';
 import StatusBadge from './StatusBadge';
+import { useTheme } from '../hooks/useTheme';
 
 interface WorkOrderCardProps {
   order: WorkOrder;
@@ -21,33 +22,34 @@ const WorkOrderCard: React.FC<WorkOrderCardProps> = ({
   onPress,
   compact = false,
 }) => {
+  const { colors } = useTheme();
   const content = (
-    <View style={[styles.card, compact && styles.cardCompact]}>
+    <View style={[styles.card, { backgroundColor: colors.cardBg }, compact && styles.cardCompact]}>
       <View style={styles.header}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={1}>
           {order.title}
         </Text>
         <StatusBadge status={order.priority} />
       </View>
       {!compact && (
-        <Text style={styles.desc} numberOfLines={2}>
+        <Text style={[styles.desc, { color: colors.textSecondary }]} numberOfLines={2}>
           {order.description || '暂无描述'}
         </Text>
       )}
       <View style={styles.meta}>
-        <Text style={styles.metaText}>
+        <Text style={[styles.metaText, { color: colors.textSecondary }]}>
           {WORK_ORDER_TYPE_LABEL[order.type] || order.type}
         </Text>
-        <Text style={styles.metaDot}>·</Text>
-        <Text style={styles.metaText}>{order.stationName}</Text>
-        <Text style={styles.metaDot}>·</Text>
-        <Text style={styles.metaText}>
+        <Text style={[styles.metaDot, { color: colors.textMuted }]}>·</Text>
+        <Text style={[styles.metaText, { color: colors.textSecondary }]}>{order.stationName}</Text>
+        <Text style={[styles.metaDot, { color: colors.textMuted }]}>·</Text>
+        <Text style={[styles.metaText, { color: colors.textSecondary }]}>
           {order.assigneeName || '未分配'}
         </Text>
       </View>
-      <View style={styles.footer}>
+      <View style={[styles.footer, { borderTopColor: colors.divider }]}>
         <StatusBadge status={order.status} />
-        <Text style={styles.time}>
+        <Text style={[styles.time, { color: colors.textMuted }]}>
           {new Date(order.createdAt).toLocaleDateString('zh-CN')}
         </Text>
       </View>
@@ -70,7 +72,6 @@ const WorkOrderCard: React.FC<WorkOrderCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -93,13 +94,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
     marginRight: 8,
   },
   desc: {
     fontSize: 13,
-    color: '#666',
     lineHeight: 18,
     marginBottom: 8,
   },
@@ -111,11 +110,9 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: '#999',
   },
   metaDot: {
     fontSize: 12,
-    color: '#ccc',
     marginHorizontal: 4,
   },
   footer: {
@@ -124,11 +121,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   time: {
     fontSize: 12,
-    color: '#bbb',
   },
 });
 
