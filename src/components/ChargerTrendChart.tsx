@@ -8,18 +8,20 @@ import {
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { chargerApi } from '../services/api';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeColors } from '../theme/colors';
 import { ChargerTrend, ChargerTrendMetric, ChargerTrendPoint } from '../types';
 import LoadingSpinner from './LoadingSpinner';
 import EmptyState from './EmptyState';
 
 const screenWidth = Dimensions.get('window').width;
 
-// 四个指标配置：标签 / 单位 / 主色
-const METRIC_CONFIG: Record<ChargerTrendMetric, { label: string; unit: string; color: string }> = {
-  power:   { label: '功率', unit: 'kW', color: '#1a73e8' },
-  voltage: { label: '电压', unit: 'V',  color: '#7b1fa2' },
-  current: { label: '电流', unit: 'A',  color: '#ef6c00' },
-  soc:     { label: 'SOC', unit: '%',   color: '#2e7d32' },
+// 四个指标配置：标签 / 单位 / 语义色键（深色模式: 值改语义键，运行时解析随主题翻转）
+const METRIC_CONFIG: Record<ChargerTrendMetric, { label: string; unit: string; color: keyof ThemeColors }> = {
+  power:   { label: '功率', unit: 'kW', color: 'primary' },
+  voltage: { label: '电压', unit: 'V',  color: 'chartPurple' },
+  current: { label: '电流', unit: 'A',  color: 'chartOrange' },
+  soc:     { label: 'SOC', unit: '%',   color: 'success' },
 };
 
 const formatClock = (ts: string): string => {
@@ -44,6 +46,7 @@ export const buildLabels = (points: ChargerTrendPoint[]): string[] => {
 };
 
 const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceName }) => {
+  const { colors } = useTheme();
   const [trend, setTrend] = useState<ChargerTrend | null>(null);
   const [metric, setMetric] = useState<ChargerTrendMetric>('power');
   const [loading, setLoading] = useState(true);
@@ -68,6 +71,7 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
   }, [fetchTrend]);
 
   const points = trend?.points ?? [];
+  const metricColor = (m: ChargerTrendMetric): string => colors[METRIC_CONFIG[m].color];
   const config = METRIC_CONFIG[metric];
 
   const chartData = {
@@ -75,7 +79,7 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
     datasets: [
       {
         data: points.length > 0 ? points.map((p) => p[metric]) : [0],
-        color: () => config.color,
+        color: () => metricColor(metric),
         strokeWidth: 2,
       },
     ],
@@ -87,25 +91,25 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>实时趋势</Text>
+        <Text style={[styles.title, { color: colors.textSecondary }]}>实时趋势</Text>
         <TouchableOpacity onPress={fetchTrend} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button">
-          <Text style={styles.refresh}>刷新</Text>
+          <Text style={[styles.refresh, { color: colors.primary }]}>刷新</Text>
         </TouchableOpacity>
       </View>
 
       {/* 指标切换 */}
-      <View style={styles.metricTabs}>
+      <View style={[styles.metricTabs, { backgroundColor: colors.neutralBg }]}>
         {(Object.keys(METRIC_CONFIG) as ChargerTrendMetric[]).map((m) => {
           const active = m === metric;
           const cfg = METRIC_CONFIG[m];
           return (
             <TouchableOpacity
               key={m}
-              style={[styles.metricTab, active && { backgroundColor: cfg.color }]}
+              style={[styles.metricTab, active && { backgroundColor: colors[METRIC_CONFIG[m].color] }]}
               onPress={() => setMetric(m)}
               activeOpacity={0.7}
              accessibilityRole="button">
-              <Text style={[styles.metricTabText, active && styles.metricTabTextActive]}>
+              <Text style={[styles.metricTabText, { color: active ? colors.onPrimary : colors.textSecondary }]}>
                 {cfg.label}
               </Text>
             </TouchableOpacity>
@@ -117,7 +121,7 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
       {latest !== null && (
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>当前{config.label}</Text>
-          <Text style={[styles.summaryValue, { color: config.color }]}>
+          <Text style={[styles.summaryValue, { color: metricColor(metric) }]}>
             {latest.toFixed(metric === 'soc' ? 0 : 1)}
             <Text style={styles.summaryUnit}> {config.unit}</Text>
           </Text>
@@ -144,14 +148,14 @@ const ChargerTrendChart: React.FC<ChargerTrendChartProps> = ({ deviceId, deviceN
           yAxisSuffix={config.unit === '%' ? '%' : ''}
           yAxisLabel=""
           chartConfig={{
-            backgroundColor: '#fff',
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
+            backgroundColor: colors.cardBg,
+            backgroundGradientFrom: colors.cardBg,
+            backgroundGradientTo: colors.cardBg,
             decimalPlaces: metric === 'soc' ? 0 : 1,
-            color: (opacity = 1) => `rgba(${hexToRgb(config.color)}, ${opacity})`,
-            labelColor: () => '#999',
-            propsForDots: { r: '3', strokeWidth: '2', stroke: config.color },
-            propsForBackgroundLines: { strokeDasharray: '', stroke: '#f0f0f0' },
+            color: (opacity = 1) => `rgba(${hexToRgb(metricColor(metric))}, ${opacity})`,
+            labelColor: () => colors.textSecondary,
+            propsForDots: { r: '3', strokeWidth: '2', stroke: metricColor(metric) },
+            propsForBackgroundLines: { strokeDasharray: '', stroke: colors.divider },
           }}
           bezier
           style={styles.chart}
@@ -176,7 +180,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   header: {
     flexDirection: 'row',
@@ -187,15 +190,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#555',
   },
   refresh: {
     fontSize: 13,
-    color: '#1a73e8',
   },
   metricTabs: {
     flexDirection: 'row',
-    backgroundColor: '#f0f2f5',
     borderRadius: 8,
     padding: 3,
     marginBottom: 8,
@@ -208,11 +208,9 @@ const styles = StyleSheet.create({
   },
   metricTabText: {
     fontSize: 12,
-    color: '#666',
     fontWeight: '500',
   },
   metricTabTextActive: {
-    color: '#fff',
     fontWeight: '700',
   },
   summaryRow: {
@@ -223,7 +221,6 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#999',
   },
   summaryValue: {
     fontSize: 18,
@@ -231,7 +228,6 @@ const styles = StyleSheet.create({
   },
   summaryUnit: {
     fontSize: 12,
-    color: '#999',
     fontWeight: '400',
   },
   chart: {

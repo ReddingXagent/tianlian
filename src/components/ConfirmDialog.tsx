@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import { useTheme } from '../hooks/useTheme';
 
 interface ConfirmDialogProps {
   visible: boolean;
@@ -32,31 +33,32 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const { colors } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.overlay}>
-        <View style={styles.dialog}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+        <View style={[styles.dialog, { backgroundColor: colors.cardBg }]}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+          <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>
           <View style={styles.actions}>
             <TouchableOpacity
-              style={[styles.btn, styles.cancelBtn]}
+              style={[styles.btn, { backgroundColor: colors.neutralBg }]}
               onPress={onCancel}
               disabled={loading}
               activeOpacity={0.7}
              accessibilityRole="button">
-              <Text style={styles.cancelText}>{cancelLabel}</Text>
+              <Text style={[styles.cancelText, { color: colors.neutralText }]}>{cancelLabel}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.btn, styles.confirmBtn, danger && styles.confirmDanger]}
+              style={[styles.btn, { backgroundColor: danger ? colors.error : colors.primary }]}
               onPress={onConfirm}
               disabled={loading}
               activeOpacity={0.7}
              accessibilityRole="button">
               {loading ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color={colors.onPrimary} size="small" />
               ) : (
-                <Text style={styles.confirmText}>{confirmLabel}</Text>
+                <Text style={[styles.confirmText, { color: colors.onPrimary }]}>{confirmLabel}</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -76,20 +78,17 @@ const styles = StyleSheet.create({
   },
   dialog: {
     width: '100%',
-    backgroundColor: '#fff',
     borderRadius: 14,
     padding: 20,
   },
   title: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#333',
     marginBottom: 10,
     textAlign: 'center',
   },
   message: {
     fontSize: 14,
-    color: '#555',
     lineHeight: 21,
     textAlign: 'center',
     marginBottom: 20,
@@ -106,23 +105,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 44,
   },
-  cancelBtn: {
-    backgroundColor: '#f0f2f5',
-  },
-  confirmBtn: {
-    backgroundColor: '#1a73e8',
-  },
-  confirmDanger: {
-    backgroundColor: '#c62828',
-  },
   cancelText: {
     fontSize: 15,
-    color: '#666',
     fontWeight: '500',
   },
   confirmText: {
     fontSize: 15,
-    color: '#fff',
     fontWeight: '600',
   },
 });

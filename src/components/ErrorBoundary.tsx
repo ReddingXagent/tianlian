@@ -3,7 +3,8 @@
  * 生产环境可一键反馈回首页
  */
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Appearance } from 'react-native';
+import { colorsLight, colorsDark } from '../theme/colors';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -12,6 +13,11 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+}
+
+/** 系统主题 → 语义色（类组件渲染时读取一次） */
+function getErrorColors() {
+  return Appearance.getColorScheme() === 'dark' ? colorsDark : colorsLight;
 }
 
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -35,24 +41,25 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   render(): ReactNode {
     if (this.state.hasError) {
+      const c = getErrorColors();
       return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: c.pageBg }]}>
           <Text style={styles.icon}>😵</Text>
-          <Text style={styles.title}>应用出现问题</Text>
-          <Text style={styles.message}>
+          <Text style={[styles.title, { color: c.textPrimary }]}>应用出现问题</Text>
+          <Text style={[styles.message, { color: c.textSecondary }]}>
             抱歉，应用遇到了意外错误。请尝试重启或返回首页。
           </Text>
           {__DEV__ && this.state.error && (
-            <ScrollView style={styles.errorDetail} contentContainerStyle={styles.errorDetailContent}>
-              <Text style={styles.errorText}>
+            <ScrollView style={[styles.errorDetail, { backgroundColor: c.errorBg }]} contentContainerStyle={styles.errorDetailContent}>
+              <Text style={[styles.errorText, { color: c.error }]}>
                 {this.state.error.name}: {this.state.error.message}
               </Text>
-              <Text style={styles.errorStack}>{this.state.error.stack}</Text>
+              <Text style={[styles.errorStack, { color: c.textSecondary }]}>{this.state.error.stack}</Text>
             </ScrollView>
           )}
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.primaryButton} onPress={this.handleReset} accessibilityRole="button">
-              <Text style={styles.primaryButtonText}>重试</Text>
+            <TouchableOpacity style={[styles.primaryButton, { backgroundColor: c.primary }]} onPress={this.handleReset} accessibilityRole="button">
+              <Text style={[styles.primaryButtonText, { color: c.onPrimary }]}>重试</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -68,7 +75,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f6fa',
     padding: 32,
   },
   icon: {
@@ -78,12 +84,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
     marginBottom: 8,
   },
   message: {
     fontSize: 14,
-    color: '#666',
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 24,
@@ -91,7 +95,6 @@ const styles = StyleSheet.create({
   errorDetail: {
     maxHeight: 200,
     width: '100%',
-    backgroundColor: '#fff5f5',
     borderRadius: 8,
     marginBottom: 24,
   },
@@ -100,14 +103,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
-    color: '#cc3300',
     fontWeight: '600',
     marginBottom: 8,
     fontFamily: 'monospace',
   },
   errorStack: {
     fontSize: 11,
-    color: '#999',
     fontFamily: 'monospace',
     lineHeight: 16,
   },
@@ -118,11 +119,9 @@ const styles = StyleSheet.create({
   primaryButton: {
     paddingHorizontal: 32,
     paddingVertical: 12,
-    backgroundColor: '#1a73e8',
     borderRadius: 8,
   },
   primaryButtonText: {
-    color: '#fff',
     fontSize: 15,
     fontWeight: '600',
   },

@@ -138,12 +138,12 @@ describe('ChargerTrendChart', () => {
   it('should render chart with correct metric colors via chart callbacks', async () => {
     const { findByTestId } = render(<ChargerTrendChart deviceId={101} />);
 
-    // 功率主色 #1a73e8 → rgb(26,115,232)
+    // 功率主色语义化: light 套 primary #0e8a80 → rgb(14,138,128)
     const chart = await findByTestId('line-chart');
     const text = Array.isArray(chart.props.children)
       ? chart.props.children.join('')
       : String(chart.props.children);
-    expect(text).toContain('26,115,232');
+    expect(text).toContain('14,138,128');
   });
 
   it('should thin labels when more than 6 points', async () => {

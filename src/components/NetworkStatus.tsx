@@ -6,11 +6,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, AppState, AppStateStatus } from 'react-native';
 import api from '../services/api';
+import { useTheme } from '../hooks/useTheme';
 
 const PING_ENDPOINT = '/auth/profile';
 const PING_TIMEOUT = 5000;
 
 export default function NetworkStatus(): React.ReactElement | null {
+  const { colors } = useTheme();
   const [online, setOnline] = useState(true);
   const mountedRef = useRef(true);
 
@@ -50,21 +52,19 @@ export default function NetworkStatus(): React.ReactElement | null {
   if (online) return null;
 
   return (
-    <View style={styles.banner}>
-      <Text style={styles.text}>网络连接已断开，请检查网络设置</Text>
+    <View style={[styles.banner, { backgroundColor: colors.error }]}>
+      <Text style={[styles.text, { color: colors.onPrimary }]}>网络连接已断开，请检查网络设置</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: '#e74c3c',
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: 'center',
   },
   text: {
-    color: '#fff',
     fontSize: 13,
     fontWeight: '500',
   },
