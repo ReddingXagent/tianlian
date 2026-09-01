@@ -14,6 +14,8 @@ import {
 import { LineChart } from 'react-native-chart-kit';
 import { useRevenue } from '../hooks/useRevenue';
 import { RevenueRecord } from '../types';
+import { useTheme } from '../hooks/useTheme';
+import { hexToRgb } from '../components/ChargerTrendChart';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import { buildRevenueCsv } from '../utils/csvExport';
@@ -29,6 +31,7 @@ const PERIOD_LABELS: Record<PeriodType, string> = {
 const screenWidth = Dimensions.get('window').width;
 
 const RevenueScreen: React.FC = () => {
+  const { colors } = useTheme();
   const [period, setPeriod] = useState<PeriodType>('week');
   const { records, summary, loading, refreshing, fetchData } = useRevenue({ period });
 
@@ -70,7 +73,7 @@ const RevenueScreen: React.FC = () => {
         data: records.length > 0
           ? records.map((r: RevenueRecord) => r.amount)
           : [0],
-        color: () => '#1a73e8',
+        color: () => colors.primary,
         strokeWidth: 2,
       },
     ],
@@ -80,26 +83,32 @@ const RevenueScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={() => fetchData(true)}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
       {/* 周期切换 */}
-      <View style={styles.periodContainer}>
+      <View style={[styles.periodContainer, { backgroundColor: colors.cardBg }]}>
         {(Object.keys(PERIOD_LABELS) as PeriodType[]).map((p) => (
           <TouchableOpacity
             key={p}
-            style={[styles.periodBtn, period === p && styles.periodBtnActive]}
+            style={[styles.periodBtn, period === p && { backgroundColor: colors.primary }]}
             onPress={() => setPeriod(p)}
            accessibilityRole="button">
-            <Text style={[styles.periodBtnText, period === p && styles.periodBtnTextActive]}>
+            <Text
+              style={[
+                styles.periodBtnText,
+                { color: colors.textSecondary },
+                period === p && { color: colors.onPrimary },
+              ]}
+            >
               {PERIOD_LABELS[p]}
             </Text>
           </TouchableOpacity>
@@ -112,21 +121,27 @@ const RevenueScreen: React.FC = () => {
         <>
           {/* 汇总数据 */}
           <View style={styles.summaryGrid}>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryLabel}>今日</Text>
-              <Text style={styles.summaryAmount}>¥{summary.today.toFixed(2)}</Text>
+            <View style={[styles.summaryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>今日</Text>
+              <Text style={[styles.summaryAmount, { color: colors.textPrimary }]}>
+                ¥{summary.today.toFixed(2)}
+              </Text>
             </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryLabel}>本周</Text>
-              <Text style={styles.summaryAmount}>¥{summary.week.toFixed(2)}</Text>
+            <View style={[styles.summaryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>本周</Text>
+              <Text style={[styles.summaryAmount, { color: colors.textPrimary }]}>
+                ¥{summary.week.toFixed(2)}
+              </Text>
             </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryLabel}>本月</Text>
-              <Text style={styles.summaryAmount}>¥{summary.month.toFixed(2)}</Text>
+            <View style={[styles.summaryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>本月</Text>
+              <Text style={[styles.summaryAmount, { color: colors.textPrimary }]}>
+                ¥{summary.month.toFixed(2)}
+              </Text>
             </View>
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryLabel}>累计</Text>
-              <Text style={[styles.summaryAmount, { color: '#1a73e8' }]}>
+            <View style={[styles.summaryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>累计</Text>
+              <Text style={[styles.summaryAmount, { color: colors.primary }]}>
                 ¥{summary.total.toFixed(2)}
               </Text>
             </View>
@@ -137,13 +152,13 @@ const RevenueScreen: React.FC = () => {
           ) : (
             <>
           {/* 图表 */}
-          <View style={styles.chartContainer}>
+          <View style={[styles.chartContainer, { backgroundColor: colors.cardBg }]}>
             <View style={styles.chartHeader}>
-              <Text style={styles.chartTitle}>
+              <Text style={[styles.chartTitle, { color: colors.textPrimary }]}>
                 {PERIOD_LABELS[period]}营收趋势
               </Text>
-              <TouchableOpacity style={styles.exportBtn} onPress={handleExport} activeOpacity={0.7} accessibilityRole="button">
-                <Text style={styles.exportBtnText}>📥 导出CSV</Text>
+              <TouchableOpacity style={[styles.exportBtn, { backgroundColor: colors.infoBg }]} onPress={handleExport} activeOpacity={0.7} accessibilityRole="button">
+                <Text style={[styles.exportBtnText, { color: colors.info }]}>📥 导出CSV</Text>
               </TouchableOpacity>
             </View>
             {records.length > 0 && (
@@ -167,20 +182,20 @@ const RevenueScreen: React.FC = () => {
                   yAxisLabel="¥"
                   yAxisSuffix=""
                   chartConfig={{
-                    backgroundColor: '#fff',
-                    backgroundGradientFrom: '#fff',
-                    backgroundGradientTo: '#fff',
+                    backgroundColor: colors.cardBg,
+                    backgroundGradientFrom: colors.cardBg,
+                    backgroundGradientTo: colors.cardBg,
                     decimalPlaces: 0,
-                    color: (opacity = 1) => `rgba(26, 115, 232, ${opacity})`,
-                    labelColor: () => '#999',
+                    color: (opacity = 1) => `rgba(${hexToRgb(colors.primary)}, ${opacity})`,
+                    labelColor: () => colors.textSecondary,
                     propsForDots: {
                       r: '4',
                       strokeWidth: '2',
-                      stroke: '#1a73e8',
+                      stroke: colors.primary,
                     },
                     propsForBackgroundLines: {
                       strokeDasharray: '',
-                      stroke: '#f0f0f0',
+                      stroke: colors.divider,
                     },
                   }}
                   bezier
@@ -191,16 +206,16 @@ const RevenueScreen: React.FC = () => {
           </View>
 
           {/* 数据明细 */}
-          <Text style={styles.sectionTitle}>数据明细</Text>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>周期总计</Text>
-            <Text style={styles.totalAmount}>¥{totalAmount.toFixed(2)}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>数据明细</Text>
+          <View style={[styles.totalRow, { backgroundColor: colors.infoBg }]}>
+            <Text style={[styles.totalLabel, { color: colors.info }]}>周期总计</Text>
+            <Text style={[styles.totalAmount, { color: colors.info }]}>¥{totalAmount.toFixed(2)}</Text>
           </View>
           {records.map((record, index) => (
-            <View key={index} style={styles.recordRow}>
-              <Text style={styles.recordDate}>{record.date}</Text>
-              <Text style={styles.recordAmount}>¥{record.amount.toFixed(2)}</Text>
-              <Text style={styles.recordCount}>{record.orderCount}笔</Text>
+            <View key={index} style={[styles.recordRow, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.recordDate, { color: colors.textSecondary }]}>{record.date}</Text>
+              <Text style={[styles.recordAmount, { color: colors.textPrimary }]}>¥{record.amount.toFixed(2)}</Text>
+              <Text style={[styles.recordCount, { color: colors.textSecondary }]}>{record.orderCount}笔</Text>
             </View>
           ))}
             </>
@@ -214,7 +229,6 @@ const RevenueScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
@@ -222,7 +236,6 @@ const styles = StyleSheet.create({
   },
   periodContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 4,
     marginBottom: 16,
@@ -233,16 +246,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
   },
-  periodBtnActive: {
-    backgroundColor: '#1a73e8',
-  },
   periodBtnText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
-  },
-  periodBtnTextActive: {
-    color: '#fff',
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -251,7 +257,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   summaryCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     width: (screenWidth - 52) / 2,
@@ -264,16 +269,13 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 13,
-    color: '#999',
     marginBottom: 6,
   },
   summaryAmount: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
   },
   chartContainer: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -292,19 +294,16 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   exportBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e3f2fd',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
   },
   exportBtnText: {
     fontSize: 13,
-    color: '#1565c0',
     fontWeight: '600',
   },
   chart: {
@@ -313,14 +312,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#e3f2fd',
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
@@ -328,37 +325,31 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1565c0',
   },
   totalAmount: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1565c0',
   },
   recordRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 12,
     marginBottom: 6,
   },
   recordDate: {
     fontSize: 13,
-    color: '#666',
     flex: 1,
   },
   recordAmount: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
     textAlign: 'center',
   },
   recordCount: {
     fontSize: 13,
-    color: '#999',
     flex: 1,
     textAlign: 'right',
   },

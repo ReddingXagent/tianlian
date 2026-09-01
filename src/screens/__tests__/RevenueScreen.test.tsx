@@ -192,12 +192,13 @@ describe('RevenueScreen', () => {
     expect(props.data.labels).toEqual(['1/1', '1/2']);
     // datasets: 金额序列 + 曲线颜色回调
     expect(props.data.datasets[0].data).toEqual([123.45, 200]);
-    expect(props.data.datasets[0].color()).toBe('#1a73e8');
+    // 深色模式: 语义化后 light 套 primary #0e8a80 → rgb(14,138,128), textSecondary #666
+    expect(props.data.datasets[0].color()).toBe('#0e8a80');
     // chartConfig 颜色回调
-    expect(props.chartConfig.color(0.5)).toBe('rgba(26, 115, 232, 0.5)');
+    expect(props.chartConfig.color(0.5)).toBe('rgba(14,138,128, 0.5)');
     // 无参调用 → opacity 默认值 1 分支
-    expect(props.chartConfig.color()).toBe('rgba(26, 115, 232, 1)');
-    expect(props.chartConfig.labelColor()).toBe('#999');
+    expect(props.chartConfig.color()).toBe('rgba(14,138,128, 1)');
+    expect(props.chartConfig.labelColor()).toBe('#666');
   });
 
   it('导出CSV: records为空时早退, 不调用Share', async () => {

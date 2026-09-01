@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useNotifications } from '../hooks/useNotifications';
 import { NotificationType } from '../types';
+import { useTheme } from '../hooks/useTheme';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
@@ -40,6 +41,7 @@ const TYPE_FILTER_OPTIONS: { value: NotificationType | 'all'; label: string }[] 
 ];
 
 const NotificationCenterScreen: React.FC = () => {
+  const { colors } = useTheme();
   const {
     notifications,
     filteredNotifications,
@@ -85,7 +87,12 @@ const NotificationCenterScreen: React.FC = () => {
 
   const renderNotificationItem = ({ item }: { item: import('../types').AppNotification }) => (
     <TouchableOpacity
-      style={[styles.notifCard, !item.isRead && styles.notifCardUnread]}
+      style={[
+        styles.notifCard,
+        { backgroundColor: colors.cardBg },
+        !item.isRead && styles.notifCardUnread,
+        !item.isRead && { backgroundColor: colors.infoBg, borderLeftColor: colors.primary },
+      ]}
       activeOpacity={0.7}
       onPress={() => !item.isRead && markAsRead(item.id)}
      accessibilityRole="button">
@@ -95,19 +102,27 @@ const NotificationCenterScreen: React.FC = () => {
         </Text>
         <View style={styles.notifContent}>
           <View style={styles.notifHeader}>
-            <Text style={[styles.notifTitle, !item.isRead && styles.notifTitleUnread]}>
+            <Text
+              style={[
+                styles.notifTitle,
+                { color: item.isRead ? colors.textPrimary : colors.primary },
+                !item.isRead && styles.notifTitleUnread,
+              ]}
+            >
               {item.title}
             </Text>
-            {!item.isRead && <View style={styles.unreadDot} />}
+            {!item.isRead && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
           </View>
-          <Text style={styles.notifMessage} numberOfLines={2}>
+          <Text style={[styles.notifMessage, { color: colors.textSecondary }]} numberOfLines={2}>
             {item.message}
           </Text>
           <View style={styles.notifFooter}>
-            <Text style={styles.notifType}>
+            <Text style={[styles.notifType, { color: colors.textMuted, backgroundColor: colors.neutralBg }]}>
               {NOTIFICATION_TYPE_LABEL[item.type] || item.type}
             </Text>
-            <Text style={styles.notifTime}>{formatTime(item.createdAt)}</Text>
+            <Text style={[styles.notifTime, { color: colors.textMuted }]}>
+              {formatTime(item.createdAt)}
+            </Text>
           </View>
         </View>
       </View>
@@ -115,13 +130,13 @@ const NotificationCenterScreen: React.FC = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.pageBg }]}>
       {/* 操作栏 */}
       {unreadCount > 0 && (
-        <View style={styles.actionBar}>
-          <Text style={styles.unreadText}>{unreadCount} 条未读</Text>
+        <View style={[styles.actionBar, { backgroundColor: colors.cardBg, borderBottomColor: colors.divider }]}>
+          <Text style={[styles.unreadText, { color: colors.primary }]}>{unreadCount} 条未读</Text>
           <TouchableOpacity onPress={handleMarkAllAsRead} accessibilityRole="button">
-            <Text style={styles.markAllText}>全部标记已读</Text>
+            <Text style={[styles.markAllText, { color: colors.primary }]}>全部标记已读</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -139,21 +154,33 @@ const NotificationCenterScreen: React.FC = () => {
       ) : (
         <View style={styles.listWrapper}>
           {/* 筛选栏：已读状态 + 类型 */}
-          <View style={styles.filterBar}>
-            <View style={styles.readSegment}>
+          <View style={[styles.filterBar, { backgroundColor: colors.cardBg, borderBottomColor: colors.divider }]}>
+            <View style={[styles.readSegment, { backgroundColor: colors.neutralBg }]}>
               <TouchableOpacity
-                style={[styles.readSegBtn, readFilter === 'all' && styles.readSegBtnActive]}
+                style={[styles.readSegBtn, readFilter === 'all' && { backgroundColor: colors.primary }]}
                 onPress={() => setReadFilter('all')}
                accessibilityRole="button">
-                <Text style={[styles.readSegText, readFilter === 'all' && styles.readSegTextActive]}>
+                <Text
+                  style={[
+                    styles.readSegText,
+                    { color: colors.textSecondary },
+                    readFilter === 'all' && { color: colors.onPrimary, fontWeight: '700' },
+                  ]}
+                >
                   全部
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.readSegBtn, readFilter === 'unread' && styles.readSegBtnActive]}
+                style={[styles.readSegBtn, readFilter === 'unread' && { backgroundColor: colors.primary }]}
                 onPress={() => setReadFilter('unread')}
                accessibilityRole="button">
-                <Text style={[styles.readSegText, readFilter === 'unread' && styles.readSegTextActive]}>
+                <Text
+                  style={[
+                    styles.readSegText,
+                    { color: colors.textSecondary },
+                    readFilter === 'unread' && { color: colors.onPrimary, fontWeight: '700' },
+                  ]}
+                >
                   未读{unreadCount > 0 ? ` ${unreadCount}` : ''}
                 </Text>
               </TouchableOpacity>
@@ -163,7 +190,7 @@ const NotificationCenterScreen: React.FC = () => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            style={styles.typeFilterRow}
+            style={[styles.typeFilterRow, { backgroundColor: colors.cardBg, borderBottomColor: colors.divider }]}
             contentContainerStyle={styles.typeFilterContent}
           >
             {TYPE_FILTER_OPTIONS.map((opt) => {
@@ -171,10 +198,16 @@ const NotificationCenterScreen: React.FC = () => {
               return (
                 <TouchableOpacity
                   key={opt.value}
-                  style={[styles.typeChip, active && styles.typeChipActive]}
+                  style={[styles.typeChip, { backgroundColor: colors.neutralBg }, active && { backgroundColor: colors.primary }]}
                   onPress={() => setTypeFilter(opt.value)}
                  accessibilityRole="button">
-                  <Text style={[styles.typeChipText, active && styles.typeChipTextActive]}>
+                  <Text
+                    style={[
+                      styles.typeChipText,
+                      { color: colors.textSecondary },
+                      active && { color: colors.onPrimary, fontWeight: '600' },
+                    ]}
+                  >
                     {opt.label}
                   </Text>
                 </TouchableOpacity>
@@ -191,8 +224,8 @@ const NotificationCenterScreen: React.FC = () => {
               <RefreshControl
                 refreshing={refreshing}
                 onRefresh={() => fetchData(true, 1)}
-                colors={['#1a73e8']}
-                tintColor="#1a73e8"
+                colors={[colors.primary]}
+                tintColor={colors.primary}
               />
             }
             onEndReached={handleLoadMore}
@@ -214,7 +247,9 @@ const NotificationCenterScreen: React.FC = () => {
                   <LoadingSpinner text="加载更多..." size="small" />
                 </View>
               ) : filteredNotifications.length >= total && total > 0 ? (
-                <Text style={styles.footerText}>已显示全部 {total} 条通知</Text>
+                <Text style={[styles.footerText, { color: colors.textMuted }]}>
+                  已显示全部 {total} 条通知
+                </Text>
               ) : null
             }
           />
@@ -227,40 +262,32 @@ const NotificationCenterScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   actionBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   unreadText: {
     fontSize: 14,
-    color: '#1a73e8',
     fontWeight: '500',
   },
   markAllText: {
     fontSize: 14,
-    color: '#1a73e8',
   },
   listWrapper: {
     flex: 1,
   },
   filterBar: {
-    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   readSegment: {
     flexDirection: 'row',
-    backgroundColor: '#f0f2f5',
     borderRadius: 8,
     padding: 3,
   },
@@ -270,23 +297,13 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
   },
-  readSegBtnActive: {
-    backgroundColor: '#1a73e8',
-  },
   readSegText: {
     fontSize: 13,
-    color: '#666',
     fontWeight: '500',
-  },
-  readSegTextActive: {
-    color: '#fff',
-    fontWeight: '700',
   },
   typeFilterRow: {
     flexGrow: 0,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   typeFilterContent: {
     paddingHorizontal: 12,
@@ -297,26 +314,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 14,
-    backgroundColor: '#f0f2f5',
     marginRight: 4,
-  },
-  typeChipActive: {
-    backgroundColor: '#1a73e8',
   },
   typeChipText: {
     fontSize: 12,
-    color: '#666',
-  },
-  typeChipTextActive: {
-    color: '#fff',
-    fontWeight: '600',
   },
   listContent: {
     padding: 16,
     paddingBottom: 32,
   },
   notifCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
@@ -327,9 +334,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   notifCardUnread: {
-    backgroundColor: '#f0f6ff',
     borderLeftWidth: 3,
-    borderLeftColor: '#1a73e8',
   },
   notifRow: {
     flexDirection: 'row',
@@ -351,23 +356,19 @@ const styles = StyleSheet.create({
   notifTitle: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#333',
     flex: 1,
   },
   notifTitleUnread: {
     fontWeight: '700',
-    color: '#1a73e8',
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#1a73e8',
     marginLeft: 6,
   },
   notifMessage: {
     fontSize: 13,
-    color: '#666',
     lineHeight: 19,
     marginBottom: 8,
   },
@@ -378,8 +379,6 @@ const styles = StyleSheet.create({
   },
   notifType: {
     fontSize: 11,
-    color: '#999',
-    backgroundColor: '#f0f0f0',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -387,14 +386,12 @@ const styles = StyleSheet.create({
   },
   notifTime: {
     fontSize: 11,
-    color: '#bbb',
   },
   loadingMore: {
     paddingVertical: 16,
   },
   footerText: {
     textAlign: 'center',
-    color: '#bbb',
     fontSize: 12,
     paddingVertical: 16,
   },

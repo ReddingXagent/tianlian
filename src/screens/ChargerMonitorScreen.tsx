@@ -10,6 +10,8 @@ import {
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { chargerApi } from '../services/api';
 import { RootStackParamList } from '../types';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeColors } from '../theme/colors';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
@@ -18,15 +20,23 @@ import { usePolling } from '../hooks/usePolling';
 
 type ChargerMonitorRouteProp = RouteProp<RootStackParamList, 'ChargerMonitor'>;
 
-const CONNECTOR_STATUS_LABEL: Record<string, { label: string; icon: string; color: string }> = {
-  idle:      { label: '空闲', icon: '⚪', color: '#999' },
-  connected: { label: '已连接', icon: '🔵', color: '#1565c0' },
-  charging:  { label: '充电中', icon: '⚡', color: '#2e7d32' },
-  fault:     { label: '故障', icon: '🔴', color: '#c62828' },
-  suspended: { label: '暂停', icon: '🟡', color: '#f57f17' },
+// 枪口状态配置: 标签/图标/语义色键(运行时随主题解析)
+const CONNECTOR_STATUS_LABEL: Record<string, { label: string; icon: string; color: keyof ThemeColors }> = {
+  idle:      { label: '空闲', icon: '⚪', color: 'textSecondary' },
+  connected: { label: '已连接', icon: '🔵', color: 'info' },
+  charging:  { label: '充电中', icon: '⚡', color: 'success' },
+  fault:     { label: '故障', icon: '🔴', color: 'error' },
+  suspended: { label: '暂停', icon: '🟡', color: 'warningAmber' },
+};
+
+const FALLBACK_CONNECTOR_CONFIG: { label: string; icon: string; color: keyof ThemeColors } = {
+  label: '',
+  icon: '❓',
+  color: 'textSecondary',
 };
 
 const ChargerMonitorScreen: React.FC = () => {
+  const { colors } = useTheme();
   const route = useRoute<ChargerMonitorRouteProp>();
   const { stationId, stationName } = route.params;
 
@@ -67,7 +77,7 @@ const ChargerMonitorScreen: React.FC = () => {
   }
 
   const getConnectorConfig = (status: string) => {
-    return CONNECTOR_STATUS_LABEL[status] || { label: status, icon: '❓', color: '#999' };
+    return CONNECTOR_STATUS_LABEL[status] || { ...FALLBACK_CONNECTOR_CONFIG, label: status };
   };
 
   const formatDuration = (minutes: number): string => {
@@ -79,73 +89,73 @@ const ChargerMonitorScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={refresh}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
       {/* 站点名称 */}
-      <Text style={styles.stationName}>{stationName}</Text>
+      <Text style={[styles.stationName, { color: colors.textSecondary }]}>{stationName}</Text>
 
       {/* 汇总卡片 */}
       {summary && (
         <View style={styles.summaryGrid}>
-          <View style={[styles.summaryCard, { backgroundColor: '#e3f2fd' }]}>
-            <Text style={styles.summaryNumber}>{summary.chargingCount}</Text>
-            <Text style={styles.summaryLabel}>充电中</Text>
+          <View style={[styles.summaryCard, { backgroundColor: colors.infoBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.textPrimary }]}>{summary.chargingCount}</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>充电中</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#f5f5f5' }]}>
-            <Text style={styles.summaryNumber}>{summary.idleCount}</Text>
-            <Text style={styles.summaryLabel}>空闲</Text>
+          <View style={[styles.summaryCard, { backgroundColor: colors.neutralBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.textPrimary }]}>{summary.idleCount}</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>空闲</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#fce4ec' }]}>
-            <Text style={[styles.summaryNumber, { color: '#c62828' }]}>{summary.faultCount}</Text>
-            <Text style={styles.summaryLabel}>故障</Text>
+          <View style={[styles.summaryCard, { backgroundColor: colors.errorBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.error }]}>{summary.faultCount}</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>故障</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#e8f5e9' }]}>
-            <Text style={[styles.summaryNumber, { color: '#2e7d32' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.successBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.success }]}>
               {summary.totalPower.toFixed(1)}
             </Text>
-            <Text style={styles.summaryLabel}>总功率kW</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>总功率kW</Text>
           </View>
         </View>
       )}
 
       {/* 今日统计 */}
       {summary && (
-        <View style={styles.todayStats}>
+        <View style={[styles.todayStats, { backgroundColor: colors.cardBg }]}>
           <View style={styles.todayItem}>
-            <Text style={styles.todayValue}>{summary.todayEnergy.toFixed(0)}</Text>
-            <Text style={styles.todayLabel}>今日充电 kWh</Text>
+            <Text style={[styles.todayValue, { color: colors.primary }]}>{summary.todayEnergy.toFixed(0)}</Text>
+            <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>今日充电 kWh</Text>
           </View>
-          <View style={styles.todayDivider} />
+          <View style={[styles.todayDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.todayItem}>
-            <Text style={styles.todayValue}>{summary.todaySessions}</Text>
-            <Text style={styles.todayLabel}>今日充电次数</Text>
+            <Text style={[styles.todayValue, { color: colors.primary }]}>{summary.todaySessions}</Text>
+            <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>今日充电次数</Text>
           </View>
-          <View style={styles.todayDivider} />
+          <View style={[styles.todayDivider, { backgroundColor: colors.divider }]} />
           <View style={styles.todayItem}>
-            <Text style={styles.todayValue}>{summary.avgPowerPerCharger.toFixed(1)}</Text>
-            <Text style={styles.todayLabel}>平均功率 kW</Text>
+            <Text style={[styles.todayValue, { color: colors.primary }]}>{summary.avgPowerPerCharger.toFixed(1)}</Text>
+            <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>平均功率 kW</Text>
           </View>
         </View>
       )}
 
       {/* 充电桩列表 */}
-      <Text style={styles.sectionTitle}>充电桩实时状态</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>充电桩实时状态</Text>
       {chargers.length === 0 ? (
         <EmptyState icon="🔌" title="暂无充电桩" message="该站点暂无充电桩设备" />
       ) : (
         chargers.map((charger) => {
           const connectorConfig = getConnectorConfig(charger.connectorStatus);
           return (
-            <View key={charger.id} style={styles.chargerCard}>
+            <View key={charger.id} style={[styles.chargerCard, { backgroundColor: colors.cardBg }]}>
               {/* 头部（点击展开/收起实时趋势） */}
               <TouchableOpacity
                 style={styles.chargerHeader}
@@ -156,13 +166,13 @@ const ChargerMonitorScreen: React.FC = () => {
                accessibilityRole="button">
                 <View style={styles.chargerNameRow}>
                   <Text style={styles.chargerIcon}>🔌</Text>
-                  <Text style={styles.chargerName} numberOfLines={1}>
+                  <Text style={[styles.chargerName, { color: colors.textPrimary }]} numberOfLines={1}>
                     {charger.deviceName}
                   </Text>
                 </View>
                 <View style={styles.headerRight}>
                   <StatusBadge status={charger.connectorStatus} label={connectorConfig.label} />
-                  <Text style={styles.trendToggle}>
+                  <Text style={[styles.trendToggle, { color: colors.primary }]}>
                     {expandedChargerId === charger.id ? '收起 ▴' : '趋势 ▾'}
                   </Text>
                 </View>
@@ -170,42 +180,42 @@ const ChargerMonitorScreen: React.FC = () => {
 
               {/* 实时数据 */}
               <View style={styles.metricsGrid}>
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricValue}>
+                <View style={[styles.metricItem, { backgroundColor: colors.inputBg }]}>
+                  <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
                     {charger.power.toFixed(1)}
                   </Text>
-                  <Text style={styles.metricUnit}>kW</Text>
-                  <Text style={styles.metricLabel}>功率</Text>
+                  <Text style={[styles.metricUnit, { color: colors.textSecondary }]}>kW</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textMuted }]}>功率</Text>
                 </View>
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricValue}>
+                <View style={[styles.metricItem, { backgroundColor: colors.inputBg }]}>
+                  <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
                     {charger.voltage.toFixed(0)}
                   </Text>
-                  <Text style={styles.metricUnit}>V</Text>
-                  <Text style={styles.metricLabel}>电压</Text>
+                  <Text style={[styles.metricUnit, { color: colors.textSecondary }]}>V</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textMuted }]}>电压</Text>
                 </View>
-                <View style={styles.metricItem}>
-                  <Text style={styles.metricValue}>
+                <View style={[styles.metricItem, { backgroundColor: colors.inputBg }]}>
+                  <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
                     {charger.current.toFixed(1)}
                   </Text>
-                  <Text style={styles.metricUnit}>A</Text>
-                  <Text style={styles.metricLabel}>电流</Text>
+                  <Text style={[styles.metricUnit, { color: colors.textSecondary }]}>A</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textMuted }]}>电流</Text>
                 </View>
-                <View style={styles.metricItem}>
+                <View style={[styles.metricItem, { backgroundColor: colors.inputBg }]}>
                   <Text style={[styles.metricValue, {
-                    color: charger.temperature > 60 ? '#c62828' : charger.temperature > 45 ? '#f57f17' : '#333',
+                    color: charger.temperature > 60 ? colors.error : charger.temperature > 45 ? colors.warningAmber : colors.textPrimary,
                   }]}>
                     {charger.temperature.toFixed(0)}
                   </Text>
-                  <Text style={styles.metricUnit}>°C</Text>
-                  <Text style={styles.metricLabel}>温度</Text>
+                  <Text style={[styles.metricUnit, { color: colors.textSecondary }]}>°C</Text>
+                  <Text style={[styles.metricLabel, { color: colors.textMuted }]}>温度</Text>
                 </View>
               </View>
 
               {/* 会话信息 */}
               {(charger.state === 'charging' || charger.state === 'suspended') && (
-                <View style={styles.sessionInfo}>
-                  <Text style={styles.sessionText}>
+                <View style={[styles.sessionInfo, { borderTopColor: colors.divider }]}>
+                  <Text style={[styles.sessionText, { color: colors.textSecondary }]}>
                     ⏱ {formatDuration(charger.sessionDuration)} ·
                     本会话 {charger.sessionEnergy.toFixed(1)} kWh
                     {charger.soc != null ? ` · 电量 ${Math.round(charger.soc)}%` : ''}
@@ -215,11 +225,11 @@ const ChargerMonitorScreen: React.FC = () => {
 
               {/* 故障信息 */}
               {charger.faultCode && (
-                <View style={styles.faultInfo}>
+                <View style={[styles.faultInfo, { borderTopColor: colors.errorBg }]}>
                   <Text style={styles.faultIcon}>⚠️</Text>
                   <View style={styles.faultContent}>
-                    <Text style={styles.faultCode}>故障码: {charger.faultCode}</Text>
-                    <Text style={styles.faultMessage} numberOfLines={2}>
+                    <Text style={[styles.faultCode, { color: colors.error }]}>故障码: {charger.faultCode}</Text>
+                    <Text style={[styles.faultMessage, { color: colors.textSecondary }]} numberOfLines={2}>
                       {charger.faultMessage}
                     </Text>
                   </View>
@@ -241,7 +251,6 @@ const ChargerMonitorScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
@@ -249,7 +258,6 @@ const styles = StyleSheet.create({
   },
   stationName: {
     fontSize: 14,
-    color: '#999',
     marginBottom: 12,
   },
   summaryGrid: {
@@ -266,16 +274,13 @@ const styles = StyleSheet.create({
   summaryNumber: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#666',
     marginTop: 4,
   },
   todayStats: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -292,27 +297,22 @@ const styles = StyleSheet.create({
   todayValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1a73e8',
   },
   todayLabel: {
     fontSize: 11,
-    color: '#999',
     marginTop: 4,
   },
   todayDivider: {
     width: 1,
     height: 36,
-    backgroundColor: '#eee',
     marginHorizontal: 8,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   chargerCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -335,7 +335,6 @@ const styles = StyleSheet.create({
   },
   trendToggle: {
     fontSize: 12,
-    color: '#1a73e8',
     fontWeight: '500',
   },
   chargerNameRow: {
@@ -351,7 +350,6 @@ const styles = StyleSheet.create({
   chargerName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
   },
   metricsGrid: {
@@ -361,40 +359,33 @@ const styles = StyleSheet.create({
   metricItem: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#fafafa',
     borderRadius: 8,
     padding: 10,
   },
   metricValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#333',
   },
   metricUnit: {
     fontSize: 11,
-    color: '#999',
     marginTop: 2,
   },
   metricLabel: {
     fontSize: 11,
-    color: '#bbb',
     marginTop: 2,
   },
   sessionInfo: {
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   sessionText: {
     fontSize: 13,
-    color: '#666',
   },
   faultInfo: {
     marginTop: 10,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#fce4ec',
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
@@ -409,12 +400,10 @@ const styles = StyleSheet.create({
   faultCode: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#c62828',
     marginBottom: 2,
   },
   faultMessage: {
     fontSize: 12,
-    color: '#999',
     lineHeight: 18,
   },
 });
