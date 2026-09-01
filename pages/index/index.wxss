@@ -1,13 +1,13 @@
 /* pages/index/index.wxss */
 .container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
 }
 
 /* 搜索栏 */
 .search-bar {
   padding: 16rpx 24rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -19,7 +19,7 @@
 .search-input-wrapper {
   display: flex;
   align-items: center;
-  background: #f5f5f5;
+  background: var(--bg-input);
   border-radius: 32rpx;
   padding: 12rpx 24rpx;
   flex: 1;
@@ -42,9 +42,9 @@
   align-items: center;
   gap: 4rpx;
   font-size: 24rpx;
-  color: #07C160;
+  color: var(--primary);
   padding: 8rpx 16rpx;
-  border: 1rpx solid #07C160;
+  border: 1rpx solid var(--primary);
   border-radius: 24rpx;
   white-space: nowrap;
 }
@@ -53,9 +53,9 @@
 
 /* 筛选面板 */
 .filter-panel {
-  background: #fff;
+  background: var(--bg-white);
   padding: 24rpx;
-  border-bottom: 1rpx solid #eee;
+  border-bottom: 1rpx solid var(--border-color);
 }
 
 .filter-row {
@@ -66,7 +66,7 @@
 
 .filter-label {
   font-size: 26rpx;
-  color: #666;
+  color: var(--text-secondary);
   width: 140rpx;
   flex-shrink: 0;
 }
@@ -79,15 +79,15 @@
 
 .filter-option {
   font-size: 24rpx;
-  color: #666;
+  color: var(--text-secondary);
   padding: 8rpx 24rpx;
   border-radius: 24rpx;
-  background: #f5f5f5;
+  background: var(--bg-input);
 }
 
 .filter-option.active {
-  color: #fff;
-  background: #07C160;
+  color: var(--on-primary);
+  background: var(--primary);
 }
 
 .filter-actions {
@@ -107,14 +107,14 @@
 }
 
 .filter-reset-btn {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--bg-input);
+  color: var(--text-secondary);
   border: none;
 }
 
 .filter-apply-btn {
-  background: #07C160;
-  color: #fff;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
 }
 
@@ -136,7 +136,7 @@
   bottom: 24rpx;
   width: 72rpx;
   height: 72rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -146,7 +146,7 @@
 }
 
 .locate-btn:active {
-  background: #f0f0f0;
+  background: var(--divider);
 }
 
 /* 站点列表 */
@@ -164,10 +164,10 @@
 .list-title {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .list-count {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
 }

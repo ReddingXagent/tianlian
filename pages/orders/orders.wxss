@@ -1,13 +1,13 @@
 /* pages/orders/orders.wxss */
 .container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
 }
 
 /* 筛选标签 */
 .filter-tabs {
   display: flex;
-  background: #ffffff;
+  background: var(--bg-white);
   padding: 0 24rpx;
   position: sticky;
   top: 0;
@@ -19,12 +19,12 @@
   text-align: center;
   padding: 24rpx 0;
   font-size: 28rpx;
-  color: #666666;
+  color: var(--text-secondary);
   position: relative;
 }
 
 .filter-tab.active {
-  color: #07C160;
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -36,7 +36,7 @@
   transform: translateX(-50%);
   width: 48rpx;
   height: 4rpx;
-  background: #07C160;
+  background: var(--primary);
   border-radius: 2rpx;
 }
 
@@ -47,7 +47,7 @@
 
 /* 订单卡片 */
 .order-card {
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
@@ -68,19 +68,19 @@
 .station-name {
   font-size: 30rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
   display: block;
   margin-bottom: 6rpx;
 }
 
 .charger-id {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 /* 订单信息 */
 .order-info {
-  background: #f9f9f9;
+  background: var(--bg-hover);
   border-radius: 12rpx;
   padding: 16rpx 20rpx;
   margin-bottom: 16rpx;
@@ -95,23 +95,23 @@
 
 .info-label {
   font-size: 26rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 .info-value {
   font-size: 26rpx;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .info-value.price {
-  color: #FA5151;
+  color: var(--danger);
   font-weight: 600;
 }
 
 /* 订单时间 */
 .order-time {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
   margin-bottom: 16rpx;
 }
 
@@ -121,7 +121,7 @@
   justify-content: flex-end;
   gap: 16rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid var(--divider);
 }
 
 /* 加载更多 */
@@ -132,5 +132,5 @@
 
 .load-more-text {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
 }

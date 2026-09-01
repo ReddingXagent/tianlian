@@ -1,7 +1,7 @@
 /* pages/order-detail/order-detail.wxss */
 .container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
   padding-bottom: 40rpx;
 }
 
@@ -9,20 +9,20 @@
 .status-section {
   padding: 48rpx 32rpx;
   text-align: center;
-  background: #ffffff;
+  background: var(--bg-white);
   margin-bottom: 20rpx;
 }
 
 .status-section.charging {
-  background: linear-gradient(135deg, #E8F8EF, #ffffff);
+  background: linear-gradient(135deg, var(--primary-light), var(--bg-white));
 }
 
 .status-section.finished {
-  background: linear-gradient(135deg, #f0f0f0, #ffffff);
+  background: linear-gradient(135deg, var(--divider), var(--bg-white));
 }
 
 .status-section.pending {
-  background: linear-gradient(135deg, #FFF8E1, #ffffff);
+  background: linear-gradient(135deg, var(--warning-bg), var(--bg-white));
 }
 
 .status-icon {
@@ -34,20 +34,20 @@
 .status-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
   display: block;
   margin-bottom: 8rpx;
 }
 
 .status-desc {
   font-size: 26rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 /* 充电数据 */
 .data-section {
   margin: 0 24rpx 20rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
 }
@@ -64,7 +64,7 @@
 
 .data-label {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
   display: block;
   margin-bottom: 8rpx;
 }
@@ -72,17 +72,17 @@
 .data-value {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .data-value.price {
-  color: #FA5151;
+  color: var(--danger);
 }
 
 /* 信息区域 */
 .info-section {
   margin: 0 24rpx 20rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
 }
@@ -90,10 +90,10 @@
 .section-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
   margin-bottom: 16rpx;
   padding-bottom: 16rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid var(--divider);
 }
 
 .info-list {
@@ -110,30 +110,30 @@
 .info-item.total {
   padding-top: 20rpx;
   margin-top: 12rpx;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid var(--divider);
 }
 
 .info-label {
   font-size: 26rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 .info-value {
   font-size: 26rpx;
-  color: #333333;
+  color: var(--text-primary);
   max-width: 60%;
   text-align: right;
   word-break: break-all;
 }
 
 .info-value.price {
-  color: #FA5151;
+  color: var(--danger);
   font-weight: 600;
   font-size: 30rpx;
 }
 
 .info-value.discount {
-  color: #07C160;
+  color: var(--primary);
 }
 
 /* 操作区 */

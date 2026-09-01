@@ -1,7 +1,7 @@
 /* pages/scan/scan.wxss */
 .container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
   padding: 40rpx 32rpx;
 }
 
@@ -29,13 +29,13 @@
 .scan-title {
   font-size: 36rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
   margin-bottom: 12rpx;
 }
 
 .scan-desc {
   font-size: 26rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 .scan-area .btn {
@@ -52,18 +52,18 @@
 .divider-line {
   flex: 1;
   height: 1rpx;
-  background: #e5e5e5;
+  background: var(--border-color);
 }
 
 .divider-label {
   padding: 0 24rpx;
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 /* 手动输入 */
 .manual-input {
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 32rpx;
 }
@@ -75,12 +75,12 @@
 
 .section-title {
   font-size: 28rpx;
-  color: #999999;
+  color: var(--text-muted);
   margin-bottom: 20rpx;
 }
 
 .history-list {
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   overflow: hidden;
 }
@@ -90,7 +90,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 28rpx 32rpx;
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1rpx solid var(--bg-color);
 }
 
 .history-item:last-child {
@@ -99,10 +99,10 @@
 
 .history-name {
   font-size: 28rpx;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .history-time {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
