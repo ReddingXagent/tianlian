@@ -26,6 +26,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { chat, ChatMessage } from '../services/ai';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeColors } from '../theme/colors';
 
 // =====================
 // 简单 Markdown 渲染器
@@ -35,7 +37,8 @@ import { chat, ChatMessage } from '../services/ai';
  * 将 Markdown 文本渲染为 React Native 组件。
  * 支持：**粗体**、*斜体*、`代码`、```代码块```、有序/无序列表、标题
  */
-function renderMarkdown(text: string): React.ReactNode[] {
+function renderMarkdown(text: string, c: ThemeColors): React.ReactNode[] {
+  const mdStyles = createMdStyles(c);
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let inCodeBlock = false;
@@ -76,7 +79,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
     if (line.startsWith('### ')) {
       elements.push(
         <Text key={`h3-${i}`} style={mdStyles.h3}>
-          {renderInlineMarkdown(line.slice(4))}
+          {renderInlineMarkdown(line.slice(4), c)}
         </Text>
       );
       continue;
@@ -84,7 +87,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
     if (line.startsWith('## ')) {
       elements.push(
         <Text key={`h2-${i}`} style={mdStyles.h2}>
-          {renderInlineMarkdown(line.slice(3))}
+          {renderInlineMarkdown(line.slice(3), c)}
         </Text>
       );
       continue;
@@ -92,7 +95,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
     if (line.startsWith('# ')) {
       elements.push(
         <Text key={`h1-${i}`} style={mdStyles.h1}>
-          {renderInlineMarkdown(line.slice(2))}
+          {renderInlineMarkdown(line.slice(2), c)}
         </Text>
       );
       continue;
@@ -104,7 +107,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
         <View key={`li-${i}`} style={mdStyles.listItem}>
           <Text style={mdStyles.bullet}>•</Text>
           <Text style={mdStyles.listText}>
-            {renderInlineMarkdown(line.replace(/^[\-\*]\s/, ''))}
+            {renderInlineMarkdown(line.replace(/^[\-\*]\s/, ''), c)}
           </Text>
         </View>
       );
@@ -118,7 +121,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
         <View key={`ol-${i}`} style={mdStyles.listItem}>
           <Text style={mdStyles.bullet}>{olMatch[1]}.</Text>
           <Text style={mdStyles.listText}>
-            {renderInlineMarkdown(line.replace(/^\d+\.\s/, ''))}
+            {renderInlineMarkdown(line.replace(/^\d+\.\s/, ''), c)}
           </Text>
         </View>
       );
@@ -128,7 +131,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
     // 普通段落
     elements.push(
       <Text key={`p-${i}`} style={mdStyles.paragraph}>
-        {renderInlineMarkdown(line)}
+        {renderInlineMarkdown(line, c)}
       </Text>
     );
   }
@@ -139,7 +142,8 @@ function renderMarkdown(text: string): React.ReactNode[] {
 /**
  * 行内 Markdown 渲染：**粗体**、*斜体*、`行内代码`
  */
-function renderInlineMarkdown(text: string): React.ReactNode[] {
+function renderInlineMarkdown(text: string, c: ThemeColors): React.ReactNode[] {
+  const mdStyles = createMdStyles(c);
   const parts: React.ReactNode[] = [];
   // 匹配 **粗体**、*斜体*、`行内代码`
   const regex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)|(`(.+?)`)/g;
@@ -189,40 +193,43 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
   return parts.length > 0 ? parts : [text];
 }
 
-const mdStyles = StyleSheet.create({
-  h1: { fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 4, marginTop: 8 },
-  h2: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 4, marginTop: 8 },
-  h3: { fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 4, marginTop: 6 },
-  paragraph: { fontSize: 15, color: '#ddd', lineHeight: 22 },
-  listItem: { flexDirection: 'row', marginBottom: 2, paddingLeft: 4 },
-  bullet: { fontSize: 15, color: '#4ECDC4', width: 20 },
-  listText: { fontSize: 15, color: '#ddd', lineHeight: 22, flex: 1 },
-  codeBlock: {
-    backgroundColor: '#111827',
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 4,
-  },
-  codeText: {
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontSize: 13,
-    color: '#a5d6ff',
-  },
-  inlineCode: {
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontSize: 13,
-    color: '#a5d6ff',
-    backgroundColor: '#1a1a2e',
-    borderRadius: 3,
-    paddingHorizontal: 4,
-  },
-});
+/** 主题感知 markdown 样式工厂（深色模式: 色值随主题翻转） */
+const createMdStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    h1: { fontSize: 20, fontWeight: '700', color: c.textPrimary, marginBottom: 4, marginTop: 8 },
+    h2: { fontSize: 18, fontWeight: '700', color: c.textPrimary, marginBottom: 4, marginTop: 8 },
+    h3: { fontSize: 16, fontWeight: '600', color: c.textPrimary, marginBottom: 4, marginTop: 6 },
+    paragraph: { fontSize: 15, color: c.textSecondary, lineHeight: 22 },
+    listItem: { flexDirection: 'row', marginBottom: 2, paddingLeft: 4 },
+    bullet: { fontSize: 15, color: c.primary, width: 20 },
+    listText: { fontSize: 15, color: c.textSecondary, lineHeight: 22, flex: 1 },
+    codeBlock: {
+      backgroundColor: c.neutralBg,
+      borderRadius: 8,
+      padding: 12,
+      marginVertical: 4,
+    },
+    codeText: {
+      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+      fontSize: 13,
+      color: c.info,
+    },
+    inlineCode: {
+      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+      fontSize: 13,
+      color: c.info,
+      backgroundColor: c.neutralBg,
+      borderRadius: 3,
+      paddingHorizontal: 4,
+    },
+  });
 
 // =====================
 // 打字动画指示器
 // =====================
 
 function TypingIndicator() {
+  const { colors } = useTheme();
   const [dots, setDots] = useState('');
 
   useEffect(() => {
@@ -234,11 +241,11 @@ function TypingIndicator() {
 
   return (
     <View style={typingStyles.container}>
-      <View style={typingStyles.bubble}>
+      <View style={[typingStyles.bubble, { backgroundColor: colors.aiBg }]}>
         <View style={typingStyles.dots}>
           <View style={[typingStyles.dot, { opacity: dots.length >= 1 ? 1 : 0.3 }]} />
-          <View style={[typingStyles.dot, { opacity: dots.length >= 2 ? 1 : 0.3 }]} />
-          <View style={[typingStyles.dot, { opacity: dots.length >= 3 ? 1 : 0.3 }]} />
+          <View style={[typingStyles.dot, { backgroundColor: colors.primary, opacity: dots.length >= 2 ? 1 : 0.3 }]} />
+          <View style={[typingStyles.dot, { backgroundColor: colors.primary, opacity: dots.length >= 3 ? 1 : 0.3 }]} />
         </View>
       </View>
     </View>
@@ -248,7 +255,6 @@ function TypingIndicator() {
 const typingStyles = StyleSheet.create({
   container: { paddingHorizontal: 16, paddingVertical: 4, alignItems: 'flex-start' },
   bubble: {
-    backgroundColor: '#1a1a2e',
     borderRadius: 16,
     borderBottomLeftRadius: 4,
     paddingHorizontal: 16,
@@ -260,7 +266,6 @@ const typingStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#4ECDC4',
   },
 });
 
@@ -273,6 +278,7 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble({ message }: MessageBubbleProps) {
+  const { colors } = useTheme();
   const isUser = message.role === 'user';
 
   return (
@@ -283,24 +289,26 @@ function MessageBubble({ message }: MessageBubbleProps) {
       ]}
     >
       {!isUser && (
-        <View style={bubbleStyles.avatar}>
-          <Text style={bubbleStyles.avatarText}>AI</Text>
+        <View style={[bubbleStyles.avatar, { backgroundColor: colors.primary }]}>
+          <Text style={[bubbleStyles.avatarText, { color: colors.onPrimary }]}>AI</Text>
         </View>
       )}
       <View
         style={[
           bubbleStyles.bubble,
-          isUser ? bubbleStyles.userBubble : bubbleStyles.assistantBubble,
+          isUser
+            ? { backgroundColor: colors.primary, borderBottomRightRadius: 4 }
+            : { backgroundColor: colors.aiBg, borderBottomLeftRadius: 4 },
         ]}
       >
         {isUser ? (
-          <Text style={bubbleStyles.userText}>{message.content}</Text>
+          <Text style={[bubbleStyles.userText, { color: colors.onPrimary }]}>{message.content}</Text>
         ) : message.content ? (
           <View style={bubbleStyles.markdownContent}>
-            {renderMarkdown(message.content)}
+            {renderMarkdown(message.content, colors)}
           </View>
         ) : (
-          <Text style={bubbleStyles.assistantText}>正在查询数据…</Text>
+          <Text style={[bubbleStyles.assistantText, { color: colors.textSecondary }]}>正在查询数据…</Text>
         )}
       </View>
     </View>
@@ -319,28 +327,19 @@ const bubbleStyles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#4ECDC4',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
   },
-  avatarText: { fontSize: 12, fontWeight: '700', color: '#0f0f23' },
+  avatarText: { fontSize: 12, fontWeight: '700' },
   bubble: {
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
     maxWidth: '78%',
   },
-  userBubble: {
-    backgroundColor: '#4ECDC4',
-    borderBottomRightRadius: 4,
-  },
-  assistantBubble: {
-    backgroundColor: '#1a1a2e',
-    borderBottomLeftRadius: 4,
-  },
-  userText: { fontSize: 15, color: '#0f0f23', lineHeight: 22 },
-  assistantText: { fontSize: 15, color: '#ddd', lineHeight: 22 },
+  userText: { fontSize: 15, lineHeight: 22 },
+  assistantText: { fontSize: 15, lineHeight: 22 },
   markdownContent: {},
 });
 
@@ -353,6 +352,7 @@ interface AIChatPanelProps {
 }
 
 export default function AIChatPanel({ onClose }: AIChatPanelProps) {
+  const { colors } = useTheme();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome',
@@ -474,21 +474,21 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
 
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.pageBg }]} edges={['bottom']}>
       {/* 顶部栏 */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.cardBg, borderBottomColor: colors.divider }]}>
         <View style={styles.headerLeft}>
-          <View style={styles.headerAvatar}>
-            <Text style={styles.headerAvatarText}>AI</Text>
+          <View style={[styles.headerAvatar, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.headerAvatarText, { color: colors.onPrimary }]}>AI</Text>
           </View>
           <View>
-            <Text style={styles.headerTitle}>AI 助手</Text>
-            <Text style={styles.headerSubtitle}>天链V3 智能运维</Text>
+            <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>AI 助手</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>天链V3 智能运维</Text>
           </View>
         </View>
         {onClose && (
-          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-            <Text style={styles.closeText}>✕</Text>
+          <TouchableOpacity onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.neutralBg }]} accessibilityRole="button" hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+            <Text style={[styles.closeText, { color: colors.textPrimary }]}>✕</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -504,7 +504,7 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
         ListFooterComponent={loading ? <TypingIndicator /> : null}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>开始对话吧</Text>
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>开始对话吧</Text>
           </View>
         }
       />
@@ -515,7 +515,7 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
           {quickQuestions.map((q) => (
             <TouchableOpacity
               key={q}
-              style={styles.quickChip}
+              style={[styles.quickChip, { backgroundColor: colors.cardBg, borderColor: colors.border }]}
               onPress={() => {
                 setInputText(q);
                 // Auto-send on next render cycle
@@ -528,7 +528,7 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
                 }, 50);
               }}
              accessibilityRole="button">
-              <Text style={styles.quickChipText}>{q}</Text>
+              <Text style={[styles.quickChipText, { color: colors.primary }]}>{q}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -539,14 +539,14 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={90}
       >
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, { backgroundColor: colors.cardBg, borderTopColor: colors.divider }]}>
           <TextInput
             ref={inputRef}
-            style={styles.textInput}
+            style={[styles.textInput, { backgroundColor: colors.pageBg, color: colors.textPrimary }]}
             value={inputText}
             onChangeText={setInputText}
             placeholder="输入你的问题…"
-            placeholderTextColor="#666"
+            placeholderTextColor={colors.textMuted}
             multiline
             maxLength={500}
             editable={!loading}
@@ -556,16 +556,17 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
           <TouchableOpacity
             style={[
               styles.sendButton,
-              (!inputText.trim() || loading) && styles.sendButtonDisabled,
+              { backgroundColor: colors.primary },
+              (!inputText.trim() || loading) && { backgroundColor: colors.neutralBg },
             ]}
             onPress={handleSend}
             disabled={!inputText.trim() || loading}
            accessibilityRole="button"
            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             {loading ? (
-              <ActivityIndicator size="small" color="#0f0f23" />
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
-              <Text style={styles.sendIcon}>↑</Text>
+              <Text style={[styles.sendIcon, { color: colors.onPrimary }]}>↑</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -579,38 +580,34 @@ export default function AIChatPanel({ onClose }: AIChatPanelProps) {
 // =====================
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f23' },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#1a1a2e',
     borderBottomWidth: 1,
-    borderBottomColor: '#222',
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerAvatar: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#4ECDC4',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerAvatarText: { fontSize: 14, fontWeight: '700', color: '#0f0f23' },
-  headerTitle: { fontSize: 17, fontWeight: '600', color: '#fff' },
-  headerSubtitle: { fontSize: 12, color: '#888' },
+  headerAvatarText: { fontSize: 14, fontWeight: '700' },
+  headerTitle: { fontSize: 17, fontWeight: '600' },
+  headerSubtitle: { fontSize: 12 },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#333',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeText: { fontSize: 14, color: '#fff' },
+  closeText: { fontSize: 14 },
   messageList: { flexGrow: 1, paddingVertical: 8 },
   emptyContainer: {
     flex: 1,
@@ -618,7 +615,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 80,
   },
-  emptyText: { fontSize: 16, color: '#666' },
+  emptyText: { fontSize: 16 },
   quickQuestions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -627,48 +624,40 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quickChip: {
-    backgroundColor: '#1a1a2e',
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: '#333',
   },
-  quickChipText: { fontSize: 13, color: '#4ECDC4' },
+  quickChipText: { fontSize: 13 },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#1a1a2e',
     borderTopWidth: 1,
-    borderTopColor: '#222',
     gap: 8,
   },
   textInput: {
     flex: 1,
-    backgroundColor: '#0f0f23',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#fff',
     maxHeight: 100,
   },
   sendButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: '#4ECDC4',
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendButtonDisabled: {
-    backgroundColor: '#333',
+    opacity: 0.6,
   },
   sendIcon: {
     fontSize: 20,
-    color: '#0f0f23',
     fontWeight: '700',
   },
 });
