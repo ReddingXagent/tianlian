@@ -15,6 +15,7 @@ jest.mock('../../services/ai', () => ({
   chat: jest.fn(),
 }));
 
+/* eslint-disable import/first -- jest.mock 必须先于被测模块 import (hoist 语义) */
 import { AIChatPanel } from '../AIChatPanel';
 import { chat } from '../../services/ai';
 import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
