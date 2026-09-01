@@ -15,6 +15,7 @@ import { RootStackParamList, DeviceControlLog } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
+import { useTheme } from '../hooks/useTheme';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { useDeviceControlLogStore } from '../store/deviceControlLogStore';
 
@@ -29,6 +30,7 @@ const DEVICE_TYPE_LABEL: Record<string, string> = {
 };
 
 const DeviceDetailScreen: React.FC = () => {
+  const { colors } = useTheme();
   const route = useRoute<DeviceDetailRouteProp>();
   const { deviceId } = route.params;
 
@@ -113,47 +115,47 @@ const DeviceDetailScreen: React.FC = () => {
   return (
     <>
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={() => fetchData(true)}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
       {/* 设备基本信息 */}
-      <View style={styles.infoCard}>
+      <View style={[styles.infoCard, { backgroundColor: colors.cardBg }]}>
         <View style={styles.infoHeader}>
           <Text style={styles.deviceIcon}>
             {device?.type === 'charger' ? '🔌' : device?.type === 'battery' ? '🔋' : device?.type === 'inverter' ? '⚡' : '📡'}
           </Text>
           <View style={styles.infoHeaderContent}>
-            <Text style={styles.deviceName}>{device?.name}</Text>
-            <Text style={styles.deviceCode}>编号: {device?.code}</Text>
+            <Text style={[styles.deviceName, { color: colors.textPrimary }]}>{device?.name}</Text>
+            <Text style={[styles.deviceCode, { color: colors.textSecondary }]}>编号: {device?.code}</Text>
           </View>
           <StatusBadge status={device?.status ?? 'offline'} />
         </View>
 
-        <View style={styles.infoDivider} />
+        <View style={[styles.infoDivider, { backgroundColor: colors.divider }]} />
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>类型</Text>
-          <Text style={styles.infoValue}>{DEVICE_TYPE_LABEL[device?.type ?? 'other']}</Text>
+        <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+          <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>类型</Text>
+          <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{DEVICE_TYPE_LABEL[device?.type ?? 'other']}</Text>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>型号</Text>
-          <Text style={styles.infoValue}>{device?.model || '-'}</Text>
+        <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+          <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>型号</Text>
+          <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{device?.model || '-'}</Text>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>厂商</Text>
-          <Text style={styles.infoValue}>{device?.manufacturer || '-'}</Text>
+        <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+          <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>厂商</Text>
+          <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{device?.manufacturer || '-'}</Text>
         </View>
-        <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-          <Text style={styles.infoLabel}>最后心跳</Text>
-          <Text style={styles.infoValue}>
+        <View style={[styles.infoRow, { borderBottomWidth: 0, borderBottomColor: 'transparent' }]}>
+          <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>最后心跳</Text>
+          <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
             {device?.lastHeartbeat
               ? new Date(device.lastHeartbeat).toLocaleString('zh-CN')
               : '无数据'}
@@ -164,39 +166,39 @@ const DeviceDetailScreen: React.FC = () => {
       {/* 遥测数据 */}
       {telemetry && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>实时遥测</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>实时遥测</Text>
           <View style={styles.telemetryGrid}>
-            <View style={styles.telemetryCard}>
-              <Text style={styles.telemetryValue}>{telemetry.power.toFixed(1)}</Text>
-              <Text style={styles.telemetryUnit}>kW</Text>
-              <Text style={styles.telemetryLabel}>功率</Text>
+            <View style={[styles.telemetryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.telemetryValue, { color: colors.textPrimary }]}>{telemetry.power.toFixed(1)}</Text>
+              <Text style={[styles.telemetryUnit, { color: colors.textSecondary }]}>kW</Text>
+              <Text style={[styles.telemetryLabel, { color: colors.textMuted }]}>功率</Text>
             </View>
-            <View style={styles.telemetryCard}>
-              <Text style={styles.telemetryValue}>{telemetry.voltage.toFixed(0)}</Text>
-              <Text style={styles.telemetryUnit}>V</Text>
-              <Text style={styles.telemetryLabel}>电压</Text>
+            <View style={[styles.telemetryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.telemetryValue, { color: colors.textPrimary }]}>{telemetry.voltage.toFixed(0)}</Text>
+              <Text style={[styles.telemetryUnit, { color: colors.textSecondary }]}>V</Text>
+              <Text style={[styles.telemetryLabel, { color: colors.textMuted }]}>电压</Text>
             </View>
-            <View style={styles.telemetryCard}>
-              <Text style={styles.telemetryValue}>{telemetry.current.toFixed(1)}</Text>
-              <Text style={styles.telemetryUnit}>A</Text>
-              <Text style={styles.telemetryLabel}>电流</Text>
+            <View style={[styles.telemetryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.telemetryValue, { color: colors.textPrimary }]}>{telemetry.current.toFixed(1)}</Text>
+              <Text style={[styles.telemetryUnit, { color: colors.textSecondary }]}>A</Text>
+              <Text style={[styles.telemetryLabel, { color: colors.textMuted }]}>电流</Text>
             </View>
-            <View style={styles.telemetryCard}>
+            <View style={[styles.telemetryCard, { backgroundColor: colors.cardBg }]}>
               <Text style={[styles.telemetryValue, {
-                color: telemetry.temperature > 60 ? '#c62828' : telemetry.temperature > 45 ? '#f57f17' : '#333',
+                color: telemetry.temperature > 60 ? colors.error : telemetry.temperature > 45 ? colors.warningAmber : colors.textPrimary,
               }]}>
                 {telemetry.temperature.toFixed(0)}
               </Text>
-              <Text style={styles.telemetryUnit}>°C</Text>
-              <Text style={styles.telemetryLabel}>温度</Text>
+              <Text style={[styles.telemetryUnit, { color: colors.textSecondary }]}>°C</Text>
+              <Text style={[styles.telemetryLabel, { color: colors.textMuted }]}>温度</Text>
             </View>
-            <View style={styles.telemetryCard}>
-              <Text style={styles.telemetryValue}>{telemetry.energy.toFixed(1)}</Text>
-              <Text style={styles.telemetryUnit}>kWh</Text>
-              <Text style={styles.telemetryLabel}>累计电量</Text>
+            <View style={[styles.telemetryCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.telemetryValue, { color: colors.textPrimary }]}>{telemetry.energy.toFixed(1)}</Text>
+              <Text style={[styles.telemetryUnit, { color: colors.textSecondary }]}>kWh</Text>
+              <Text style={[styles.telemetryLabel, { color: colors.textMuted }]}>累计电量</Text>
             </View>
           </View>
-          <Text style={styles.telemetryTime}>
+          <Text style={[styles.telemetryTime, { color: colors.textMuted }]}>
             更新时间: {new Date(telemetry.timestamp).toLocaleString('zh-CN')}
           </Text>
         </View>
@@ -204,52 +206,52 @@ const DeviceDetailScreen: React.FC = () => {
 
       {/* 远程控制 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>远程控制</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>远程控制</Text>
         <View style={styles.controlGrid}>
           <TouchableOpacity
-            style={[styles.controlBtn, { backgroundColor: '#e8f5e9' }]}
+            style={[styles.controlBtn, { backgroundColor: colors.successBg }]}
             onPress={() => handleControl('start', '启动')}
             disabled={controlling || device?.status === 'online'}
             activeOpacity={0.7}
            accessibilityRole="button">
             {controlling ? (
-              <ActivityIndicator color="#2e7d32" size="small" />
+              <ActivityIndicator color={colors.success} size="small" />
             ) : (
               <>
                 <Text style={styles.controlIcon}>▶️</Text>
-                <Text style={[styles.controlLabel, { color: '#2e7d32' }]}>启动</Text>
+                <Text style={[styles.controlLabel, { color: colors.success }]}>启动</Text>
               </>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.controlBtn, { backgroundColor: '#fce4ec' }]}
+            style={[styles.controlBtn, { backgroundColor: colors.errorBg }]}
             onPress={() => handleControl('stop', '停止', true)}
             disabled={controlling}
             activeOpacity={0.7}
            accessibilityRole="button">
             <Text style={styles.controlIcon}>⏹️</Text>
-            <Text style={[styles.controlLabel, { color: '#c62828' }]}>停止</Text>
+            <Text style={[styles.controlLabel, { color: colors.error }]}>停止</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.controlBtn, { backgroundColor: '#fff8e1' }]}
+            style={[styles.controlBtn, { backgroundColor: colors.warningAmberBg }]}
             onPress={() => handleControl('restart', '重启')}
             disabled={controlling}
             activeOpacity={0.7}
            accessibilityRole="button">
             <Text style={styles.controlIcon}>🔄</Text>
-            <Text style={[styles.controlLabel, { color: '#f57f17' }]}>重启</Text>
+            <Text style={[styles.controlLabel, { color: colors.warningAmber }]}>重启</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.controlBtn, { backgroundColor: '#e3f2fd' }]}
+            style={[styles.controlBtn, { backgroundColor: colors.infoBg }]}
             onPress={() => handleControl('reset', '复位')}
             disabled={controlling}
             activeOpacity={0.7}
            accessibilityRole="button">
             <Text style={styles.controlIcon}>🔧</Text>
-            <Text style={[styles.controlLabel, { color: '#1565c0' }]}>复位</Text>
+            <Text style={[styles.controlLabel, { color: colors.info }]}>复位</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -257,29 +259,29 @@ const DeviceDetailScreen: React.FC = () => {
       {/* 操作日志 */}
       <View style={styles.section}>
         <View style={styles.logHeader}>
-          <Text style={styles.sectionTitle}>操作日志</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>操作日志</Text>
           {deviceLogs.length > 0 && (
             <TouchableOpacity onPress={clearLogs} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button">
-              <Text style={styles.clearLogText}>清空</Text>
+              <Text style={[styles.clearLogText, { color: colors.error }]}>清空</Text>
             </TouchableOpacity>
           )}
         </View>
         {deviceLogs.length === 0 ? (
-          <Text style={styles.logEmpty}>暂无操作记录</Text>
+          <Text style={[styles.logEmpty, { color: colors.textMuted, backgroundColor: colors.cardBg }]}>暂无操作记录</Text>
         ) : (
           deviceLogs.map((log) => (
             <View
               key={log.id}
-              style={[styles.logItem, log.status === 'failed' && styles.logItemFailed]}
+              style={[styles.logItem, { backgroundColor: colors.cardBg, borderLeftColor: log.status === 'failed' ? colors.error : colors.success }]}
             >
               <View style={styles.logRow}>
-                <Text style={styles.logCommand}>{log.commandLabel}</Text>
-                <Text style={[styles.logStatus, log.status === 'failed' ? styles.logStatusFail : styles.logStatusOk]}>
+                <Text style={[styles.logCommand, { color: colors.textPrimary }]}>{log.commandLabel}</Text>
+                <Text style={[styles.logStatus, { color: log.status === 'failed' ? colors.error : colors.success, backgroundColor: log.status === 'failed' ? colors.errorBg : colors.successBg }]}>
                   {log.status === 'success' ? '成功' : '失败'}
                 </Text>
               </View>
-              <Text style={styles.logMessage} numberOfLines={2}>{log.message}</Text>
-              <Text style={styles.logTime}>{formatLogTime(log.createdAt)}</Text>
+              <Text style={[styles.logMessage, { color: colors.textSecondary }]} numberOfLines={2}>{log.message}</Text>
+              <Text style={[styles.logTime, { color: colors.textMuted }]}>{formatLogTime(log.createdAt)}</Text>
             </View>
           ))
         )}
@@ -309,14 +311,12 @@ const DeviceDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
     paddingBottom: 32,
   },
   infoCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -340,16 +340,13 @@ const styles = StyleSheet.create({
   deviceName: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 2,
   },
   deviceCode: {
     fontSize: 13,
-    color: '#999',
   },
   infoDivider: {
     height: 1,
-    backgroundColor: '#f0f0f0',
     marginVertical: 12,
   },
   infoRow: {
@@ -358,15 +355,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   infoLabel: {
     fontSize: 14,
-    color: '#999',
   },
   infoValue: {
     fontSize: 14,
-    color: '#333',
     fontWeight: '500',
   },
   section: {
@@ -375,7 +369,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   telemetryGrid: {
@@ -384,7 +377,6 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   telemetryCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 14,
     width: '30%',
@@ -398,21 +390,17 @@ const styles = StyleSheet.create({
   telemetryValue: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#333',
   },
   telemetryUnit: {
     fontSize: 11,
-    color: '#999',
     marginTop: 2,
   },
   telemetryLabel: {
     fontSize: 11,
-    color: '#bbb',
     marginTop: 2,
   },
   telemetryTime: {
     fontSize: 12,
-    color: '#bbb',
     textAlign: 'right',
     marginTop: 8,
   },
@@ -444,26 +432,18 @@ const styles = StyleSheet.create({
   },
   clearLogText: {
     fontSize: 13,
-    color: '#c62828',
   },
   logEmpty: {
     fontSize: 13,
-    color: '#bbb',
     textAlign: 'center',
     paddingVertical: 20,
-    backgroundColor: '#fff',
     borderRadius: 8,
   },
   logItem: {
-    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#2e7d32',
-  },
-  logItemFailed: {
-    borderLeftColor: '#c62828',
   },
   logRow: {
     flexDirection: 'row',
@@ -474,7 +454,6 @@ const styles = StyleSheet.create({
   logCommand: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
   },
   logStatus: {
     fontSize: 12,
@@ -484,23 +463,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: 'hidden',
   },
-  logStatusOk: {
-    color: '#2e7d32',
-    backgroundColor: '#e8f5e9',
-  },
-  logStatusFail: {
-    color: '#c62828',
-    backgroundColor: '#fce4ec',
-  },
   logMessage: {
     fontSize: 12,
-    color: '#666',
     lineHeight: 18,
     marginBottom: 4,
   },
   logTime: {
     fontSize: 11,
-    color: '#bbb',
   },
 });
 
