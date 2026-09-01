@@ -160,7 +160,8 @@ describe('StationDetailScreen', () => {
     await waitFor(() => getByText('离线桩'));
     const dot = UNSAFE_getAllByType(View).find((v) => {
       const arr = (Array.isArray(v.props.style) ? v.props.style : [v.props.style]) as (Record<string, unknown> | null | undefined)[];
-      return arr.some((s) => s && s.backgroundColor === '#666') && arr.some((s) => s && s.width === 10);
+      // dotOffline 语义化: light套 textMuted #999
+      return arr.some((s) => s && s.backgroundColor === '#999') && arr.some((s) => s && s.width === 10);
     });
     expect(dot).toBeTruthy();
   });
