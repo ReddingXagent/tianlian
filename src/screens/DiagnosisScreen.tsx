@@ -1,5 +1,7 @@
 import { ScrollView, View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useDiagnosis } from '../hooks/useDiagnosis';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeColors } from '../theme/colors';
 
 const FAULT_CODE_EXAMPLES = [
   { code: 'E001', label: 'E001-过压' },
@@ -9,11 +11,11 @@ const FAULT_CODE_EXAMPLES = [
   { code: 'E005', label: 'E005-绝缘异常' },
 ];
 
-const SEVERITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: '低', color: '#2e7d32' },
-  medium: { label: '中', color: '#f57f17' },
-  high: { label: '高', color: '#e65100' },
-  critical: { label: '严重', color: '#c62828' },
+const SEVERITY_SEMANTICS: Record<string, { label: string; color: keyof ThemeColors }> = {
+  low: { label: '低', color: 'success' },
+  medium: { label: '中', color: 'warningAmber' },
+  high: { label: '高', color: 'warning' },
+  critical: { label: '严重', color: 'error' },
 };
 
 const DiagnosisScreen: React.FC = () => {
@@ -27,28 +29,29 @@ const DiagnosisScreen: React.FC = () => {
     handleSearch,
     handleQuickInput,
   } = useDiagnosis();
+  const { colors } = useTheme();
 
-  const severityConfig = result
-    ? SEVERITY_CONFIG[result.severity] || { label: result.severity, color: '#999' }
+  const severitySemantic = result
+    ? SEVERITY_SEMANTICS[result.severity] || { label: result.severity, color: 'neutralText' as const }
     : null;
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
       {/* 搜索区域 */}
-      <View style={styles.searchCard}>
-        <Text style={styles.searchTitle}>🔍 故障码诊断</Text>
-        <Text style={styles.searchHint}>
+      <View style={[styles.searchCard, { backgroundColor: colors.cardBg }]}>
+        <Text style={[styles.searchTitle, { color: colors.textPrimary }]}>🔍 故障码诊断</Text>
+        <Text style={[styles.searchHint, { color: colors.textSecondary }]}>
           输入设备故障码，获取故障原因和解决方案
         </Text>
         <View style={styles.inputRow}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.pageBg, color: colors.textPrimary, borderColor: colors.border }]}
             placeholder="输入故障码（如 E001）"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={codeInput}
             onChangeText={(text) => {
               setCodeInput(text);
@@ -61,31 +64,31 @@ const DiagnosisScreen: React.FC = () => {
             onSubmitEditing={handleSearch}
           />
           <TouchableOpacity
-            style={[styles.searchBtn, loading && styles.searchBtnDisabled]}
+            style={[styles.searchBtn, { backgroundColor: colors.primary }, loading && styles.searchBtnDisabled]}
             onPress={handleSearch}
             disabled={loading}
             activeOpacity={0.7}
             accessibilityRole="button">
             {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={colors.onPrimary} size="small" />
             ) : (
-              <Text style={styles.searchBtnText}>查询</Text>
+              <Text style={[styles.searchBtnText, { color: colors.onPrimary }]}>查询</Text>
             )}
           </TouchableOpacity>
         </View>
       </View>
 
       {/* 常见故障码 */}
-      <View style={styles.examplesCard}>
-        <Text style={styles.examplesTitle}>常见故障码:</Text>
+      <View style={[styles.examplesCard, { backgroundColor: colors.cardBg }]}>
+        <Text style={[styles.examplesTitle, { color: colors.textSecondary }]}>常见故障码:</Text>
         <View style={styles.examplesRow}>
           {FAULT_CODE_EXAMPLES.map((item) => (
             <TouchableOpacity
               key={item.code}
-              style={styles.exampleBtn}
+              style={[styles.exampleBtn, { backgroundColor: colors.infoBg }]}
               onPress={() => handleQuickInput(item.code)}
               accessibilityRole="button">
-              <Text style={styles.exampleBtnText}>{item.label}</Text>
+              <Text style={[styles.exampleBtnText, { color: colors.info }]}>{item.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -93,36 +96,36 @@ const DiagnosisScreen: React.FC = () => {
 
       {/* 错误提示 */}
       {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
+        <View style={[styles.errorContainer, { backgroundColor: colors.errorBg }]}>
+          <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
         </View>
       )}
 
       {/* 诊断结果 */}
       {result && (
         <View style={styles.resultContainer}>
-          <Text style={styles.resultTitle}>诊断结果</Text>
+          <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>诊断结果</Text>
 
           {/* 故障码信息 */}
-          <View style={styles.resultCard}>
+          <View style={[styles.resultCard, { backgroundColor: colors.cardBg }]}>
             <View style={styles.resultHeader}>
-              <Text style={styles.faultCode}>{result.faultCode}</Text>
-              {severityConfig && (
+              <Text style={[styles.faultCode, { color: colors.textPrimary }]}>{result.faultCode}</Text>
+              {severitySemantic && (
                 <View
                   style={[
                     styles.severityBadge,
-                    { backgroundColor: severityConfig.color },
+                    { backgroundColor: colors[severitySemantic.color] },
                   ]}
                 >
-                  <Text style={styles.severityText}>
-                    {severityConfig.label}
+                  <Text style={[styles.severityText, { color: colors.onPrimary }]}>
+                    {severitySemantic.label}
                   </Text>
                 </View>
               )}
             </View>
-            <Text style={styles.faultDesc}>{result.description}</Text>
+            <Text style={[styles.faultDesc, { color: colors.textSecondary }]}>{result.description}</Text>
             {result.deviceType && (
-              <Text style={styles.deviceType}>
+              <Text style={[styles.deviceType, { color: colors.textSecondary }]}>
                 设备类型: {result.deviceType}
               </Text>
             )}
@@ -130,12 +133,12 @@ const DiagnosisScreen: React.FC = () => {
 
           {/* 可能原因 */}
           {result.possibleCauses.length > 0 && (
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionLabel}>📋 可能原因</Text>
+            <View style={[styles.sectionCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.sectionLabel, { color: colors.textPrimary }]}>📋 可能原因</Text>
               {result.possibleCauses.map((cause, index) => (
                 <View key={index} style={styles.listItem}>
-                  <Text style={styles.listNumber}>{index + 1}.</Text>
-                  <Text style={styles.listText}>{cause}</Text>
+                  <Text style={[styles.listNumber, { color: colors.primary }]}>{index + 1}.</Text>
+                  <Text style={[styles.listText, { color: colors.textSecondary }]}>{cause}</Text>
                 </View>
               ))}
             </View>
@@ -143,45 +146,45 @@ const DiagnosisScreen: React.FC = () => {
 
           {/* 解决方案 */}
           {result.solutions.length > 0 && (
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionLabel}>💡 解决方案</Text>
+            <View style={[styles.sectionCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.sectionLabel, { color: colors.textPrimary }]}>💡 解决方案</Text>
               {result.solutions.map((solution, index) => (
                 <View key={index} style={styles.listItem}>
-                  <Text style={styles.listNumber}>{index + 1}.</Text>
-                  <Text style={styles.listText}>{solution}</Text>
+                  <Text style={[styles.listNumber, { color: colors.primary }]}>{index + 1}.</Text>
+                  <Text style={[styles.listText, { color: colors.textSecondary }]}>{solution}</Text>
                 </View>
               ))}
             </View>
           )}
 
           {/* AI 建议入口 */}
-          <View style={styles.aiCard}>
+          <View style={[styles.aiCard, { backgroundColor: colors.cardBg }]}>
             <Text style={styles.aiIcon}>🤖</Text>
             <View style={styles.aiContent}>
-              <Text style={styles.aiTitle}>需要更多帮助？</Text>
-              <Text style={styles.aiHint}>
+              <Text style={[styles.aiTitle, { color: colors.textPrimary }]}>需要更多帮助？</Text>
+              <Text style={[styles.aiHint, { color: colors.textSecondary }]}>
                 使用 AI 助手获取更详细的故障分析和处理建议
               </Text>
             </View>
-            <TouchableOpacity style={styles.aiBtn} activeOpacity={0.7}>
-              <Text style={styles.aiBtnText}>咨询AI</Text>
+            <TouchableOpacity style={[styles.aiBtn, { backgroundColor: colors.primary }]} activeOpacity={0.7}>
+              <Text style={[styles.aiBtnText, { color: colors.onPrimary }]}>咨询AI</Text>
             </TouchableOpacity>
           </View>
 
           {/* 关联文章 */}
           {result.relatedArticles && result.relatedArticles.length > 0 && (
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionLabel}>📚 相关知识库文章</Text>
+            <View style={[styles.sectionCard, { backgroundColor: colors.cardBg }]}>
+              <Text style={[styles.sectionLabel, { color: colors.textPrimary }]}>📚 相关知识库文章</Text>
               {result.relatedArticles.map((article) => (
                 <TouchableOpacity
                   key={article.id}
-                  style={styles.articleItem}
+                  style={[styles.articleItem, { borderBottomColor: colors.divider }]}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.articleTitle} numberOfLines={1}>
+                  <Text style={[styles.articleTitle, { color: colors.primary }]} numberOfLines={1}>
                     {article.title}
                   </Text>
-                  <Text style={styles.articleMeta}>
+                  <Text style={[styles.articleMeta, { color: colors.textSecondary }]}>
                     {article.authorName} · {article.viewCount}次浏览
                   </Text>
                 </TouchableOpacity>
@@ -195,8 +198,8 @@ const DiagnosisScreen: React.FC = () => {
       {!result && !error && !loading && (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>🔍</Text>
-          <Text style={styles.emptyTitle}>故障码诊断</Text>
-          <Text style={styles.emptyMessage}>
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>故障码诊断</Text>
+          <Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
             输入设备上显示的故障码，获取故障原因、解决方案和相关知识库文章
           </Text>
         </View>
@@ -208,14 +211,12 @@ const DiagnosisScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
     paddingBottom: 40,
   },
   searchCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -228,12 +229,10 @@ const styles = StyleSheet.create({
   searchTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
   searchHint: {
     fontSize: 13,
-    color: '#999',
     marginBottom: 12,
   },
   inputRow: {
@@ -242,17 +241,13 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#333',
     borderWidth: 1,
-    borderColor: '#ddd',
   },
   searchBtn: {
-    backgroundColor: '#1a73e8',
     borderRadius: 8,
     paddingHorizontal: 24,
     justifyContent: 'center',
@@ -262,12 +257,10 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   searchBtnText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
   examplesCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
@@ -279,7 +272,6 @@ const styles = StyleSheet.create({
   },
   examplesTitle: {
     fontSize: 13,
-    color: '#999',
     marginBottom: 8,
   },
   examplesRow: {
@@ -290,22 +282,18 @@ const styles = StyleSheet.create({
   exampleBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#e3f2fd',
     borderRadius: 8,
   },
   exampleBtnText: {
     fontSize: 13,
-    color: '#1565c0',
     fontWeight: '500',
   },
   errorContainer: {
-    backgroundColor: '#fce4ec',
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
   },
   errorText: {
-    color: '#c62828',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -315,11 +303,9 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   resultCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -338,7 +324,6 @@ const styles = StyleSheet.create({
   faultCode: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
   },
   severityBadge: {
     paddingHorizontal: 10,
@@ -347,21 +332,17 @@ const styles = StyleSheet.create({
   },
   severityText: {
     fontSize: 12,
-    color: '#fff',
     fontWeight: '600',
   },
   faultDesc: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
     marginBottom: 8,
   },
   deviceType: {
     fontSize: 12,
-    color: '#999',
   },
   sectionCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -374,7 +355,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   listItem: {
@@ -384,19 +364,16 @@ const styles = StyleSheet.create({
   },
   listNumber: {
     fontSize: 14,
-    color: '#1a73e8',
     fontWeight: '500',
     marginRight: 6,
     width: 20,
   },
   listText: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
     flex: 1,
   },
   aiCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -418,39 +395,32 @@ const styles = StyleSheet.create({
   aiTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 2,
   },
   aiHint: {
     fontSize: 12,
-    color: '#999',
     lineHeight: 16,
   },
   aiBtn: {
-    backgroundColor: '#1a73e8',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 8,
   },
   aiBtnText: {
-    color: '#fff',
     fontSize: 13,
     fontWeight: '600',
   },
   articleItem: {
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   articleTitle: {
     fontSize: 14,
-    color: '#1a73e8',
     fontWeight: '500',
     marginBottom: 2,
   },
   articleMeta: {
     fontSize: 12,
-    color: '#999',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -464,12 +434,10 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
   },
   emptyMessage: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
     lineHeight: 22,
   },
