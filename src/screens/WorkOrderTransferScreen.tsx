@@ -8,9 +8,11 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useTheme } from '../hooks/useTheme';
 import { useWorkOrderTransfer } from '../hooks/useWorkOrderTransfer';
 
 const WorkOrderTransferScreen: React.FC = () => {
+  const { colors } = useTheme();
   const {
     assigneeId,
     reason,
@@ -55,38 +57,38 @@ const WorkOrderTransferScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={styles.sectionTitle}>工单流转</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>工单流转</Text>
 
       {(localError || transferError) && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{localError || transferError}</Text>
+        <View style={[styles.errorContainer, { backgroundColor: colors.errorBg }]}>
+          <Text style={[styles.errorText, { color: colors.error }]}>{localError || transferError}</Text>
         </View>
       )}
 
       {/* 转派区域 */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>转派工单</Text>
-        <View style={styles.card}>
-          <Text style={styles.fieldLabel}>目标运维人员ID</Text>
+        <Text style={[styles.sectionLabel, { color: colors.textPrimary }]}>转派工单</Text>
+        <View style={[styles.card, { backgroundColor: colors.cardBg }]}>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>目标运维人员ID</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入运维人员ID"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={assigneeId}
             onChangeText={onFieldChange(setAssigneeId)}
             keyboardType="numeric"
             editable={!transferring}
           />
 
-          <Text style={styles.fieldLabel}>转派原因</Text>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>转派原因</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入转派原因"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={reason}
             onChangeText={onFieldChange(setReason)}
             multiline
@@ -97,15 +99,15 @@ const WorkOrderTransferScreen: React.FC = () => {
           />
 
           <TouchableOpacity
-            style={[styles.transferBtn, transferring && styles.btnDisabled]}
+            style={[styles.transferBtn, transferring && styles.btnDisabled, { backgroundColor: colors.primary }]}
             onPress={onTransfer}
             disabled={transferring}
             activeOpacity={0.7}
            accessibilityRole="button">
             {transferring ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={colors.onPrimary} size="small" />
             ) : (
-              <Text style={styles.btnText}>转派工单</Text>
+              <Text style={[styles.btnText, { color: colors.onPrimary }]}>转派工单</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -113,21 +115,21 @@ const WorkOrderTransferScreen: React.FC = () => {
 
       {/* 催单区域 */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>催单</Text>
-        <View style={styles.card}>
-          <Text style={styles.hintText}>
+        <Text style={[styles.sectionLabel, { color: colors.textPrimary }]}>催单</Text>
+        <View style={[styles.card, { backgroundColor: colors.cardBg }]}>
+          <Text style={[styles.hintText, { color: colors.textSecondary }]}>
             催单后将通知工程师尽快处理，适用于工单长时间未接单或未完成的场景。
           </Text>
           <TouchableOpacity
-            style={[styles.escalateBtn, transferring && styles.btnDisabled]}
+            style={[styles.escalateBtn, transferring && styles.btnDisabled, { backgroundColor: colors.warning }]}
             onPress={onUrge}
             disabled={transferring}
             activeOpacity={0.7}
            accessibilityRole="button">
             {transferring ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={colors.onPrimary} size="small" />
             ) : (
-              <Text style={styles.btnText}>催促处理</Text>
+              <Text style={[styles.btnText, { color: colors.onPrimary }]}>催促处理</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -139,7 +141,6 @@ const WorkOrderTransferScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
@@ -148,17 +149,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
     marginBottom: 20,
   },
   errorContainer: {
-    backgroundColor: '#fce4ec',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   errorText: {
-    color: '#c62828',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -168,11 +166,9 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -184,19 +180,15 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#666',
     marginBottom: 6,
     marginTop: 12,
   },
   input: {
-    backgroundColor: '#fafafa',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#333',
   },
   textArea: {
     height: 80,
@@ -204,19 +196,16 @@ const styles = StyleSheet.create({
   },
   hintText: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
     marginBottom: 16,
   },
   transferBtn: {
-    backgroundColor: '#1a73e8',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 16,
   },
   escalateBtn: {
-    backgroundColor: '#e65100',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -225,7 +214,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   btnText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },

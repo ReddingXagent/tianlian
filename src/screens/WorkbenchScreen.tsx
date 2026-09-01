@@ -20,6 +20,7 @@ import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
 import WorkOrderCard from '../components/WorkOrderCard';
 import { usePolling } from '../hooks/usePolling';
+import { useTheme } from '../hooks/useTheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -32,6 +33,7 @@ const QUICK_ACTIONS = [
 
 const WorkbenchScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   // 并行获取工作台数据，15秒自动轮询
   const fetcher = useCallback(async () => {
     const [statsRes, ordersRes, alarmsRes] = await Promise.all([
@@ -103,75 +105,75 @@ const WorkbenchScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={refresh}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
       {/* 统计概览 */}
-      <Text style={styles.sectionTitle}>今日概览</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>今日概览</Text>
       <View style={styles.statsGrid}>
         <TouchableOpacity
-          style={[styles.statCard, { backgroundColor: '#fff8e1' }]}
+          style={[styles.statCard, { backgroundColor: colors.warningAmberBg }]}
           activeOpacity={0.7}
           onPress={() => handleNavigateTab('WorkOrders')}
          accessibilityRole="button">
-          <Text style={[styles.statNumber, { color: '#f57f17' }]}>
+          <Text style={[styles.statNumber, { color: colors.warningAmber }]}>
             {stats?.pendingOrders ?? '-'}
           </Text>
-          <Text style={styles.statLabel}>待处理工单</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>待处理工单</Text>
         </TouchableOpacity>
-        <View style={[styles.statCard, { backgroundColor: '#e3f2fd' }]}>
-          <Text style={[styles.statNumber, { color: '#1565c0' }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.infoBg }]}>
+          <Text style={[styles.statNumber, { color: colors.info }]}>
             {stats?.inProgressOrders ?? '-'}
           </Text>
-          <Text style={styles.statLabel}>进行中</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>进行中</Text>
         </View>
-        <View style={[styles.statCard, { backgroundColor: '#e8f5e9' }]}>
-          <Text style={[styles.statNumber, { color: '#2e7d32' }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.successBg }]}>
+          <Text style={[styles.statNumber, { color: colors.success }]}>
             {stats?.todayCompleted ?? '-'}
           </Text>
-          <Text style={styles.statLabel}>今日完成</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>今日完成</Text>
         </View>
-        <View style={[styles.statCard, { backgroundColor: '#fce4ec' }]}>
-          <Text style={[styles.statNumber, { color: '#c62828' }]}>
+        <View style={[styles.statCard, { backgroundColor: colors.errorBg }]}>
+          <Text style={[styles.statNumber, { color: colors.error }]}>
             {stats?.unhandledAlarms ?? '-'}
           </Text>
-          <Text style={styles.statLabel}>未处理告警</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>未处理告警</Text>
         </View>
       </View>
 
       {/* 紧急度汇总条 */}
       {(urgentCount > 0 || highCount > 0) && (
-        <View style={styles.urgencyBar}>
+        <View style={[styles.urgencyBar, { backgroundColor: colors.cardBg }]}>
           {urgentCount > 0 && (
             <View style={styles.urgencyItem}>
               <StatusBadge status="urgent" />
-              <Text style={styles.urgencyCount}>{urgentCount}条紧急</Text>
+              <Text style={[styles.urgencyCount, { color: colors.textSecondary }]}>{urgentCount}条紧急</Text>
             </View>
           )}
           {highCount > 0 && (
             <View style={styles.urgencyItem}>
               <StatusBadge status="high" />
-              <Text style={styles.urgencyCount}>{highCount}条高优</Text>
+              <Text style={[styles.urgencyCount, { color: colors.textSecondary }]}>{highCount}条高优</Text>
             </View>
           )}
         </View>
       )}
 
       {/* 快捷入口 */}
-      <Text style={styles.sectionTitle}>快捷操作</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>快捷操作</Text>
       <View style={styles.quickActions}>
         {QUICK_ACTIONS.map((action) => (
           <TouchableOpacity
             key={action.key}
-            style={styles.quickActionBtn}
+            style={[styles.quickActionBtn, { backgroundColor: colors.cardBg }]}
             onPress={() => {
               if (action.route === 'Scan' || action.route === 'Monitor') {
                 handleNavigateTab(action.route);
@@ -182,24 +184,24 @@ const WorkbenchScreen: React.FC = () => {
             activeOpacity={0.7}
            accessibilityRole="button">
             <Text style={styles.quickActionIcon}>{action.icon}</Text>
-            <Text style={styles.quickActionLabel}>{action.label}</Text>
+            <Text style={[styles.quickActionLabel, { color: colors.textSecondary }]}>{action.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* 待办工单 */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>待办工单</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>待办工单</Text>
         <TouchableOpacity onPress={() => handleNavigateTab('WorkOrders')} accessibilityRole="button">
-          <Text style={styles.viewAll}>
+          <Text style={[styles.viewAll, { color: colors.primary }]}>
             查看全部 {stats && stats.pendingOrders > 0 ? `(${stats.pendingOrders})` : ''}
           </Text>
         </TouchableOpacity>
       </View>
       {pendingOrders.length === 0 ? (
-        <View style={styles.emptyCard}>
+        <View style={[styles.emptyCard, { backgroundColor: colors.cardBg }]}>
           <Text style={styles.emptyIcon}>🎉</Text>
-          <Text style={styles.emptyText}>暂无待办工单</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>暂无待办工单</Text>
         </View>
       ) : (
         pendingOrders.map((order) => (
@@ -214,29 +216,29 @@ const WorkbenchScreen: React.FC = () => {
 
       {/* 最近告警 */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>最近告警</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>最近告警</Text>
         {stats && stats.criticalAlarms > 0 && (
-          <Text style={styles.criticalBadge}>
+          <Text style={[styles.criticalBadge, { color: colors.error }]}>
             🔴 {stats.criticalAlarms}条严重
           </Text>
         )}
       </View>
       {recentAlarms.length === 0 ? (
-        <View style={styles.emptyCard}>
+        <View style={[styles.emptyCard, { backgroundColor: colors.cardBg }]}>
           <Text style={styles.emptyIcon}>✅</Text>
-          <Text style={styles.emptyText}>暂无告警</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>暂无告警</Text>
         </View>
       ) : (
         recentAlarms.map((alarm) => (
-          <View key={alarm.id} style={styles.alarmItem}>
+          <View key={alarm.id} style={[styles.alarmItem, { backgroundColor: colors.cardBg }]}>
             <Text style={styles.alarmIcon}>
               {alarmLevelIcon(alarm.level)}
             </Text>
             <View style={styles.alarmContent}>
-              <Text style={styles.alarmTitle} numberOfLines={1}>
+              <Text style={[styles.alarmTitle, { color: colors.textPrimary }]} numberOfLines={1}>
                 {alarm.title}
               </Text>
-              <Text style={styles.alarmStation} numberOfLines={1}>
+              <Text style={[styles.alarmStation, { color: colors.textSecondary }]} numberOfLines={1}>
                 {alarm.stationName}
               </Text>
             </View>
@@ -256,7 +258,6 @@ const WorkbenchScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
@@ -265,7 +266,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
     marginTop: 8,
   },
@@ -278,11 +278,9 @@ const styles = StyleSheet.create({
   },
   viewAll: {
     fontSize: 14,
-    color: '#1a73e8',
   },
   criticalBadge: {
     fontSize: 12,
-    color: '#c62828',
     fontWeight: '500',
   },
   statsGrid: {
@@ -303,14 +301,12 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 13,
-    color: '#666',
     marginTop: 4,
   },
   urgencyBar: {
     flexDirection: 'row',
     gap: 12,
     marginBottom: 8,
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 10,
     shadowColor: '#000',
@@ -326,7 +322,6 @@ const styles = StyleSheet.create({
   },
   urgencyCount: {
     fontSize: 12,
-    color: '#666',
   },
   quickActions: {
     flexDirection: 'row',
@@ -335,7 +330,6 @@ const styles = StyleSheet.create({
   },
   quickActionBtn: {
     flex: 1,
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
@@ -351,11 +345,9 @@ const styles = StyleSheet.create({
   },
   quickActionLabel: {
     fontSize: 12,
-    color: '#666',
     fontWeight: '500',
   },
   emptyCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
@@ -366,11 +358,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   emptyText: {
-    color: '#999',
     fontSize: 14,
   },
   alarmItem: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 14,
     flexDirection: 'row',
@@ -393,12 +383,10 @@ const styles = StyleSheet.create({
   alarmTitle: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     marginBottom: 2,
   },
   alarmStation: {
     fontSize: 12,
-    color: '#999',
   },
 });
 

@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme } from '../hooks/useTheme';
 import { useInspectionList } from '../hooks/useInspectionList';
 import { InspectionTask, InspectionStatus, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -35,6 +36,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 const InspectionListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const { tasks, loading, error, total, activeFilter, refreshing, setActiveFilter, loadData } =
     useInspectionList();
 
@@ -44,31 +46,31 @@ const InspectionListScreen: React.FC = () => {
 
   const renderItem = ({ item }: { item: InspectionTask }) => (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: colors.cardBg }]}
       onPress={() => handleTaskPress(item)}
       activeOpacity={0.7}
      accessibilityRole="button">
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleRow}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
+          <Text style={[styles.cardTitle, { color: colors.textPrimary }]} numberOfLines={1}>
             {item.description}
           </Text>
           <StatusBadge status={item.status} />
         </View>
         <View style={styles.cardMeta}>
-          <View style={styles.typeBadge}>
-            <Text style={styles.typeText}>{TYPE_LABELS[item.type] || item.type}</Text>
+          <View style={[styles.typeBadge, { backgroundColor: colors.infoBg }]}>
+            <Text style={[styles.typeText, { color: colors.info }]}>{TYPE_LABELS[item.type] || item.type}</Text>
           </View>
-          <Text style={styles.cardMetaText}>{item.stationName}</Text>
-          <Text style={styles.cardMetaText}>·</Text>
-          <Text style={styles.cardMetaText}>{item.deviceName}</Text>
+          <Text style={[styles.cardMetaText, { color: colors.textSecondary }]}>{item.stationName}</Text>
+          <Text style={[styles.cardMetaText, { color: colors.textSecondary }]}>·</Text>
+          <Text style={[styles.cardMetaText, { color: colors.textSecondary }]}>{item.deviceName}</Text>
         </View>
       </View>
-      <View style={styles.cardFooter}>
-        <Text style={styles.dateText}>
+      <View style={[styles.cardFooter, { borderTopColor: colors.divider }]}>
+        <Text style={[styles.dateText, { color: colors.textSecondary }]}>
           计划日期: {new Date(item.scheduledDate).toLocaleDateString('zh-CN')}
         </Text>
-        <Text style={styles.itemCount}>
+        <Text style={[styles.itemCount, { color: colors.primary }]}>
           {item.items?.length || 0} 项检查
         </Text>
       </View>
@@ -80,15 +82,15 @@ const InspectionListScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.filterContainer}>
+    <View style={[styles.container, { backgroundColor: colors.pageBg }]}>
+      <View style={[styles.filterContainer, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
         {STATUS_FILTERS.map((f) => (
           <TouchableOpacity
             key={f.key}
-            style={[styles.filterBtn, activeFilter === f.key && styles.filterBtnActive]}
+            style={[styles.filterBtn, { backgroundColor: colors.neutralBg }, activeFilter === f.key && { backgroundColor: colors.primary }]}
             onPress={() => setActiveFilter(f.key)}
            accessibilityRole="button">
-            <Text style={[styles.filterBtnText, activeFilter === f.key && styles.filterBtnTextActive]}>
+            <Text style={[styles.filterBtnText, { color: colors.textSecondary }, activeFilter === f.key && { color: colors.onPrimary }]}>
               {f.label}
             </Text>
           </TouchableOpacity>
@@ -113,8 +115,8 @@ const InspectionListScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => loadData(true)}
-              colors={['#1a73e8']}
-              tintColor="#1a73e8"
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
           ListEmptyComponent={
@@ -122,7 +124,7 @@ const InspectionListScreen: React.FC = () => {
           }
           ListFooterComponent={
             tasks.length > 0 ? (
-              <Text style={styles.totalText}>共 {total} 条巡检任务</Text>
+              <Text style={[styles.totalText, { color: colors.textSecondary }]}>共 {total} 条巡检任务</Text>
             ) : null
           }
         />
@@ -134,40 +136,28 @@ const InspectionListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   filterContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   filterBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     marginRight: 8,
-    backgroundColor: '#f0f0f0',
-  },
-  filterBtnActive: {
-    backgroundColor: '#1a73e8',
   },
   filterBtnText: {
     fontSize: 13,
-    color: '#666',
     fontWeight: '500',
-  },
-  filterBtnTextActive: {
-    color: '#fff',
   },
   listContent: {
     padding: 16,
     paddingBottom: 32,
   },
   card: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -189,7 +179,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
     marginRight: 8,
   },
@@ -201,17 +190,14 @@ const styles = StyleSheet.create({
   typeBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    backgroundColor: '#e3f2fd',
     borderRadius: 4,
   },
   typeText: {
     fontSize: 11,
-    color: '#1565c0',
     fontWeight: '500',
   },
   cardMetaText: {
     fontSize: 12,
-    color: '#999',
   },
   cardFooter: {
     flexDirection: 'row',
@@ -219,21 +205,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   dateText: {
     fontSize: 12,
-    color: '#999',
   },
   itemCount: {
     fontSize: 12,
-    color: '#1a73e8',
     fontWeight: '500',
   },
   totalText: {
     textAlign: 'center',
     fontSize: 13,
-    color: '#999',
     paddingVertical: 12,
   },
 });

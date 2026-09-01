@@ -13,6 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useWorkOrderCreate } from '../hooks/useWorkOrderCreate';
+import { useTheme } from '../hooks/useTheme';
 import { RootStackParamList, WorkOrderType, WorkOrderPriority } from '../types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -25,15 +26,20 @@ const ORDER_TYPES: { key: WorkOrderType; label: string }[] = [
   { key: 'other', label: '其他' },
 ];
 
-const PRIORITIES: { key: WorkOrderPriority; label: string; color: string }[] = [
-  { key: 'low', label: '低', color: '#2e7d32' },
-  { key: 'normal', label: '中', color: '#1565c0' },
-  { key: 'high', label: '高', color: '#c62828' },
-  { key: 'urgent', label: '紧急', color: '#b71c1c' },
+const PRIORITIES: {
+  key: WorkOrderPriority;
+  label: string;
+  color: 'success' | 'info' | 'error';
+}[] = [
+  { key: 'low', label: '低', color: 'success' },
+  { key: 'normal', label: '中', color: 'info' },
+  { key: 'high', label: '高', color: 'error' },
+  { key: 'urgent', label: '紧急', color: 'error' },
 ];
 
 const WorkOrderCreateScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const {
     title, description, stationId, type, priority,
     localError, createError, creating,
@@ -58,7 +64,7 @@ const WorkOrderCreateScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -66,21 +72,21 @@ const WorkOrderCreateScreen: React.FC = () => {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.sectionTitle}>创建工单</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>创建工单</Text>
 
         {(localError || createError) && (
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>{localError || createError}</Text>
+          <View style={[styles.errorContainer, { backgroundColor: colors.errorBg }]}>
+            <Text style={[styles.errorText, { color: colors.error }]}>{localError || createError}</Text>
           </View>
         )}
 
         {/* 工单标题 */}
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>工单标题 *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>工单标题 *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.cardBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入工单标题"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={title}
             onChangeText={onFieldChange(setTitle)}
             editable={!creating}
@@ -90,11 +96,11 @@ const WorkOrderCreateScreen: React.FC = () => {
 
         {/* 工单描述 */}
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>工单描述 *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>工单描述 *</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={[styles.input, styles.textArea, { backgroundColor: colors.cardBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请详细描述工单内容"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={description}
             onChangeText={onFieldChange(setDescription)}
             multiline
@@ -107,11 +113,11 @@ const WorkOrderCreateScreen: React.FC = () => {
 
         {/* 站点ID */}
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>关联站点ID *</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>关联站点ID *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: colors.cardBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入站点ID"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={stationId}
             onChangeText={onFieldChange(setStationId)}
             keyboardType="numeric"
@@ -121,16 +127,16 @@ const WorkOrderCreateScreen: React.FC = () => {
 
         {/* 工单类型 */}
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>工单类型</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>工单类型</Text>
           <View style={styles.chipContainer}>
             {ORDER_TYPES.map((ot) => (
               <TouchableOpacity
                 key={ot.key}
-                style={[styles.chip, type === ot.key && styles.chipActive]}
+                style={[styles.chip, { backgroundColor: colors.neutralBg }, type === ot.key && { backgroundColor: colors.primary }]}
                 onPress={() => setType(ot.key)}
                 disabled={creating}
                accessibilityRole="button">
-                <Text style={[styles.chipText, type === ot.key && styles.chipTextActive]}>
+                <Text style={[styles.chipText, { color: colors.textSecondary }, type === ot.key && { color: colors.onPrimary }]}>
                   {ot.label}
                 </Text>
               </TouchableOpacity>
@@ -140,14 +146,15 @@ const WorkOrderCreateScreen: React.FC = () => {
 
         {/* 优先级 */}
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>优先级</Text>
+          <Text style={[styles.label, { color: colors.textPrimary }]}>优先级</Text>
           <View style={styles.chipContainer}>
             {PRIORITIES.map((p) => (
               <TouchableOpacity
                 key={p.key}
                 style={[
                   styles.chip,
-                  priority === p.key && { backgroundColor: p.color },
+                  { backgroundColor: colors.neutralBg },
+                  priority === p.key && { backgroundColor: colors[p.color] },
                 ]}
                 onPress={() => setPriority(p.key)}
                 disabled={creating}
@@ -155,7 +162,8 @@ const WorkOrderCreateScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.chipText,
-                    priority === p.key && { color: '#fff' },
+                    { color: colors.textSecondary },
+                    priority === p.key && { color: colors.onPrimary },
                   ]}
                 >
                   {p.label}
@@ -167,15 +175,15 @@ const WorkOrderCreateScreen: React.FC = () => {
 
         {/* 提交按钮 */}
         <TouchableOpacity
-          style={[styles.submitBtn, creating && styles.submitBtnDisabled]}
+          style={[styles.submitBtn, creating && styles.submitBtnDisabled, { backgroundColor: colors.primary }]}
           onPress={onSubmit}
           disabled={creating}
           activeOpacity={0.7}
          accessibilityRole="button">
           {creating ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={colors.onPrimary} size="small" />
           ) : (
-            <Text style={styles.submitBtnText}>提交工单</Text>
+            <Text style={[styles.submitBtnText, { color: colors.onPrimary }]}>提交工单</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -186,7 +194,6 @@ const WorkOrderCreateScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   scrollView: {
     flex: 1,
@@ -198,17 +205,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
     marginBottom: 20,
   },
   errorContainer: {
-    backgroundColor: '#fce4ec',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   errorText: {
-    color: '#c62828',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -218,18 +222,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#fff',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#333',
   },
   textArea: {
     height: 100,
@@ -244,21 +244,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#e8e8e8',
-  },
-  chipActive: {
-    backgroundColor: '#1a73e8',
   },
   chipText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
-  },
-  chipTextActive: {
-    color: '#fff',
   },
   submitBtn: {
-    backgroundColor: '#1a73e8',
     borderRadius: 10,
     paddingVertical: 16,
     alignItems: 'center',
@@ -268,7 +259,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitBtnText: {
-    color: '#fff',
     fontSize: 17,
     fontWeight: '600',
   },
