@@ -4,6 +4,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
 import { useWorkOrderDetail } from '../hooks/useWorkOrderDetail';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeColors } from '../theme/colors';
 
 const WORK_ORDER_TYPE_LABEL: Record<string, string> = {
   repair: '维修',
@@ -13,18 +15,19 @@ const WORK_ORDER_TYPE_LABEL: Record<string, string> = {
   other: '其他',
 };
 
-const WORK_ORDER_ACTION_LABEL: Record<string, { label: string; color: string }> = {
-  created: { label: '创建工单', color: '#1a73e8' },
-  accepted: { label: '接单', color: '#1565c0' },
-  started: { label: '开始处理', color: '#f57f17' },
-  check_in: { label: '签到', color: '#e65100' },
-  executing: { label: '开始执行', color: '#f57f17' },
-  completed: { label: '完成', color: '#2e7d32' },
-  transferred: { label: '转单', color: '#6a1b9a' },
-  urged: { label: '催单', color: '#d84315' },
-  note: { label: '备注', color: '#455a64' },
-  cancelled: { label: '取消', color: '#616161' },
-  reassigned: { label: '重新分配', color: '#6a1b9a' },
+type ActionSemantic = { label: string; color: keyof ThemeColors };
+const WORK_ORDER_ACTION_SEMANTICS: Record<string, ActionSemantic> = {
+  created: { label: '创建工单', color: 'primary' },
+  accepted: { label: '接单', color: 'info' },
+  started: { label: '开始处理', color: 'warningAmber' },
+  check_in: { label: '签到', color: 'warning' },
+  executing: { label: '开始执行', color: 'warningAmber' },
+  completed: { label: '完成', color: 'success' },
+  transferred: { label: '转单', color: 'purple' },
+  urged: { label: '催单', color: 'warning' },
+  note: { label: '备注', color: 'neutralText' },
+  cancelled: { label: '取消', color: 'neutralText' },
+  reassigned: { label: '重新分配', color: 'purple' },
 };
 
 const WorkOrderDetailScreen: React.FC = () => {
@@ -39,6 +42,7 @@ const WorkOrderDetailScreen: React.FC = () => {
     loadData,
     performAction,
   } = useWorkOrderDetail();
+  const { colors } = useTheme();
 
   const handleAction = (action: 'accept' | 'execute' | 'complete') => {
     const confirmMessages: Record<string, string> = {
@@ -95,20 +99,20 @@ const WorkOrderDetailScreen: React.FC = () => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={() => loadData(true)}
-          colors={['#1a73e8']}
-          tintColor="#1a73e8"
+          colors={[colors.primary]}
+          tintColor={colors.primary}
         />
       }
     >
       {/* 工单头部 */}
-      <View style={styles.headerCard}>
+      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]}>
         <View style={styles.headerRow}>
-          <Text style={styles.orderTitle}>{order?.title}</Text>
+          <Text style={[styles.orderTitle, { color: colors.textPrimary }]}>{order?.title}</Text>
           <StatusBadge status={order?.priority ?? 'normal'} />
         </View>
         <View style={styles.headerMeta}>
           <StatusBadge status={order?.status ?? 'pending'} />
-          <Text style={styles.orderType}>
+          <Text style={[styles.orderType, { color: colors.textSecondary }]}>
             {WORK_ORDER_TYPE_LABEL[order?.type ?? 'other'] || order?.type}
           </Text>
         </View>
@@ -116,47 +120,47 @@ const WorkOrderDetailScreen: React.FC = () => {
 
       {/* 基本信息 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>基本信息</Text>
-        <View style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>工单编号</Text>
-            <Text style={styles.infoValue}>#{order?.id}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>基本信息</Text>
+        <View style={[styles.infoCard, { backgroundColor: colors.cardBg }]}>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>工单编号</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>#{order?.id}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>工单类型</Text>
-            <Text style={styles.infoValue}>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>工单类型</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
               {WORK_ORDER_TYPE_LABEL[order?.type ?? 'other'] || '-'}
             </Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>关联站点</Text>
-            <Text style={styles.infoValue}>{order?.stationName || '-'}</Text>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>关联站点</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{order?.stationName || '-'}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>关联设备</Text>
-            <Text style={styles.infoValue}>-</Text>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>关联设备</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>-</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>创建人</Text>
-            <Text style={styles.infoValue}>{order?.creatorName || '-'}</Text>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>创建人</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{order?.creatorName || '-'}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>负责人</Text>
-            <Text style={styles.infoValue}>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>负责人</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
               {order?.assigneeName || '未分配'}
             </Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>创建时间</Text>
-            <Text style={styles.infoValue}>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>创建时间</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
               {order?.createdAt
                 ? new Date(order.createdAt).toLocaleString('zh-CN')
                 : '-'}
             </Text>
           </View>
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.infoLabel}>完成时间</Text>
-            <Text style={styles.infoValue}>
+          <View style={[styles.infoRow, { borderBottomWidth: 0, borderBottomColor: 'transparent' }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>完成时间</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>
               {order?.completedAt
                 ? new Date(order.completedAt).toLocaleString('zh-CN')
                 : '-'}
@@ -167,9 +171,9 @@ const WorkOrderDetailScreen: React.FC = () => {
 
       {/* 工单描述 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>工单描述</Text>
-        <View style={styles.descCard}>
-          <Text style={styles.descText}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>工单描述</Text>
+        <View style={[styles.descCard, { backgroundColor: colors.cardBg }]}>
+          <Text style={[styles.descText, { color: colors.textSecondary }]}>
             {order?.description || '暂无描述'}
           </Text>
         </View>
@@ -177,20 +181,20 @@ const WorkOrderDetailScreen: React.FC = () => {
 
       {/* 操作按钮 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>操作</Text>
-        <View style={styles.actionCard}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>操作</Text>
+        <View style={[styles.actionCard, { backgroundColor: colors.cardBg }]}>
           {order?.status === 'pending' && (
             <>
               <TouchableOpacity
-                style={[styles.actionBtn, styles.actionPrimary]}
+                style={[styles.actionBtn, { backgroundColor: colors.primary }]}
                 onPress={() => handleAction('accept')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
                accessibilityRole="button">
                 {statusUpdating ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
                 ) : (
-                  <Text style={styles.actionBtnText}>📋 接单</Text>
+                  <Text style={[styles.actionBtnText, { color: colors.onPrimary }]}>📋 接单</Text>
                 )}
               </TouchableOpacity>
             </>
@@ -198,41 +202,41 @@ const WorkOrderDetailScreen: React.FC = () => {
           {order?.status === 'in_progress' && (
             <>
               <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: '#f57f17' }]}
+                style={[styles.actionBtn, { backgroundColor: colors.warningAmber }]}
                 onPress={() => handleAction('execute')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
                accessibilityRole="button">
                 {statusUpdating ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
                 ) : (
-                  <Text style={styles.actionBtnText}>🔧 到场并开始执行</Text>
+                  <Text style={[styles.actionBtnText, { color: colors.onPrimary }]}>🔧 到场并开始执行</Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.actionBtn, styles.actionSuccess]}
+                style={[styles.actionBtn, { backgroundColor: colors.success }]}
                 onPress={() => handleAction('complete')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
                accessibilityRole="button">
                 {statusUpdating ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
                 ) : (
-                  <Text style={styles.actionBtnText}>✅ 标记完成</Text>
+                  <Text style={[styles.actionBtnText, { color: colors.onPrimary }]}>✅ 标记完成</Text>
                 )}
               </TouchableOpacity>
             </>
           )}
           {order?.status === 'completed' && (
             <View style={styles.completedHint}>
-              <Text style={styles.completedHintText}>
+              <Text style={[styles.completedHintText, { color: colors.success }]}>
                 ✅ 工单已完成
               </Text>
             </View>
           )}
           {order?.status === 'cancelled' && (
             <View style={styles.cancelledHint}>
-              <Text style={styles.cancelledHintText}>
+              <Text style={[styles.cancelledHintText, { color: colors.error }]}>
                 ❌ 工单已取消
               </Text>
             </View>
@@ -242,17 +246,17 @@ const WorkOrderDetailScreen: React.FC = () => {
 
       {/* 执行记录 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>执行记录</Text>
-        <View style={styles.recordsCard}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>执行记录</Text>
+        <View style={[styles.recordsCard, { backgroundColor: colors.cardBg }]}>
           {recordsLoading && records.length === 0 ? (
-            <ActivityIndicator color="#1a73e8" style={{ padding: 20 }} />
+            <ActivityIndicator color={colors.primary} style={{ padding: 20 }} />
           ) : records.length === 0 ? (
-            <Text style={styles.noRecords}>暂无执行记录</Text>
+            <Text style={[styles.noRecords, { color: colors.textSecondary }]}>暂无执行记录</Text>
           ) : (
             records.map((record: WorkOrderRecord, index: number) => {
-              const actionConfig = WORK_ORDER_ACTION_LABEL[record.action] || {
+              const semantic = WORK_ORDER_ACTION_SEMANTICS[record.action] || {
                 label: record.action,
-                color: '#999',
+                color: 'neutralText' as const,
               };
               return (
                 <View key={record.id} style={styles.recordItem}>
@@ -260,24 +264,24 @@ const WorkOrderDetailScreen: React.FC = () => {
                     <View
                       style={[
                         styles.recordDot,
-                        { backgroundColor: actionConfig.color },
+                        { backgroundColor: colors[semantic.color] },
                       ]}
                     />
                     {index < records.length - 1 && (
-                      <View style={styles.recordLine} />
+                      <View style={[styles.recordLine, { backgroundColor: colors.neutralBg }]} />
                     )}
                   </View>
                   <View style={styles.recordContent}>
-                    <Text style={styles.recordAction}>
-                      {actionConfig.label}
+                    <Text style={[styles.recordAction, { color: colors.textPrimary }]}>
+                      {semantic.label}
                     </Text>
-                    <Text style={styles.recordMeta}>
+                    <Text style={[styles.recordMeta, { color: colors.textSecondary }]}>
                       {record.operatorName}
                     </Text>
                     {record.note ? (
-                      <Text style={styles.recordNote}>{record.note}</Text>
+                      <Text style={[styles.recordNote, { color: colors.textSecondary }]}>{record.note}</Text>
                     ) : null}
-                    <Text style={styles.recordTime}>
+                    <Text style={[styles.recordTime, { color: colors.textMuted }]}>
                       {new Date(record.createdAt).toLocaleString('zh-CN')}
                     </Text>
                   </View>
@@ -294,14 +298,12 @@ const WorkOrderDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
     paddingBottom: 40,
   },
   headerCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -320,7 +322,6 @@ const styles = StyleSheet.create({
   orderTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
     marginRight: 8,
   },
@@ -331,7 +332,6 @@ const styles = StyleSheet.create({
   },
   orderType: {
     fontSize: 13,
-    color: '#999',
   },
   section: {
     marginBottom: 16,
@@ -339,11 +339,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   infoCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 4,
     shadowColor: '#000',
@@ -358,22 +356,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   infoLabel: {
     fontSize: 14,
-    color: '#999',
   },
   infoValue: {
     fontSize: 14,
-    color: '#333',
     fontWeight: '500',
     textAlign: 'right',
     maxWidth: '60%',
   },
   descCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -384,11 +377,9 @@ const styles = StyleSheet.create({
   },
   descText: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 22,
   },
   actionCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -403,20 +394,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
   },
-  actionPrimary: {
-    backgroundColor: '#1a73e8',
-  },
-  actionSuccess: {
-    backgroundColor: '#2e7d32',
-  },
-  actionWarning: {
-    backgroundColor: '#e65100',
-  },
-  actionDanger: {
-    backgroundColor: '#c62828',
-  },
   actionBtnText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -427,7 +405,6 @@ const styles = StyleSheet.create({
   completedHintText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#2e7d32',
   },
   cancelledHint: {
     alignItems: 'center',
@@ -436,10 +413,8 @@ const styles = StyleSheet.create({
   cancelledHintText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#c62828',
   },
   recordsCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -450,7 +425,6 @@ const styles = StyleSheet.create({
   },
   noRecords: {
     textAlign: 'center',
-    color: '#999',
     fontSize: 14,
     paddingVertical: 16,
   },
@@ -472,7 +446,6 @@ const styles = StyleSheet.create({
   recordLine: {
     width: 2,
     flex: 1,
-    backgroundColor: '#e0e0e0',
     marginVertical: 2,
   },
   recordContent: {
@@ -482,23 +455,19 @@ const styles = StyleSheet.create({
   recordAction: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     marginBottom: 2,
   },
   recordMeta: {
     fontSize: 12,
-    color: '#999',
     marginBottom: 2,
   },
   recordNote: {
     fontSize: 13,
-    color: '#666',
     marginTop: 4,
     marginBottom: 2,
   },
   recordTime: {
     fontSize: 11,
-    color: '#bbb',
     marginTop: 4,
   },
 });
