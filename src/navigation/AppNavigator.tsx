@@ -24,6 +24,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import DiagnosisScreen from '../screens/DiagnosisScreen';
 import KnowledgeScreen from '../screens/KnowledgeScreen';
 import KnowledgeDetailScreen from '../screens/KnowledgeDetailScreen';
+import { useTheme } from '../hooks/useTheme';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -46,11 +47,12 @@ function AuthNavigator() {
 }
 
 function MainNavigator() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#1a73e8',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           height: 56,
           paddingBottom: 6,
@@ -61,9 +63,9 @@ function MainNavigator() {
           fontWeight: '500',
         },
         headerStyle: {
-          backgroundColor: '#1a73e8',
+          backgroundColor: colors.primary,
         },
-        headerTintColor: '#fff',
+        headerTintColor: colors.onPrimary,
         headerTitleStyle: {
           fontWeight: '600',
         },
@@ -137,6 +139,7 @@ function MainNavigator() {
 }
 
 export const AppNavigator: FC = () => {
+  const { colors } = useTheme();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
   const checkAuth = useAuthStore((s) => s.checkAuth);
@@ -147,9 +150,9 @@ export const AppNavigator: FC = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1a73e8" />
-        <Text style={styles.loadingText}>加载中...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.pageBg }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>加载中...</Text>
       </View>
     );
   }
@@ -172,6 +175,7 @@ export const AppNavigator: FC = () => {
 
 // 在 RootStack 中包裹 Main + 详情页
 function MainTabNavigatorWithDetail() {
+  const { colors } = useTheme();
   return (
     <RootStack.Navigator>
       <RootStack.Screen
@@ -184,8 +188,8 @@ function MainTabNavigatorWithDetail() {
         component={WorkOrderDetailScreen}
         options={{
           title: '工单详情',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -194,8 +198,8 @@ function MainTabNavigatorWithDetail() {
         component={WorkOrderCreateScreen}
         options={{
           title: '创建工单',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -204,8 +208,8 @@ function MainTabNavigatorWithDetail() {
         component={WorkOrderTransferScreen}
         options={{
           title: '工单流转',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -214,8 +218,8 @@ function MainTabNavigatorWithDetail() {
         component={InspectionDetailScreen}
         options={{
           title: '巡检详情',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -224,8 +228,8 @@ function MainTabNavigatorWithDetail() {
         component={DiagnosisScreen}
         options={{
           title: '故障诊断',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -234,8 +238,8 @@ function MainTabNavigatorWithDetail() {
         component={KnowledgeScreen}
         options={{
           title: '知识库',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -244,8 +248,8 @@ function MainTabNavigatorWithDetail() {
         component={KnowledgeDetailScreen}
         options={{
           title: '文章详情',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -258,11 +262,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
   },
 });
