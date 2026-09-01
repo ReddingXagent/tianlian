@@ -13,6 +13,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
 import { useMonitorData, type MonitorTab } from '../hooks/useMonitorData';
+import { useTheme } from '../hooks/useTheme';
 
 const TABS: { key: MonitorTab; label: string }[] = [
   { key: 'devices', label: '实时监控' },
@@ -33,6 +34,7 @@ const MonitorScreen: React.FC = () => {
     fetchAll,
     startPolling,
   } = useMonitorData();
+  const { colors } = useTheme();
 
   const [activeTab, setActiveTab] = useState<MonitorTab>('devices');
 
@@ -70,21 +72,21 @@ const MonitorScreen: React.FC = () => {
 
   const renderMetricsBar = (rt?: RealtimeDeviceStatus) => {
     if (!rt) {
-      return <Text style={styles.metricsNoData}>遥测数据加载中...</Text>;
+      return <Text style={[styles.metricsNoData, { color: colors.textMuted }]}>遥测数据加载中...</Text>;
     }
     return (
-      <View style={styles.metricsRow}>
+      <View style={[styles.metricsRow, { backgroundColor: colors.pageBg }]}>
         <View style={styles.metricItem}>
-          <Text style={styles.metricValue}>{rt.power.toFixed(1)}</Text>
-          <Text style={styles.metricUnit}>kW</Text>
-          <Text style={styles.metricLabel}>功率</Text>
+          <Text style={[styles.metricValue, { color: colors.textPrimary }]}>{rt.power.toFixed(1)}</Text>
+          <Text style={[styles.metricUnit, { color: colors.textSecondary }]}>kW</Text>
+          <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>功率</Text>
         </View>
       </View>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.pageBg }]}>
       <ScrollView
         style={styles.scrollContainer}
         contentContainerStyle={styles.content}
@@ -92,52 +94,55 @@ const MonitorScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => fetchAll(true)}
-            colors={['#1a73e8']}
-            tintColor="#1a73e8"
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
         }
       >
         {/* 监控概览 */}
-        <Text style={styles.sectionTitle}>监控概览</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>监控概览</Text>
         <View style={styles.summaryGrid}>
-          <View style={[styles.summaryCard, { backgroundColor: '#e3f2fd' }]}>
-            <Text style={[styles.summaryNumber, { color: '#1565c0' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.infoBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.info }]}>
               {summary?.totalDevices ?? '-'}
             </Text>
-            <Text style={styles.summaryLabel}>总设备</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>总设备</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#e8f5e9' }]}>
-            <Text style={[styles.summaryNumber, { color: '#2e7d32' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.successBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.success }]}>
               {summary?.onlineDevices ?? '-'}
             </Text>
-            <Text style={styles.summaryLabel}>在线</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>在线</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#fff3e0' }]}>
-            <Text style={[styles.summaryNumber, { color: '#e65100' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.warningBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.warning }]}>
               {summary?.faultDevices ?? '-'}
             </Text>
-            <Text style={styles.summaryLabel}>故障</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>故障</Text>
           </View>
-          <View style={[styles.summaryCard, { backgroundColor: '#fce4ec' }]}>
-            <Text style={[styles.summaryNumber, { color: '#c62828' }]}>
+          <View style={[styles.summaryCard, { backgroundColor: colors.errorBg }]}>
+            <Text style={[styles.summaryNumber, { color: colors.error }]}>
               {summary?.criticalAlarms ?? '-'}
             </Text>
-            <Text style={styles.summaryLabel}>严重告警</Text>
+            <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>严重告警</Text>
           </View>
         </View>
 
         {/* Tab 切换 */}
-        <View style={styles.tabContainer}>
+        <View style={[styles.tabContainer, { backgroundColor: colors.cardBg }]}>
           {TABS.map((tab) => (
             <TouchableOpacity
               key={tab.key}
-              style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+              style={[
+                styles.tab,
+                activeTab === tab.key && { backgroundColor: colors.primary },
+              ]}
               onPress={() => setActiveTab(tab.key)}
               accessibilityRole="button">
               <Text
                 style={[
                   styles.tabText,
-                  activeTab === tab.key && styles.tabTextActive,
+                  { color: activeTab === tab.key ? colors.onPrimary : colors.textSecondary },
                 ]}
               >
                 {tab.label}
@@ -148,22 +153,22 @@ const MonitorScreen: React.FC = () => {
 
         {/* 实时总览 */}
         {activeTab === 'devices' && realtimeOverview && (
-          <View style={styles.realtimeOverviewBar}>
+          <View style={[styles.realtimeOverviewBar, { backgroundColor: colors.pageBg }]}>
             <View style={styles.metricItem}>
-              <Text style={styles.metricValue}>{realtimeOverview.totalPower.toFixed(1)}</Text>
-              <Text style={styles.metricUnit}>kW</Text>
-              <Text style={styles.metricLabel}>总功率</Text>
+              <Text style={[styles.metricValue, { color: colors.textPrimary }]}>{realtimeOverview.totalPower.toFixed(1)}</Text>
+              <Text style={[styles.metricUnit, { color: colors.textSecondary }]}>kW</Text>
+              <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>总功率</Text>
             </View>
             <View style={styles.metricItem}>
-              <Text style={[styles.metricValue, { color: realtimeOverview.powerTrend >= 0 ? '#2e7d32' : '#e65100' }]}>
+              <Text style={[styles.metricValue, { color: realtimeOverview.powerTrend >= 0 ? colors.success : colors.warning }]}>
                 {realtimeOverview.powerTrend >= 0 ? '↑' : '↓'} {Math.abs(realtimeOverview.powerTrend).toFixed(1)}%
               </Text>
-              <Text style={styles.metricLabel}>趋势</Text>
+              <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>趋势</Text>
             </View>
             <View style={styles.metricItem}>
-              <Text style={styles.metricValue}>{realtimeOverview.efficiency.toFixed(1)}</Text>
-              <Text style={styles.metricUnit}>%</Text>
-              <Text style={styles.metricLabel}>效率</Text>
+              <Text style={[styles.metricValue, { color: colors.textPrimary }]}>{realtimeOverview.efficiency.toFixed(1)}</Text>
+              <Text style={[styles.metricUnit, { color: colors.textSecondary }]}>%</Text>
+              <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>效率</Text>
             </View>
           </View>
         )}
@@ -180,20 +185,20 @@ const MonitorScreen: React.FC = () => {
             devices.map((device) => {
               const rt = getRealtimeDevice(device.id, realtimeOverview, devices);
               return (
-                <View key={device.id} style={styles.deviceCard}>
+                <View key={device.id} style={[styles.deviceCard, { backgroundColor: colors.cardBg }]}>
                   <View style={styles.deviceHeader}>
                     <View style={styles.deviceNameRow}>
-                      <Text style={styles.deviceName} numberOfLines={1}>
+                      <Text style={[styles.deviceName, { color: colors.textPrimary }]} numberOfLines={1}>
                         {device.name}
                       </Text>
                       <StatusBadge status={(rt?.status || device.status) as StatusType} />
                     </View>
-                    <Text style={styles.deviceMeta}>
+                    <Text style={[styles.deviceMeta, { color: colors.textSecondary }]}>
                       {device.stationName || `站点#${device.stationId}`} · {device.model}
                     </Text>
                   </View>
                   {renderMetricsBar(rt)}
-                  <Text style={styles.deviceUpdateTime}>
+                  <Text style={[styles.deviceUpdateTime, { color: colors.textMuted }]}>
                     最后更新: {realtimeOverview?.updateTime
                       ? new Date(realtimeOverview.updateTime).toLocaleTimeString('zh-CN')
                       : device.lastHeartbeat
@@ -216,18 +221,18 @@ const MonitorScreen: React.FC = () => {
             />
           ) : (
             faultDevices.map((device: Device) => (
-              <View key={device.id} style={styles.itemCard}>
+              <View key={device.id} style={[styles.itemCard, { backgroundColor: colors.cardBg }]}>
                 <View style={styles.itemHeader}>
-                  <Text style={styles.itemName} numberOfLines={1}>
+                  <Text style={[styles.itemName, { color: colors.textPrimary }]} numberOfLines={1}>
                     {device.name}
                   </Text>
                   <StatusBadge status="fault" />
                 </View>
-                <Text style={styles.itemMeta}>
+                <Text style={[styles.itemMeta, { color: colors.textSecondary }]}>
                   {device.stationName || `站点ID: ${device.stationId}`} ·{' '}
                   {device.model}
                 </Text>
-                <Text style={styles.itemTime}>
+                <Text style={[styles.itemTime, { color: colors.textMuted }]}>
                   最后心跳: {device.lastHeartbeat
                     ? new Date(device.lastHeartbeat).toLocaleString('zh-CN')
                     : '-'}
@@ -247,21 +252,21 @@ const MonitorScreen: React.FC = () => {
             />
           ) : (
             criticalAlarms.map((alarm: Alarm) => (
-              <View key={alarm.id} style={styles.itemCard}>
+              <View key={alarm.id} style={[styles.itemCard, { backgroundColor: colors.cardBg }]}>
                 <View style={styles.itemHeader}>
-                  <Text style={styles.itemName} numberOfLines={1}>
+                  <Text style={[styles.itemName, { color: colors.textPrimary }]} numberOfLines={1}>
                     {alarm.title}
                   </Text>
                   <StatusBadge status="critical" />
                 </View>
-                <Text style={styles.itemMeta} numberOfLines={2}>
+                <Text style={[styles.itemMeta, { color: colors.textSecondary }]} numberOfLines={2}>
                   {alarm.description}
                 </Text>
                 <View style={styles.itemFooter}>
-                  <Text style={styles.itemStation}>
+                  <Text style={[styles.itemStation, { color: colors.textSecondary }]}>
                     {alarm.stationName}
                   </Text>
-                  <Text style={styles.itemTime}>
+                  <Text style={[styles.itemTime, { color: colors.textMuted }]}>
                     {new Date(alarm.createdAt).toLocaleString('zh-CN')}
                   </Text>
                 </View>
@@ -277,7 +282,6 @@ const MonitorScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   scrollContainer: {
     flex: 1,
@@ -289,7 +293,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
     marginTop: 8,
   },
@@ -311,12 +314,10 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 13,
-    color: '#666',
     marginTop: 4,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 4,
     marginBottom: 12,
@@ -327,19 +328,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
   },
-  tabActive: {
-    backgroundColor: '#1a73e8',
-  },
   tabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#666',
-  },
-  tabTextActive: {
-    color: '#fff',
   },
   deviceCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,
@@ -361,17 +354,14 @@ const styles = StyleSheet.create({
   deviceName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
     marginRight: 8,
   },
   deviceMeta: {
     fontSize: 12,
-    color: '#999',
   },
   metricsRow: {
     flexDirection: 'row',
-    backgroundColor: '#f5f6fa',
     borderRadius: 8,
     padding: 10,
     marginBottom: 8,
@@ -384,30 +374,24 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#333',
   },
   metricUnit: {
     fontSize: 11,
-    color: '#999',
     marginTop: 1,
   },
   metricLabel: {
     fontSize: 11,
-    color: '#999',
     marginTop: 2,
   },
   metricsNoData: {
     fontSize: 12,
-    color: '#bbb',
     textAlign: 'center',
     paddingVertical: 8,
   },
   deviceUpdateTime: {
     fontSize: 11,
-    color: '#bbb',
   },
   itemCard: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 14,
     marginBottom: 8,
@@ -426,13 +410,11 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#333',
     flex: 1,
     marginRight: 8,
   },
   itemMeta: {
     fontSize: 13,
-    color: '#999',
     marginBottom: 4,
     lineHeight: 18,
   },
@@ -441,16 +423,13 @@ const styles = StyleSheet.create({
   },
   itemStation: {
     fontSize: 12,
-    color: '#999',
     marginBottom: 2,
   },
   itemTime: {
     fontSize: 12,
-    color: '#bbb',
   },
   realtimeOverviewBar: {
     flexDirection: 'row',
-    backgroundColor: '#f5f7fa',
     borderRadius: 10,
     padding: 12,
     marginBottom: 10,
