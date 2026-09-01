@@ -17,6 +17,7 @@ import NotificationCenterScreen from '../screens/NotificationCenterScreen';
 import DeviceListScreen from '../screens/DeviceListScreen';
 import DeviceDetailScreen from '../screens/DeviceDetailScreen';
 import WorkOrderScreen from '../screens/WorkOrderScreen';
+import { useTheme } from '../hooks/useTheme';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -36,11 +37,12 @@ function AuthNavigator() {
 }
 
 function MainNavigator() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#1a73e8',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           height: 56,
           paddingBottom: 6,
@@ -51,9 +53,9 @@ function MainNavigator() {
           fontWeight: '500',
         },
         headerStyle: {
-          backgroundColor: '#1a73e8',
+          backgroundColor: colors.primary,
         },
-        headerTintColor: '#fff',
+        headerTintColor: colors.onPrimary,
         headerTitleStyle: {
           fontWeight: '600',
         },
@@ -100,6 +102,7 @@ function MainNavigator() {
 }
 
 export const AppNavigator: React.FC = () => {
+  const { colors } = useTheme();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isLoading = useAuthStore((s) => s.isLoading);
   const checkAuth = useAuthStore((s) => s.checkAuth);
@@ -111,9 +114,9 @@ export const AppNavigator: React.FC = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1a73e8" />
-        <Text style={styles.loadingText}>加载中...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.pageBg }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>加载中...</Text>
       </View>
     );
   }
@@ -133,6 +136,7 @@ export const AppNavigator: React.FC = () => {
 
 // 在 RootStack 中包裹 Main + 详情页面
 function MainTabNavigatorWithDetail() {
+  const { colors } = useTheme();
   return (
     <RootStack.Navigator>
       <RootStack.Screen name="Main" component={MainNavigator} options={{ headerShown: false }} />
@@ -141,8 +145,8 @@ function MainTabNavigatorWithDetail() {
         component={StationDetailScreen}
         options={{
           title: '站点详情',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -151,8 +155,8 @@ function MainTabNavigatorWithDetail() {
         component={ChargerMonitorScreen}
         options={({ route }) => ({
           title: `充电桩监控`,
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         })}
       />
@@ -161,8 +165,8 @@ function MainTabNavigatorWithDetail() {
         component={AlarmListScreen}
         options={{
           title: '告警列表',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -171,8 +175,8 @@ function MainTabNavigatorWithDetail() {
         component={NotificationCenterScreen}
         options={{
           title: '消息中心',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -181,8 +185,8 @@ function MainTabNavigatorWithDetail() {
         component={DeviceListScreen}
         options={({ route }) => ({
           title: `${route.params?.stationName || ''} - 设备列表`,
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         })}
       />
@@ -191,8 +195,8 @@ function MainTabNavigatorWithDetail() {
         component={DeviceDetailScreen}
         options={{
           title: '设备详情',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -201,8 +205,8 @@ function MainTabNavigatorWithDetail() {
         component={WorkOrderScreen}
         options={{
           title: '工单管理',
-          headerStyle: { backgroundColor: '#1a73e8' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },
         }}
       />
@@ -215,11 +219,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
   },
 });
