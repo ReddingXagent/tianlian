@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import StatusBadge from '../components/StatusBadge';
 import { useScan } from '../hooks/useScan';
+import { useTheme } from '../hooks/useTheme';
 
 const ScanScreen: React.FC = () => {
   const {
@@ -25,6 +26,7 @@ const ScanScreen: React.FC = () => {
     handleQuickInput,
     performCheckIn,
   } = useScan();
+  const { colors } = useTheme();
 
   const [signInMode, setSignInMode] = useState(false);
 
@@ -87,18 +89,18 @@ const ScanScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled"
     >
       {/* 扫码区域示意 */}
       <View style={styles.scannerFrame}>
-        <View style={[styles.scannerBox, signInMode && styles.scannerBoxSignIn]}>
+        <View style={[styles.scannerBox, { borderColor: colors.primary, backgroundColor: colors.infoBg }, signInMode && { borderColor: colors.warning, backgroundColor: colors.warningBg }]}>
           <Text style={styles.scannerIcon}>{signInMode ? '📌' : '📷'}</Text>
-          <Text style={styles.scannerHint}>
+          <Text style={[styles.scannerHint, { color: colors.textPrimary }]}>
             {signInMode ? '签到模式' : '请输入设备或站点编码'}
           </Text>
-          <Text style={styles.scannerSubHint}>
+          <Text style={[styles.scannerSubHint, { color: colors.textSecondary }]}>
             {signInMode ? '请扫描设备二维码进行签到' : '模拟扫码 - 手动输入编码查询'}
           </Text>
         </View>
@@ -108,9 +110,9 @@ const ScanScreen: React.FC = () => {
       <View style={styles.inputContainer}>
         <TextInput
           ref={inputRef}
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.cardBg, color: colors.textPrimary, borderColor: colors.border }]}
           placeholder="输入设备/站点编码"
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.textSecondary}
           value={codeInput}
           onChangeText={(text) => {
             setCodeInput(text);
@@ -123,72 +125,72 @@ const ScanScreen: React.FC = () => {
           onSubmitEditing={handleScan}
         />
         <TouchableOpacity
-          style={[styles.scanBtn, loading && styles.scanBtnDisabled]}
+          style={[styles.scanBtn, { backgroundColor: colors.primary }, loading && styles.scanBtnDisabled]}
           onPress={handleScan}
           disabled={loading}
           activeOpacity={0.7}
           accessibilityRole="button">
           {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={colors.onPrimary} size="small" />
           ) : (
-            <Text style={styles.scanBtnText}>查询</Text>
+            <Text style={[styles.scanBtnText, { color: colors.onPrimary }]}>查询</Text>
           )}
         </TouchableOpacity>
       </View>
 
       {/* 快速输入示例 */}
       <View style={styles.quickContainer}>
-        <Text style={styles.quickLabel}>快速输入:</Text>
+        <Text style={[styles.quickLabel, { color: colors.textSecondary }]}>快速输入:</Text>
         <View style={styles.quickRow}>
           <TouchableOpacity
-            style={styles.quickBtn}
+            style={[styles.quickBtn, { backgroundColor: colors.infoBg }]}
             onPress={() => handleQuickInput('DEV-001')}
             accessibilityRole="button">
-            <Text style={styles.quickBtnText}>DEV-001</Text>
+            <Text style={[styles.quickBtnText, { color: colors.info }]}>DEV-001</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.quickBtn}
+            style={[styles.quickBtn, { backgroundColor: colors.infoBg }]}
             onPress={() => handleQuickInput('STATION-A01')}
             accessibilityRole="button">
-            <Text style={styles.quickBtnText}>STATION-A01</Text>
+            <Text style={[styles.quickBtnText, { color: colors.info }]}>STATION-A01</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.quickBtn}
+            style={[styles.quickBtn, { backgroundColor: colors.infoBg }]}
             onPress={() => handleQuickInput('CHARGER-005')}
             accessibilityRole="button">
-            <Text style={styles.quickBtnText}>CHARGER-005</Text>
+            <Text style={[styles.quickBtnText, { color: colors.info }]}>CHARGER-005</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* 错误提示 */}
       {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
+        <View style={[styles.errorContainer, { backgroundColor: colors.errorBg }]}>
+          <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
         </View>
       )}
 
       {/* 查询结果 */}
       {lastResult && (
         <View style={styles.resultContainer}>
-          <Text style={styles.resultTitle}>扫码结果</Text>
-          <View style={styles.resultCard}>
+          <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>扫码结果</Text>
+          <View style={[styles.resultCard, { backgroundColor: colors.cardBg }]}>
             <Text style={styles.resultIcon}>
               {resultIcon(lastResult.type)}
             </Text>
             <View style={styles.resultInfo}>
-              <Text style={styles.resultType}>
+              <Text style={[styles.resultType, { color: colors.primary }]}>
                 类型: {resultTypeLabel(lastResult.type)}
               </Text>
-              <Text style={styles.resultCode}>
+              <Text style={[styles.resultCode, { color: colors.textPrimary }]}>
                 编码: {lastResult!.code}
               </Text>
               {lastResult!.name && (
-                <Text style={styles.resultName}>
+                <Text style={[styles.resultName, { color: colors.textPrimary }]}>
                   名称: {lastResult!.name}
                 </Text>
               )}
-              <Text style={styles.resultId}>ID: {lastResult.id}</Text>
+              <Text style={[styles.resultId, { color: colors.textSecondary }]}>ID: {lastResult.id}</Text>
               {lastResult.type === 'device' && lastResult.status && (
                 <View style={styles.resultStatus}>
                   <StatusBadge status={lastResult.status} />
@@ -200,20 +202,20 @@ const ScanScreen: React.FC = () => {
           {/* 操作按钮 */}
           <View style={styles.resultActions}>
             <TouchableOpacity
-              style={styles.resultActionBtn}
+              style={[styles.resultActionBtn, { backgroundColor: colors.cardBg }]}
               onPress={handleSignIn}
               activeOpacity={0.7}
               accessibilityRole="button">
               <Text style={styles.resultActionIcon}>📌</Text>
-              <Text style={styles.resultActionLabel}>扫码签到</Text>
+              <Text style={[styles.resultActionLabel, { color: colors.textSecondary }]}>扫码签到</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.resultActionBtn}
+              style={[styles.resultActionBtn, { backgroundColor: colors.cardBg }]}
               onPress={handleReportFault}
               activeOpacity={0.7}
               accessibilityRole="button">
               <Text style={styles.resultActionIcon}>🔧</Text>
-              <Text style={styles.resultActionLabel}>报修</Text>
+              <Text style={[styles.resultActionLabel, { color: colors.textSecondary }]}>报修</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -225,7 +227,6 @@ const ScanScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
@@ -240,15 +241,9 @@ const styles = StyleSheet.create({
     width: 240,
     height: 200,
     borderWidth: 2,
-    borderColor: '#1a73e8',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(26, 115, 232, 0.05)',
-  },
-  scannerBoxSignIn: {
-    borderColor: '#e65100',
-    backgroundColor: 'rgba(230, 81, 0, 0.05)',
   },
   scannerIcon: {
     fontSize: 56,
@@ -257,11 +252,9 @@ const styles = StyleSheet.create({
   scannerHint: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#333',
   },
   scannerSubHint: {
     fontSize: 12,
-    color: '#999',
     marginTop: 4,
   },
   inputContainer: {
@@ -271,17 +264,13 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: '#fff',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#333',
     borderWidth: 1,
-    borderColor: '#ddd',
   },
   scanBtn: {
-    backgroundColor: '#1a73e8',
     borderRadius: 8,
     paddingHorizontal: 24,
     justifyContent: 'center',
@@ -291,7 +280,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   scanBtnText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -300,7 +288,6 @@ const styles = StyleSheet.create({
   },
   quickLabel: {
     fontSize: 13,
-    color: '#999',
     marginBottom: 8,
   },
   quickRow: {
@@ -311,22 +298,18 @@ const styles = StyleSheet.create({
   quickBtn: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: '#e3f2fd',
     borderRadius: 8,
   },
   quickBtnText: {
     fontSize: 13,
-    color: '#1565c0',
     fontWeight: '500',
   },
   errorContainer: {
-    backgroundColor: '#fce4ec',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   errorText: {
-    color: '#c62828',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -336,11 +319,9 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   resultCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -361,23 +342,19 @@ const styles = StyleSheet.create({
   },
   resultType: {
     fontSize: 14,
-    color: '#1a73e8',
     fontWeight: '500',
     marginBottom: 4,
   },
   resultCode: {
     fontSize: 14,
-    color: '#333',
     marginBottom: 2,
   },
   resultName: {
     fontSize: 14,
-    color: '#333',
     marginBottom: 2,
   },
   resultId: {
     fontSize: 12,
-    color: '#999',
   },
   resultStatus: {
     marginTop: 4,
@@ -388,7 +365,6 @@ const styles = StyleSheet.create({
   },
   resultActionBtn: {
     flex: 1,
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -404,7 +380,6 @@ const styles = StyleSheet.create({
   },
   resultActionLabel: {
     fontSize: 13,
-    color: '#666',
     fontWeight: '500',
   },
 });
