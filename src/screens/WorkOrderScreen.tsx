@@ -18,6 +18,8 @@ import { WorkOrder, RootStackParamList, WorkOrderType, WorkOrderPriority } from 
 import LoadingSpinner from '../components/LoadingSpinner';
 import StatusBadge from '../components/StatusBadge';
 import EmptyState from '../components/EmptyState';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeColors } from '../theme/colors';
 
 type WorkOrderRouteProp = RouteProp<RootStackParamList, 'WorkOrder'>;
 
@@ -36,17 +38,18 @@ const WORK_ORDER_TYPE_LABEL: Record<string, string> = {
   other: '其他',
 };
 
-const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: '低', color: '#2e7d32' },
-  normal: { label: '中', color: '#1565c0' },
-  high: { label: '高', color: '#c62828' },
-  urgent: { label: '紧急', color: '#b71c1c' },
+const PRIORITY_SEMANTICS: Record<string, { label: string; color: keyof ThemeColors }> = {
+  low: { label: '低', color: 'success' },
+  normal: { label: '中', color: 'info' },
+  high: { label: '高', color: 'error' },
+  urgent: { label: '紧急', color: 'error' },
 };
 
 const WORK_ORDER_TYPES: WorkOrderType[] = ['repair', 'inspection', 'installation', 'maintenance', 'other'];
 const PRIORITIES: WorkOrderPriority[] = ['low', 'normal', 'high', 'urgent'];
 
 const WorkOrderScreen: React.FC = () => {
+  const { colors } = useTheme();
   const route = useRoute<WorkOrderRouteProp>();
   const stationId = route.params?.stationId;
 
@@ -121,44 +124,44 @@ const WorkOrderScreen: React.FC = () => {
   };
 
   const renderOrderItem = ({ item }: { item: WorkOrder }) => {
-    const priorityConfig = PRIORITY_CONFIG[item.priority] || { label: item.priority, color: '#666' };
+    const prioritySemantic = PRIORITY_SEMANTICS[item.priority] || { label: item.priority, color: 'neutralText' as const };
 
     return (
-      <TouchableOpacity style={styles.orderCard} activeOpacity={0.7}>
+      <TouchableOpacity style={[styles.orderCard, { backgroundColor: colors.cardBg }]} activeOpacity={0.7}>
         <View style={styles.orderHeader}>
           <View style={styles.orderTitleRow}>
-            <Text style={styles.orderTitle} numberOfLines={1}>{item.title}</Text>
-            <View style={[styles.priorityBadge, { backgroundColor: priorityConfig.color + '20' }]}>
-              <Text style={[styles.priorityText, { color: priorityConfig.color }]}>
-                {priorityConfig.label}
+            <Text style={[styles.orderTitle, { color: colors.textPrimary }]} numberOfLines={1}>{item.title}</Text>
+            <View style={[styles.priorityBadge, { backgroundColor: colors[prioritySemantic.color] + '20' }]}>
+              <Text style={[styles.priorityText, { color: colors[prioritySemantic.color] }]}>
+                {prioritySemantic.label}
               </Text>
             </View>
           </View>
           <StatusBadge status={item.status} />
         </View>
 
-        <Text style={styles.orderDesc} numberOfLines={2}>{item.description}</Text>
+        <Text style={[styles.orderDesc, { color: colors.textSecondary }]} numberOfLines={2}>{item.description}</Text>
 
         <View style={styles.orderMeta}>
-          <Text style={styles.orderMetaText}>
+          <Text style={[styles.orderMetaText, { color: colors.textSecondary }]}>
             {WORK_ORDER_TYPE_LABEL[item.type] || item.type}
           </Text>
-          <Text style={styles.orderMetaText}>· {item.stationName}</Text>
+          <Text style={[styles.orderMetaText, { color: colors.textSecondary }]}>· {item.stationName}</Text>
         </View>
 
-        <View style={styles.orderFooter}>
+        <View style={[styles.orderFooter, { borderTopColor: colors.divider }]}>
           <View style={styles.orderFooterLeft}>
-            <Text style={styles.orderPerson}>
+            <Text style={[styles.orderPerson, { color: colors.textSecondary }]}>
               {item.assigneeName ? `负责人: ${item.assigneeName}` : '未分配'}
             </Text>
-            <Text style={styles.orderTime}>{formatTime(item.createdAt)}</Text>
+            <Text style={[styles.orderTime, { color: colors.textMuted }]}>{formatTime(item.createdAt)}</Text>
           </View>
           {item.status === 'in_progress' && (
             <TouchableOpacity
-              style={styles.completeBtn}
+              style={[styles.completeBtn, { backgroundColor: colors.successBg }]}
               onPress={() => handleCompleteOrder(item)}
              accessibilityRole="button">
-              <Text style={styles.completeBtnText}>完成</Text>
+              <Text style={[styles.completeBtnText, { color: colors.success }]}>完成</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -167,17 +170,17 @@ const WorkOrderScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.pageBg }]}>
       {/* 筛选栏 */}
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
         <View style={styles.filterRow}>
           {STATUS_FILTERS.map((f) => (
             <TouchableOpacity
               key={f.key}
-              style={[styles.filterChip, statusFilter === f.key && styles.filterChipActive]}
+              style={[styles.filterChip, { backgroundColor: colors.pageBg }, statusFilter === f.key && { backgroundColor: colors.primary }]}
               onPress={() => setStatusFilter(f.key)}
              accessibilityRole="button">
-              <Text style={[styles.filterChipText, statusFilter === f.key && styles.filterChipTextActive]}>
+              <Text style={[styles.filterChipText, { color: colors.textSecondary }, statusFilter === f.key && { color: colors.onPrimary, fontWeight: '500' }]}>
                 {f.label}
               </Text>
             </TouchableOpacity>
@@ -205,8 +208,8 @@ const WorkOrderScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => fetchData(true, 1)}
-              colors={['#1a73e8']}
-              tintColor="#1a73e8"
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
           onEndReached={handleLoadMore}
@@ -224,7 +227,7 @@ const WorkOrderScreen: React.FC = () => {
                 <LoadingSpinner text="加载更多..." size="small" />
               </View>
             ) : orders.length >= total && total > 0 ? (
-              <Text style={styles.footerText}>已显示全部 {total} 条工单</Text>
+              <Text style={[styles.footerText, { color: colors.textMuted }]}>已显示全部 {total} 条工单</Text>
             ) : null
           }
         />
@@ -233,11 +236,11 @@ const WorkOrderScreen: React.FC = () => {
       {/* 新建工单 FAB */}
       {stationId && (
         <TouchableOpacity
-          style={styles.fab}
+          style={[styles.fab, { backgroundColor: colors.primary, shadowColor: colors.primary }]}
           onPress={() => setShowCreateModal(true)}
           activeOpacity={0.8}
          accessibilityRole="button">
-          <Text style={styles.fabText}>+</Text>
+          <Text style={[styles.fabText, { color: colors.onPrimary }]}>+</Text>
         </TouchableOpacity>
       )}
 
@@ -249,61 +252,63 @@ const WorkOrderScreen: React.FC = () => {
         onRequestClose={() => setShowCreateModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.cardBg }]}>
             <ScrollView>
-              <Text style={styles.modalTitle}>新建工单</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>新建工单</Text>
 
-              <Text style={styles.modalLabel}>标题 *</Text>
+              <Text style={[styles.modalLabel, { color: colors.textPrimary }]}>标题 *</Text>
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBg }]}
                 placeholder="请输入工单标题"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textSecondary}
                 value={createTitle}
                 onChangeText={setCreateTitle}
               />
 
-              <Text style={styles.modalLabel}>描述</Text>
+              <Text style={[styles.modalLabel, { color: colors.textPrimary }]}>描述</Text>
               <TextInput
-                style={[styles.modalInput, styles.modalTextArea]}
+                style={[styles.modalInput, styles.modalTextArea, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.inputBg }]}
                 placeholder="请输入工单描述"
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textSecondary}
                 value={createDesc}
                 onChangeText={setCreateDesc}
                 multiline
                 numberOfLines={3}
               />
 
-              <Text style={styles.modalLabel}>工单类型</Text>
+              <Text style={[styles.modalLabel, { color: colors.textPrimary }]}>工单类型</Text>
               <View style={styles.pickerRow}>
                 {WORK_ORDER_TYPES.map((t) => (
                   <TouchableOpacity
                     key={t}
-                    style={[styles.pickerItem, createType === t && styles.pickerItemActive]}
+                    style={[styles.pickerItem, { borderColor: colors.border, backgroundColor: colors.inputBg }, createType === t && { backgroundColor: colors.infoBg, borderColor: colors.primary }]}
                     onPress={() => setCreateType(t)}
                    accessibilityRole="button">
-                    <Text style={[styles.pickerItemText, createType === t && styles.pickerItemTextActive]}>
+                    <Text style={[styles.pickerItemText, { color: colors.textSecondary }, createType === t && { color: colors.primary, fontWeight: '600' }]}>
                       {WORK_ORDER_TYPE_LABEL[t]}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
-              <Text style={styles.modalLabel}>优先级</Text>
+              <Text style={[styles.modalLabel, { color: colors.textPrimary }]}>优先级</Text>
               <View style={styles.pickerRow}>
                 {PRIORITIES.map((p) => {
-                  const pc = PRIORITY_CONFIG[p]!;
+                  const pc = PRIORITY_SEMANTICS[p]!;
                   return (
                     <TouchableOpacity
                       key={p}
                       style={[
                         styles.pickerItem,
-                        createPriority === p && { backgroundColor: pc.color + '20', borderColor: pc.color },
+                        { borderColor: colors.border, backgroundColor: colors.inputBg },
+                        createPriority === p && { backgroundColor: colors[pc.color] + '20', borderColor: colors[pc.color] },
                       ]}
                       onPress={() => setCreatePriority(p)}
                      accessibilityRole="button">
                       <Text style={[
                         styles.pickerItemText,
-                        createPriority === p && { color: pc.color, fontWeight: '600' },
+                        { color: colors.textSecondary },
+                        createPriority === p && { color: colors[pc.color], fontWeight: '600' },
                       ]}>
                         {pc.label}
                       </Text>
@@ -314,20 +319,20 @@ const WorkOrderScreen: React.FC = () => {
 
               <View style={styles.modalActions}>
                 <TouchableOpacity
-                  style={styles.modalCancelBtn}
+                  style={[styles.modalCancelBtn, { borderColor: colors.border }]}
                   onPress={() => setShowCreateModal(false)}
                  accessibilityRole="button">
-                  <Text style={styles.modalCancelText}>取消</Text>
+                  <Text style={[styles.modalCancelText, { color: colors.textSecondary }]}>取消</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.modalSubmitBtn, creating && styles.modalSubmitBtnDisabled]}
+                  style={[styles.modalSubmitBtn, { backgroundColor: colors.primary }, creating && styles.modalSubmitBtnDisabled]}
                   onPress={handleCreateWorkOrder}
                   disabled={creating}
                  accessibilityRole="button">
                   {creating ? (
-                    <ActivityIndicator color="#fff" size="small" />
+                    <ActivityIndicator color={colors.onPrimary} size="small" />
                   ) : (
-                    <Text style={styles.modalSubmitText}>创建工单</Text>
+                    <Text style={[styles.modalSubmitText, { color: colors.onPrimary }]}>创建工单</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -342,14 +347,11 @@ const WorkOrderScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   filterContainer: {
-    backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   filterRow: {
     flexDirection: 'row',
@@ -358,26 +360,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: '#f5f6fa',
     marginRight: 8,
-  },
-  filterChipActive: {
-    backgroundColor: '#1a73e8',
   },
   filterChipText: {
     fontSize: 13,
-    color: '#666',
-  },
-  filterChipTextActive: {
-    color: '#fff',
-    fontWeight: '500',
   },
   listContent: {
     padding: 16,
     paddingBottom: 80,
   },
   orderCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,
@@ -398,7 +390,6 @@ const styles = StyleSheet.create({
   orderTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
     marginRight: 8,
   },
@@ -414,7 +405,6 @@ const styles = StyleSheet.create({
   },
   orderDesc: {
     fontSize: 13,
-    color: '#666',
     lineHeight: 19,
     marginBottom: 8,
   },
@@ -425,7 +415,6 @@ const styles = StyleSheet.create({
   },
   orderMetaText: {
     fontSize: 12,
-    color: '#999',
     marginRight: 4,
   },
   orderFooter: {
@@ -434,27 +423,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   orderFooterLeft: {},
   orderPerson: {
     fontSize: 12,
-    color: '#999',
     marginBottom: 2,
   },
   orderTime: {
     fontSize: 11,
-    color: '#bbb',
   },
   completeBtn: {
-    backgroundColor: '#e8f5e9',
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 6,
   },
   completeBtnText: {
     fontSize: 13,
-    color: '#2e7d32',
     fontWeight: '500',
   },
   loadingMore: {
@@ -462,7 +446,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     textAlign: 'center',
-    color: '#bbb',
     fontSize: 12,
     paddingVertical: 16,
   },
@@ -473,10 +456,9 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#1a73e8',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#1a73e8',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -484,7 +466,6 @@ const styles = StyleSheet.create({
   },
   fabText: {
     fontSize: 28,
-    color: '#fff',
     marginTop: -2,
   },
   modalOverlay: {
@@ -493,7 +474,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -502,25 +482,20 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 20,
   },
   modalLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     marginBottom: 8,
     marginTop: 12,
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#333',
-    backgroundColor: '#fafafa',
   },
   modalTextArea: {
     minHeight: 80,
@@ -536,20 +511,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
-  },
-  pickerItemActive: {
-    backgroundColor: '#e3f2fd',
-    borderColor: '#1a73e8',
   },
   pickerItemText: {
     fontSize: 13,
-    color: '#666',
-  },
-  pickerItemTextActive: {
-    color: '#1a73e8',
-    fontWeight: '600',
   },
   modalActions: {
     flexDirection: 'row',
@@ -561,19 +525,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
     alignItems: 'center',
   },
   modalCancelText: {
     fontSize: 15,
-    color: '#666',
     fontWeight: '500',
   },
   modalSubmitBtn: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: '#1a73e8',
     alignItems: 'center',
   },
   modalSubmitBtnDisabled: {
@@ -581,7 +542,6 @@ const styles = StyleSheet.create({
   },
   modalSubmitText: {
     fontSize: 15,
-    color: '#fff',
     fontWeight: '600',
   },
 });
