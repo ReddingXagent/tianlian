@@ -14,6 +14,7 @@ import { useKnowledge } from '../hooks/useKnowledge';
 import { KnowledgeArticle, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import { useTheme } from '../hooks/useTheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -27,6 +28,7 @@ const CATEGORIES: { key: string; label: string; icon: string }[] = [
 ];
 
 const KnowledgeScreen: React.FC = () => {
+  const { colors } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const {
     articles,
@@ -46,28 +48,28 @@ const KnowledgeScreen: React.FC = () => {
 
   const renderArticleItem = ({ item }: { item: KnowledgeArticle }) => (
     <TouchableOpacity
-      style={styles.articleCard}
+      style={[styles.articleCard, { backgroundColor: colors.cardBg }]}
       onPress={() => handleArticlePress(item)}
       activeOpacity={0.7}
      accessibilityRole="button">
       <View style={styles.articleHeader}>
-        <Text style={styles.articleTitle} numberOfLines={1}>
+        <Text style={[styles.articleTitle, { color: colors.textPrimary }]} numberOfLines={1}>
           {item.title}
         </Text>
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>
+        <View style={[styles.categoryBadge, { backgroundColor: colors.infoBg }]}>
+          <Text style={[styles.categoryText, { color: colors.info }]}>
             {CATEGORIES.find((c) => c.key === item.category)?.label || item.category}
           </Text>
         </View>
       </View>
-      <Text style={styles.articleSummary} numberOfLines={2}>
+      <Text style={[styles.articleSummary, { color: colors.textSecondary }]} numberOfLines={2}>
         {item.summary || '暂无摘要'}
       </Text>
-      <View style={styles.articleFooter}>
-        <Text style={styles.articleMeta}>
+      <View style={[styles.articleFooter, { borderTopColor: colors.divider }]}>
+        <Text style={[styles.articleMeta, { color: colors.textSecondary }]}>
           {item.authorName} · {item.viewCount}次浏览
         </Text>
-        <Text style={styles.articleDate}>
+        <Text style={[styles.articleDate, { color: colors.textMuted }]}>
           {new Date(item.createdAt).toLocaleDateString('zh-CN')}
         </Text>
       </View>
@@ -79,13 +81,13 @@ const KnowledgeScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.pageBg }]}>
       {/* 搜索栏 */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.pageBg, color: colors.textPrimary }]}
           placeholder="搜索知识库..."
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
           clearButtonMode="while-editing"
@@ -93,7 +95,7 @@ const KnowledgeScreen: React.FC = () => {
       </View>
 
       {/* 分类筛选 */}
-      <View style={styles.categoryContainer}>
+      <View style={[styles.categoryContainer, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
         {CATEGORIES.map((cat) => (
           <TouchableOpacity
             key={cat.key}
@@ -107,7 +109,8 @@ const KnowledgeScreen: React.FC = () => {
             <Text
               style={[
                 styles.categoryLabel,
-                activeCategory === cat.key && styles.categoryLabelActive,
+                { color: colors.textSecondary },
+                activeCategory === cat.key && { color: colors.primary, fontWeight: '600' },
               ]}
             >
               {cat.label}
@@ -134,8 +137,8 @@ const KnowledgeScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => fetchArticles(true)}
-              colors={['#1a73e8']}
-              tintColor="#1a73e8"
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
           ListEmptyComponent={
@@ -158,30 +161,23 @@ const KnowledgeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   searchInput: {
-    backgroundColor: '#f5f6fa',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 15,
-    color: '#333',
   },
   categoryContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   categoryBtn: {
     alignItems: 'center',
@@ -197,19 +193,13 @@ const styles = StyleSheet.create({
   },
   categoryLabel: {
     fontSize: 11,
-    color: '#999',
     fontWeight: '500',
-  },
-  categoryLabelActive: {
-    color: '#1a73e8',
-    fontWeight: '600',
   },
   listContent: {
     padding: 16,
     paddingBottom: 32,
   },
   articleCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 10,
@@ -228,24 +218,20 @@ const styles = StyleSheet.create({
   articleTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     flex: 1,
     marginRight: 8,
   },
   categoryBadge: {
-    backgroundColor: '#e3f2fd',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
   },
   categoryText: {
     fontSize: 11,
-    color: '#1565c0',
     fontWeight: '500',
   },
   articleSummary: {
     fontSize: 13,
-    color: '#666',
     lineHeight: 18,
     marginBottom: 10,
   },
@@ -255,15 +241,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   articleMeta: {
     fontSize: 12,
-    color: '#999',
   },
   articleDate: {
     fontSize: 12,
-    color: '#bbb',
   },
 });
 

@@ -10,8 +10,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useLogin } from '../hooks/useLogin';
+import { useTheme } from '../hooks/useTheme';
 
 const LoginScreen: React.FC = () => {
+  const { colors } = useTheme();
   const {
     username,
     setUsername,
@@ -24,28 +26,28 @@ const LoginScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.primary }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.appName}>天链运维</Text>
+          <Text style={[styles.appName, { color: colors.onPrimary }]}>天链运维</Text>
           <Text style={styles.subtitle}>运维管理平台</Text>
         </View>
 
-        <View style={styles.form}>
+        <View style={[styles.form, { backgroundColor: colors.cardBg }]}>
           {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
+            <View style={[styles.errorContainer, { backgroundColor: colors.errorBg }]}>
+              <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>
             </View>
           )}
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>用户名</Text>
+            <Text style={[styles.label, { color: colors.textPrimary }]}>用户名</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg }]}
               placeholder="请输入用户名"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
@@ -55,11 +57,11 @@ const LoginScreen: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>密码</Text>
+            <Text style={[styles.label, { color: colors.textPrimary }]}>密码</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg }]}
               placeholder="请输入密码"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -68,15 +70,15 @@ const LoginScreen: React.FC = () => {
           </View>
 
           <TouchableOpacity
-            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            style={[styles.loginButton, { backgroundColor: colors.primary }, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
             disabled={loading}
             activeOpacity={0.7}
            accessibilityRole="button">
             {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={colors.onPrimary} size="small" />
             ) : (
-              <Text style={styles.loginButtonText}>登 录</Text>
+              <Text style={[styles.loginButtonText, { color: colors.onPrimary }]}>登 录</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -88,7 +90,6 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a73e8',
   },
   content: {
     flex: 1,
@@ -102,7 +103,6 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
     marginBottom: 8,
   },
   subtitle: {
@@ -110,7 +110,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
   },
   form: {
-    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
     shadowColor: '#000',
@@ -120,13 +119,11 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   errorContainer: {
-    backgroundColor: '#fce4ec',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
   errorText: {
-    color: '#c62828',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -136,7 +133,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     marginBottom: 6,
   },
   input: {
@@ -146,11 +142,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#333',
-    backgroundColor: '#fafafa',
   },
   loginButton: {
-    backgroundColor: '#1a73e8',
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
@@ -160,7 +153,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   loginButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },

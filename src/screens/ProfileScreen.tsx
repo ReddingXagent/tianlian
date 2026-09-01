@@ -7,8 +7,10 @@ import {
   Alert,
 } from 'react-native';
 import { useAuthStore } from '../store/authStore';
+import { useTheme } from '../hooks/useTheme';
 
 const ProfileScreen: React.FC = () => {
+  const { colors } = useTheme();
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
@@ -39,85 +41,85 @@ const ProfileScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.pageBg }]} contentContainerStyle={styles.content}>
       {/* 用户信息卡片 */}
-      <View style={styles.profileCard}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>
+      <View style={[styles.profileCard, { backgroundColor: colors.cardBg }]}>
+        <View style={[styles.avatarContainer, { backgroundColor: colors.primary }]}>
+          <Text style={[styles.avatarText, { color: colors.onPrimary }]}>
             {user?.nickname?.charAt(0) || user?.username?.charAt(0) || '?'}
           </Text>
         </View>
-        <Text style={styles.nickname}>
+        <Text style={[styles.nickname, { color: colors.textPrimary }]}>
           {user?.nickname || user?.username || '未设置'}
         </Text>
-        <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>{roleLabel(user?.role)}</Text>
+        <View style={[styles.roleBadge, { backgroundColor: colors.infoBg }]}>
+          <Text style={[styles.roleText, { color: colors.primary }]}>{roleLabel(user?.role)}</Text>
         </View>
       </View>
 
       {/* 详细信息 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>账号信息</Text>
-        <View style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>用户名</Text>
-            <Text style={styles.infoValue}>{user?.username || '-'}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>账号信息</Text>
+        <View style={[styles.infoCard, { backgroundColor: colors.cardBg }]}>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>用户名</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{user?.username || '-'}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>昵称</Text>
-            <Text style={styles.infoValue}>{user?.nickname || '-'}</Text>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>昵称</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{user?.nickname || '-'}</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>邮箱</Text>
-            <Text style={styles.infoValue}>{user?.email || '-'}</Text>
+          <View style={[styles.infoRow, { borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>邮箱</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{user?.email || '-'}</Text>
           </View>
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.infoLabel}>手机号</Text>
-            <Text style={styles.infoValue}>{user?.phone || '-'}</Text>
+          <View style={[styles.infoRow, { borderBottomWidth: 0, borderBottomColor: colors.divider }]}>
+            <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>手机号</Text>
+            <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{user?.phone || '-'}</Text>
           </View>
         </View>
       </View>
 
       {/* 设置入口 */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>设置</Text>
-        <View style={styles.menuCard}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>设置</Text>
+        <View style={[styles.menuCard, { backgroundColor: colors.cardBg }]}>
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.6}>
             <Text style={styles.menuIcon}>🔔</Text>
-            <Text style={styles.menuLabel}>消息通知</Text>
-            <Text style={styles.menuArrow}>›</Text>
+            <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>消息通知</Text>
+            <Text style={[styles.menuArrow, { color: colors.textMuted }]}>›</Text>
           </TouchableOpacity>
-          <View style={styles.menuDivider} />
+          <View style={[styles.menuDivider, { backgroundColor: colors.divider }]} />
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.6}>
             <Text style={styles.menuIcon}>🔒</Text>
-            <Text style={styles.menuLabel}>修改密码</Text>
-            <Text style={styles.menuArrow}>›</Text>
+            <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>修改密码</Text>
+            <Text style={[styles.menuArrow, { color: colors.textMuted }]}>›</Text>
           </TouchableOpacity>
-          <View style={styles.menuDivider} />
+          <View style={[styles.menuDivider, { backgroundColor: colors.divider }]} />
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.6}>
             <Text style={styles.menuIcon}>📖</Text>
-            <Text style={styles.menuLabel}>操作手册</Text>
-            <Text style={styles.menuArrow}>›</Text>
+            <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>操作手册</Text>
+            <Text style={[styles.menuArrow, { color: colors.textMuted }]}>›</Text>
           </TouchableOpacity>
-          <View style={styles.menuDivider} />
+          <View style={[styles.menuDivider, { backgroundColor: colors.divider }]} />
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.6}>
             <Text style={styles.menuIcon}>ℹ️</Text>
-            <Text style={styles.menuLabel}>关于</Text>
-            <Text style={styles.menuArrow}>›</Text>
+            <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>关于</Text>
+            <Text style={[styles.menuArrow, { color: colors.textMuted }]}>›</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* 退出登录 */}
       <TouchableOpacity
-        style={styles.logoutButton}
+        style={[styles.logoutButton, { backgroundColor: colors.cardBg, borderColor: colors.errorBg }]}
         onPress={handleLogout}
         activeOpacity={0.7}
        accessibilityRole="button">
-        <Text style={styles.logoutText}>退出登录</Text>
+        <Text style={[styles.logoutText, { color: colors.error }]}>退出登录</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>天链运维 v1.0.0</Text>
+      <Text style={[styles.version, { color: colors.textMuted }]}>天链运维 v1.0.0</Text>
     </ScrollView>
   );
 };
@@ -125,14 +127,12 @@ const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
     paddingBottom: 40,
   },
   profileCard: {
-    backgroundColor: '#fff',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -147,7 +147,6 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#1a73e8',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -155,23 +154,19 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
   },
   nickname: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 6,
   },
   roleBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    backgroundColor: '#e3f2fd',
     borderRadius: 12,
   },
   roleText: {
     fontSize: 13,
-    color: '#1a73e8',
     fontWeight: '500',
   },
   section: {
@@ -180,11 +175,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 10,
   },
   infoCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 4,
     shadowColor: '#000',
@@ -200,19 +193,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   infoLabel: {
     fontSize: 14,
-    color: '#999',
   },
   infoValue: {
     fontSize: 14,
-    color: '#333',
     fontWeight: '500',
   },
   menuCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -233,35 +222,28 @@ const styles = StyleSheet.create({
   menuLabel: {
     flex: 1,
     fontSize: 15,
-    color: '#333',
   },
   menuArrow: {
     fontSize: 20,
-    color: '#ccc',
   },
   menuDivider: {
     height: 1,
-    backgroundColor: '#f0f0f0',
     marginLeft: 50,
   },
   logoutButton: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#fce4ec',
   },
   logoutText: {
     fontSize: 16,
-    color: '#c62828',
     fontWeight: '500',
   },
   version: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#ccc',
   },
 });
 

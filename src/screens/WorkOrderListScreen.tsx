@@ -13,6 +13,7 @@ import { WorkOrder, WorkOrderStatus, RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 import WorkOrderCard from '../components/WorkOrderCard';
+import { useTheme } from '../hooks/useTheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,6 +26,7 @@ const STATUS_FILTERS: { key: WorkOrderStatus | 'all'; label: string }[] = [
 ];
 
 const WorkOrderListScreen: React.FC = () => {
+  const { colors } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const { orders, loading, error, total, activeFilter, refreshing, setActiveFilter, loadData } =
     useWorkOrderList();
@@ -46,21 +48,21 @@ const WorkOrderListScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.pageBg }]}>
       {/* 顶部操作栏 */}
-      <View style={styles.headerBar}>
-        <Text style={styles.headerTitle}>
+      <View style={[styles.headerBar, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
           工单管理
           {total > 0 && (
-            <Text style={styles.headerCount}> ({total})</Text>
+            <Text style={[styles.headerCount, { color: colors.textSecondary }]}> ({total})</Text>
           )}
         </Text>
         <TouchableOpacity
-          style={styles.createBtn}
+          style={[styles.createBtn, { backgroundColor: colors.primary }]}
           onPress={handleCreateOrder}
           activeOpacity={0.7}
          accessibilityRole="button">
-          <Text style={styles.createBtnText}>+ 新建</Text>
+          <Text style={[styles.createBtnText, { color: colors.onPrimary }]}>+ 新建</Text>
         </TouchableOpacity>
       </View>
 
@@ -89,8 +91,8 @@ const WorkOrderListScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => loadData(true)}
-              colors={['#1a73e8']}
-              tintColor="#1a73e8"
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
           ListEmptyComponent={
@@ -106,7 +108,7 @@ const WorkOrderListScreen: React.FC = () => {
           }
           ListFooterComponent={
             orders.length > 0 ? (
-              <Text style={styles.totalText}>
+              <Text style={[styles.totalText, { color: colors.textSecondary }]}>
                 共 {total} 条工单
               </Text>
             ) : null
@@ -122,91 +124,79 @@ const ScrollableFilter: React.FC<{
   filters: { key: string; label: string }[];
   active: string;
   onSelect: (key: WorkOrderStatus | 'all') => void;
-}> = ({ filters, active, onSelect }) => (
-  <View style={styles.filterContainer}>
-    {filters.map((f) => (
-      <TouchableOpacity
-        key={f.key}
-        style={[
-          styles.filterBtn,
-          active === f.key && styles.filterBtnActive,
-        ]}
-        onPress={() => onSelect(f.key as WorkOrderStatus | 'all')}
-       accessibilityRole="button">
-        <Text
+}> = ({ filters, active, onSelect }) => {
+  const { colors } = useTheme();
+  return (
+    <View style={[styles.filterContainer, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
+      {filters.map((f) => (
+        <TouchableOpacity
+          key={f.key}
           style={[
-            styles.filterBtnText,
-            active === f.key && styles.filterBtnTextActive,
+            styles.filterBtn,
+            { backgroundColor: colors.divider },
+            active === f.key && { backgroundColor: colors.primary },
           ]}
-        >
-          {f.label}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-);
+          onPress={() => onSelect(f.key as WorkOrderStatus | 'all')}
+         accessibilityRole="button">
+          <Text
+            style={[
+              styles.filterBtnText,
+              { color: colors.textSecondary },
+              active === f.key && { color: colors.onPrimary },
+            ]}
+          >
+            {f.label}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   headerBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
   },
   headerCount: {
     fontSize: 14,
-    color: '#999',
     fontWeight: '400',
   },
   createBtn: {
-    backgroundColor: '#1a73e8',
     borderRadius: 6,
     paddingHorizontal: 14,
     paddingVertical: 6,
   },
   createBtnText: {
-    color: '#fff',
     fontSize: 13,
     fontWeight: '600',
   },
   filterContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   filterBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
     marginRight: 8,
-    backgroundColor: '#f0f0f0',
-  },
-  filterBtnActive: {
-    backgroundColor: '#1a73e8',
   },
   filterBtnText: {
     fontSize: 13,
-    color: '#666',
     fontWeight: '500',
-  },
-  filterBtnTextActive: {
-    color: '#fff',
   },
   listContent: {
     padding: 16,
@@ -215,7 +205,6 @@ const styles = StyleSheet.create({
   totalText: {
     textAlign: 'center',
     fontSize: 13,
-    color: '#999',
     paddingVertical: 12,
   },
 });

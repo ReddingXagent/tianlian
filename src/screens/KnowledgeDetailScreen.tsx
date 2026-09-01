@@ -9,10 +9,12 @@ import { useKnowledgeDetail } from '../hooks/useKnowledgeDetail';
 import { RootStackParamList } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
+import { useTheme } from '../hooks/useTheme';
 
 type DetailRouteProp = RouteProp<RootStackParamList, 'KnowledgeDetail'>;
 
 const KnowledgeDetailScreen: React.FC = () => {
+  const { colors } = useTheme();
   const route = useRoute<DetailRouteProp>();
   void route; // route consumed by hook
   const { article, loading, error, fetchDetail } = useKnowledgeDetail();
@@ -35,20 +37,20 @@ const KnowledgeDetailScreen: React.FC = () => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
     >
       {/* 文章头部 */}
-      <View style={styles.headerCard}>
-        <Text style={styles.title}>{article.title}</Text>
+      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{article.title}</Text>
         <View style={styles.meta}>
-          <Text style={styles.metaText}>{article.authorName}</Text>
-          <Text style={styles.metaDot}>·</Text>
-          <Text style={styles.metaText}>
+          <Text style={[styles.metaText, { color: colors.textSecondary }]}>{article.authorName}</Text>
+          <Text style={[styles.metaDot, { color: colors.textMuted }]}>·</Text>
+          <Text style={[styles.metaText, { color: colors.textSecondary }]}>
             {new Date(article.createdAt).toLocaleDateString('zh-CN')}
           </Text>
-          <Text style={styles.metaDot}>·</Text>
-          <Text style={styles.metaText}>{article.viewCount}次浏览</Text>
+          <Text style={[styles.metaDot, { color: colors.textMuted }]}>·</Text>
+          <Text style={[styles.metaText, { color: colors.textSecondary }]}>{article.viewCount}次浏览</Text>
         </View>
       </View>
 
@@ -56,8 +58,8 @@ const KnowledgeDetailScreen: React.FC = () => {
       {article.tags.length > 0 && (
         <View style={styles.tagRow}>
           {article.tags.map((tag, index) => (
-            <View key={index} style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
+            <View key={index} style={[styles.tag, { backgroundColor: colors.successBg }]}>
+              <Text style={[styles.tagText, { color: colors.success }]}>{tag}</Text>
             </View>
           ))}
         </View>
@@ -65,16 +67,16 @@ const KnowledgeDetailScreen: React.FC = () => {
 
       {/* 摘要 */}
       {article.summary ? (
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>📝 摘要</Text>
-          <Text style={styles.summaryText}>{article.summary}</Text>
+        <View style={[styles.summaryCard, { backgroundColor: colors.infoBg }]}>
+          <Text style={[styles.summaryLabel, { color: colors.info }]}>📝 摘要</Text>
+          <Text style={[styles.summaryText, { color: colors.textPrimary }]}>{article.summary}</Text>
         </View>
       ) : null}
 
       {/* 正文 */}
-      <View style={styles.contentCard}>
-        <Text style={styles.contentTitle}>📄 正文</Text>
-        <Text style={styles.contentText}>
+      <View style={[styles.contentCard, { backgroundColor: colors.cardBg }]}>
+        <Text style={[styles.contentTitle, { color: colors.textPrimary }]}>📄 正文</Text>
+        <Text style={[styles.contentText, { color: colors.textPrimary }]}>
           {article.content || '暂无详细内容'}
         </Text>
       </View>
@@ -85,14 +87,12 @@ const KnowledgeDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f6fa',
   },
   content: {
     padding: 16,
     paddingBottom: 40,
   },
   headerCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -105,7 +105,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
     marginBottom: 10,
     lineHeight: 28,
   },
@@ -115,11 +114,9 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 13,
-    color: '#666',
   },
   metaDot: {
     fontSize: 13,
-    color: '#ccc',
     marginHorizontal: 6,
   },
   tagRow: {
@@ -129,17 +126,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   tag: {
-    backgroundColor: '#e8f5e9',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 4,
   },
   tagText: {
     fontSize: 12,
-    color: '#2e7d32',
   },
   summaryCard: {
-    backgroundColor: '#e3f2fd',
     borderRadius: 10,
     padding: 14,
     marginBottom: 12,
@@ -147,16 +141,13 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1565c0',
     marginBottom: 6,
   },
   summaryText: {
     fontSize: 14,
-    color: '#333',
     lineHeight: 22,
   },
   contentCard: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -168,12 +159,10 @@ const styles = StyleSheet.create({
   contentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 12,
   },
   contentText: {
     fontSize: 15,
-    color: '#333',
     lineHeight: 26,
   },
 });
