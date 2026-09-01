@@ -7,18 +7,20 @@ import RevenueScreen from './RevenueScreen';
 // AI 助手 Tab: 云端 /ai/chat 端点已下线, 新 /chat 端点已适配(2026-08-20).
 // 当前AI降级模式(answer="对话服务暂时不可用"), 上线后即可正常使用.
 import ProfileScreen from './ProfileScreen';
+import { useTheme } from '../hooks/useTheme';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#1a1a2e' },
-        headerTintColor: '#fff',
-        tabBarActiveTintColor: '#4ECDC4',
-        tabBarInactiveTintColor: '#666',
-        tabBarStyle: { backgroundColor: '#1a1a2e', borderTopColor: '#333' },
+        headerStyle: { backgroundColor: colors.cardBg },
+        headerTintColor: colors.textPrimary,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: { backgroundColor: colors.cardBg, borderTopColor: colors.border },
       }}
     >
       <Tab.Screen

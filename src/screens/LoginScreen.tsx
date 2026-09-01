@@ -4,8 +4,10 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from 'react-native';
 import { useLogin } from '../hooks/useLogin';
+import { useTheme } from '../hooks/useTheme';
 
 export default function LoginScreen() {
+  const { colors } = useTheme();
   const { username, password, loading, error, setUsername, setPassword, login } = useLogin();
 
   const handleLogin = async () => {
@@ -17,28 +19,36 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.pageBg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>天链</Text>
-        <Text style={styles.subtitle}>站长管理平台</Text>
+        <Text style={[styles.logoText, { color: colors.primary }]}>天链</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>站长管理平台</Text>
       </View>
 
       <View style={styles.form}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, {
+            backgroundColor: colors.inputBg,
+            color: colors.textPrimary,
+            borderColor: colors.border,
+          }]}
           placeholder="用户名"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textMuted}
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
           autoCorrect={false}
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, {
+            backgroundColor: colors.inputBg,
+            color: colors.textPrimary,
+            borderColor: colors.border,
+          }]}
           placeholder="密码"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textMuted}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -46,14 +56,14 @@ export default function LoginScreen() {
         />
 
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+          style={[styles.button, loading && styles.buttonDisabled, { backgroundColor: colors.primary }]}
           onPress={handleLogin}
           disabled={loading}
          accessibilityRole="button">
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
-            <Text style={styles.buttonText}>登录</Text>
+            <Text style={[styles.buttonText, { color: colors.onPrimary }]}>登录</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -64,7 +74,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f23',
     justifyContent: 'center',
     paddingHorizontal: 32,
   },
@@ -75,28 +84,22 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#4ECDC4',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    color: '#888',
   },
   form: {
     gap: 16,
   },
   input: {
-    backgroundColor: '#1a1a2e',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
     fontSize: 16,
-    color: '#fff',
     borderWidth: 1,
-    borderColor: '#333',
   },
   button: {
-    backgroundColor: '#4ECDC4',
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -106,7 +109,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#0f0f23',
     fontSize: 18,
     fontWeight: 'bold',
   },

@@ -4,15 +4,21 @@ import {
 } from 'react-native';
 import { useAlarms } from '../hooks/useAlarms';
 import { Alarm, AlarmLevel, AlarmStatus } from '../types';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeColors } from '../theme/colors';
+
+// 告警级别 → 语义色键(深色模式: 值改语义键, 运行时经 colors[key] 解析随主题翻转)
+const LEVEL_COLOR_KEYS: Record<AlarmLevel, keyof ThemeColors> = {
+  critical: 'error',
+  warning: 'warning',
+  info: 'info',
+};
 
 export default function AlarmListScreen() {
+  const { colors } = useTheme();
   const { alarms, loading, refreshing, filter, setFilter, refresh } = useAlarms();
 
-  const levelColor = (level: AlarmLevel) => {
-    if (level === 'critical') return '#e74c3c';
-    if (level === 'warning') return '#f39c12';
-    return '#3498db';
-  };
+  const levelColor = (level: AlarmLevel) => colors[LEVEL_COLOR_KEYS[level]];
 
   const levelText = (level: AlarmLevel) => {
     if (level === 'critical') return '严重';
@@ -27,17 +33,17 @@ export default function AlarmListScreen() {
   };
 
   const renderItem = ({ item }: { item: Alarm }) => (
-    <View style={styles.card}>
+    <View style={[styles.card, { backgroundColor: colors.cardBg }]}>
       <View style={[styles.levelBar, { backgroundColor: levelColor(item.level) }]} />
       <View style={styles.cardBody}>
         <View style={styles.cardHeader}>
-          <Text style={styles.title}>{item.title}</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>{item.title}</Text>
           <Text style={[styles.levelTag, { color: levelColor(item.level) }]}>{levelText(item.level)}</Text>
         </View>
-        <Text style={styles.desc}>{item.description}</Text>
+        <Text style={[styles.desc, { color: colors.textSecondary }]}>{item.description}</Text>
         <View style={styles.cardFooter}>
-          <Text style={styles.statusText}>{statusText(item.status)}</Text>
-          <Text style={styles.time}>{new Date(item.createdAt).toLocaleString('zh-CN')}</Text>
+          <Text style={[styles.statusText, { color: colors.textMuted }]}>{statusText(item.status)}</Text>
+          <Text style={[styles.time, { color: colors.textSecondary }]}>{new Date(item.createdAt).toLocaleString('zh-CN')}</Text>
         </View>
       </View>
     </View>
@@ -51,15 +57,15 @@ export default function AlarmListScreen() {
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.pageBg }]}>
       <View style={styles.filterRow}>
         {filters.map((f) => (
           <React.Fragment key={f.key}>
             <View
-              style={[styles.filterChip, filter === f.key && styles.filterChipActive]}
+              style={[styles.filterChip, { backgroundColor: colors.cardBg }, filter === f.key && { backgroundColor: colors.primary }]}
             >
               <Text
-                style={[styles.filterText, filter === f.key && styles.filterTextActive]}
+                style={[styles.filterText, { color: colors.textSecondary }, filter === f.key && { color: colors.onPrimary, fontWeight: '600' as const }]}
                 onPress={() => setFilter(f.key)}
               >
                 {f.label}
@@ -70,15 +76,15 @@ export default function AlarmListScreen() {
       </View>
 
       {loading && !refreshing ? (
-        <View style={styles.center}><ActivityIndicator size="large" color="#4ECDC4" /></View>
+        <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : (
         <FlatList
           data={alarms}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#4ECDC4" />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
           contentContainerStyle={styles.list}
-          ListEmptyComponent={<View style={styles.center}><Text style={styles.emptyText}>暂无告警 🎉</Text></View>}
+          ListEmptyComponent={<View style={styles.center}><Text style={[styles.emptyText, { color: colors.textMuted }]}>暂无告警 🎉</Text></View>}
         />
       )}
     </View>
@@ -86,23 +92,21 @@ export default function AlarmListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f23' },
+  container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   filterRow: { flexDirection: 'row', padding: 12, gap: 8 },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: '#1a1a2e' },
-  filterChipActive: { backgroundColor: '#4ECDC4' },
-  filterText: { fontSize: 13, color: '#888' },
-  filterTextActive: { color: '#0f0f23', fontWeight: '600' },
+  filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+  filterText: { fontSize: 13 },
   list: { paddingHorizontal: 16, paddingBottom: 20 },
-  card: { flexDirection: 'row', backgroundColor: '#1a1a2e', borderRadius: 12, marginBottom: 10, overflow: 'hidden' },
+  card: { flexDirection: 'row', borderRadius: 12, marginBottom: 10, overflow: 'hidden' },
   levelBar: { width: 4 },
   cardBody: { flex: 1, padding: 14 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  title: { fontSize: 15, fontWeight: '600', color: '#fff', flex: 1 },
+  title: { fontSize: 15, fontWeight: '600', flex: 1 },
   levelTag: { fontSize: 12, fontWeight: '600', marginLeft: 8 },
-  desc: { fontSize: 13, color: '#999', marginBottom: 8 },
+  desc: { fontSize: 13, marginBottom: 8 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-  statusText: { fontSize: 12, color: '#666' },
-  time: { fontSize: 12, color: '#555' },
-  emptyText: { color: '#666', fontSize: 15 },
+  statusText: { fontSize: 12 },
+  time: { fontSize: 12 },
+  emptyText: { fontSize: 15 },
 });
