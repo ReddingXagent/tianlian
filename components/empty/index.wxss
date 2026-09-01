@@ -16,7 +16,7 @@
 
 .empty-text {
   font-size: 28rpx;
-  color: #999999;
+  color: var(--text-muted);
   margin-bottom: 32rpx;
 }
 

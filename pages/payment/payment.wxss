@@ -1,13 +1,13 @@
 /* pages/payment/payment.wxss */
 .container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
   padding-bottom: 40rpx;
 }
 
 /* 金额区域 */
 .amount-section {
-  background: #ffffff;
+  background: var(--bg-white);
   padding: 48rpx 32rpx;
   text-align: center;
   margin-bottom: 20rpx;
@@ -15,7 +15,7 @@
 
 .amount-label {
   font-size: 28rpx;
-  color: #999999;
+  color: var(--text-muted);
   display: block;
   margin-bottom: 16rpx;
 }
@@ -28,7 +28,7 @@
 
 .amount-symbol {
   font-size: 36rpx;
-  color: #333333;
+  color: var(--text-primary);
   font-weight: 600;
   margin-right: 4rpx;
 }
@@ -36,14 +36,14 @@
 .amount-number {
   font-size: 72rpx;
   font-weight: 700;
-  color: #333333;
+  color: var(--text-primary);
   line-height: 1;
 }
 
 /* 订单摘要 */
 .order-summary {
   margin: 0 24rpx 20rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
 }
@@ -56,23 +56,23 @@
 }
 
 .summary-item:not(:last-child) {
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1rpx solid var(--bg-color);
 }
 
 .summary-label {
   font-size: 26rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 .summary-value {
   font-size: 26rpx;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 /* 支付方式 */
 .pay-methods {
   margin: 0 24rpx 20rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
 }
@@ -80,7 +80,7 @@
 .section-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
   margin-bottom: 20rpx;
 }
 
@@ -89,7 +89,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 24rpx 16rpx;
-  border: 2rpx solid #f0f0f0;
+  border: 2rpx solid var(--divider);
   border-radius: 12rpx;
   margin-bottom: 16rpx;
 }
@@ -99,8 +99,8 @@
 }
 
 .pay-method.active {
-  border-color: #07C160;
-  background: #E8F8EF;
+  border-color: var(--primary);
+  background: var(--success-bg);
 }
 
 .method-left {
@@ -115,12 +115,12 @@
 
 .method-name {
   font-size: 28rpx;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .method-balance {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 .method-right {
@@ -129,7 +129,7 @@
 
 .method-check {
   font-size: 28rpx;
-  color: #07C160;
+  color: var(--primary);
   font-weight: 600;
 }
 

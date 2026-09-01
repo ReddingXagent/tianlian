@@ -1,13 +1,13 @@
 /* pages/charging/charging.wxss */
 .container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--bg-color);
   padding-bottom: 40rpx;
 }
 
 /* 状态头部 */
 .charging-header {
-  background: linear-gradient(135deg, #07C160, #06AD56);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   padding: 40rpx 32rpx;
   display: flex;
   align-items: center;
@@ -24,7 +24,7 @@
   width: 16rpx;
   height: 16rpx;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--on-primary);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -35,7 +35,7 @@
 
 .status-text {
   font-size: 32rpx;
-  color: #ffffff;
+  color: var(--on-primary);
   font-weight: 500;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .data-card {
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 28rpx 24rpx;
   text-align: center;
@@ -57,7 +57,7 @@
 
 .data-label {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
   margin-bottom: 12rpx;
   display: block;
 }
@@ -72,24 +72,24 @@
 .data-number {
   font-size: 48rpx;
   font-weight: 700;
-  color: #333333;
+  color: var(--text-primary);
   line-height: 1;
 }
 
 .data-unit {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
-.power-card .data-number { color: #07C160; }
-.energy-card .data-number { color: #1890FF; }
-.cost-card .data-number { color: #FA5151; }
-.time-card .data-number { color: #FF8C00; }
+.power-card .data-number { color: var(--primary); }
+.energy-card .data-number { color: var(--info); }
+.cost-card .data-number { color: var(--danger); }
+.time-card .data-number { color: var(--warning); }
 
 /* 充电进度 */
 .progress-section {
   margin: 0 24rpx 24rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
 }
@@ -103,19 +103,19 @@
 
 .progress-label {
   font-size: 28rpx;
-  color: #333333;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .progress-percent {
   font-size: 36rpx;
   font-weight: 700;
-  color: #07C160;
+  color: var(--primary);
 }
 
 .progress-bar {
   height: 12rpx;
-  background: #f0f0f0;
+  background: var(--divider);
   border-radius: 6rpx;
   overflow: hidden;
   margin-bottom: 16rpx;
@@ -123,7 +123,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #07C160, #06AD56);
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
   border-radius: 6rpx;
   transition: width 0.5s ease;
 }
@@ -132,13 +132,13 @@
   display: flex;
   justify-content: space-between;
   font-size: 22rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 /* 详情 */
 .detail-section {
   margin: 0 24rpx 24rpx;
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
 }
@@ -148,7 +148,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16rpx 0;
-  border-bottom: 1rpx solid #f5f5f5;
+  border-bottom: 1rpx solid var(--bg-color);
 }
 
 .detail-item:last-child {
@@ -157,12 +157,12 @@
 
 .detail-label {
   font-size: 26rpx;
-  color: #999999;
+  color: var(--text-muted);
 }
 
 .detail-value {
   font-size: 26rpx;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 /* 操作区 */

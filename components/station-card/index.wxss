@@ -1,6 +1,6 @@
 /* components/station-card/index.wxss */
 .station-card {
-  background: #ffffff;
+  background: var(--bg-white);
   border-radius: 16rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
@@ -17,7 +17,7 @@
 .station-name {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -26,8 +26,8 @@
 
 .station-distance {
   font-size: 24rpx;
-  color: #07C160;
-  background: #E8F8EF;
+  color: var(--primary);
+  background: var(--success-bg);
   padding: 4rpx 16rpx;
   border-radius: 20rpx;
   margin-left: 16rpx;
@@ -36,7 +36,7 @@
 
 .station-address {
   font-size: 24rpx;
-  color: #999999;
+  color: var(--text-muted);
   margin-bottom: 16rpx;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -47,8 +47,8 @@
   display: flex;
   justify-content: space-between;
   padding: 16rpx 0;
-  border-top: 1rpx solid #f0f0f0;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid var(--divider);
+  border-bottom: 1rpx solid var(--divider);
 }
 
 .info-item {
@@ -60,13 +60,13 @@
 
 .info-label {
   font-size: 22rpx;
-  color: #999999;
+  color: var(--text-muted);
   margin-bottom: 6rpx;
 }
 
 .info-value {
   font-size: 26rpx;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .station-tags {
@@ -81,7 +81,7 @@
   justify-content: flex-end;
   margin-top: 16rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid var(--divider);
 }
 
 .action-btn {
@@ -91,13 +91,13 @@
 }
 
 .fav-btn {
-  color: #FA5151;
+  color: var(--danger);
   background: rgba(250, 81, 81, 0.1);
 }
 
 .fav-btn.outline {
-  color: #999;
-  background: #f5f5f5;
+  color: var(--text-muted);
+  background: var(--bg-input);
 }
 
 /* 品牌标识 */
