@@ -45,7 +45,7 @@ const LoginScreen: React.FC = () => {
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: colors.textPrimary }]}>用户名</Text>
             <TextInput
-              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg }]}
+              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg, borderColor: colors.border }]}
               placeholder="请输入用户名"
               placeholderTextColor={colors.textSecondary}
               value={username}
@@ -59,7 +59,7 @@ const LoginScreen: React.FC = () => {
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: colors.textPrimary }]}>密码</Text>
             <TextInput
-              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg }]}
+              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg, borderColor: colors.border }]}
               placeholder="请输入密码"
               placeholderTextColor={colors.textSecondary}
               value={password}
@@ -137,7 +137,6 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,

@@ -3,10 +3,13 @@
     "name": "天链运维",
     "slug": "tianlian-ops",
     "version": "1.0.0",
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "scheme": "tianlian-ops",
     "splash": {
       "image": "./assets/splash.png",
