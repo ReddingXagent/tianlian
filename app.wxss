@@ -33,6 +33,33 @@ page {
   box-sizing: border-box;
 }
 
+/* F3602 深色模式 — 跟随系统切变量值(页面级已全部 var() 归一, 此处唯一切换点) */
+@media (prefers-color-scheme: dark) {
+  page {
+    --primary: #07C160;          /* 品牌绿不翻转 */
+    --primary-dark: #06AD56;
+    --primary-light: #123527;
+    --danger: #FF7875;
+    --text-primary: #e0e0e0;
+    --text-secondary: #9e9e9e;
+    --text-muted: #666666;
+    --bg-color: #111111;
+    --bg-white: #1e1e1e;
+    --border-color: #333333;
+    --divider: #2a2a2a;
+    --text-faint: #555555;
+    --bg-input: #2a2a2a;
+    --bg-hover: #333333;
+    --info: #40A9FF;
+    --warning: #FFA940;
+    --warning-bg: #33291c;
+    --success-bg: #1c2b1c;
+    --orange: #FF8534;
+    --on-primary: #ffffff;
+    --danger-bg: #3a1a24;
+    --shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.4);
+  }
+
 /* === 通用容器 === */
 .container {
   min-height: 100vh;

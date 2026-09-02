@@ -13,17 +13,17 @@
     "pages/notifications/notifications"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#07C160",
+    "navigationBarBackgroundColor": "@navBgColor",
     "navigationBarTitleText": "天链充电",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#f5f5f5",
-    "backgroundTextStyle": "dark"
+    "navigationBarTextStyle": "@navTxtStyle",
+    "backgroundColor": "@bgColor",
+    "backgroundTextStyle": "@bgTxtStyle"
   },
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#07C160",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "black",
+    "color": "@tabFontColor",
+    "selectedColor": "@tabSelectedColor",
+    "backgroundColor": "@tabBgColor",
+    "borderStyle": "@tabBorderStyle",
     "list": [
       {
         "pagePath": "pages/index/index",
@@ -71,11 +71,17 @@
   "preloadRule": {
     "pages/index/index": {
       "network": "all",
-      "packages": ["__APP__"]
+      "packages": [
+        "__APP__"
+      ]
     },
     "pages/scan/scan": {
       "network": "wifi",
-      "packages": ["__APP__"]
+      "packages": [
+        "__APP__"
+      ]
     }
-  }
+  },
+  "darkmode": true,
+  "themeLocation": "theme.json"
 }
