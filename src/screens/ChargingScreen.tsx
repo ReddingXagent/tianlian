@@ -71,7 +71,7 @@ const ChargingScreen: React.FC = () => {
       return (
         <View style={styles.centerContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity accessibilityRole="button" style={styles.retryBtn} onPress={() => refresh()}>
+          <TouchableOpacity accessibilityRole="button" testID="charging-retry-btn" style={styles.retryBtn} onPress={() => refresh()}>
             <Text style={styles.retryBtnText}>重试</Text>
           </TouchableOpacity>
         </View>
@@ -152,6 +152,7 @@ const ChargingScreen: React.FC = () => {
 
       {/* 停止按钮 */}
       <TouchableOpacity accessibilityRole="button"
+        testID="stop-charging-btn"
         style={[styles.stopBtn, stopping && styles.stopBtnDisabled]}
         onPress={handleStop}
         disabled={stopping}

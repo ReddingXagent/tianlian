@@ -76,6 +76,7 @@ const CouponScreen: React.FC = () => {
       ) : (
         <FlatList
           data={coupons}
+          testID="coupon-list"
           keyExtractor={(item) => String(item.id)}
           renderItem={renderCouponItem}
           contentContainerStyle={styles.listContent}
