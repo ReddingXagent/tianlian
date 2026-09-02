@@ -83,7 +83,7 @@ const InspectionDetailScreen: React.FC = () => {
       }
     >
       {/* Header */}
-      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]}>
+      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]} testID="inspection-detail-card">
         <View style={styles.headerRow}>
           <Text style={[styles.taskTitle, { color: colors.textPrimary }]} numberOfLines={2}>{task?.description}</Text>
           <StatusBadge status={task?.status ?? 'pending'} />
@@ -123,7 +123,7 @@ const InspectionDetailScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>检查项目 ({task?.items?.length || 0})</Text>
         {task?.items?.map((item: InspectionItem) => (
-          <View key={item.id} style={[styles.itemCard, { backgroundColor: colors.cardBg }]}>
+          <View key={item.id} style={[styles.itemCard, { backgroundColor: colors.cardBg }]} testID={`inspection-item-${item.id}`}>
             <View style={styles.itemHeader}>
               <Text style={[styles.itemName, { color: colors.textPrimary }]} numberOfLines={2}>{item.name}</Text>
               <Text style={styles.itemResultIcon}>{getResultIcon(item.result)}</Text>
@@ -133,13 +133,13 @@ const InspectionDetailScreen: React.FC = () => {
 
             {task.status === 'in_progress' && !item.result && (
               <View style={styles.itemActions}>
-                <TouchableOpacity style={[styles.passBtn, { backgroundColor: colors.successBg }]} onPress={() => handleItemResult(item, 'pass')} disabled={submitting} accessibilityRole="button">
+                <TouchableOpacity style={[styles.passBtn, { backgroundColor: colors.successBg }]} onPress={() => handleItemResult(item, 'pass')} disabled={submitting} accessibilityRole="button" testID={`inspection-item-${item.id}-pass-btn`}>
                   <Text style={[styles.actionBtnText, { color: colors.textPrimary }]}>✅ 通过</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.failBtn, { backgroundColor: colors.errorBg }]} onPress={() => handleItemResult(item, 'fail')} disabled={submitting} accessibilityRole="button">
+                <TouchableOpacity style={[styles.failBtn, { backgroundColor: colors.errorBg }]} onPress={() => handleItemResult(item, 'fail')} disabled={submitting} accessibilityRole="button" testID={`inspection-item-${item.id}-fail-btn`}>
                   <Text style={[styles.actionBtnText, { color: colors.textPrimary }]}>❌ 不通过</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.naBtn, { backgroundColor: colors.neutralBg }]} onPress={() => handleItemResult(item, 'na')} disabled={submitting} accessibilityRole="button">
+                <TouchableOpacity style={[styles.naBtn, { backgroundColor: colors.neutralBg }]} onPress={() => handleItemResult(item, 'na')} disabled={submitting} accessibilityRole="button" testID={`inspection-item-${item.id}-na-btn`}>
                   <Text style={[styles.actionBtnText, { color: colors.textPrimary }]}>N/A</Text>
                 </TouchableOpacity>
               </View>
@@ -172,7 +172,7 @@ const InspectionDetailScreen: React.FC = () => {
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>操作</Text>
         <View style={[styles.actionCard, { backgroundColor: colors.cardBg }]}>
           {task?.status === 'pending' && (
-            <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary, { backgroundColor: colors.primary }]} onPress={onStart} disabled={submitting} activeOpacity={0.7} accessibilityRole="button">
+            <TouchableOpacity style={[styles.actionBtn, styles.actionPrimary, { backgroundColor: colors.primary }]} onPress={onStart} disabled={submitting} activeOpacity={0.7} accessibilityRole="button" testID="inspection-start-btn">
               {submitting ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={[styles.actionBtnText, { color: colors.onPrimary }]}>开始巡检</Text>}
             </TouchableOpacity>
           )}
@@ -180,7 +180,7 @@ const InspectionDetailScreen: React.FC = () => {
           {task?.status === 'in_progress' && (
             <>
               {!showCompleteForm ? (
-                <TouchableOpacity style={[styles.actionBtn, styles.actionSuccess, { backgroundColor: colors.success }]} onPress={() => setShowCompleteForm(true)} activeOpacity={0.7} accessibilityRole="button">
+                <TouchableOpacity style={[styles.actionBtn, styles.actionSuccess, { backgroundColor: colors.success }]} onPress={() => setShowCompleteForm(true)} activeOpacity={0.7} accessibilityRole="button" testID="inspection-complete-btn">
                   <Text style={[styles.actionBtnText, { color: colors.onPrimary }]}>完成巡检</Text>
                 </TouchableOpacity>
               ) : (
@@ -195,12 +195,13 @@ const InspectionDetailScreen: React.FC = () => {
                     multiline
                     numberOfLines={3}
                     textAlignVertical="top"
+                    testID="inspection-complete-note-input"
                   />
                   <View style={styles.completeFormActions}>
-                    <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.neutralBg }]} onPress={() => { setShowCompleteForm(false); setCompletionNote(''); }} accessibilityRole="button">
+                    <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: colors.neutralBg }]} onPress={() => { setShowCompleteForm(false); setCompletionNote(''); }} accessibilityRole="button" testID="inspection-complete-cancel-btn">
                       <Text style={[styles.cancelBtnText, { color: colors.textSecondary }]}>取消</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.submitCompleteBtn, submitting && { opacity: 0.6 }, { backgroundColor: colors.success }]} onPress={onComplete} disabled={submitting} accessibilityRole="button">
+                    <TouchableOpacity style={[styles.submitCompleteBtn, submitting && { opacity: 0.6 }, { backgroundColor: colors.success }]} onPress={onComplete} disabled={submitting} accessibilityRole="button" testID="inspection-complete-submit-btn">
                       {submitting ? <ActivityIndicator color={colors.onPrimary} size="small" /> : <Text style={[styles.submitCompleteBtnText, { color: colors.onPrimary }]}>提交结果</Text>}
                     </TouchableOpacity>
                   </View>

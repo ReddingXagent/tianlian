@@ -39,9 +39,10 @@ const KnowledgeDetailScreen: React.FC = () => {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.pageBg }]}
       contentContainerStyle={styles.content}
+      testID="knowledge-detail-scroll"
     >
       {/* 文章头部 */}
-      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]}>
+      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]} testID="knowledge-detail-card">
         <Text style={[styles.title, { color: colors.textPrimary }]}>{article.title}</Text>
         <View style={styles.meta}>
           <Text style={[styles.metaText, { color: colors.textSecondary }]}>{article.authorName}</Text>

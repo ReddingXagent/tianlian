@@ -105,7 +105,7 @@ const WorkOrderDetailScreen: React.FC = () => {
       }
     >
       {/* 工单头部 */}
-      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]}>
+      <View style={[styles.headerCard, { backgroundColor: colors.cardBg }]} testID="workorder-detail-card">
         <View style={styles.headerRow}>
           <Text style={[styles.orderTitle, { color: colors.textPrimary }]}>{order?.title}</Text>
           <StatusBadge status={order?.priority ?? 'normal'} />
@@ -190,7 +190,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 onPress={() => handleAction('accept')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
-               accessibilityRole="button">
+               accessibilityRole="button" testID="workorder-detail-accept-btn">
                 {statusUpdating ? (
                   <ActivityIndicator color={colors.onPrimary} size="small" />
                 ) : (
@@ -206,7 +206,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 onPress={() => handleAction('execute')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
-               accessibilityRole="button">
+               accessibilityRole="button" testID="workorder-detail-execute-btn">
                 {statusUpdating ? (
                   <ActivityIndicator color={colors.onPrimary} size="small" />
                 ) : (
@@ -218,7 +218,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 onPress={() => handleAction('complete')}
                 disabled={statusUpdating}
                 activeOpacity={0.7}
-               accessibilityRole="button">
+               accessibilityRole="button" testID="workorder-detail-complete-btn">
                 {statusUpdating ? (
                   <ActivityIndicator color={colors.onPrimary} size="small" />
                 ) : (
@@ -259,7 +259,7 @@ const WorkOrderDetailScreen: React.FC = () => {
                 color: 'neutralText' as const,
               };
               return (
-                <View key={record.id} style={styles.recordItem}>
+                <View key={record.id} style={styles.recordItem} testID={`workorder-record-${record.id}`}>
                   <View style={styles.recordTimeline}>
                     <View
                       style={[
