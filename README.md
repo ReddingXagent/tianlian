@@ -16,7 +16,7 @@
 | 命令 | 作用 |
 |------|------|
 | `npm run check` | 小程序结构门控（JSON 合法性 / 页面四件套 / tabBar 图标 / 组件引用解析），错误退 1 |
-| `npm test` | Jest 单测（9 套件 / 230 用例，覆盖率 98.07%） |
+| `npm test` | Jest 单测（36 套件 / 493 用例(F3602深色模式后基线)） |
 | `npm run lint` | ESLint flat config 门控（0 错 0 警） |
 | `npm run deploy:check` | 部署管线就绪验证（门控→appid→密钥，不上传） |
 | `npm run deploy` | miniprogram-ci 上传体验版（需真 appid + 密钥） |
