@@ -45,6 +45,7 @@ const LoginScreen: React.FC = () => {
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: colors.textPrimary }]}>用户名</Text>
             <TextInput
+              testID="login-username-input"
               style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg, borderColor: colors.border }]}
               placeholder="请输入用户名"
               placeholderTextColor={colors.textSecondary}
@@ -59,6 +60,7 @@ const LoginScreen: React.FC = () => {
           <View style={styles.inputGroup}>
             <Text style={[styles.label, { color: colors.textPrimary }]}>密码</Text>
             <TextInput
+              testID="login-password-input"
               style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.inputBg, borderColor: colors.border }]}
               placeholder="请输入密码"
               placeholderTextColor={colors.textSecondary}
@@ -70,6 +72,7 @@ const LoginScreen: React.FC = () => {
           </View>
 
           <TouchableOpacity
+            testID="login-submit-btn"
             style={[styles.loginButton, { backgroundColor: colors.primary }, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
             disabled={loading}

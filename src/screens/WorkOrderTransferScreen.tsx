@@ -75,6 +75,7 @@ const WorkOrderTransferScreen: React.FC = () => {
         <View style={[styles.card, { backgroundColor: colors.cardBg }]}>
           <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>目标运维人员ID</Text>
           <TextInput
+            testID="workorder-transfer-assignee-input"
             style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入运维人员ID"
             placeholderTextColor={colors.textSecondary}
@@ -86,6 +87,7 @@ const WorkOrderTransferScreen: React.FC = () => {
 
           <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>转派原因</Text>
           <TextInput
+            testID="workorder-transfer-reason-input"
             style={[styles.input, styles.textArea, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入转派原因"
             placeholderTextColor={colors.textSecondary}
@@ -99,6 +101,7 @@ const WorkOrderTransferScreen: React.FC = () => {
           />
 
           <TouchableOpacity
+            testID="workorder-transfer-submit-btn"
             style={[styles.transferBtn, transferring && styles.btnDisabled, { backgroundColor: colors.primary }]}
             onPress={onTransfer}
             disabled={transferring}
@@ -121,6 +124,7 @@ const WorkOrderTransferScreen: React.FC = () => {
             催单后将通知工程师尽快处理，适用于工单长时间未接单或未完成的场景。
           </Text>
           <TouchableOpacity
+            testID="workorder-transfer-urge-btn"
             style={[styles.escalateBtn, transferring && styles.btnDisabled, { backgroundColor: colors.warning }]}
             onPress={onUrge}
             disabled={transferring}

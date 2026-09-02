@@ -58,6 +58,7 @@ const WorkOrderListScreen: React.FC = () => {
           )}
         </Text>
         <TouchableOpacity
+          testID="workorder-create-btn"
           style={[styles.createBtn, { backgroundColor: colors.primary }]}
           onPress={handleCreateOrder}
           activeOpacity={0.7}
@@ -83,6 +84,7 @@ const WorkOrderListScreen: React.FC = () => {
         />
       ) : (
         <FlatList
+          testID="workorder-list"
           data={orders}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderOrderItem}

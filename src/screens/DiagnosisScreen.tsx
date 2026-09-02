@@ -49,6 +49,7 @@ const DiagnosisScreen: React.FC = () => {
         </Text>
         <View style={styles.inputRow}>
           <TextInput
+            testID="diagnosis-code-input"
             style={[styles.input, { backgroundColor: colors.pageBg, color: colors.textPrimary, borderColor: colors.border }]}
             placeholder="输入故障码（如 E001）"
             placeholderTextColor={colors.textSecondary}
@@ -64,6 +65,7 @@ const DiagnosisScreen: React.FC = () => {
             onSubmitEditing={handleSearch}
           />
           <TouchableOpacity
+            testID="diagnosis-search-btn"
             style={[styles.searchBtn, { backgroundColor: colors.primary }, loading && styles.searchBtnDisabled]}
             onPress={handleSearch}
             disabled={loading}

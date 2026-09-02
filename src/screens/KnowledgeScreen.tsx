@@ -48,6 +48,7 @@ const KnowledgeScreen: React.FC = () => {
 
   const renderArticleItem = ({ item }: { item: KnowledgeArticle }) => (
     <TouchableOpacity
+      testID={`knowledge-card-${item.id}`}
       style={[styles.articleCard, { backgroundColor: colors.cardBg }]}
       onPress={() => handleArticlePress(item)}
       activeOpacity={0.7}
@@ -85,6 +86,7 @@ const KnowledgeScreen: React.FC = () => {
       {/* 搜索栏 */}
       <View style={[styles.searchContainer, { backgroundColor: colors.cardBg, borderBottomColor: colors.border }]}>
         <TextInput
+          testID="knowledge-search-input"
           style={[styles.searchInput, { backgroundColor: colors.pageBg, color: colors.textPrimary }]}
           placeholder="搜索知识库..."
           placeholderTextColor={colors.textSecondary}
@@ -129,6 +131,7 @@ const KnowledgeScreen: React.FC = () => {
         />
       ) : (
         <FlatList
+          testID="knowledge-list"
           data={articles}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderArticleItem}

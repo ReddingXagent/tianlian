@@ -78,6 +78,7 @@ const DashboardScreen: React.FC = () => {
       <View style={[styles.periodContainer, { backgroundColor: colors.cardBg }]}>
         {PERIODS.map((p) => (
           <TouchableOpacity
+            testID={`dashboard-period-${p.key}`}
             key={p.key}
             style={[styles.periodBtn, { backgroundColor: selectedPeriod === p.key ? colors.primary : 'transparent' }]}
             onPress={() => setPeriod(p.key)}

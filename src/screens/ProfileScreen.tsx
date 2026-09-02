@@ -112,6 +112,7 @@ const ProfileScreen: React.FC = () => {
 
       {/* 退出登录 */}
       <TouchableOpacity
+        testID="profile-logout-btn"
         style={[styles.logoutButton, { backgroundColor: colors.cardBg, borderColor: colors.errorBg }]}
         onPress={handleLogout}
         activeOpacity={0.7}

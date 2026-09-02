@@ -109,6 +109,7 @@ const ScanScreen: React.FC = () => {
       {/* 输入区域 */}
       <View style={styles.inputContainer}>
         <TextInput
+          testID="scan-code-input"
           ref={inputRef}
           style={[styles.input, { backgroundColor: colors.cardBg, color: colors.textPrimary, borderColor: colors.border }]}
           placeholder="输入设备/站点编码"
@@ -125,6 +126,7 @@ const ScanScreen: React.FC = () => {
           onSubmitEditing={handleScan}
         />
         <TouchableOpacity
+          testID="scan-submit-btn"
           style={[styles.scanBtn, { backgroundColor: colors.primary }, loading && styles.scanBtnDisabled]}
           onPress={handleScan}
           disabled={loading}

@@ -46,6 +46,7 @@ const InspectionListScreen: React.FC = () => {
 
   const renderItem = ({ item }: { item: InspectionTask }) => (
     <TouchableOpacity
+      testID={`inspection-card-${item.id}`}
       style={[styles.card, { backgroundColor: colors.cardBg }]}
       onPress={() => handleTaskPress(item)}
       activeOpacity={0.7}
@@ -107,6 +108,7 @@ const InspectionListScreen: React.FC = () => {
         />
       ) : (
         <FlatList
+          testID="inspection-list"
           data={tasks}
           keyExtractor={(item) => String(item.id)}
           renderItem={renderItem}

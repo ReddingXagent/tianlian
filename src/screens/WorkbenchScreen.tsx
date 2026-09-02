@@ -120,6 +120,7 @@ const WorkbenchScreen: React.FC = () => {
       <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>今日概览</Text>
       <View style={styles.statsGrid}>
         <TouchableOpacity
+          testID={`workbench-pending-orders-card`}
           style={[styles.statCard, { backgroundColor: colors.warningAmberBg }]}
           activeOpacity={0.7}
           onPress={() => handleNavigateTab('WorkOrders')}
@@ -172,6 +173,7 @@ const WorkbenchScreen: React.FC = () => {
       <View style={styles.quickActions}>
         {QUICK_ACTIONS.map((action) => (
           <TouchableOpacity
+            testID={`workbench-action-${action.key}`}
             key={action.key}
             style={[styles.quickActionBtn, { backgroundColor: colors.cardBg }]}
             onPress={() => {

@@ -84,6 +84,7 @@ const WorkOrderCreateScreen: React.FC = () => {
         <View style={styles.fieldGroup}>
           <Text style={[styles.label, { color: colors.textPrimary }]}>工单标题 *</Text>
           <TextInput
+            testID="workorder-create-title-input"
             style={[styles.input, { backgroundColor: colors.cardBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入工单标题"
             placeholderTextColor={colors.textSecondary}
@@ -98,6 +99,7 @@ const WorkOrderCreateScreen: React.FC = () => {
         <View style={styles.fieldGroup}>
           <Text style={[styles.label, { color: colors.textPrimary }]}>工单描述 *</Text>
           <TextInput
+            testID="workorder-create-desc-input"
             style={[styles.input, styles.textArea, { backgroundColor: colors.cardBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请详细描述工单内容"
             placeholderTextColor={colors.textSecondary}
@@ -115,6 +117,7 @@ const WorkOrderCreateScreen: React.FC = () => {
         <View style={styles.fieldGroup}>
           <Text style={[styles.label, { color: colors.textPrimary }]}>关联站点ID *</Text>
           <TextInput
+            testID="workorder-create-station-input"
             style={[styles.input, { backgroundColor: colors.cardBg, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="请输入站点ID"
             placeholderTextColor={colors.textSecondary}
@@ -175,6 +178,7 @@ const WorkOrderCreateScreen: React.FC = () => {
 
         {/* 提交按钮 */}
         <TouchableOpacity
+          testID="workorder-create-submit-btn"
           style={[styles.submitBtn, creating && styles.submitBtnDisabled, { backgroundColor: colors.primary }]}
           onPress={onSubmit}
           disabled={creating}

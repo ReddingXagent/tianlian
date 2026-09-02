@@ -132,6 +132,7 @@ const MonitorScreen: React.FC = () => {
         <View style={[styles.tabContainer, { backgroundColor: colors.cardBg }]}>
           {TABS.map((tab) => (
             <TouchableOpacity
+              testID={`monitor-tab-${tab.key}`}
               key={tab.key}
               style={[
                 styles.tab,
