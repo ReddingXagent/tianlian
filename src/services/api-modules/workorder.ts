@@ -185,7 +185,8 @@ export const alarmApi = {
     return api.get(`/alarms/${id}`).then((res) => res.data);
   },
   handleAlarm(id: number): Promise<ApiResponse<Alarm>> {
-    return api.post(`/alarms/${id}/ack`).then((res) => res.data);
+    /** 真云 OPTIONS 实测 allow=PUT (F3680 发现, 2026-09-03 复核) */
+    return api.put(`/alarms/${id}/ack`).then((res) => res.data);
   },
   /** PUT /alarms/{id}/resolve — 解决告警 */
   resolve(id: number): Promise<ApiResponse<Alarm>> {
