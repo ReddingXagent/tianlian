@@ -58,7 +58,7 @@ const ProfileScreen: React.FC = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* 用户信息卡片 */}
       <View style={styles.profileCard}>
-        <View style={styles.avatarContainer}>
+        <View style={styles.avatarContainer} testID="profile-avatar">
           <Text style={styles.avatarText}>
             {user?.nickname?.charAt(0) || user?.phone?.charAt(0) || '?'}
           </Text>
@@ -121,7 +121,7 @@ const ProfileScreen: React.FC = () => {
       </View>
 
       {/* 退出登录 */}
-      <TouchableOpacity accessibilityRole="button" style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+      <TouchableOpacity accessibilityRole="button" testID="logout-btn" style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
         <Text style={styles.logoutText}>退出登录</Text>
       </TouchableOpacity>
 

@@ -53,7 +53,7 @@ const LoginScreen: React.FC = () => {
 
           <View style={styles.form}>
             {error && (
-              <View style={styles.errorContainer}>
+              <View style={styles.errorContainer} testID="error-banner">
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
@@ -62,6 +62,7 @@ const LoginScreen: React.FC = () => {
               <Text style={styles.label}>手机号</Text>
               <TextInput
                 style={styles.input}
+                testID="phone-input"
                 placeholder="请输入手机号"
                 placeholderTextColor={colors.textSecondary}
                 value={phone}
@@ -80,6 +81,7 @@ const LoginScreen: React.FC = () => {
                 <View style={styles.codeRow}>
                   <TextInput
                     style={[styles.input, styles.codeInput]}
+                    testID="code-input"
                     placeholder="请输入验证码"
                     placeholderTextColor={colors.textSecondary}
                     value={code}
@@ -98,6 +100,7 @@ const LoginScreen: React.FC = () => {
                       (countdown > 0 || sendingCode) && styles.codeBtnDisabled,
                     ]}
                     onPress={handleSendCode}
+                    testID="send-code-btn"
                     disabled={countdown > 0 || sendingCode}
                     activeOpacity={0.7}
                   >
@@ -116,6 +119,7 @@ const LoginScreen: React.FC = () => {
                 <Text style={styles.label}>密码</Text>
                 <TextInput
                   style={styles.input}
+                  testID="password-input"
                   placeholder="请输入密码"
                   placeholderTextColor={colors.textSecondary}
                   value={password}
@@ -133,6 +137,7 @@ const LoginScreen: React.FC = () => {
             <TouchableOpacity accessibilityRole="button"
               style={[styles.loginButton, loading && styles.loginButtonDisabled]}
               onPress={handleLogin}
+              testID="login-btn"
               disabled={loading}
               activeOpacity={0.7}
             >
@@ -148,6 +153,7 @@ const LoginScreen: React.FC = () => {
               onPress={() => {
                 setLoginMode(loginMode === 'code' ? 'password' : 'code');
               }}
+              testID="mode-toggle-btn"
             >
               <Text style={styles.modeSwitchText}>
                 {loginMode === 'code' ? '使用密码登录' : '使用验证码登录'}

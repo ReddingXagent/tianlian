@@ -98,10 +98,12 @@ const HomeScreen: React.FC = () => {
             onChangeText={setSearchText}
             returnKeyType="search"
             onSubmitEditing={handleSearch}
+            testID="search-input"
           />
           <TouchableOpacity accessibilityRole="button"
             style={styles.searchBtn}
             onPress={handleSearch}
+            testID="search-btn"
             activeOpacity={0.7}
           >
             <Text style={styles.searchBtnText}>
@@ -147,6 +149,7 @@ const HomeScreen: React.FC = () => {
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
+              testID="station-list-refresh"
               refreshing={refreshing}
               onRefresh={handleRefresh}
               colors={[colors.primary]}
