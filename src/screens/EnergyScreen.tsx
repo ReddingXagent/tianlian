@@ -55,6 +55,7 @@ const EnergyScreen: React.FC = () => {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
+      testID="energy-screen"
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -92,7 +93,7 @@ const EnergyScreen: React.FC = () => {
 
       {/* 充电数据 */}
       <Text style={styles.sectionTitle}>充电</Text>
-      <View style={styles.statsCard}>
+      <View style={styles.statsCard} testID="energy-stats-card">
         <StatRow
           label="充电量"
           value={`${formatEnergy(summary.chargingAmount)} kWh`}

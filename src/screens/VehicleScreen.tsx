@@ -146,6 +146,7 @@ const VehicleScreen: React.FC = () => {
     <View style={styles.container}>
       <FlatList
         data={vehicles}
+        testID="vehicle-list"
         keyExtractor={(item) => String(item.id)}
         renderItem={renderVehicleItem}
         contentContainerStyle={styles.listContent}
@@ -168,6 +169,7 @@ const VehicleScreen: React.FC = () => {
 
       {/* 添加按钮 */}
       <TouchableOpacity accessibilityRole="button"
+        testID="vehicle-add-btn"
         style={styles.addBtn}
         onPress={() => setModalVisible(true)}
         activeOpacity={0.7}

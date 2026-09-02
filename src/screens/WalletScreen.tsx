@@ -99,6 +99,7 @@ const WalletScreen: React.FC = () => {
           ¥{formatMoney(user?.balance || 0)}
         </Text>
         <TouchableOpacity accessibilityRole="button"
+          testID="wallet-recharge-btn"
           style={[styles.rechargeBtn, recharging && styles.rechargeBtnDisabled]}
           onPress={handleRecharge}
           disabled={recharging}
@@ -131,6 +132,7 @@ const WalletScreen: React.FC = () => {
       ) : (
         <FlatList
           data={records}
+          testID="wallet-record-list"
           keyExtractor={(item) => String(item.id)}
           renderItem={renderRecordItem}
           contentContainerStyle={styles.listContent}

@@ -63,7 +63,7 @@ const PaymentScreen: React.FC = () => {
 
       {/* 支付方式 */}
       <Text style={styles.sectionTitle}>选择支付方式</Text>
-      <View style={styles.methodCard}>
+      <View style={styles.methodCard} testID="payment-method-card">
         {PAYMENT_METHODS.map((method, index) => (
           <TouchableOpacity accessibilityRole="button"
             key={method.key}
@@ -91,6 +91,7 @@ const PaymentScreen: React.FC = () => {
 
       {/* 支付按钮 */}
       <TouchableOpacity accessibilityRole="button"
+        testID="payment-pay-btn"
         style={[styles.payBtn, paying && styles.payBtnDisabled]}
         onPress={handlePay}
         disabled={paying}

@@ -188,7 +188,7 @@ const StationDetailScreen: React.FC = () => {
       </View>
 
       {/* 导航按钮 */}
-      <TouchableOpacity accessibilityRole="button" style={styles.navButton} onPress={handleNavigate} activeOpacity={0.7}>
+      <TouchableOpacity accessibilityRole="button" testID="station-detail-nav-btn" style={styles.navButton} onPress={handleNavigate} activeOpacity={0.7}>
         <Text style={styles.navButtonIcon}>🗺️</Text>
         <Text style={styles.navButtonText}>导航到这里</Text>
       </TouchableOpacity>
@@ -217,6 +217,7 @@ const StationDetailScreen: React.FC = () => {
         chargers.map((charger) => (
           <TouchableOpacity accessibilityRole="button"
             key={charger.id}
+            testID={`station-detail-charger-${charger.id}`}
             style={styles.chargerCard}
             onPress={() => handleChargerPress(charger)}
             activeOpacity={0.7}

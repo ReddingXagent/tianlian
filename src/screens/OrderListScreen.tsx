@@ -124,6 +124,7 @@ const OrderListScreen: React.FC = () => {
         {ORDER_STATUS_FILTERS.map((filter) => (
           <TouchableOpacity accessibilityRole="button"
             key={filter.key}
+            testID={`order-list-filter-${filter.key}`}
             style={[styles.filterBtn, activeFilter === filter.key && styles.filterBtnActive]}
             onPress={() => setActiveFilter(filter.key)}
           >
@@ -150,6 +151,7 @@ const OrderListScreen: React.FC = () => {
       ) : (
         <FlatList
           data={orders}
+          testID="order-list"
           keyExtractor={(item) => String(item.id)}
           renderItem={renderOrderItem}
           contentContainerStyle={styles.listContent}
