@@ -179,6 +179,7 @@ const WorkOrderScreen: React.FC = () => {
               key={f.key}
               style={[styles.filterChip, { backgroundColor: colors.pageBg }, statusFilter === f.key && { backgroundColor: colors.primary }]}
               onPress={() => setStatusFilter(f.key)}
+             testID={`workorder-filter-${f.key}`}
              accessibilityRole="button">
               <Text style={[styles.filterChipText, { color: colors.textSecondary }, statusFilter === f.key && { color: colors.onPrimary, fontWeight: '500' }]}>
                 {f.label}
@@ -213,6 +214,7 @@ const WorkOrderScreen: React.FC = () => {
             />
           }
           onEndReached={handleLoadMore}
+          testID="workorder-list"
           onEndReachedThreshold={0.3}
           ListEmptyComponent={
             <EmptyState
@@ -238,6 +240,7 @@ const WorkOrderScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.fab, { backgroundColor: colors.primary, shadowColor: colors.primary }]}
           onPress={() => setShowCreateModal(true)}
+          testID="workorder-create-btn"
           activeOpacity={0.8}
          accessibilityRole="button">
           <Text style={[styles.fabText, { color: colors.onPrimary }]}>+</Text>
@@ -262,6 +265,7 @@ const WorkOrderScreen: React.FC = () => {
                 placeholder="请输入工单标题"
                 placeholderTextColor={colors.textSecondary}
                 value={createTitle}
+                testID="workorder-title-input"
                 onChangeText={setCreateTitle}
               />
 
@@ -271,6 +275,7 @@ const WorkOrderScreen: React.FC = () => {
                 placeholder="请输入工单描述"
                 placeholderTextColor={colors.textSecondary}
                 value={createDesc}
+                testID="workorder-desc-input"
                 onChangeText={setCreateDesc}
                 multiline
                 numberOfLines={3}
@@ -283,6 +288,7 @@ const WorkOrderScreen: React.FC = () => {
                     key={t}
                     style={[styles.pickerItem, { borderColor: colors.border, backgroundColor: colors.inputBg }, createType === t && { backgroundColor: colors.infoBg, borderColor: colors.primary }]}
                     onPress={() => setCreateType(t)}
+                   testID={`workorder-type-${t}`}
                    accessibilityRole="button">
                     <Text style={[styles.pickerItemText, { color: colors.textSecondary }, createType === t && { color: colors.primary, fontWeight: '600' }]}>
                       {WORK_ORDER_TYPE_LABEL[t]}
@@ -304,6 +310,7 @@ const WorkOrderScreen: React.FC = () => {
                         createPriority === p && { backgroundColor: colors[pc.color] + '20', borderColor: colors[pc.color] },
                       ]}
                       onPress={() => setCreatePriority(p)}
+                     testID={`workorder-priority-${p}`}
                      accessibilityRole="button">
                       <Text style={[
                         styles.pickerItemText,
@@ -327,6 +334,7 @@ const WorkOrderScreen: React.FC = () => {
                 <TouchableOpacity
                   style={[styles.modalSubmitBtn, { backgroundColor: colors.primary }, creating && styles.modalSubmitBtnDisabled]}
                   onPress={handleCreateWorkOrder}
+                  testID="workorder-submit-btn"
                   disabled={creating}
                  accessibilityRole="button">
                   {creating ? (

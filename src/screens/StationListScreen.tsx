@@ -27,6 +27,7 @@ export default function StationListScreen() {
       style={[styles.card, { backgroundColor: colors.cardBg }]}
       onPress={() => navigation.navigate('StationDetail', { stationId: item.id })}
      accessibilityRole="button">
+      testID={`station-card-${item.id}`}
       <View style={styles.cardHeader}>
         <Text style={[styles.stationName, { color: colors.textPrimary }]}>{item.name}</Text>
         <View style={[styles.badge, { backgroundColor: badgeBg(item.status) }]}>
@@ -55,6 +56,7 @@ export default function StationListScreen() {
           value={search}
           onChangeText={setSearch}
           onSubmitEditing={refresh}
+          testID="station-search-input"
           returnKeyType="search"
         />
       </View>
@@ -68,6 +70,7 @@ export default function StationListScreen() {
           data={filteredStations}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
+          testID="station-list"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
           contentContainerStyle={styles.list}
           ListEmptyComponent={

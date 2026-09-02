@@ -156,6 +156,7 @@ const ChargerMonitorScreen: React.FC = () => {
           const connectorConfig = getConnectorConfig(charger.connectorStatus);
           return (
             <View key={charger.id} style={[styles.chargerCard, { backgroundColor: colors.cardBg }]}>
+              testID={`charger-card-${charger.id}`}
               {/* 头部（点击展开/收起实时趋势） */}
               <TouchableOpacity
                 style={styles.chargerHeader}

@@ -34,6 +34,7 @@ export default function AlarmListScreen() {
 
   const renderItem = ({ item }: { item: Alarm }) => (
     <View style={[styles.card, { backgroundColor: colors.cardBg }]}>
+      testID={`alarm-card-${item.id}`}
       <View style={[styles.levelBar, { backgroundColor: levelColor(item.level) }]} />
       <View style={styles.cardBody}>
         <View style={styles.cardHeader}>
@@ -63,6 +64,7 @@ export default function AlarmListScreen() {
           <React.Fragment key={f.key}>
             <View
               style={[styles.filterChip, { backgroundColor: colors.cardBg }, filter === f.key && { backgroundColor: colors.primary }]}
+            testID={`alarm-filter-${f.key}`}
             >
               <Text
                 style={[styles.filterText, { color: colors.textSecondary }, filter === f.key && { color: colors.onPrimary, fontWeight: '600' as const }]}
@@ -85,6 +87,7 @@ export default function AlarmListScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
           contentContainerStyle={styles.list}
           ListEmptyComponent={<View style={styles.center}><Text style={[styles.emptyText, { color: colors.textMuted }]}>暂无告警 🎉</Text></View>}
+        testID="alarm-list"
         />
       )}
     </View>

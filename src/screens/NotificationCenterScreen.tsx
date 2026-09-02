@@ -135,7 +135,9 @@ const NotificationCenterScreen: React.FC = () => {
       {unreadCount > 0 && (
         <View style={[styles.actionBar, { backgroundColor: colors.cardBg, borderBottomColor: colors.divider }]}>
           <Text style={[styles.unreadText, { color: colors.primary }]}>{unreadCount} 条未读</Text>
-          <TouchableOpacity onPress={handleMarkAllAsRead} accessibilityRole="button">
+          <TouchableOpacity onPress={handleMarkAllAsRead} accessibilityRole="button"
+            testID="notification-mark-all-btn"
+          >
             <Text style={[styles.markAllText, { color: colors.primary }]}>全部标记已读</Text>
           </TouchableOpacity>
         </View>
@@ -159,6 +161,7 @@ const NotificationCenterScreen: React.FC = () => {
               <TouchableOpacity
                 style={[styles.readSegBtn, readFilter === 'all' && { backgroundColor: colors.primary }]}
                 onPress={() => setReadFilter('all')}
+               testID="notification-filter-all"
                accessibilityRole="button">
                 <Text
                   style={[
@@ -173,6 +176,7 @@ const NotificationCenterScreen: React.FC = () => {
               <TouchableOpacity
                 style={[styles.readSegBtn, readFilter === 'unread' && { backgroundColor: colors.primary }]}
                 onPress={() => setReadFilter('unread')}
+               testID="notification-filter-unread"
                accessibilityRole="button">
                 <Text
                   style={[
@@ -200,6 +204,7 @@ const NotificationCenterScreen: React.FC = () => {
                   key={opt.value}
                   style={[styles.typeChip, { backgroundColor: colors.neutralBg }, active && { backgroundColor: colors.primary }]}
                   onPress={() => setTypeFilter(opt.value)}
+                 testID={`notification-type-${opt.value}`}
                  accessibilityRole="button">
                   <Text
                     style={[

@@ -83,6 +83,7 @@ export default function DashboardScreen() {
           <TouchableOpacity
             style={[styles.actionItem, { backgroundColor: colors.cardBg }]}
             onPress={() => navigation.navigate('Stations' as never)}
+           testID="dashboard-action-stations"
            accessibilityRole="button">
             <Text style={styles.actionIcon}>📍</Text>
             <Text style={[styles.actionText, { color: colors.textSecondary }]}>站点管理</Text>
@@ -90,6 +91,7 @@ export default function DashboardScreen() {
           <TouchableOpacity
             style={[styles.actionItem, { backgroundColor: colors.cardBg }]}
             onPress={() => navigation.navigate('AlarmList' as never)}
+           testID="dashboard-action-alarms"
            accessibilityRole="button">
             <Text style={styles.actionIcon}>🔔</Text>
             <Text style={[styles.actionText, { color: colors.textSecondary }]}>告警查看</Text>
@@ -97,6 +99,7 @@ export default function DashboardScreen() {
           <TouchableOpacity
             style={[styles.actionItem, { backgroundColor: colors.cardBg }]}
             onPress={() => navigation.navigate('WorkOrder' as never)}
+           testID="dashboard-action-workorders"
            accessibilityRole="button">
             <Text style={styles.actionIcon}>📋</Text>
             <Text style={[styles.actionText, { color: colors.textSecondary }]}>工单管理</Text>
@@ -104,6 +107,7 @@ export default function DashboardScreen() {
           <TouchableOpacity
             style={[styles.actionItem, { backgroundColor: colors.cardBg }]}
             onPress={() => navigation.navigate('Revenue' as never)}
+           testID="dashboard-action-revenue"
            accessibilityRole="button">
             <Text style={styles.actionIcon}>💰</Text>
             <Text style={[styles.actionText, { color: colors.textSecondary }]}>营收统计</Text>
@@ -115,7 +119,9 @@ export default function DashboardScreen() {
       <View style={styles.stationPreview}>
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>我的站点</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Stations' as never)} accessibilityRole="button">
+          <TouchableOpacity onPress={() => navigation.navigate('Stations' as never)} accessibilityRole="button"
+            testID="dashboard-see-all-stations"
+          >
             <Text style={[styles.seeAll, { color: colors.primary }]}>查看全部 →</Text>
           </TouchableOpacity>
         </View>
@@ -124,6 +130,7 @@ export default function DashboardScreen() {
             key={station.id}
             style={[styles.stationItem, { backgroundColor: colors.cardBg }]}
             onPress={() => navigation.navigate('StationDetail', { stationId: station.id })}
+           testID={`dashboard-station-${station.id}`}
            accessibilityRole="button">
             <View style={styles.stationInfo}>
               <Text style={[styles.stationName, { color: colors.textPrimary }]}>{station.name}</Text>

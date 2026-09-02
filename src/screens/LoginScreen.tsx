@@ -37,6 +37,7 @@ export default function LoginScreen() {
           placeholder="用户名"
           placeholderTextColor={colors.textMuted}
           value={username}
+          testID="login-username-input"
           onChangeText={setUsername}
           autoCapitalize="none"
           autoCorrect={false}
@@ -52,6 +53,7 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          testID="login-password-input"
           autoCapitalize="none"
         />
 
@@ -59,7 +61,9 @@ export default function LoginScreen() {
           style={[styles.button, loading && styles.buttonDisabled, { backgroundColor: colors.primary }]}
           onPress={handleLogin}
           disabled={loading}
-         accessibilityRole="button">
+         accessibilityRole="button"
+          testID="login-submit-btn"
+         >
           {loading ? (
             <ActivityIndicator color={colors.onPrimary} />
           ) : (

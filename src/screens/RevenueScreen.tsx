@@ -101,6 +101,7 @@ const RevenueScreen: React.FC = () => {
             key={p}
             style={[styles.periodBtn, period === p && { backgroundColor: colors.primary }]}
             onPress={() => setPeriod(p)}
+           testID={`revenue-period-${p}`}
            accessibilityRole="button">
             <Text
               style={[
@@ -157,7 +158,9 @@ const RevenueScreen: React.FC = () => {
               <Text style={[styles.chartTitle, { color: colors.textPrimary }]}>
                 {PERIOD_LABELS[period]}营收趋势
               </Text>
-              <TouchableOpacity style={[styles.exportBtn, { backgroundColor: colors.infoBg }]} onPress={handleExport} activeOpacity={0.7} accessibilityRole="button">
+              <TouchableOpacity style={[styles.exportBtn, { backgroundColor: colors.infoBg }]} onPress={handleExport} activeOpacity={0.7} accessibilityRole="button"
+                testID="revenue-export-btn"
+              >
                 <Text style={[styles.exportBtnText, { color: colors.info }]}>📥 导出CSV</Text>
               </TouchableOpacity>
             </View>

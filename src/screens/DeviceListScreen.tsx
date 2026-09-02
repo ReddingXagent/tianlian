@@ -35,6 +35,7 @@ export default function DeviceListScreen() {
 
   const renderItem = ({ item }: { item: Device }) => (
     <TouchableOpacity style={[styles.card, { backgroundColor: colors.cardBg }]}>
+      testID={`device-card-${item.id}`}
       <View style={styles.cardHeader}>
         <View>
           <Text style={[styles.deviceName, { color: colors.textPrimary }]}>{item.name}</Text>
@@ -64,6 +65,7 @@ export default function DeviceListScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadData} tintColor={colors.primary} />}
           contentContainerStyle={styles.list}
           ListEmptyComponent={<View style={styles.center}><Text style={[styles.emptyText, { color: colors.textMuted }]}>暂无设备</Text></View>}
+        testID="device-list"
         />
       )}
     </View>

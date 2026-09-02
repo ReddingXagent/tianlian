@@ -62,6 +62,7 @@ export default function StationDetailScreen() {
         <TouchableOpacity
           style={[styles.actionBtn, { backgroundColor: colors.cardBg }]}
           onPress={() => navigation.navigate('DeviceList', { stationId, stationName: station?.name || '站点' })}
+         testID="stationdetail-action-devices"
          accessibilityRole="button">
           <Text style={styles.actionIcon}>🔌</Text>
           <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>设备</Text>
@@ -70,6 +71,7 @@ export default function StationDetailScreen() {
         <TouchableOpacity
           style={[styles.actionBtn, { backgroundColor: colors.cardBg }]}
           onPress={() => navigation.navigate('AlarmList', { stationId })}
+         testID="stationdetail-action-alarms"
          accessibilityRole="button">
           <Text style={styles.actionIcon}>🔔</Text>
           <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>告警</Text>
@@ -78,6 +80,7 @@ export default function StationDetailScreen() {
         <TouchableOpacity
           style={[styles.actionBtn, { backgroundColor: colors.cardBg }]}
           onPress={() => navigation.navigate('WorkOrder', { stationId })}
+         testID="stationdetail-action-workorders"
          accessibilityRole="button">
           <Text style={styles.actionIcon}>📋</Text>
           <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>工单</Text>
@@ -89,6 +92,7 @@ export default function StationDetailScreen() {
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>设备列表 ({devices.length})</Text>
         {devices.slice(0, 5).map((device) => (
           <View key={device.id} style={[styles.deviceItem, { backgroundColor: colors.cardBg }]}>
+            testID={`stationdetail-device-${device.id}`}
             <View style={styles.deviceInfo}>
               <Text style={[styles.deviceName, { color: colors.textPrimary }]}>{device.name}</Text>
               <Text style={[styles.deviceModel, { color: colors.textMuted }]}>{device.model}</Text>
@@ -98,7 +102,9 @@ export default function StationDetailScreen() {
         ))}
         {devices.length === 0 && <Text style={[styles.emptyText, { color: colors.textMuted }]}>暂无设备</Text>}
         {devices.length > 5 && (
-          <TouchableOpacity onPress={() => navigation.navigate('DeviceList', { stationId, stationName: station?.name || '站点' })} accessibilityRole="button">
+          <TouchableOpacity onPress={() => navigation.navigate('DeviceList', { stationId, stationName: station?.name || '站点' })} accessibilityRole="button"
+            testID="stationdetail-see-all-devices"
+          >
             <Text style={[styles.seeAll, { color: colors.primary }]}>查看全部设备 →</Text>
           </TouchableOpacity>
         )}
@@ -109,6 +115,7 @@ export default function StationDetailScreen() {
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>最近告警</Text>
         {alarms.slice(0, 3).map((alarm) => (
           <View key={alarm.id} style={[styles.alarmItem, { backgroundColor: colors.cardBg }]}>
+            testID={`stationdetail-alarm-${alarm.id}`}
             <View style={[styles.alarmLevel, { backgroundColor: alarm.level === 'critical' ? colors.error : colors.warning }]} />
             <View style={styles.alarmInfo}>
               <Text style={[styles.alarmTitle, { color: colors.textPrimary }]}>{alarm.title}</Text>

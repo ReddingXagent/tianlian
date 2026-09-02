@@ -261,7 +261,9 @@ const DeviceDetailScreen: React.FC = () => {
         <View style={styles.logHeader}>
           <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>操作日志</Text>
           {deviceLogs.length > 0 && (
-            <TouchableOpacity onPress={clearLogs} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button">
+            <TouchableOpacity onPress={clearLogs} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button"
+              testID="devicedetail-clear-logs-btn"
+            >
               <Text style={[styles.clearLogText, { color: colors.error }]}>清空</Text>
             </TouchableOpacity>
           )}
