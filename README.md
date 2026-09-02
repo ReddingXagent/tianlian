@@ -53,7 +53,7 @@ scripts/          check-mp-structure.js 结构门控 / deploy.js 部署门控(mi
 
 ## 质量现状
 
-- 测试：230 全绿，coverage 98.07%（Stmts 98.07% / Branch 85.76% / Funcs 98.33% / Lines 98.91%）；**coverageThreshold 已配置**（global 98/85/98/98，F393 实测下取整，余量 0.07/0.76/0.33/0.91，只升不降棘轮）
+- 测试：493 全绿（36 套，F3602 深色模式后基线），coverage 100%（Stmts 100% / Branch 100% / Funcs 100% / Lines 100%，2026-09-02 夜间冲刺档实测）；**coverageThreshold 已配置**（global 98/85/98/98，F393 实测下取整；棘轮只升不降，当前实测四项全满，后续补测以门限上调为准）
 - lint：ESLint 10 flat config，0 错 0 警
 - 对账守卫族：十九枚自动守卫全接 CI check job + Makefile check 链——导航↔注册（F246）/wxml绑定↔方法（F252）/auth键（F240）/死handler（F264）/孤儿页（F258）/孤儿组件（F284）/storage键（F270）/隐私API↔声明（F277）/请求单一源（F292）/setData性能反模式（F298）/wxs视图层隔离（F305）/JSON配置键白名单（F311）/setData负载体积（F317）/组件properties↔使用属性（F323）/组件事件triggerEvent↔绑定（F329）/原生组件属性域image·button·input·text·view·map白名单+枚举值域（F337→F344→F350→F356）/CSS变量死代码检测（F373）/CSS死类对账（F380）/静态资源路径↔磁盘实体双向对账（F386）
 - 上传包：主包 ~704K（≪2MB 限额），packOptions.ignore 已排除开发产物
