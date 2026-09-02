@@ -34,8 +34,8 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 903 全绿（109 suites）✅ |
-| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 99 / branches 99 / functions 99 / lines 99（只升不降）；实测 100 / 99.86 / 100 / 100（903 tests，2026-08-22，clover.xml 直算） |
+| 测试 | `npm run test:ci` | 911 全绿（110 suites）✅ |
+| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 99 / branches 99 / functions 99 / lines 99（只升不降）；实测 100 / 99.85 / 100 / 100（911 tests，2026-09-02，jest 覆盖率表） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / 0 警告（`--max-warnings=0`，只降不升；当前 0） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（F25/F33 已决策清零 08-05：Expo 账号当前阶段不需要——测试走 Expo Go 扫码、内部分发走 APK 直装；OTA 延后到发布候选期再定，届时接账号须 app.json updates.url ↔ eas.json projectId 两侧同步，F302 守卫形态） |
 
@@ -94,6 +94,10 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 | passwordAutofillGuards | 输入族② | TextInput secureTextEntry → 双平台 autofill 声明 |
 | otpAutofillGuards | 输入族③ | TextInput 数字键盘×短 maxLength → sms-otp/oneTimeCode 双平台声明 |
 | accessibilityRoleGuards | accessibility族① | 带 onPress 的 Pressable/TouchableOpacity → accessibilityRole 声明（读屏语义） |
+
+## testID 锚点铺底
+
+全部 13 屏已铺设 `testID` 锚点共 30 处（Login 7 / Home 3 / Profile 2 / Scan 1 / Charging 2 / Coupon 1 / Energy 2 / OrderDetail 2 / OrderList 2 / Payment 2 / StationDetail 2 / Vehicle 2 / Wallet 2），供 E2E（Detox/Maestro 类）选择器与无障碍调试定位使用。命名约定：`<屏名>-<元素>`（如 `login-btn`、`station-list-refresh`），动态列表项带后缀（`order-list-filter-${key}`、`station-detail-charger-${id}`）。新增交互元素时应同步补 testID，保持 E2E 可寻址性不回退。
 
 ## 已知限制
 
