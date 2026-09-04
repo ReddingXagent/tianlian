@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
+import { RefreshControl } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from '../HomeScreen';
 import type { Station } from '../../types';
@@ -136,5 +137,19 @@ describe('HomeScreen', () => {
   it('does not render MapView when stations empty (空态分支不挂地图)', () => {
     const { queryByText } = renderHomeScreen();
     expect(queryByText('暂无站点数据')).toBeNull();
+  });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', () => {
+    mockState.stations = [
+      { id: 1, name: '站点A', availableConnectors: 2, distance: 500 },
+    ];
+    const utils = renderHomeScreen();
+    expect(utils.getByTestId('search-input')).toBeTruthy();
+    expect(utils.getByTestId('search-btn')).toBeTruthy();
+    // RefreshControl的testID经refreshControl prop挂载, getByTestId不可见(RNTL已知行为)
+    const rc = utils.UNSAFE_getByType(RefreshControl);
+    expect(rc.props.testID).toBe('station-list-refresh');
+    expect(utils.queryByText('testID=search-btn')).toBeNull();
   });
 });

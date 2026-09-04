@@ -112,4 +112,14 @@ describe('OrderDetailScreen', () => {
     utils.rerender(<SafeAreaProvider><OrderDetailScreen /></SafeAreaProvider>);
     expect(mockFetchOrderDetail).toHaveBeenCalledTimes(2);
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  // cancel-btn需status=charging; pay-btn需paymentStatus=unpaid且status≠charging
+  // 默认mock order=completed+unpaid → pay-btn可见, cancel-btn应缺席(条件分支守卫)
+  it('renders testID anchors as props (not visible text)', async () => {
+    const utils = renderScreen();
+    await waitFor(() => expect(utils.getByTestId('order-detail-pay-btn')).toBeTruthy());
+    expect(utils.queryByTestId('order-detail-cancel-btn')).toBeNull();
+    expect(utils.queryByText('testID=order-detail-pay-btn')).toBeNull();
+  });
 });

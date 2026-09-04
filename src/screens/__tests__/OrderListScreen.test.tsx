@@ -157,4 +157,16 @@ describe('OrderListScreen', () => {
     expect(getByText('订单号: ORD-002')).toBeTruthy();
     expect(queryByText('加载失败')).toBeNull();
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', () => {
+    const { getByTestId, queryByText } = renderScreen();
+    // 4筛选chip: ''/'charging'/'completed'/'unpaid'
+    expect(getByTestId('order-list-filter-')).toBeTruthy();
+    expect(getByTestId('order-list-filter-charging')).toBeTruthy();
+    expect(getByTestId('order-list-filter-completed')).toBeTruthy();
+    expect(getByTestId('order-list-filter-unpaid')).toBeTruthy();
+    expect(getByTestId('order-list')).toBeTruthy();
+    expect(queryByText('testID=order-list')).toBeNull();
+  });
 });

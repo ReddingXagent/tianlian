@@ -170,4 +170,23 @@ describe('LoginScreen', () => {
     fireEvent.changeText(getByPlaceholderText('请输入验证码'), '4');
     expect(queryByText('请输入正确的手机号')).toBeNull();
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', () => {
+    const { getByTestId, getByText, getByPlaceholderText, queryByText } = renderLogin();
+    // error-banner为条件渲染, 先触发一次校验错误
+    fireEvent.press(getByText('登 录'));
+    expect(getByTestId('error-banner')).toBeTruthy();
+    fireEvent.changeText(getByPlaceholderText('请输入手机号'), '13800138000');
+    expect(getByTestId('phone-input')).toBeTruthy();
+    expect(getByTestId('code-input')).toBeTruthy();
+    expect(getByTestId('send-code-btn')).toBeTruthy();
+    expect(queryByText('testID=login-btn')).toBeNull();
+    // password-input仅在密码模式分支渲染
+    fireEvent.press(getByTestId('mode-toggle-btn'));
+    expect(getByTestId('password-input')).toBeTruthy();
+    expect(getByTestId('login-btn')).toBeTruthy();
+    expect(getByTestId('mode-toggle-btn')).toBeTruthy();
+    expect(queryByText('testID=login-btn')).toBeNull();
+  });
 });

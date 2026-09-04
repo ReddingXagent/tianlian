@@ -133,4 +133,21 @@ describe('ChargingScreen', () => {
     });
     expect(getByText('30.5')).toBeTruthy();
   });
+
+    const { chargingApi } = require('../../services/api');
+    chargingApi.getStatus.mockResolvedValue({ data: mockChargingData });
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  // retry-btn需首帧error态; stop-btn需有status正常态
+  it('renders testID anchors as props (not visible text)', async () => {
+    const { chargingApi } = require('../../services/api');
+    chargingApi.getStatus
+      .mockRejectedValueOnce(new Error('boot fail'))
+      .mockResolvedValue({ data: mockChargingData });
+    const { findByTestId, getByTestId, queryByText } = renderScreen();
+    expect(await findByTestId('charging-retry-btn')).toBeTruthy();
+    expect(queryByText('testID=charging-retry-btn')).toBeNull();
+    // 点重试→恢复成功态后stop按钮出现
+    fireEvent.press(getByTestId('charging-retry-btn'));
+    expect(await findByTestId('stop-charging-btn')).toBeTruthy();
+  });
 });

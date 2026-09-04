@@ -171,4 +171,13 @@ describe('EnergyScreen', () => {
       expect(getByText('近30天')).toBeTruthy();
     });
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', async () => {
+    mockGetSummary.mockResolvedValue({ data: mockSummary });
+    const { getByTestId, queryByText } = render(<EnergyScreen />);
+    await waitFor(() => expect(getByTestId('energy-screen')).toBeTruthy());
+    await waitFor(() => expect(getByTestId('energy-stats-card')).toBeTruthy());
+    expect(queryByText('testID=energy-stats-card')).toBeNull();
+  });
 });

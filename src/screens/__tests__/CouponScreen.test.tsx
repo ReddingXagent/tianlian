@@ -126,4 +126,14 @@ describe('CouponScreen', () => {
     utils.rerender(<CouponScreen />);
     await waitFor(() => expect(mockGetList).toHaveBeenCalledTimes(2));
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', async () => {
+    mockGetList.mockResolvedValue({
+      data: { items: [makeCoupon()], total: 1, page: 1, pageSize: 20 },
+    });
+    const { getByTestId, queryByText } = render(<CouponScreen />);
+    await waitFor(() => expect(getByTestId('coupon-list')).toBeTruthy());
+    expect(queryByText('testID=coupon-list')).toBeNull();
+  });
 });

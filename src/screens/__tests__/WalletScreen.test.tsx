@@ -215,4 +215,14 @@ describe('WalletScreen', () => {
     expect(utils.getByText('充电消费')).toBeTruthy();
     expect(utils.queryByText('加载失败')).toBeNull();
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  // wallet-recharge-btn常驻; wallet-record-list需有流水时渲染
+  it('renders testID anchors as props (not visible text)', async () => {
+    mockGetRecords.mockResolvedValue({ data: { items: [recordFixture], page: 1, total: 1 } });
+    const { getByTestId, queryByText } = renderScreen();
+    expect(getByTestId('wallet-recharge-btn')).toBeTruthy();
+    await waitFor(() => expect(getByTestId('wallet-record-list')).toBeTruthy());
+    expect(queryByText('testID=wallet-recharge-btn')).toBeNull();
+  });
 });

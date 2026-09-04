@@ -95,4 +95,12 @@ describe('PaymentScreen', () => {
       expect(paymentApi.pay).toHaveBeenCalled();
     });
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', () => {
+    const { getByTestId, queryByText } = renderScreen();
+    expect(getByTestId('payment-method-card')).toBeTruthy();
+    expect(getByTestId('payment-pay-btn')).toBeTruthy();
+    expect(queryByText('testID=payment-pay-btn')).toBeNull();
+  });
 });

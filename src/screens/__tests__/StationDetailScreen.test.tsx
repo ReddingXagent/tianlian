@@ -328,4 +328,14 @@ describe('StationDetailScreen', () => {
     const { getByText } = renderScreen();
     expect(getByText('-')).toBeTruthy();
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', () => {
+    const { getByTestId, queryByText } = renderScreen();
+    expect(getByTestId('station-detail-nav-btn')).toBeTruthy();
+    // mockChargers含id=1/2, 动态锚点逐一验证
+    expect(getByTestId('station-detail-charger-1')).toBeTruthy();
+    expect(getByTestId('station-detail-charger-2')).toBeTruthy();
+    expect(queryByText('testID=station-detail-nav-btn')).toBeNull();
+  });
 });

@@ -144,4 +144,12 @@ describe('ProfileScreen', () => {
     const { getByText } = renderScreen();
     await waitFor(() => expect(getByText('5')).toBeTruthy());
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', () => {
+    const { getByTestId, queryByText } = renderScreen();
+    expect(getByTestId('profile-avatar')).toBeTruthy();
+    expect(getByTestId('logout-btn')).toBeTruthy();
+    expect(queryByText('testID=logout-btn')).toBeNull();
+  });
 });

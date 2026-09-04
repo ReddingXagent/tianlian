@@ -205,4 +205,13 @@ describe('VehicleScreen', () => {
       (Platform as { OS: string }).OS = origOS;
     }
   });
+
+  // ── testID guard (F3688同款: 防testID误写JSX children假绿) ──
+  it('renders testID anchors as props (not visible text)', async () => {
+    mockGetList.mockResolvedValue({ data: mockVehicles });
+    const { getByTestId, queryByText } = renderScreen();
+    await waitFor(() => expect(getByTestId('vehicle-list')).toBeTruthy());
+    expect(getByTestId('vehicle-add-btn')).toBeTruthy();
+    expect(queryByText('testID=vehicle-add-btn')).toBeNull();
+  });
 });
