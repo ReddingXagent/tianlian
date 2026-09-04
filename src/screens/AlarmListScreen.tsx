@@ -33,8 +33,7 @@ export default function AlarmListScreen() {
   };
 
   const renderItem = ({ item }: { item: Alarm }) => (
-    <View style={[styles.card, { backgroundColor: colors.cardBg }]}>
-      testID={`alarm-card-${item.id}`}
+    <View style={[styles.card, { backgroundColor: colors.cardBg }]} testID={`alarm-card-${item.id}`}>
       <View style={[styles.levelBar, { backgroundColor: levelColor(item.level) }]} />
       <View style={styles.cardBody}>
         <View style={styles.cardHeader}>

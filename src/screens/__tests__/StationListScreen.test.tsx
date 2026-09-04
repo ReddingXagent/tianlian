@@ -59,7 +59,7 @@ describe('StationListScreen', () => {
     ];
     mockUseStationList.stations = stations;
     mockUseStationList.filteredStations = stations;
-    const { getByText } = render(<StationListScreen />);
+    const { getByText, getByTestId } = render(<StationListScreen />);
     getByText('充电站A');
     getByText('充电站B');
     getByText('充电站C');
@@ -68,6 +68,9 @@ describe('StationListScreen', () => {
     getByText('在线');
     getByText('维护中');
     getByText('离线');
+    // testID守卫: 卡片testID必须是prop而非children(F3688回归)
+    expect(getByTestId('station-card-1')).toBeTruthy();
+    expect(getByTestId('station-card-2')).toBeTruthy();
   });
 
   it('告警徽章仅在 alarmCount>0 时出现', async () => {

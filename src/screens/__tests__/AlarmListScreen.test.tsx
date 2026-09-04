@@ -136,10 +136,14 @@ describe('AlarmListScreen', () => {
   it('should render alarm list after loading', async () => {
     mockUseAlarms.loading = false;
     mockUseAlarms.alarms = MOCK_ALARMS;
-    const { getByText } = render(<AlarmListScreen />);
+    const { getByText, getByTestId } = render(<AlarmListScreen />);
     expect(getByText('充电桩A-01温度异常')).toBeTruthy();
     expect(getByText('充电站A功率异常')).toBeTruthy();
     expect(getByText('充电站B通信恢复')).toBeTruthy();
+    // testID守卫: 卡片testID必须是prop而非children(F3688回归)
+    expect(getByTestId('alarm-card-1')).toBeTruthy();
+    expect(getByTestId('alarm-card-2')).toBeTruthy();
+    expect(getByTestId('alarm-card-3')).toBeTruthy();
   });
 
   it('should render station names in alarm cards', async () => {

@@ -26,8 +26,7 @@ export default function StationListScreen() {
     <TouchableOpacity
       style={[styles.card, { backgroundColor: colors.cardBg }]}
       onPress={() => navigation.navigate('StationDetail', { stationId: item.id })}
-     accessibilityRole="button">
-      testID={`station-card-${item.id}`}
+     accessibilityRole="button" testID={`station-card-${item.id}`}>
       <View style={styles.cardHeader}>
         <Text style={[styles.stationName, { color: colors.textPrimary }]}>{item.name}</Text>
         <View style={[styles.badge, { backgroundColor: badgeBg(item.status) }]}>

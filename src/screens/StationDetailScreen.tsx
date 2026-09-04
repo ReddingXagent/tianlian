@@ -91,8 +91,7 @@ export default function StationDetailScreen() {
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>设备列表 ({devices.length})</Text>
         {devices.slice(0, 5).map((device) => (
-          <View key={device.id} style={[styles.deviceItem, { backgroundColor: colors.cardBg }]}>
-            testID={`stationdetail-device-${device.id}`}
+          <View key={device.id} style={[styles.deviceItem, { backgroundColor: colors.cardBg }]} testID={`stationdetail-device-${device.id}`}>
             <View style={styles.deviceInfo}>
               <Text style={[styles.deviceName, { color: colors.textPrimary }]}>{device.name}</Text>
               <Text style={[styles.deviceModel, { color: colors.textMuted }]}>{device.model}</Text>
@@ -114,8 +113,7 @@ export default function StationDetailScreen() {
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>最近告警</Text>
         {alarms.slice(0, 3).map((alarm) => (
-          <View key={alarm.id} style={[styles.alarmItem, { backgroundColor: colors.cardBg }]}>
-            testID={`stationdetail-alarm-${alarm.id}`}
+          <View key={alarm.id} style={[styles.alarmItem, { backgroundColor: colors.cardBg }]} testID={`stationdetail-alarm-${alarm.id}`}>
             <View style={[styles.alarmLevel, { backgroundColor: alarm.level === 'critical' ? colors.error : colors.warning }]} />
             <View style={styles.alarmInfo}>
               <Text style={[styles.alarmTitle, { color: colors.textPrimary }]}>{alarm.title}</Text>

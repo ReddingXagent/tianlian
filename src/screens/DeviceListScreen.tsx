@@ -34,8 +34,7 @@ export default function DeviceListScreen() {
     status === 'online' ? colors.successBg : colors.errorBg;
 
   const renderItem = ({ item }: { item: Device }) => (
-    <TouchableOpacity style={[styles.card, { backgroundColor: colors.cardBg }]}>
-      testID={`device-card-${item.id}`}
+    <TouchableOpacity style={[styles.card, { backgroundColor: colors.cardBg }]} testID={`device-card-${item.id}`}>
       <View style={styles.cardHeader}>
         <View>
           <Text style={[styles.deviceName, { color: colors.textPrimary }]}>{item.name}</Text>

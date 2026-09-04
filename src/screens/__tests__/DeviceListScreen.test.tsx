@@ -129,11 +129,14 @@ describe('DeviceListScreen', () => {
   });
 
   it('should render device list after loading', async () => {
-    const { findByText } = render(<DeviceListScreen />);
+    const { findByText, getByTestId } = render(<DeviceListScreen />);
 
     expect(await findByText('充电桩A-01')).toBeTruthy();
     expect(await findByText('逆变器A-01')).toBeTruthy();
     expect(await findByText('储能电池A-01')).toBeTruthy();
+    // testID守卫: 卡片testID必须是prop而非children(F3688回归)
+    expect(getByTestId('device-card-1')).toBeTruthy();
+    expect(getByTestId('device-card-2')).toBeTruthy();
   });
 
   it('未知设备类型: 类型标签回退原值渲染不崩(deviceTypeLabel的||兜底分支)', async () => {

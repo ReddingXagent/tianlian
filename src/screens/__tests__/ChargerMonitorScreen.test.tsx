@@ -152,11 +152,14 @@ describe('ChargerMonitorScreen', () => {
   });
 
   it('should render chargers after loading', async () => {
-    const { findByText } = render(<ChargerMonitorScreen />);
+    const { findByText, getByTestId } = render(<ChargerMonitorScreen />);
 
     expect(await findByText('充电桩A-01')).toBeTruthy();
     expect(await findByText('充电桩A-02')).toBeTruthy();
     expect(await findByText('充电桩A-03')).toBeTruthy();
+    // testID守卫: 卡片testID必须是prop而非children(F3688回归)
+    expect(getByTestId('charger-card-1')).toBeTruthy();
+    expect(getByTestId('charger-card-2')).toBeTruthy();
   });
 
   it('should render summary statistics', async () => {

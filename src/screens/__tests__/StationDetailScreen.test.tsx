@@ -83,11 +83,14 @@ describe('StationDetailScreen', () => {
 
   it('设备列表渲染名称/型号与计数', async () => {
     setup();
-    const { getByText } = render(<StationDetailScreen />);
+    const { getByText, getByTestId } = render(<StationDetailScreen />);
     await waitFor(() => getByText('充电桩-01'));
     getByText('充电桩-02');
     getByText('Model-X');
     getByText('设备列表 (2)');
+    // testID守卫: 卡片testID必须是prop而非children(F3688回归)
+    expect(getByTestId('stationdetail-device-1')).toBeTruthy();
+    expect(getByTestId('stationdetail-device-2')).toBeTruthy();
   });
 
   it('设备超过5台显示"查看全部设备"并可跳转设备列表', async () => {
@@ -102,9 +105,12 @@ describe('StationDetailScreen', () => {
 
   it('最近告警渲染标题', async () => {
     setup();
-    const { getByText } = render(<StationDetailScreen />);
+    const { getByText, getByTestId } = render(<StationDetailScreen />);
     await waitFor(() => getByText('电压过高'));
     getByText('温度过高');
+    // testID守卫: 卡片testID必须是prop而非children(F3688回归)
+    expect(getByTestId('stationdetail-alarm-1')).toBeTruthy();
+    expect(getByTestId('stationdetail-alarm-2')).toBeTruthy();
   });
 
   it('无告警显示庆祝空态; 无设备显示设备空态', async () => {
