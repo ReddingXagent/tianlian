@@ -122,4 +122,9 @@ describe('WorkOrderListScreen', () => {
     const { getByText } = render(<WorkOrderListScreen />);
     expect(getByText('加载失败')).toBeTruthy();
   });
-});
+
+  it('exposes list testIDs for e2e (guard against children misuse)', () => {
+    const { getByTestId } = render(<WorkOrderListScreen />);
+    expect(getByTestId('workorder-create-btn')).toBeTruthy();
+    expect(getByTestId('workorder-list')).toBeTruthy();
+  });});

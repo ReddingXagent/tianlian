@@ -101,4 +101,10 @@ describe('WorkOrderTransferScreen', () => {
     expect(mockUrgeOrder).toHaveBeenCalledWith('WO-1', '请尽快处理');
     alertSpy.mockRestore();
   });
-});
+
+  it('exposes transfer form testIDs for e2e (guard against children misuse)', () => {
+    const { getByTestId } = render(<WorkOrderTransferScreen />);
+    expect(getByTestId('workorder-transfer-assignee-input')).toBeTruthy();
+    expect(getByTestId('workorder-transfer-reason-input')).toBeTruthy();
+    expect(getByTestId('workorder-transfer-submit-btn')).toBeTruthy();
+  });});

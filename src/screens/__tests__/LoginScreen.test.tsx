@@ -74,4 +74,10 @@ describe('LoginScreen', () => {
     });
     expect(await findByText('网络错误，请检查网络连接')).toBeTruthy();
   });
-});
+
+  it('exposes expected testIDs for e2e (guard against children misuse)', () => {
+    const { getByTestId } = render(<LoginScreen />);
+    expect(getByTestId('login-username-input')).toBeTruthy();
+    expect(getByTestId('login-password-input')).toBeTruthy();
+    expect(getByTestId('login-submit-btn')).toBeTruthy();
+  });});

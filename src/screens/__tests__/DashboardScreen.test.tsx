@@ -98,4 +98,10 @@ describe('DashboardScreen', () => {
     expect(getByText('暂无工单趋势数据')).toBeTruthy();
     expect(getByText('暂无故障设备数据')).toBeTruthy();
   });
-});
+
+  it('exposes period selector testIDs for e2e (guard against children misuse)', async () => {
+    const { getByTestId, findByTestId } = render(<DashboardScreen />);
+    expect(await findByTestId('dashboard-period-week')).toBeTruthy();
+    expect(getByTestId('dashboard-period-month')).toBeTruthy();
+    expect(getByTestId('dashboard-period-quarter')).toBeTruthy();
+  });});

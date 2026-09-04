@@ -138,4 +138,12 @@ describe('WorkbenchScreen', () => {
     expect(getByText('暂无待办工单')).toBeTruthy();
     expect(getByText('暂无告警')).toBeTruthy();
   });
-});
+
+  it('exposes stats and quick action testIDs for e2e (guard against children misuse)', () => {
+    const { getByTestId } = render(<WorkbenchScreen />);
+    expect(getByTestId('workbench-pending-orders-card')).toBeTruthy();
+    expect(getByTestId('workbench-action-scan')).toBeTruthy();
+    expect(getByTestId('workbench-action-monitor')).toBeTruthy();
+    expect(getByTestId('workbench-action-knowledge')).toBeTruthy();
+    expect(getByTestId('workbench-action-diagnosis')).toBeTruthy();
+  });});

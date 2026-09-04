@@ -92,4 +92,10 @@ describe('KnowledgeScreen', () => {
     const { findByText } = render(<KnowledgeScreen />);
     expect(await findByText('加载失败')).toBeTruthy();
   });
-});
+
+  it('exposes list/search testIDs for e2e (guard against children misuse)', async () => {
+    const { getByTestId, findByTestId } = render(<KnowledgeScreen />);
+    expect(await findByTestId('knowledge-card-1')).toBeTruthy();
+    expect(getByTestId('knowledge-search-input')).toBeTruthy();
+    expect(getByTestId('knowledge-list')).toBeTruthy();
+  });});

@@ -220,4 +220,9 @@ describe('ScanScreen', () => {
     fireEvent.press(getByText('CHARGER-005'));
     expect(getByPlaceholderText('输入设备/站点编码').props.value).toBe('CHARGER-005');
   });
-});
+
+  it('exposes scan testIDs for e2e (guards against children misuse)', () => {
+    const { getByTestId } = render(<ScanScreen />);
+    expect(getByTestId('scan-code-input')).toBeTruthy();
+    expect(getByTestId('scan-submit-btn')).toBeTruthy();
+  });});

@@ -74,4 +74,9 @@ describe('DiagnosisScreen', () => {
       await findByText('未找到该故障码，请确认故障码是否正确')
     ).toBeTruthy();
   });
-});
+
+  it('exposes diagnosis testIDs for e2e (guard against children misuse)', () => {
+    const { getByTestId } = render(<DiagnosisScreen />);
+    expect(getByTestId('diagnosis-code-input')).toBeTruthy();
+    expect(getByTestId('diagnosis-search-btn')).toBeTruthy();
+  });});

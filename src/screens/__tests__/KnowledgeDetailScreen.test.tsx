@@ -76,4 +76,9 @@ describe('KnowledgeDetailScreen', () => {
     expect(await findByText('充电桩故障排查指南')).toBeTruthy();
     expect(knowledgeApi.getArticles).toHaveBeenCalledTimes(2);
   });
-});
+
+  it('exposes detail testIDs for e2e (guard against children misuse)', async () => {
+    const { getByTestId, findByTestId } = render(<KnowledgeDetailScreen />);
+    expect(await findByTestId('knowledge-detail-scroll')).toBeTruthy();
+    expect(getByTestId('knowledge-detail-card')).toBeTruthy();
+  });});

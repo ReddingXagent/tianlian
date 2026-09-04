@@ -122,4 +122,10 @@ describe('MonitorScreen', () => {
     const { findByText } = render(<MonitorScreen />);
     expect(await findByText('暂无设备')).toBeTruthy();
   });
-});
+
+  it('exposes monitor tab testIDs for e2e (guard against children misuse)', async () => {
+    const { getByTestId, findByTestId } = render(<MonitorScreen />);
+    expect(await findByTestId('monitor-tab-devices')).toBeTruthy();
+    expect(getByTestId('monitor-tab-faults')).toBeTruthy();
+    expect(getByTestId('monitor-tab-alarms')).toBeTruthy();
+  });});

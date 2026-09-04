@@ -113,4 +113,9 @@ describe('InspectionListScreen', () => {
     const { getByText } = render(<InspectionListScreen />);
     expect(getByText('加载失败')).toBeTruthy();
   });
-});
+
+  it('exposes list testIDs for e2e (guard against children misuse)', async () => {
+    const { getByTestId, findByTestId } = render(<InspectionListScreen />);
+    expect(await findByTestId('inspection-card-1')).toBeTruthy();
+    expect(getByTestId('inspection-list')).toBeTruthy();
+  });});

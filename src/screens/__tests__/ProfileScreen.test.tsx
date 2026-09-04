@@ -88,4 +88,8 @@ describe('ProfileScreen', () => {
     expect(mockLogout).toHaveBeenCalled();
     alertSpy.mockRestore();
   });
-});
+
+  it('exposes profile logout testID for e2e (guard against children misuse)', () => {
+    const { getByTestId } = render(<ProfileScreen />);
+    expect(getByTestId('profile-logout-btn')).toBeTruthy();
+  });});

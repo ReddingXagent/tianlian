@@ -133,4 +133,9 @@ describe('WorkOrderDetailScreen', () => {
     const { findByText } = render(<WorkOrderDetailScreen />);
     expect(await findByText('暂无执行记录')).toBeTruthy();
   });
-});
+
+  it('exposes detail card testIDs for e2e (guard against children misuse)', async () => {
+    const { getByTestId, findByTestId } = render(<WorkOrderDetailScreen />);
+    expect(await findByTestId('workorder-detail-card')).toBeTruthy();
+    expect(getByTestId('workorder-detail-accept-btn')).toBeTruthy();
+  });});

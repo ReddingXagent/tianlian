@@ -93,4 +93,11 @@ describe('WorkOrderCreateScreen', () => {
     const { getByText } = render(<WorkOrderCreateScreen />);
     expect(getByText('创建工单失败')).toBeTruthy();
   });
-});
+
+  it('exposes create form testIDs for e2e (guard against children misuse)', () => {
+    const { getByTestId } = render(<WorkOrderCreateScreen />);
+    expect(getByTestId('workorder-create-title-input')).toBeTruthy();
+    expect(getByTestId('workorder-create-desc-input')).toBeTruthy();
+    expect(getByTestId('workorder-create-station-input')).toBeTruthy();
+    expect(getByTestId('workorder-create-submit-btn')).toBeTruthy();
+  });});

@@ -131,4 +131,15 @@ describe('InspectionDetailScreen', () => {
     expect(getByText('✅ 巡检已完成')).toBeTruthy();
     expect(getByText('一切正常')).toBeTruthy();
   });
-});
+
+  it('exposes header/item/action testIDs for e2e (guard against children misuse)', () => {
+    (useInspectionStore as unknown as jest.Mock).mockReturnValue(
+      storeReturn({ selectedTask: { ...BASE_TASK, status: 'in_progress' } })
+    );
+    const { getByTestId } = render(<InspectionDetailScreen />);
+    expect(getByTestId('inspection-detail-card')).toBeTruthy();
+    expect(getByTestId('inspection-item-1')).toBeTruthy();
+    expect(getByTestId('inspection-item-1-pass-btn')).toBeTruthy();
+    expect(getByTestId('inspection-item-1-fail-btn')).toBeTruthy();
+    expect(getByTestId('inspection-item-1-na-btn')).toBeTruthy();
+  });});
