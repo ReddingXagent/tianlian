@@ -79,7 +79,9 @@ describe('ProfileScreen', () => {
       const destructive = buttons?.find((b) => b.style === 'destructive');
       destructive?.onPress?.();
     });
-    const { getByText } = render(<ProfileScreen />);
+    const { getByText, getByTestId } = render(<ProfileScreen />);
+    // testID守卫: 退出登录锚点必须是prop而非children(F3688回归)
+    expect(getByTestId('profile-logout-btn')).toBeTruthy();
     fireEvent.press(getByText('退出登录'));
     await waitFor(() => expect(logout).toHaveBeenCalledTimes(1));
     alertSpy.mockRestore();

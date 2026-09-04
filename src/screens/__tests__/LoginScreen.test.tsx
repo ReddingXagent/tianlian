@@ -37,12 +37,16 @@ describe('LoginScreen', () => {
   });
 
   it('渲染logo与登录表单', () => {
-    const { getByText, getByPlaceholderText } = render(<LoginScreen />);
+    const { getByText, getByPlaceholderText, getByTestId } = render(<LoginScreen />);
     expect(getByText('天链')).toBeTruthy();
     expect(getByText('站长管理平台')).toBeTruthy();
     expect(getByPlaceholderText('用户名')).toBeTruthy();
     expect(getByPlaceholderText('密码')).toBeTruthy();
     expect(getByText('登录')).toBeTruthy();
+    // testID守卫: 登录表单锚点必须是prop而非children(F3688回归)
+    expect(getByTestId('login-username-input')).toBeTruthy();
+    expect(getByTestId('login-password-input')).toBeTruthy();
+    expect(getByTestId('login-submit-btn')).toBeTruthy();
   });
 
   it('用户名为空时login返回false+error, 弹Alert', async () => {

@@ -147,12 +147,18 @@ describe('WorkOrderScreen', () => {
   });
 
   it('should render status filter chips', async () => {
-    const { findByText } = render(<WorkOrderScreen />);
+    const { findByText, findByTestId } = render(<WorkOrderScreen />);
 
     expect(await findByText('全部')).toBeTruthy();
     expect(await findByText('待处理')).toBeTruthy();
     expect(await findByText('进行中')).toBeTruthy();
     expect(await findByText('已完成')).toBeTruthy();
+    // testID守卫: 筛选chip与列表容器锚点必须是prop而非children(F3688回归)
+    expect(await findByTestId('workorder-filter-all')).toBeTruthy();
+    expect(await findByTestId('workorder-filter-pending')).toBeTruthy();
+    expect(await findByTestId('workorder-filter-in_progress')).toBeTruthy();
+    expect(await findByTestId('workorder-filter-completed')).toBeTruthy();
+    expect(await findByTestId('workorder-list')).toBeTruthy();
   });
 
   it('should show assignee names in order cards', async () => {
@@ -264,10 +270,12 @@ describe('WorkOrderScreen', () => {
   });
 
   it('should open create modal when FAB pressed', async () => {
-    const { findByText, getByText } = render(<WorkOrderScreen />);
+    const { findByText, getByText, findByTestId } = render(<WorkOrderScreen />);
 
     // Wait for list to load
     await findByText('充电桩A-01故障维修');
+    // testID守卫: 创建FAB锚点必须是prop而非children(F3688回归)
+    expect(await findByTestId('workorder-create-btn')).toBeTruthy();
 
     // Find and press FAB (+)
     const fabElement = await findByText('+');
@@ -276,6 +284,14 @@ describe('WorkOrderScreen', () => {
     });
 
     expect(getByText('新建工单')).toBeTruthy();
+    // testID守卫: 创建Modal内表单锚点(F3688回归)
+    expect(await findByTestId('workorder-title-input')).toBeTruthy();
+    expect(await findByTestId('workorder-desc-input')).toBeTruthy();
+    expect(await findByTestId('workorder-type-repair')).toBeTruthy();
+    expect(await findByTestId('workorder-type-maintenance')).toBeTruthy();
+    expect(await findByTestId('workorder-priority-low')).toBeTruthy();
+    expect(await findByTestId('workorder-priority-urgent')).toBeTruthy();
+    expect(await findByTestId('workorder-submit-btn')).toBeTruthy();
   });
 
   it('should create work order successfully', async () => {

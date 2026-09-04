@@ -165,7 +165,7 @@ describe('DeviceDetailScreen', () => {
   });
 
   it('should execute control, call API and record a success log on confirm', async () => {
-    const { findByText } = render(<DeviceDetailScreen />);
+    const { findByText, queryByTestId } = render(<DeviceDetailScreen />);
 
     await findByText('远程控制');
     fireEvent.press(await findByText('停止'));
@@ -179,6 +179,8 @@ describe('DeviceDetailScreen', () => {
     // 操作日志写入成功记录
     expect(await findByText('停止指令已发送')).toBeTruthy();
     expect(await findByText('成功')).toBeTruthy();
+    // testID守卫: 清空日志按钮仅在日志非空时渲染, 且必须是prop而非children(F3688回归)
+    expect(queryByTestId('devicedetail-clear-logs-btn')).toBeTruthy();
   });
 
   it('formatLogTime falls back to raw dateStr when toLocaleString throws (F187)', async () => {

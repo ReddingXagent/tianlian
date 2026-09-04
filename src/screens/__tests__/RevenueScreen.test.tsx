@@ -104,11 +104,15 @@ describe('RevenueScreen', () => {
   });
 
   it('should render period switch buttons', async () => {
-    const { findByText } = render(<RevenueScreen />);
+    const { findByText, findByTestId } = render(<RevenueScreen />);
 
     expect(await findByText('日')).toBeTruthy();
     expect(await findByText('周')).toBeTruthy();
     expect(await findByText('月')).toBeTruthy();
+    // testID守卫: 周期切换锚点必须是prop而非children(F3688回归)
+    expect(await findByTestId('revenue-period-day')).toBeTruthy();
+    expect(await findByTestId('revenue-period-week')).toBeTruthy();
+    expect(await findByTestId('revenue-period-month')).toBeTruthy();
   });
 
   it('should refetch records with new period type when switching', async () => {
@@ -128,7 +132,10 @@ describe('RevenueScreen', () => {
   });
 
   it('should render export button and trigger Share with CSV content', async () => {
-    const { findByText } = render(<RevenueScreen />);
+    const { findByText, findByTestId } = render(<RevenueScreen />);
+
+    // testID守卫: 导出按钮锚点(F3688回归)
+    expect(await findByTestId('revenue-export-btn')).toBeTruthy();
 
     const exportBtn = await findByText(/导出CSV/);
     fireEvent.press(exportBtn);

@@ -154,13 +154,16 @@ describe('NotificationCenterScreen', () => {
   });
 
   it('should render read filter segments (全部 / 未读)', async () => {
-    const { findByText, findAllByText } = render(<NotificationCenterScreen />);
+    const { findByText, findAllByText, findByTestId } = render(<NotificationCenterScreen />);
 
     // 等待列表加载
     await findByText('充电桩A-01温度异常告警');
     // 「全部」出现在已读分段与类型筛选 chip 两处
     expect((await findAllByText('全部')).length).toBe(2);
     expect(await findByText('未读 3')).toBeTruthy();
+    // testID守卫: 已读筛选分段锚点必须是prop而非children(F3688回归)
+    expect(await findByTestId('notification-filter-all')).toBeTruthy();
+    expect(await findByTestId('notification-filter-unread')).toBeTruthy();
   });
 
   it('should filter to unread only when tapping 未读 segment', async () => {
@@ -177,9 +180,16 @@ describe('NotificationCenterScreen', () => {
   });
 
   it('should filter by type when tapping a type chip', async () => {
-    const { findByText, queryByText } = render(<NotificationCenterScreen />);
+    const { findByText, queryByText, findByTestId } = render(<NotificationCenterScreen />);
 
     await findByText('系统维护通知');
+    // testID守卫: 类型筛选chip锚点(F3688回归)
+    expect(await findByTestId('notification-type-all')).toBeTruthy();
+    expect(await findByTestId('notification-type-alarm')).toBeTruthy();
+    expect(await findByTestId('notification-type-work_order')).toBeTruthy();
+    expect(await findByTestId('notification-type-device')).toBeTruthy();
+    expect(await findByTestId('notification-type-revenue')).toBeTruthy();
+    expect(await findByTestId('notification-type-system')).toBeTruthy();
 
     fireEvent.press(await findByText('告警'));
 
