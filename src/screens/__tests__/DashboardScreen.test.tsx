@@ -124,8 +124,13 @@ describe('DashboardScreen', () => {
     useAuthStore.mockReturnValue({ user: { nickname: '站长甲', username: 'zz1' } });
     mockUseDashboard.loading = false;
     mockUseDashboard.stations = [makeStation()];
-    const { getByText } = render(<DashboardScreen />);
+    const { getByText, getByTestId } = render(<DashboardScreen />);
     expect(getByText('快捷操作')).toBeTruthy();
+    // testID守卫: 快捷操作锚点必须是prop而非children(F3688回归)
+    expect(getByTestId('dashboard-action-stations')).toBeTruthy();
+    expect(getByTestId('dashboard-action-alarms')).toBeTruthy();
+    expect(getByTestId('dashboard-action-workorders')).toBeTruthy();
+    expect(getByTestId('dashboard-action-revenue')).toBeTruthy();
     fireEvent.press(getByText('站点管理'));
     expect(mockNavigate).toHaveBeenCalledWith('Stations');
     fireEvent.press(getByText('告警查看'));
@@ -140,8 +145,12 @@ describe('DashboardScreen', () => {
     useAuthStore.mockReturnValue({ user: { nickname: '站长甲', username: 'zz1' } });
     mockUseDashboard.loading = false;
     mockUseDashboard.stations = [makeStation(), makeStation({ id: 2, name: '充电站B', address: '上海市徐汇区', status: 'offline' })];
-    const { getByText } = render(<DashboardScreen />);
+    const { getByText, getByTestId } = render(<DashboardScreen />);
     expect(getByText('充电站A')).toBeTruthy();
+    // testID守卫: 站点预览卡片与查看全部锚点(F3688回归)
+    expect(getByTestId('dashboard-station-1')).toBeTruthy();
+    expect(getByTestId('dashboard-station-2')).toBeTruthy();
+    expect(getByTestId('dashboard-see-all-stations')).toBeTruthy();
     fireEvent.press(getByText('充电站B'));
     expect(mockNavigate).toHaveBeenCalledWith('StationDetail', { stationId: 2 });
     fireEvent.press(getByText('查看全部 →'));
