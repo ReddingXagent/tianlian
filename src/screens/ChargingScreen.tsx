@@ -306,7 +306,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   statusHintText: {
     fontSize: 12,
-    color: '#8d6e00',
+    color: colors.warningAmber,
     textAlign: 'center',
   },
 });
