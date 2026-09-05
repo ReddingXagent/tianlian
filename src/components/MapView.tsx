@@ -33,8 +33,8 @@ const MapView: React.FC<MapViewProps> = ({
   onStationPress,
   height = 300,
 }) => {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   if (!stations || stations.length === 0) {
     return (
       <View style={[styles.container, { height }]}>
@@ -169,12 +169,12 @@ function getStationPosition(index: number, total: number): { x: number; y: numbe
   };
 }
 
-const createStyles = (colors: ThemeColors) =>
+const createStyles = (colors: ThemeColors, isDark: boolean) =>
   StyleSheet.create({
   container: {
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#e8f5e9',
+    backgroundColor: isDark ? colors.neutralBg : colors.successBg,
   },
   emptyMap: {
     flex: 1,
@@ -196,7 +196,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   gridLine: {
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
   },
   gridLineHorizontal: {
     left: 0,
@@ -214,7 +214,7 @@ const createStyles = (colors: ThemeColors) =>
     right: 10,
     fontSize: 16,
     fontWeight: '700',
-    color: 'rgba(0,0,0,0.3)',
+    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)',
   },
   marker: {
     position: 'absolute',
@@ -231,7 +231,7 @@ const createStyles = (colors: ThemeColors) =>
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: isDark ? colors.cardBg : '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -252,7 +252,7 @@ const createStyles = (colors: ThemeColors) =>
     color: colors.textPrimary,
     fontWeight: '600',
     marginTop: 2,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: isDark ? 'rgba(30,30,30,0.92)' : 'rgba(255,255,255,0.9)',
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 2,
@@ -264,14 +264,14 @@ const createStyles = (colors: ThemeColors) =>
   markerDistance: {
     fontSize: 9,
     color: colors.textSecondary,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: isDark ? 'rgba(30,30,30,0.88)' : 'rgba(255,255,255,0.8)',
     paddingHorizontal: 3,
     borderRadius: 2,
   },
   legend: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.9)',
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
