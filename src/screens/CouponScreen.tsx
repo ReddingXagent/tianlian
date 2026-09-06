@@ -159,7 +159,7 @@ const createStyles = (colors: ThemeColors) =>
   footerText: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#bbb',
+    color: colors.textMuted,
     marginVertical: 12,
   },
 });

@@ -235,7 +235,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   recordTime: {
     fontSize: 11,
-    color: '#bbb',
+    color: colors.textMuted,
   },
   recordRight: {
     alignItems: 'flex-end',
@@ -247,7 +247,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   recordBalance: {
     fontSize: 11,
-    color: '#bbb',
+    color: colors.textMuted,
     marginTop: 2,
   },
   footer: {
@@ -256,7 +256,7 @@ const createStyles = (colors: ThemeColors) =>
   footerText: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#bbb',
+    color: colors.textMuted,
     marginVertical: 12,
   },
 });

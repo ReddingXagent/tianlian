@@ -266,7 +266,7 @@ const createStyles = (colors: ThemeColors) =>
   },
   orderTime: {
     fontSize: 12,
-    color: '#bbb',
+    color: colors.textMuted,
   },
   footer: {
     marginVertical: 12,
@@ -274,7 +274,7 @@ const createStyles = (colors: ThemeColors) =>
   footerText: {
     textAlign: 'center',
     fontSize: 12,
-    color: '#bbb',
+    color: colors.textMuted,
     marginVertical: 12,
   },
 });
