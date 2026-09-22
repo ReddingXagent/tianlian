@@ -5,3 +5,6 @@ dist/
 *.keystore
 .env
 coverage/
+
+# Understand Anything skill artifacts
+.ua/
