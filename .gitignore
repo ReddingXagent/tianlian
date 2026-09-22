@@ -11,3 +11,6 @@ coverage.json
 .pid
 .watchdog.lock
 gateway.log
+
+# Understand Anything skill artifacts
+.ua/
