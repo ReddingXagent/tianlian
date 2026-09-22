@@ -11,3 +11,5 @@ npm-debug.*
 *.orig.*
 web-build/
 .DS_Store
+# Understand Anything skill artifacts
+.ua/
