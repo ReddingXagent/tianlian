@@ -64,7 +64,8 @@ jobs:
       # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
       - run: npm run typecheck
       - run: npm run lint
-      - run: npm test -- --coverage --ci --reporters=default
+      # --runInBand: 顺序执行防并行 act() 资源争抢假红 (F399, 2026-09-22 本地复现: 并行 1/1614 fail, 顺序全绿)
+      - run: npm test -- --runInBand --coverage --ci --reporters=default
       - run: npm run doctor
 
   export:
