@@ -6,3 +6,6 @@ dist/
 .env
 coverage/
 report/jscpd-report.json
+
+# Understand Anything skill artifacts
+.ua/
