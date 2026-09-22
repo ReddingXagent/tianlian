@@ -8,7 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --verbose",
-    "test:ci": "jest --verbose --ci --coverage",
+    "test:ci": "jest --verbose --ci --coverage --runInBand",
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:ci": "eslint . --max-warnings=0",
