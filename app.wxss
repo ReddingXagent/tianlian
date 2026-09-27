@@ -59,6 +59,7 @@ page {
     --danger-bg: #3a1a24;
     --shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.4);
   }
+}  /* F3602 dark-mode block close — 原缺失致 @media 吞没后续全部规则, WXSS 317:1 unexpected EOF */
 
 /* === 通用容器 === */
 .container {
