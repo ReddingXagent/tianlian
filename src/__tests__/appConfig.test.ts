@@ -5,7 +5,7 @@ import pkgJson from '../../package.json';
 
 /**
  * app.json 构建配置回归守卫(移植 user-app F179/F196 同型守卫, 接入门禁: jest全量跑)
- * - platforms 限定 android+ios (F179: 裸export曾误挂web)
+ * - platforms 限定 android+ios+web (F179: 裸export曾误挂web; 2026-09-24 丁哥开 web 调试通道, web 为有意保留)
  * - plugins↔deps 双源对账: 每个 plugin 必有已装 dep(缺=export/prebuild直接炸);
  *   已知原生模块 dep 必声明 plugin(缺=原生配置静默缺口, F196反向)
  * - android.package === ios.bundleIdentifier: 应用唯一标识同语义双源,
@@ -21,8 +21,8 @@ describe('app.json 构建配置回归守卫', () => {
     (expo.plugins as (string | [string, unknown])[]) || []
   ).map((p) => (Array.isArray(p) ? p[0] : p));
 
-  it('platforms 限定 android+ios(防误挂 web)', () => {
-    expect(expo.platforms).toEqual(['android', 'ios']);
+  it('platforms 限定 android+ios+web(web 为调试通道, 2026-09-24 有意开启)', () => {
+    expect(expo.platforms).toEqual(['android', 'ios', 'web']);
   });
 
   it('每个 plugin 都有对应依赖(缺则 export/prebuild 直接失败)', () => {
