@@ -152,7 +152,9 @@ describe('authApi', () => {
     };
     const apiResponse = { code: 0, message: 'success', data: responseData };
 
-    mockAxios.onPost('/auth/login', loginData).reply(200, apiResponse);
+    // F: 2026-09-30 login 改 OAuth2 form-encoded(真云只收表单), mock 匹配体也同步为 URLSearchParams 字符串
+    const formBody = new URLSearchParams(loginData).toString();
+    mockAxios.onPost('/auth/login', formBody).reply(200, apiResponse);
 
     const result = await authApi.login(loginData);
     expect(result).toEqual(apiResponse);

@@ -16,7 +16,11 @@ import {
 
 export const authApi = {
   login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    return api.post('/auth/login', data).then((res) => res.data);
+    // 真云 (Django) /auth/login 只收 OAuth2 form-urlencoded; JSON 一律 422 (F: 2026-09-30 真云实测)
+    const form = new URLSearchParams({ username: data.username, password: data.password });
+    return api
+      .post('/auth/login', form.toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+      .then((res) => res.data);
   },
   logout(): Promise<ApiResponse<null>> {
     return api.post('/auth/logout').then((res) => res.data);
