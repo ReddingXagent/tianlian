@@ -1,5 +1,6 @@
 """Local debug API server (FastAPI)"""
 
+import json
 import logging
 import os
 import secrets
@@ -12,6 +13,7 @@ from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 
 from config import LocalAPIConfig
+from device_params import DeviceParamStore
 from storage.cache import TelemetryCache
 
 logger = logging.getLogger(__name__)
@@ -46,6 +48,7 @@ _device_count: int = 0
 _latest_telemetry: dict = {}
 _modbus_adapter = None
 _ocpp_adapter = None
+_device_params: DeviceParamStore | None = None
 
 
 # ── Pydantic Models ──────────────────────────────────────────────────────
@@ -77,6 +80,22 @@ class CacheStatsResponse(BaseModel):
     db_path: str
 
 
+class DeviceParamsPayload(BaseModel):
+    """设备参数保存/下发请求体"""
+    protocol: str | None = Field(default=None, description="通讯协议: modbus-tcp/modbus-rtu/ocpp1.6/ocpp2.0/mqtt")
+    config: dict = Field(default_factory=dict, description="参数键值对（适配器参数区）")
+
+
+class ParamDeployResponse(BaseModel):
+    """参数下发结果"""
+    device_id: str
+    success: bool
+    simulated: bool = False
+    protocol: str | None = None
+    written: dict = Field(default_factory=dict)
+    detail: str = ""
+
+
 def create_app(
     cache: TelemetryCache,
     start_time: float,
@@ -87,6 +106,7 @@ def create_app(
     telemetry_count_callback=None,
     alarm_count_callback=None,
     cloud_push_callback=None,
+    device_param_store: DeviceParamStore | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application.
 
@@ -98,11 +118,12 @@ def create_app(
         modbus_adapter: ModbusAdapter instance for debug injection.
         ocpp_adapter: OCPPAdapter instance for debug injection.
     """
-    global _cache, _start_time, _modbus_adapter, _ocpp_adapter
+    global _cache, _start_time, _modbus_adapter, _ocpp_adapter, _device_params
     _cache = cache
     _start_time = start_time
     _modbus_adapter = modbus_adapter
     _ocpp_adapter = ocpp_adapter
+    _device_params = device_param_store
 
     app = FastAPI(
         title="天链V3 Edge Gateway API",
@@ -361,6 +382,102 @@ def create_app(
             "cache": cache_stats,
             "timestamp": time.time(),
         }
+
+    # ── Device Params (参数下发/校验 — 云端联动) ───────────────────────
+
+    @app.get("/api/v1/devices/{device_id}/params")
+    async def get_device_params(device_id: str):
+        """查询设备参数绑定与下发/校验状态"""
+        if not _device_params:
+            raise HTTPException(status_code=503, detail="DeviceParamStore not initialized")
+        data = _device_params.get(device_id)
+        if not data:
+            raise HTTPException(status_code=404, detail=f"设备 {device_id} 无参数绑定，先 PUT 保存")
+        return {"data": data}
+
+    @app.put("/api/v1/devices/{device_id}/params")
+    async def save_device_params(device_id: str, payload: DeviceParamsPayload, _auth: str = Depends(require_api_key)):
+        """保存设备参数绑定（draft 状态，不触发下发）"""
+        if not _device_params:
+            raise HTTPException(status_code=503, detail="DeviceParamStore not initialized")
+        try:
+            data = _device_params.save(device_id, protocol=payload.protocol, config=payload.config)
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        return {"data": data}
+
+    @app.post("/api/v1/devices/{device_id}/params/deploy", response_model=ParamDeployResponse)
+    async def deploy_device_params(device_id: str, _auth: str = Depends(require_api_key)):
+        """参数下发：把已保存参数写入设备（协议适配器执行）"""
+        if not _device_params:
+            raise HTTPException(status_code=503, detail="DeviceParamStore not initialized")
+        binding = _device_params.get(device_id)
+        if not binding:
+            raise HTTPException(status_code=404, detail=f"设备 {device_id} 无参数绑定，先 PUT 保存")
+        protocol = binding.get("protocol") or ""
+        config: dict = binding.get("config") or {}
+        if not config:
+            raise HTTPException(status_code=422, detail="参数集为空，无可下发内容")
+
+        if protocol.startswith("modbus"):
+            if _modbus_adapter is None:
+                raise HTTPException(status_code=503, detail="Modbus adapter not running")
+            try:
+                result = await _modbus_adapter.write_params(config)
+                _device_params.mark_deployed(device_id, ok=True, detail=json.dumps(result, ensure_ascii=False))
+                return ParamDeployResponse(
+                    device_id=device_id, success=True, simulated=result["simulated"],
+                    protocol=protocol, written=result["written"],
+                )
+            except (ValueError, RuntimeError) as e:
+                _device_params.mark_deployed(device_id, ok=False, detail=str(e))
+                return ParamDeployResponse(device_id=device_id, success=False, protocol=protocol, detail=str(e))
+        # ocpp1.6/ocpp2.0/mqtt: 下发通道待云端方案定稿后接入
+        raise HTTPException(
+            status_code=501,
+            detail=f"协议 {protocol or '(未指定)'} 暂不支持参数下发；当前支持: modbus-tcp, modbus-rtu",
+        )
+
+    @app.post("/api/v1/devices/{device_id}/params/verify")
+    async def verify_device_params(device_id: str, _auth: str = Depends(require_api_key)):
+        """参数校验：读回设备实际参数与期望值比对，生成差异报告"""
+        if not _device_params:
+            raise HTTPException(status_code=503, detail="DeviceParamStore not initialized")
+        binding = _device_params.get(device_id)
+        if not binding:
+            raise HTTPException(status_code=404, detail=f"设备 {device_id} 无参数绑定")
+        protocol = binding.get("protocol") or ""
+        expected: dict = binding.get("config") or {}
+        if not expected:
+            raise HTTPException(status_code=422, detail="参数集为空，无可校验内容")
+
+        if protocol.startswith("modbus"):
+            if _modbus_adapter is None:
+                raise HTTPException(status_code=503, detail="Modbus adapter not running")
+            try:
+                actual = await _modbus_adapter.read_params(list(expected.keys()))
+            except (ValueError, RuntimeError) as e:
+                return {"device_id": device_id, "error": str(e)}
+            diff = []
+            for key, want in expected.items():
+                got = actual.get(key, {}).get("value")
+                matched = (got == want) or (isinstance(want, (int, float)) and isinstance(got, (int, float)) and abs(float(got) - float(want)) < 1e-6)
+                diff.append({"key": key, "expected": want, "actual": got, "match": matched,
+                             "raw": actual.get(key, {}).get("raw")})
+            result = {
+                "device_id": device_id,
+                "protocol": protocol,
+                "match": all(d["match"] for d in diff),
+                "simulated": any(v.get("simulated") for v in actual.values()),
+                "diff": diff,
+                "verified_at": time.time(),
+            }
+            _device_params.mark_verified(device_id, result)
+            return {"data": result}
+        raise HTTPException(
+            status_code=501,
+            detail=f"协议 {protocol or '(未指定)'} 暂不支持参数校验；当前支持: modbus-tcp, modbus-rtu",
+        )
 
     return app
 

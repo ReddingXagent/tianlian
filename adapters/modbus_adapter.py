@@ -10,7 +10,7 @@ import contextlib
 import logging
 import random
 from collections.abc import Callable
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from config import ModbusConfig
 from models import TelemetryPoint
@@ -327,6 +327,100 @@ class ModbusAdapter:
         self._emit_alarm(alarm_type, message)
 
     # ── Helpers ───────────────────────────────────────────────────────
+
+    # ── Parameter Deploy/Verify (参数下发/校验) ─────────────────────
+    # 参数寄存器区: address 100+（与遥测区 0-5 隔离）
+    PARAM_REGISTER_MAP: ClassVar[dict[str, int]] = {
+        "voltage_limit": 100,        # V, ×10
+        "current_limit": 101,        # A, ×10
+        "max_power": 102,            # kW, ×10
+        "charge_mode": 103,          # enum: 0=standard 1=fast 2=trickle
+        "overload_protection": 104,  # 0/1
+    }
+    _PARAM_SCALE: ClassVar[dict[str, int]] = {"voltage_limit": 10, "current_limit": 10, "max_power": 10}
+    _CHARGE_MODE_ENUM: ClassVar[dict[str, int]] = {"standard": 0, "fast": 1, "trickle": 2}
+    _CHARGE_MODE_NAMES: ClassVar[dict[int, str]] = {0: "standard", 1: "fast", 2: "trickle"}
+
+    def _encode_param(self, key: str, value) -> int:
+        """参数值 → 寄存器原始值"""
+        if key == "charge_mode":
+            if isinstance(value, str):
+                if value not in self._CHARGE_MODE_ENUM:
+                    raise ValueError(f"charge_mode 非法: {value}")
+                return self._CHARGE_MODE_ENUM[value]
+            return int(value)
+        if key == "overload_protection":
+            return 1 if value else 0
+        return int(float(value) * self._PARAM_SCALE.get(key, 1))
+
+    def _decode_param(self, key: str, raw: int):
+        """寄存器原始值 → 参数值"""
+        if key == "charge_mode":
+            return self._CHARGE_MODE_NAMES.get(raw, str(raw))
+        if key == "overload_protection":
+            return bool(raw)
+        return raw / self._PARAM_SCALE.get(key, 1)
+
+    def _ensure_param_shadow(self) -> dict[int, int]:
+        if not hasattr(self, "_param_shadow"):
+            self._param_shadow: dict[int, int] = {}
+        return self._param_shadow
+
+    async def write_params(self, values: dict) -> dict:
+        """参数下发: 写保持寄存器。真实模式走 pymodbus, 未连接/模拟模式写影子寄存器。
+
+        Returns: {"simulated": bool, "written": {key: address}, "raw": {key: int}}
+        """
+        unknown = [k for k in values if k not in self.PARAM_REGISTER_MAP]
+        if unknown:
+            raise ValueError(f"未知参数: {unknown}（支持: {list(self.PARAM_REGISTER_MAP)}）")
+        raw_values = {k: self._encode_param(k, v) for k, v in values.items()}
+        shadow = self._ensure_param_shadow()
+
+        if not self._connected or self._client is None:
+            shadow.update({self.PARAM_REGISTER_MAP[k]: v for k, v in raw_values.items()})
+            return {
+                "simulated": True,
+                "written": {k: self.PARAM_REGISTER_MAP[k] for k in raw_values},
+                "raw": raw_values,
+            }
+
+        for key, raw in raw_values.items():
+            rr = await self._client.write_register(self.PARAM_REGISTER_MAP[key], raw)
+            if rr.isError():
+                raise RuntimeError(f"写入寄存器失败 {key}@{self.PARAM_REGISTER_MAP[key]}: {rr}")
+            shadow[self.PARAM_REGISTER_MAP[key]] = raw
+        return {
+            "simulated": False,
+            "written": {k: self.PARAM_REGISTER_MAP[k] for k in raw_values},
+            "raw": raw_values,
+        }
+
+    async def read_params(self, keys: list[str] | None = None) -> dict:
+        """参数读回: 读保持寄存器并解码（用于校验）。模拟模式从影子寄存器读。"""
+        keys = keys or list(self.PARAM_REGISTER_MAP)
+        unknown = [k for k in keys if k not in self.PARAM_REGISTER_MAP]
+        if unknown:
+            raise ValueError(f"未知参数: {unknown}")
+        shadow = self._ensure_param_shadow()
+
+        result: dict[str, Any] = {}
+        if not self._connected or self._client is None:
+            for k in keys:
+                addr = self.PARAM_REGISTER_MAP[k]
+                raw = shadow.get(addr)
+                result[k] = {"value": self._decode_param(k, raw) if raw is not None else None,
+                             "raw": raw, "simulated": True}
+            return result
+
+        for k in keys:
+            addr = self.PARAM_REGISTER_MAP[k]
+            rr = await self._client.read_holding_registers(addr, 1)
+            if rr.isError():
+                raise RuntimeError(f"读取寄存器失败 {k}@{addr}: {rr}")
+            raw = int(rr.registers[0])
+            result[k] = {"value": self._decode_param(k, raw), "raw": raw, "simulated": False}
+        return result
 
     def _emit_alarm(self, alarm_type: str, message: str) -> None:
         """Emit an alarm through the registered callback"""

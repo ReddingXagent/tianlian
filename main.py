@@ -51,6 +51,7 @@ from adapters.mqtt_client import MQTTClient
 from adapters.ocpp_adapter import OCPPAdapter
 from api.server import create_app, run_api
 from config import GatewayConfig
+from device_params import DeviceParamStore
 from models import TelemetryPoint
 from storage.cache import TelemetryCache
 
@@ -105,6 +106,7 @@ class EdgeGateway:
 
         # Components (initialized in start())
         self.cache: TelemetryCache | None = None
+        self.device_params: DeviceParamStore | None = None
         self.modbus: ModbusAdapter | None = None
         self.ocpp: OCPPAdapter | None = None
         self.mqtt: MQTTClient | None = None
@@ -128,6 +130,7 @@ class EdgeGateway:
 
         # 1. Initialize local cache
         self.cache = TelemetryCache(self.config.storage)
+        self.device_params = DeviceParamStore(self.config.storage.db_path)
         self.logger.info("Telemetry cache initialized (db=%s)", self.config.storage.db_path)
 
         # 2. Initialize adapters
@@ -187,6 +190,7 @@ class EdgeGateway:
                 "push_total": self._cloud_push_count,
                 "push_failures": self._cloud_push_failures,
             },
+            device_param_store=self.device_params,
         )
         self._api_task = asyncio.create_task(run_api(self.config.local_api, app))
 
