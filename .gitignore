@@ -13,3 +13,7 @@ web-build/
 .DS_Store
 # Understand Anything skill artifacts
 .ua/
+
+# local env overrides (EXPO_PUBLIC_* dev URLs)
+.env
+.env.*
