@@ -3,8 +3,9 @@
  * 请求出口↔URL声明单一源对账守卫 (F292, 2026-08-05 猴王自驱lint轮)
  *
  * 小程序网络栈无任何编译期约束: wx.request 随处可调, URL 字面量随处可写。
- * 本仓既定架构: services/api.js 是唯一请求出口(统一 token 注入/超时/重试/
- * {code,message,data}信封解析/错误提示), config/index.js 是唯一 URL 声明源
+ * 本仓既定架构: services/modules/client.js 是唯一请求出口(统一 token 注入/超时/
+ * 重试/{code,message,data}信封解析/错误提示; 原 services/api.js 单体拆分为
+ * barrel+modules 后请求实现移入 client.js), config/index.js 是唯一 URL 声明源
  * (dev/staging/prod 三环境 API_BASE_URL)。两类静默漂移:
  *   ① 出口旁路: 页面/组件直调 wx.request/wx.uploadFile/wx.downloadFile →
  *      绕过 token 注入(鉴权静默失败)+绕过信封解析(拿到裸response误当data)+
@@ -40,7 +41,7 @@ const SCAN_DIRS = ['pages', 'components', 'services', 'utils', 'config'];
 const EXCLUDE_DIRS = new Set(['node_modules', 'scripts', 'coverage', 'dist', 'build', 'miniprogram_npm', '__tests__']);
 
 // 唯一允许的请求出口文件(项目根相对, posix 分隔符)
-const ALLOWED_REQUEST_FILES = ['services/api.js'];
+const ALLOWED_REQUEST_FILES = ['services/modules/client.js'];
 // 唯一允许的 URL 字面量声明文件
 const ALLOWED_URL_FILES = ['config/index.js'];
 
@@ -142,7 +143,7 @@ for (const f of files) {
 }
 
 if (requestSites.length === 0) {
-  console.error('❌ 提取器失效信号: 全仓零个 wx.request/uploadFile/downloadFile 调用点 (services/api.js 应至少有一处)');
+  console.error('❌ 提取器失效信号: 全仓零个 wx.request/uploadFile/downloadFile 调用点 (services/modules/client.js 应至少有一处)');
   process.exit(1);
 }
 if (urlSites.length === 0) {
