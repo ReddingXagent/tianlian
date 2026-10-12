@@ -34,7 +34,7 @@ fi
 PLUGINS="$(node -p '(require("./app.json").expo.plugins || []).map(x => Array.isArray(x) ? x[0] : x).join("\n")')"
 
 # 使用形态3: 运行时隐式原生依赖白名单 — dep=原因 (每项必须带原因, 禁空条目)
-ALLOWLIST="react-native-screens=@react-navigation运行时原生桥(enableScreens由navigation自动初始化, 零代码import, 移除=导航运行期崩溃);expo=Expo框架CLI/运行时(经package.json scripts的expo start/export等命令消费, 零代码import, 移除=工程不可运行)"
+ALLOWLIST="react-native-screens=@react-navigation运行时原生桥(enableScreens由navigation自动初始化, 零代码import, 移除=导航运行期崩溃);expo=Expo框架CLI/运行时(经package.json scripts的expo start/export等命令消费, 零代码import, 移除=工程不可运行);@expo/metro-runtime=expo web运行时(async-chunk/import.meta注册, app.json platforms含web后由expo/metro隐式消费, 零代码import, 移除=web调试通道崩溃, 352972c);react-dom=web平台DOM渲染宿主(react-native-web的peer运行时, 零代码import, 移除=web构建崩溃, 352972c);react-native-web=RN转Web别名层(app.json platforms含web后由expo模块别名隐式消费, 零代码import, 移除=web构建崩溃, 352972c)"
 
 # 使用形态1的检索文件集: 全部受版控 ts/tsx/js, 排除 scripts/ (守卫脚本自身含dep字面量会自引用误报)
 FILES="$(git ls-files '*.ts' '*.tsx' '*.js' | grep -v '^scripts/' || true)"
