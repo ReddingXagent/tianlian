@@ -24,8 +24,10 @@
  *
  * 豁免清单 (自有 schema, 非 mp 页面配置键域): package.json/package-lock.json
  * (npm), project.config.json/project.private.config.json (开发者工具),
- * sitemap.json (微信索引规则 rules[]), node_modules/miniprogram_npm/coverage/
- * __tests__ (依赖与测试脚手架, F292 口径)。
+ * sitemap.json (微信索引规则 rules[]), theme.json (darkmode主题变量文件,
+ * app.json themeLocation引用, 自有schema: light/dark两主题×导航/背景/tab键域),
+ * node_modules/miniprogram_npm/coverage/__tests__ (依赖与测试脚手架, F292 口径),
+ * .ua (gitignored Understand-Anything skill artifacts, 非工程内容).
  */
 'use strict';
 
@@ -98,10 +100,10 @@ const ENUMS = {
 // 非 mp 页面配置键域 json, 自有 schema (见文件头豁免清单)
 const EXEMPT_FILES = new Set([
   'package.json', 'package-lock.json', 'project.config.json',
-  'project.private.config.json', 'sitemap.json',
+  'project.private.config.json', 'sitemap.json', 'theme.json',
 ]);
 const EXEMPT_DIRS = new Set([
-  'node_modules', 'miniprogram_npm', 'coverage', '__tests__', '.git',
+  'node_modules', 'miniprogram_npm', 'coverage', '__tests__', '.git', '.ua',
 ]);
 
 function walkJsonFiles(dir, rel = '') {
@@ -144,6 +146,62 @@ if (!Array.isArray(appConfig.pages) || appConfig.pages.length === 0) {
 }
 const registeredPages = new Set(appConfig.pages);
 
+// darkmode 主题变量引用解析 (微信官方能力: "darkmode": true + "themeLocation" 时,
+// 配置值可用 "@key" 引用 theme.json light/dark 主题变量; 拼错键名=静默回退默认, F311同族)
+let themeVars = null;
+if (appConfig.darkmode === true && typeof appConfig.themeLocation === 'string') {
+  const themePath = path.join(ROOT, appConfig.themeLocation);
+  let parsed;
+  if (!fs.existsSync(themePath)) {
+    errors.push(`themeLocation "${appConfig.themeLocation}" 指向的文件不存在 (darkmode引用将静默回退默认)`);
+  } else {
+    try {
+      parsed = JSON.parse(fs.readFileSync(themePath, 'utf8'));
+    } catch (e) {
+      errors.push(`${appConfig.themeLocation} 解析失败: ${e.message}`);
+    }
+  }
+  if (parsed && typeof parsed === 'object' &&
+      parsed.light && typeof parsed.light === 'object' &&
+      parsed.dark && typeof parsed.dark === 'object') {
+    themeVars = parsed;
+  } else if (parsed !== undefined) {
+    errors.push(`${appConfig.themeLocation} 结构异常: 需要 light/dark 两主题对象`);
+  }
+}
+
+// 枚举字段值合法判定: 直接值 ∈ 值域, 或 "@变量" 引用且 theme.json light/dark 同名存在且均在值域
+function enumValueOk(enumPath, value, legal) {
+  if (legal.includes(value)) return true;
+  if (typeof value === 'string' && value.startsWith('@') && themeVars) {
+    const key = value.slice(1);
+    const lv = themeVars.light[key];
+    const dv = themeVars.dark[key];
+    if (lv === undefined || dv === undefined) {
+      errors.push(`app.json ${enumPath}="${value}" 主题变量在 ${appConfig.themeLocation} light/dark 缺失`);
+      return false;
+    }
+    if (!legal.includes(lv) || !legal.includes(dv)) {
+      errors.push(`app.json ${enumPath}="${value}" 主题变量值超值域 (light:"${lv}", dark:"${dv}", 合法: ${legal.join('|')})`);
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+// 全部 @引用键与 theme.json 对账 (拼写错误=静默回退默认)
+if (themeVars) {
+  for (const [scope, obj] of [['window', appConfig.window], ['tabBar', appConfig.tabBar]]) {
+    for (const [k, v] of Object.entries(obj || {})) {
+      const key = typeof v === 'string' && v.startsWith('@') ? v.slice(1) : null;
+      if (key && (themeVars.light[key] === undefined || themeVars.dark[key] === undefined)) {
+        errors.push(`app.json ${scope}.${k} 引用主题变量 "${key}" 在 ${appConfig.themeLocation} light/dark 缺失 (静默回退默认)`);
+      }
+    }
+  }
+}
+
 // A. app.json 顶层键
 for (const key of Object.keys(appConfig)) {
   if (!APP_KEYS.has(key)) {
@@ -161,8 +219,8 @@ if (appConfig.window !== undefined) {
         errors.push(`app.json window 未知键 "${key}" (静默忽略)`);
       }
       const enumPath = `window.${key}`;
-      if (ENUMS[enumPath] && !ENUMS[enumPath].includes(appConfig.window[key])) {
-        errors.push(`app.json window.${key}="${appConfig.window[key]}" 非法值 (合法: ${ENUMS[enumPath].join('|')}, 非法值静默回退默认)`);
+      if (ENUMS[enumPath] && !enumValueOk(enumPath, appConfig.window[key], ENUMS[enumPath])) {
+        errors.push(`app.json window.${key}="${appConfig.window[key]}" 非法值 (合法: ${ENUMS[enumPath].join('|')} 或 @主题变量引用, 非法值静默回退默认)`);
       }
     }
   }
@@ -177,8 +235,8 @@ if (appConfig.tabBar !== undefined) {
       if (!TABBAR_KEYS.has(key)) {
         errors.push(`app.json tabBar 未知键 "${key}" (静默忽略)`);
       }
-      if (ENUMS[`tabBar.${key}`] && !ENUMS[`tabBar.${key}`].includes(appConfig.tabBar[key])) {
-        errors.push(`app.json tabBar.${key}="${appConfig.tabBar[key]}" 非法值 (合法: ${ENUMS[`tabBar.${key}`].join('|')})`);
+      if (ENUMS[`tabBar.${key}`] && !enumValueOk(`tabBar.${key}`, appConfig.tabBar[key], ENUMS[`tabBar.${key}`])) {
+        errors.push(`app.json tabBar.${key}="${appConfig.tabBar[key]}" 非法值 (合法: ${ENUMS[`tabBar.${key}`].join('|')} 或 @主题变量引用)`);
       }
     }
     const list = appConfig.tabBar.list;
