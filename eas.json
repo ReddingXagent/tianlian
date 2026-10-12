@@ -20,7 +20,7 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.tianlian-charge.com/api/v1"
+        "EXPO_PUBLIC_API_URL": "http://8.134.106.166/api/v1"
       }
     }
   },
