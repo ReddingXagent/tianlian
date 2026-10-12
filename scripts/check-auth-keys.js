@@ -2,8 +2,8 @@
 /**
  * auth存储键双源对账守卫 (F240, 2026-08-04 猴王自驱lint轮)
  *
- * 漂移场景: 'token'/'userInfo' 存储键名在 app.js(boot恢复侧) 与 services/api.js
- * (登录写入侧) 双源硬编码字面量, 无任何断言。任一侧单独改名(如 api.js 改写
+ * 漂移场景: 'token'/'userInfo' 存储键名在 app.js(boot恢复侧) 与 services 认证层
+ * (登录写入侧, 原services/api.js单体→拆分后写入散布 modules/*) 双源硬编码字面量, 无任何断言。任一侧单独改名(如 api.js 改写
  * 'authToken')→ boot恢复读旧键静默落空 → 用户持有有效token却被静默登出(半登录态
  * 漂移, F224双源漂移同族; eslint守卫F214只挡认证层外的直读写, 层内双源漂移不设防)。
  *
@@ -27,7 +27,18 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const APP_FILE = path.join(ROOT, 'app.js');
-const API_FILE = path.join(ROOT, 'services', 'api.js');
+const SERVICES_DIR = path.join(ROOT, 'services');
+
+// 写入侧提取范围: services/** 递归 .js (api.js barrel + modules/*, 排除 __tests__)
+// 背景: api.js 拆分为12模块+barrel后, storage写入移入 modules/auth.js 等模块,
+// 单文件提取源过时会导致提取空→守卫误报(F212提取空不放行), 故改为目录递归提取
+function listServiceFiles(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) return e.name === '__tests__' ? [] : listServiceFiles(p);
+    return e.name.endsWith('.js') ? [p] : [];
+  });
+}
 
 function extractStorageKeys(file) {
   if (!fs.existsSync(file)) {
@@ -47,23 +58,26 @@ function extractStorageKeys(file) {
 }
 
 const appKeys = extractStorageKeys(APP_FILE);
-const apiKeys = extractStorageKeys(API_FILE);
+const apiKeys = new Set();
+for (const f of listServiceFiles(SERVICES_DIR)) {
+  for (const k of extractStorageKeys(f)) apiKeys.add(k);
+}
 
 if (appKeys.size === 0) {
   console.error('❌ app.js 未提取到任何 storage 键(提取逻辑失效或文件结构突变)');
   process.exit(1);
 }
 if (apiKeys.size === 0) {
-  console.error('❌ services/api.js 未提取到任何 storage 键(提取逻辑失效或文件结构突变)');
+  console.error('❌ services/** 未提取到任何 storage 键(提取逻辑失效或文件结构突变)');
   process.exit(1);
 }
 
 const missing = [...appKeys].filter((k) => !apiKeys.has(k));
 if (missing.length > 0) {
-  console.error(`❌ auth存储键双源漂移: app.js 使用的键 ${JSON.stringify(missing)} 未在 services/api.js 中出现`);
+  console.error(`❌ auth存储键双源漂移: app.js 使用的键 ${JSON.stringify(missing)} 未在 services/** 中出现`);
   console.error('   含义: boot恢复读的键认证层从未以同名写入 → 有效token静默丢失(半登录态)');
   console.error('   修复: 保持两侧键名严格一致(改名必须两侧同步)');
   process.exit(1);
 }
 
-console.log(`✅ auth存储键双源一致: app.js ${[...appKeys].sort().join(',')} ⊆ api.js ${[...apiKeys].sort().join(',')}`);
+console.log(`✅ auth存储键双源一致: app.js ${[...appKeys].sort().join(',')} ⊆ services/** ${[...apiKeys].sort().join(',')}`);
