@@ -34,7 +34,7 @@ adapters/
   mqtt_client.py      MQTT 点位批量发布
   cloud_client.py     云端 API 客户端（register/heartbeat/telemetry/alarm）
 api/
-  server.py           FastAPI 调试 API（8 端点，详见 docs/API_REFERENCE.md）
+  server.py           FastAPI 调试 API（13 端点，详见 docs/API_REFERENCE.md）
 models/
   device.py           设备数据模型
   telemetry.py        遥测数据模型

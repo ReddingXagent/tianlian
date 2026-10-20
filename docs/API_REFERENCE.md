@@ -1,8 +1,8 @@
 # API 参考 — 天链V3 边缘网关本地 API
 
 > 基础地址: `http://<gateway-ip>:8080`  
-> 版本: 0.2.0  
-> 所有端点免认证（本地调试用途），CORS 全放通。
+> 版本: 0.3.0  
+> CORS 全放通。只读端点免认证；`simulate` 注入与设备参数写侧端点在设置 `DEBUG_API_KEY` 环境变量后需携带 `X-API-Key` 请求头（未设置时全开放，本地调试兼容）。
 
 ## 健康检查
 
@@ -104,6 +104,114 @@
   ]
 }
 ```
+
+---
+
+## 设备参数管理（下发/校验 — 云端联动）
+
+> 参数绑定持久化于 `device_params` 表（SQLite）。`deploy_status` 生命周期: `draft`（保存）→ `deployed` / `failed`（下发）→ `verified` / `mismatch`（校验）。
+> 除 GET 查询外，写侧三端点在设置 `DEBUG_API_KEY` 环境变量后需携带 `X-API-Key` 请求头。
+
+### `GET /api/v1/devices/{device_id}/params`
+
+查询设备参数绑定与下发/校验状态。
+
+**响应 200:**
+```json
+{
+  "data": {
+    "id": 1,
+    "device_id": "MODBUS-001",
+    "protocol": "modbus-tcp",
+    "config": { "max_current_a": 32 },
+    "deploy_status": "verified",
+    "deployed_at": "2026-10-20 12:00:00",
+    "deployed_detail": "{\"written\": {...}}",
+    "verified_at": "2026-10-20 12:01:00",
+    "verify_result": { "match": true },
+    "updated_at": "2026-10-20 12:01:00"
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `protocol` | string\|null | 通讯协议: `modbus-tcp` / `modbus-rtu` / `ocpp1.6` / `ocpp2.0` / `mqtt` |
+| `config` | object | 参数键值对（浅合并累积） |
+| `deploy_status` | string | `draft` / `deployed` / `failed` / `verified` / `mismatch` |
+| `deployed_detail` | string | 下发结果详情（截断 500 字符） |
+| `verify_result` | object\|null | 最近一次校验差异报告 |
+
+**错误:** `404` 设备无参数绑定；`503` DeviceParamStore 未初始化。
+
+---
+
+### `PUT /api/v1/devices/{device_id}/params`
+
+保存参数绑定（`draft` 状态，不触发下发）。部分更新语义：未传字段保留原值；`config` 与已存配置浅合并，配置变化则回到 `draft`。
+
+**请求体:**
+```json
+{
+  "protocol": "modbus-tcp",
+  "config": { "max_current_a": 32 }
+}
+```
+
+| 字段 | 类型 | 默认 | 说明 |
+|------|------|------|------|
+| `protocol` | string\|null | null | null=保留原值 |
+| `config` | object | `{}` | 参数键值对（适配器参数区） |
+
+**响应 200:** `{"data": { /* 同 GET 绑定结构 */ }}`
+
+**错误:** `403` X-API-Key 缺失/不匹配（设置 `DEBUG_API_KEY` 时）；`422` 协议非法；`503` Store 未初始化。
+
+---
+
+### `POST /api/v1/devices/{device_id}/params/deploy`
+
+参数下发：把已保存参数经协议适配器写入设备。当前支持 `modbus-tcp` / `modbus-rtu`；`ocpp1.6` / `ocpp2.0` / `mqtt` 下发通道待云端方案定稿（返回 `501`）。
+
+**响应 200:**
+```json
+{
+  "device_id": "MODBUS-001",
+  "success": true,
+  "simulated": false,
+  "protocol": "modbus-tcp",
+  "written": { "max_current_a": 32 },
+  "detail": ""
+}
+```
+
+适配器执行失败不抛 HTTP 错误：`success=false` 且 `detail` 带原因，绑定状态记 `failed`。
+
+**错误:** `403` 鉴权；`404` 无参数绑定（先 PUT 保存）；`422` 参数集为空；`501` 协议暂不支持；`503` Store 未初始化 / Modbus adapter 未运行。
+
+---
+
+### `POST /api/v1/devices/{device_id}/params/verify`
+
+参数校验：读回设备实际参数与期望值比对，生成差异报告。数值按 `1e-6` 容差比对。
+
+**响应 200:**
+```json
+{
+  "data": {
+    "device_id": "MODBUS-001",
+    "protocol": "modbus-tcp",
+    "match": true,
+    "simulated": false,
+    "diff": [
+      { "key": "max_current_a", "expected": 32, "actual": 32, "match": true, "raw": "0x0020" }
+    ],
+    "verified_at": 1722720000.12
+  }
+}
+```
+
+**错误:** `403` 鉴权；`404` 无参数绑定；`422` 参数集为空；`501` 协议暂不支持；`503` Store 未初始化 / Modbus adapter 未运行。适配器读回失败时返回 `{"device_id": ..., "error": ...}`。
 
 ---
 
@@ -298,4 +406,15 @@ curl -X POST http://localhost:8080/api/v1/simulate/alarm \
 
 # 查看仪表盘
 curl http://localhost:8080/api/v1/dashboard | python -m json.tool
+
+# 设备参数三步流: 保存 → 下发 → 校验（设置 DEBUG_API_KEY 时加 -H "X-API-Key: <key>"）
+curl -X PUT http://localhost:8080/api/v1/devices/MODBUS-001/params \
+  -H "Content-Type: application/json" \
+  -d '{"protocol":"modbus-tcp","config":{"max_current_a":32}}'
+
+curl -X POST http://localhost:8080/api/v1/devices/MODBUS-001/params/deploy
+curl -X POST http://localhost:8080/api/v1/devices/MODBUS-001/params/verify
+
+# 查询参数绑定与下发/校验状态
+curl http://localhost:8080/api/v1/devices/MODBUS-001/params | python -m json.tool
 ```
