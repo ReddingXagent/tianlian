@@ -34,8 +34,8 @@ npx expo start    # 启动 Metro，Expo Go 扫码调试
 | 门 | 命令 | 当前基线 |
 |----|------|---------|
 | 构建 | `npx tsc --noEmit` | 0 错误 ✅ |
-| 测试 | `npm run test:ci` | 911 全绿（110 suites）✅ |
-| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 99 / branches 99 / functions 99 / lines 99（只升不降）；实测 100 / 99.85 / 100 / 100（911 tests，2026-09-02，jest 覆盖率表） |
+| 测试 | `npm run test:ci` | 927 全绿（111 suites）✅ |
+| 覆盖率棘轮 | jest coverageThreshold（package.json） | 门限 statements 99 / branches 99 / functions 99 / lines 99（只升不降）；实测 100 / 99.72 / 100 / 100（927 tests，2026-10-23，jest 覆盖率表） |
 | Lint 棘轮 | `npm run lint:ci` | 0 错误 / 0 警告（`--max-warnings=0`，只降不升；当前 0） |
 | 部署门控 | `npm run deploy:check` | 退2 设计内拦截（F25/F33 已决策清零 08-05：Expo 账号当前阶段不需要——测试走 Expo Go 扫码、内部分发走 APK 直装；OTA 延后到发布候选期再定，届时接账号须 app.json updates.url ↔ eas.json projectId 两侧同步，F302 守卫形态） |
 

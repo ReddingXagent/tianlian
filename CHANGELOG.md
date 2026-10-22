@@ -48,6 +48,7 @@
 - ScanScreen 真扫码落地（F21 修复）— 新增 expo-camera ~16.0.18 + CameraScanner 组件（相机权限请求/拒绝后引导去设置、QR 取景框、同码 2.5s 冷却去重）+ parseScanPayload 解析器（裸编码/URL/URL 末段路径三形态）；扫码成功自动查询并收起相机，手动输入保留兜底；补测 24 条（241→265：CameraScanner 权限/扫描、scanCode 解析、ScanScreen 相机交互）
 
 ### Fixed
+- test:ci 覆盖率门槛必红修复 + MapView 深色/网格分支补测（F449，测试维度，夜间自驱轮）— 缺口：CI 门禁 `npm run test:ci` 实测 exit 1——coverageThreshold branches 99 门槛下实测 98.74%（923 测时代，HEAD efa5673；上次实测绿档 99.85% 停在 2026-09-02 911 测，此后 911→923 增测期分支持有代码无覆盖扩张，test:ci 无人在跑成潜伏必红）。根因定位：MapView.tsx branches 82.05%——createStyles 内 7 组 isDark 三元全部只走亮色侧（177-274 行）+ getStationPosition 网格三元 col=2/row 末段/中段侧从未触发（需 ≥7 站点的 3列×3行网格，既有测试最多 2 站点）；另 ErrorBoundary.tsx 90.9%（模块加载期取色三元暗侧，类组件无 hook，jest 模块沙箱 mock 不可达，遗留不追）与 useLogin.ts 97.72%（timerRef 空档 contrived 分支，不追）为可接受残余。修复：新增 src/components/__tests__/MapView.dark.test.tsx 4 例——useColorScheme mock 'dark' 全渲染域（空态 / 7 站点 3列×3行网格全分支 / 选中态高亮+onPress 回调 / 无 distance 站点）；MapView.tsx branches 82.05→100（差分即活性证明），全仓 98.74→99.72 过门槛。四门全走：tsc 0err → jest 111套/927测全绿 → 覆盖率 100/99.72/100/100（门槛 99/99/99/99 exit 0）→ eslint --max-warnings=0 零警告；README 质量门控表测试基线行 911/110→927/111、覆盖率实测行同步（旧 99.85/911 测绿档口径已过时）。同轮裁定：ErrorBoundary 模块级暗色取色与 useLogin timer 空档两分支不补——前者需 hack jest 模块沙箱性价比过低、后者需双 interval 叠加 contrived 场景，均记录在案留档。
 - lint:ci 警告阈值红盘修复（F170 遗留闭环）— 清理 6 条 unused-vars（ErrorBoundary/AppNavigator/api 测试未用导入），warnings 62→56 ≤ 阈值 60，`npm run lint:ci` 由红转绿
 
 ### Fixed
