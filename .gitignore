@@ -17,3 +17,4 @@ web-build/
 # local env overrides (EXPO_PUBLIC_* dev URLs)
 .env
 .env.*
+!.env.example

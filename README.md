@@ -48,12 +48,12 @@ App.tsx                  # 入口：SafeAreaProvider + AppNavigator
 src/
   navigation/            # AppNavigator（登录态切换 + Tab 导航）
   screens/               # 13 个页面（Home/Scan/Charging/Order/Payment/Profile/Coupon/Energy/Vehicle...）
-  components/            # MapView / StationCard / StatusBadge / EmptyState / LoadingSpinner
-  hooks/
+  components/            # MapView / StationCard / StatusBadge / EmptyState / LoadingSpinner / CameraScanner / OfflineBanner / ErrorBoundary
+  hooks/                 # 11 个 hooks（useLogin / useScan / usePayment / useWallet / useTheme...）
     useAppLifecycle.ts   # 前后台(AppState) + 联网(NetInfo) 状态聚合
     useChargingPolling.ts# 充电轮询；后台/离线自动暂停，回前台/复网立即补拉
-  services/api.ts        # axios 实例 + 全部 API 封装（token 拦截器自动附加）
-  store/                 # Zustand stores
+  services/              # API 层：client.ts（axios 实例 + token 拦截器 + 基址 env 读取）+ 11 领域模块（auth/station/charging/order/payment/vehicle/coupon/wallet/energy/stats/tenant）+ api.ts barrel 统一出口
+  store/                 # Zustand stores（authStore / orderStore / stationStore / brandingStore）
   types/                 # 共享类型定义
   utils/                 # format.ts（日期/距离/金额/电量单一源）+ scanCode.ts（扫码解析）
 __mocks__/               # expo-secure-store / expo-status-bar 的 jest mock
@@ -64,7 +64,7 @@ jest.setup.ts            # 全局 mock（含 AppState/NetInfo 兜底，见下）
 
 - **生命周期感知轮询**：`useChargingPolling` 通过 `useAppLifecycle` 订阅 AppState 与 NetInfo，进入后台或确认离线时自动暂停轮询，回前台或复网立即补拉一次，避免无效请求与电量浪费（`pauseWhenInactive` 开关可控）。
 - **Jest 原生模块坑**：jest 自动 mock 会导致 `AppState.currentState` 变成 `jest.fn()` 而非字符串，`??` 兜底无效；`jest.setup.ts` 中已将其钉死为 `'active'`，NetInfo 同理。新增原生模块 mock 时注意同型问题。
-- **API 基址**：`src/services/api.ts` 通过 `EXPO_PUBLIC_API_URL` 环境变量配置，回退到生产云端地址。开发时可在 `.env` 或启动命令中覆盖（如 `EXPO_PUBLIC_API_URL=http://localhost:8000/api/v1 npx expo start`）。
+- **API 基址**：`src/services/client.ts` 通过 `EXPO_PUBLIC_API_URL` 环境变量配置，回退到生产云端地址。开发时 `cp .env.example .env` 后按需修改，或在启动命令中覆盖（如 `EXPO_PUBLIC_API_URL=http://localhost:8000/api/v1 npx expo start`）。
 
 ## 部署
 
