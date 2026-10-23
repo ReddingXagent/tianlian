@@ -6,7 +6,7 @@
 set -e
 cd "$(dirname "$0")/.."
 
-MIN_SUITES=54
+MIN_SUITES=59
 
 SUITES=$(npx jest --listTests 2>/dev/null) || { echo "❌ jest --listTests 执行失败(缺输入 F212)"; exit 1; }
 COUNT=$(printf '%s\n' "$SUITES" | grep -c . || true)

@@ -17,6 +17,7 @@ import NotificationCenterScreen from '../screens/NotificationCenterScreen';
 import DeviceListScreen from '../screens/DeviceListScreen';
 import DeviceDetailScreen from '../screens/DeviceDetailScreen';
 import WorkOrderScreen from '../screens/WorkOrderScreen';
+import MerchantKYCScreen from '../screens/MerchantKYCScreen';
 import { useTheme } from '../hooks/useTheme';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -175,6 +176,16 @@ function MainTabNavigatorWithDetail() {
         component={NotificationCenterScreen}
         options={{
           title: '消息中心',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
+      <RootStack.Screen
+        name="MerchantKYC"
+        component={MerchantKYCScreen}
+        options={{
+          title: '商户进件',
           headerStyle: { backgroundColor: colors.primary },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },

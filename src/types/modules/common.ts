@@ -14,6 +14,7 @@ export type RootStackParamList = {
   WorkOrder: { stationId?: number };
   ChargerMonitor: { stationId: number; stationName: string };
   NotificationCenter: undefined;
+  MerchantKYC: undefined;
 };
 
 export type AuthStackParamList = {

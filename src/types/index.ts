@@ -14,3 +14,4 @@ export * from './modules/charger';
 export * from './modules/energy';
 export * from './modules/notification';
 export * from './modules/report';
+export * from './modules/merchant';

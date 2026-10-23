@@ -128,6 +128,16 @@ jest.mock('../../screens/WorkOrderScreen', () => {
   return { __esModule: true, default: M };
 });
 
+// 商户进件屏幕 mock (卡 a8ca56aa, 避免真实屏幕拉入 client/secure-store 链)
+jest.mock('../../screens/MerchantKYCScreen', () => {
+  const M = () => {
+    const R = require('react');
+    const { Text } = require('react-native');
+    return R.createElement(Text, null, 'merchant-kyc-screen');
+  };
+  return { __esModule: true, default: M };
+});
+
 describe('AppNavigator', () => {
   beforeEach(() => {
     mockAuthState = { isAuthenticated: false, isLoading: false };

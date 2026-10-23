@@ -8,6 +8,11 @@ jest.mock('../../store/authStore', () => ({
   useAuthStore: jest.fn(),
 }));
 
+const mockNavigate = jest.fn();
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate }),
+}));
+
 interface MockUser {
   username?: string;
   nickname?: string;
@@ -110,5 +115,17 @@ describe('ProfileScreen', () => {
     fireEvent.press(getByText('退出登录'));
     await waitFor(() => expect(logout).toHaveBeenCalledTimes(1));
     alertSpy.mockRestore();
+  });
+});
+
+describe('ProfileScreen 商户进件入口 (卡 a8ca56aa)', () => {
+  it('商户服务区含进件入口, 点击跳转 MerchantKYC', () => {
+    setup();
+    mockNavigate.mockClear();
+    const { getByTestId } = render(<ProfileScreen />);
+    const entry = getByTestId('kyc-entry-btn');
+    expect(entry).toBeTruthy();
+    fireEvent.press(entry);
+    expect(mockNavigate).toHaveBeenCalledWith('MerchantKYC');
   });
 });

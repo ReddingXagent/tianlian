@@ -7,11 +7,17 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useTheme } from '../hooks/useTheme';
+import type { RootStackParamList } from '../types';
+
+type ProfileNavProp = NativeStackNavigationProp<RootStackParamList, 'Main'>;
 
 const ProfileScreen: React.FC = () => {
   const { colors } = useTheme();
+  const navigation = useNavigation<ProfileNavProp>();
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
@@ -80,6 +86,24 @@ const ProfileScreen: React.FC = () => {
             <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>手机号</Text>
             <Text style={[styles.infoValue, { color: colors.textPrimary }]}>{user?.phone || '-'}</Text>
           </View>
+        </View>
+      </View>
+
+      {/* 商户服务入口 (卡 a8ca56aa 商户进件) */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>商户服务</Text>
+        <View style={[styles.menuCard, { backgroundColor: colors.cardBg }]}>
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomWidth: 0 }]}
+            activeOpacity={0.6}
+            onPress={() => navigation.navigate('MerchantKYC' as never)}
+            testID="kyc-entry-btn"
+            accessibilityRole="button"
+          >
+            <Text style={styles.menuIcon}>🏦</Text>
+            <Text style={[styles.menuLabel, { color: colors.textPrimary }]}>商户进件（特约商户开通）</Text>
+            <Text style={[styles.menuArrow, { color: colors.textMuted }]}>›</Text>
+          </TouchableOpacity>
         </View>
       </View>
 

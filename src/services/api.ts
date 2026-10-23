@@ -25,3 +25,4 @@ export { chargerApi } from './charger';
 export { energyApi } from './energy';
 export { notificationApi } from './notification';
 export { reportApi } from './report';
+export { merchantApi, mapMerchantApplication, buildMerchantFormData, merchantStatusLabel } from './merchant';
