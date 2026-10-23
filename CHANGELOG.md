@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Changed
+- 移动端体检对齐兄弟仓：expo-doctor 17/18→18/18 全绿（F450，移动端维度，终端app自驱轮）— 两项漂移修复：① react-native-svg 声明 ^15.8.0 caret 漂移至实装 15.15.5，SDK 52 bundledNativeModules 期望精确 15.8.0，钉死 15.8.0（对齐 station-app 同款精确钉法）；② 补 expo.install.exclude=["eslint-config-expo"] 豁免块（对齐 ops 0d5f9ee/station 6830e3c 既定模式：eslint-config-expo ^57.0.2 为有意超前声明，三仓一致豁免 SDK 版本校验）；考古：svg 建仓 squash b9920f1 起即 caret，源码零直接引用（仅 jest.setup.ts mock 整体替换实现），降级零行为风险；四门验证：expo-doctor 18/18 exit 0 / tsc 0err / jest 111套927测全绿 coverage 100/99.72/100/100 / eslint --max-warnings=0 零警告
 - README 文档补全：新增静态守卫族章节（11 枚守卫全清单表格化，对齐 ops-app F186 门控章节惯例）+ 项目结构树补 utils/ 目录 + 删失实的「12 个 screen 中 8 个有测试」（实际 12/12 全覆盖）。（F363，文档维度，白天降级档）
 - lint:ci 阈值棘轮收紧 60→54（F361，lint维度，白天降级档）— 与F348 coverageThreshold同款棘轮语义：eslint --max-warnings 原设60（余量6），实测全仓54warn（37 no-require-imports测试文件jest require+7 react-hooks/set-state-in-effect+6 react-hooks/exhaustive-deps+2 import/first+2 unused eslint-disable），阈值下取整至54（==阈值通过，>54即FAIL）；变异验证 max-warnings=53 → exit 1 FAIL（ESLint found too many warnings maximum: 53），棘轮活性确认；warning分布摸底：no-require-imports全来自测试文件jest mock加载（RN生态惯例不改）、set-state-in-effect是effect内同步setState（7处hooks/screens，功能性正确仅性能建议不改）、exhaustive-deps是hooks依赖缺失（6处，留夜间档评估是否修复降warn）；README lint棘轮行同步≤60→≤54
 
