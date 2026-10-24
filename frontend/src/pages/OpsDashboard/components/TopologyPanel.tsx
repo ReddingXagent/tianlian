@@ -66,15 +66,16 @@ const TopologyPanel: React.FC<{
       },
     });
 
-    const stations = (topology?.nodes.stations || []).map((s) => {
+    const nodes = topology?.nodes;
+    const stations = (nodes?.stations || []).map((s) => {
       const stationNode = { ...mk(s, 22, COLORS.station), children: [] as TreeOpt[] };
       (stationNode as any).__stationNum = idNum(s.id);
-      const gws = (topology?.nodes.gateways || []).filter(
+      const gws = (nodes?.gateways || []).filter(
         (g) => idNum(g.id) === idNum(s.id) || g.station_id === idNum(s.id),
       );
       gws.forEach((g) => {
         const gwNode = { ...mk(g, 14, COLORS.gateway), children: [] as TreeOpt[] };
-        (topology?.nodes.devices || [])
+        (nodes?.devices || [])
           .filter((d) => d.gateway_id != null && `gateway-${d.gateway_id}` === g.id)
           .forEach((d) => gwNode.children.push(mk(d, 8, COLORS.deviceOffline)));
         stationNode.children.push(gwNode);
@@ -84,19 +85,19 @@ const TopologyPanel: React.FC<{
 
     const rootChildren: TreeOpt[] = [...stations];
     // 孤儿网关(无站点)挂根
-    (topology?.nodes.gateways || []).filter(
-      (g) => !(topology?.nodes.stations || []).some(
+    (nodes?.gateways || []).filter(
+      (g) => !(nodes?.stations || []).some(
         (s) => idNum(g.id) === idNum(s.id) || g.station_id === idNum(s.id)),
     ).forEach((g) => {
       const gwNode = { ...mk(g, 14, COLORS.gateway), children: [] as TreeOpt[] };
-      (topology?.nodes.devices || [])
+      (nodes?.devices || [])
         .filter((d) => d.gateway_id != null && `gateway-${d.gateway_id}` === g.id)
         .forEach((d) => gwNode.children.push(mk(d, 8, COLORS.deviceOffline)));
       rootChildren.push(gwNode);
     });
     // 无网关设备挂所属站点; 无站点进「未分配设备」组
     const unassigned: TreeOpt[] = [];
-    (topology?.nodes.devices || []).filter((d) => d.gateway_id == null).forEach((d) => {
+    (nodes?.devices || []).filter((d) => d.gateway_id == null).forEach((d) => {
       const stationNode: any = stations.find(
         (st: any) => st.__stationNum === d.station_id,
       );
