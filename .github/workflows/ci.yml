@@ -31,7 +31,8 @@ jobs:
       - run: npm run check:test-liveness
       - run: npm run check:node
       - run: npm run check:engine-strict
-      - run: npm test -- --coverage
+      # --runInBand: 顺序执行防并行 act() 资源争抢假红 (F399 同族 F457, 2026-10-25 本地复现: 并行 1/646 fail, 顺序 59套/646 全绿)
+      - run: npm test -- --runInBand --coverage --ci --reporters=default
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4

@@ -42,7 +42,7 @@ npm run ios          # iOS
 npx tsc --noEmit     # 类型检查 ✅
 npm run check:alias  # 路径别名双源漂移守卫（tsconfig.paths ↔ jest.moduleNameMapper，F238）
 npm run check:test-liveness  # 测试套件活性守卫（收集数下限33+路径域断言，拦 --passWithNoTests 零收集静默放行，F379）
-npm test             # jest 单测（646 用例全绿；testTimeout 15s 加固负载型 flaky，F322；加 --coverage 触发覆盖率门限）
+npm test             # jest 单测（646 用例全绿；CI --runInBand 口径防并行 act() 资源争抢假红，F457/F399 同族；testTimeout 15s 加固负载型 flaky，F322；加 --coverage 触发覆盖率门限）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
 npx expo export --platform ios   # 产物构建验证（零警告）
