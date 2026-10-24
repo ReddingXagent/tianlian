@@ -32,6 +32,68 @@ TianLian Cloud 是面向光储充行业的新一代智能运维平台，前后�
 | 平台治理 | RBAC 权限 / 多租户（Tenants）/ 审计日志 / Webhooks / SSL 证书监控 |
 | AI 辅助 | 日志分析 / 维修建议 / 预防性维护（可插拔 LLM 接入） |
 
+## 功能截图
+
+演示环境（`demo` / `demo12345`，只读）实拍，全部为原生界面：
+
+| 板块 | 说明 |
+|------|------|
+| [运维驾驶舱](docs/images/dashboard.png) | 在线设备、今日告警、工单进度、发电与充电量一屏总览 |
+| [站点管理](docs/images/stations.png) | 站点档案、容量、设备挂载与地理分布 |
+| [设备台账](docs/images/devices.png) | 全量设备档案：型号、SN、归属站点、运行状态 |
+| [实时遥测](docs/images/telemetry.png) | 设备实时点位、曲线与批量上报 |
+| [告警中心](docs/images/alarms.png) | 告警列表、级别、确认与关闭闭环 |
+| [工单管理](docs/images/workorders.png) | 创建、派发、接单、验收全流程 |
+| [数字孪生](docs/images/digital-twin.png) | 三维站点还原与交互 |
+| [能源报表](docs/images/energy-report.png) | 发电、储能、充电三类能量流报表 |
+| [运营工作台](docs/images/operate.png) | 订单、结算、优惠券、开票、互联互通 |
+| [数据大屏](docs/images/large-screen.png) | 全屏可视化，适合展厅与指挥中心 |
+
+<details>
+<summary><b>展开查看全部截图</b></summary>
+
+### 运维驾驶舱
+
+<img src="./docs/images/dashboard.png" width="760" alt="运维驾驶舱" />
+
+### 站点管理
+
+<img src="./docs/images/stations.png" width="760" alt="站点管理" />
+
+### 设备台账
+
+<img src="./docs/images/devices.png" width="760" alt="设备台账" />
+
+### 实时遥测
+
+<img src="./docs/images/telemetry.png" width="760" alt="实时遥测" />
+
+### 告警中心
+
+<img src="./docs/images/alarms.png" width="760" alt="告警中心" />
+
+### 工单管理
+
+<img src="./docs/images/workorders.png" width="760" alt="工单管理" />
+
+### 数字孪生
+
+<img src="./docs/images/digital-twin.png" width="760" alt="数字孪生" />
+
+### 能源报表
+
+<img src="./docs/images/energy-report.png" width="760" alt="能源报表" />
+
+### 运营工作台
+
+<img src="./docs/images/operate.png" width="760" alt="运营工作台" />
+
+### 数据大屏
+
+<img src="./docs/images/large-screen.png" width="760" alt="数据大屏" />
+
+</details>
+
 ## 设备模拟器（开箱即用）
 
 没有真实现场设备也能跑通全链路——仓库内置多协议设备模拟器，覆盖光储充主要设备类型：
