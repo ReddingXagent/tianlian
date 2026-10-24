@@ -1,0 +1,20 @@
+{
+  "providers": [
+    {
+      "provider": "cloud_provider-token",
+      "model_id": "llm-pro-a",
+      "name": "TP/DS4P",
+      "base_url": "https://token-plan.cn-beijing.maas.cloud_providercs.com/compatible-mode/v1",
+      "api_key": "",
+      "enabled": true
+    }
+  ],
+  "task_mappings": {
+    "log_analysis": "TP/DS4P",
+    "fault_classify": "TP/DS4F",
+    "root_cause": "TP/DS4P",
+    "repair_suggest": "TP/ModelB5.1",
+    "preventive": "TP/ModelB5.1"
+  },
+  "fallback_strategy": "next_available"
+}

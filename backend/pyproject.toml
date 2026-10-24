@@ -1,0 +1,53 @@
+# ============================================================
+# 天链光储充运维系统 V3 - 后端项目配置
+# ============================================================
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.venv
+  | __pycache__
+  | node_modules
+  | migrations
+  | tests
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+py_version = 39
+skip = [".git", ".venv", "__pycache__", "migrations", "node_modules"]
+skip_glob = ["tests/*"]
+known_first_party = ["app"]
+known_third_party = ["fastapi", "sqlalchemy", "pydantic", "uvicorn", "celery", "numpy", "redis"]
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short -q"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203", "W503"]
+exclude = [".git", ".venv", "__pycache__", "migrations", "node_modules"]
+max-complexity = 12

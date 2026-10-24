@@ -1,0 +1,26 @@
+[Unit]
+Description=Tianlian V3 Celery Beat Scheduler
+After=network.target redis.service celery-worker.service
+Requires=redis.service
+
+[Service]
+Type=simple
+User=tianlian
+Group=tianlian
+WorkingDirectory=/opt/tianlian-v3/backend
+Environment="CELERY_BROKER_URL=redis://localhost:6379/0"
+Environment="CELERY_RESULT_BACKEND=redis://localhost:6379/1"
+Environment="PYTHONPATH=/opt/tianlian-v3/backend"
+ExecStart=/opt/tianlian-v3/backend/venv/bin/celery -A app.core.celery_app beat \
+  --loglevel=info \
+  --schedule=/opt/tianlian-v3/celerybeat-schedule \
+  --pidfile=/opt/tianlian-v3/backend/celerybeat.pid
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tianlian-celery-beat
+
+[Install]
+WantedBy=multi-user.target

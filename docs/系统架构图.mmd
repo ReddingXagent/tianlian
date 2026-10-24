@@ -1,0 +1,204 @@
+---
+title: 天链 V3 物联网运维平台系统架构图
+description: 基于微服务架构的充电桩智能运维平台
+author: 大圣
+date: 2026-04-06
+---
+
+```mermaid
+flowchart TD
+    %% ========== 用户层 ==========
+    subgraph userLayer [用户层]
+        direction LR
+        webUser[Web用户<br/>管理员/运维人员]
+        mobileUser[移动用户<br/>现场工程师]
+        apiUser[API用户<br/>第三方系统]
+    end
+
+    %% ========== 接入层 ==========
+    subgraph accessLayer [接入层]
+        direction LR
+        webGateway[Web网关<br/>Nginx + SSL]
+        apiGateway[API网关<br/>Kong/Spring Cloud Gateway]
+        mobileGateway[移动网关<br/>WebSocket + MQTT]
+    end
+
+    %% ========== 应用层 ==========
+    subgraph appLayer [应用服务层]
+        direction TB
+        subgraph coreServices [核心服务]
+            deviceService[设备服务<br/>设备管理/状态监控]
+            healthService[健康度服务<br/>5维度评估引擎]
+            dispatchService[派单服务<br/>智能调度引擎]
+            workorderService[工单服务<br/>全生命周期管理]
+        end
+
+        subgraph supportServices [支撑服务]
+            authService[认证服务<br/>JWT + RBAC]
+            fileService[文件服务<br/>MinIO/S3]
+            messageService[消息服务<br/>通知/告警]
+            syncService[同步服务<br/>离线数据同步]
+        end
+    end
+
+    %% ========== 数据层 ==========
+    subgraph dataLayer [数据层]
+        direction LR
+        postgresDB[(PostgreSQL<br/>业务数据)]
+        timescaleDB[(TimescaleDB<br/>时序数据)]
+        redisDB[(Redis<br/>缓存/会话)]
+        minioStore[(MinIO<br/>文件存储)]
+    end
+
+    %% ========== 基础设施 ==========
+    subgraph infraLayer [基础设施]
+        direction LR
+        k8sCluster[Kubernetes集群]
+        monitoring[监控系统<br/>Prometheus + Grafana]
+        logging[日志系统<br/>ELK Stack]
+        ciCD[CI/CD流水线<br/>GitLab + ArgoCD]
+    end
+
+    %% ========== 外部系统 ==========
+    subgraph externalSystems [外部系统]
+        direction LR
+        iotPlatform[IoT平台<br/>设备连接/数据采集]
+        paymentSystem[支付系统<br/>IM-B/支付宝]
+        smsService[短信服务<br/>验证码/通知]
+        mapService[地图服务<br/>高德/服务商C]
+    end
+
+    %% ========== 连接关系 ==========
+    %% 用户层 -> 接入层
+    webUser --> webGateway
+    mobileUser --> mobileGateway
+    apiUser --> apiGateway
+
+    %% 接入层 -> 应用层
+    webGateway --> authService
+    apiGateway --> coreServices
+    mobileGateway --> syncService
+
+    %% 应用层内部连接
+    deviceService --> healthService
+    healthService --> dispatchService
+    dispatchService --> workorderService
+    
+    authService --> coreServices
+    syncService --> coreServices
+
+    %% 应用层 -> 数据层
+    coreServices --> postgresDB
+    deviceService --> timescaleDB
+    authService --> redisDB
+    fileService --> minioStore
+
+    %% 应用层 -> 外部系统
+    deviceService --> iotPlatform
+    workorderService --> paymentSystem
+    messageService --> smsService
+    dispatchService --> mapService
+
+    %% 基础设施支撑
+    k8sCluster -.-> appLayer
+    monitoring -.-> appLayer
+    logging -.-> appLayer
+    ciCD -.-> appLayer
+
+    %% ========== 样式定义 ==========
+    classDef user fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef access fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef app fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef data fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef infra fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef external fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+
+    class webUser,mobileUser,apiUser user
+    class webGateway,apiGateway,mobileGateway access
+    class deviceService,healthService,dispatchService,workorderService,authService,fileService,messageService,syncService app
+    class postgresDB,timescaleDB,redisDB,minioStore data
+    class k8sCluster,monitoring,logging,ciCD infra
+    class iotPlatform,paymentSystem,smsService,mapService external
+```
+
+## 架构说明
+
+### 1. 用户层
+- **Web用户**: 管理员、运维人员通过Web界面管理平台
+- **移动用户**: 现场工程师通过移动App处理工单
+- **API用户**: 第三方系统通过API集成
+
+### 2. 接入层
+- **Web网关**: Nginx反向代理 + SSL加密
+- **API网关**: 统一API入口，限流、鉴权、路由
+- **移动网关**: WebSocket实时通信 + MQTT物联网协议
+
+### 3. 应用服务层
+#### 核心服务
+- **设备服务**: 设备注册、状态监控、数据采集
+- **健康度服务**: 5维度评估引擎，实时健康评分
+- **派单服务**: 智能调度算法，最优工程师匹配
+- **工单服务**: 工单全生命周期管理
+
+#### 支撑服务
+- **认证服务**: JWT令牌 + RBAC权限控制
+- **文件服务**: 图片、文档存储管理
+- **消息服务**: 实时通知、告警推送
+- **同步服务**: 移动端离线数据同步
+
+### 4. 数据层
+- **PostgreSQL**: 业务关系数据，ACID事务保证
+- **TimescaleDB**: 时序数据，高效存储设备监控数据
+- **Redis**: 缓存、会话管理、消息队列
+- **MinIO**: 对象存储，文件管理
+
+### 5. 基础设施
+- **Kubernetes**: 容器编排，弹性伸缩
+- **监控系统**: Prometheus指标收集 + Grafana可视化
+- **日志系统**: ELK Stack，集中日志管理
+- **CI/CD**: 自动化部署流水线
+
+### 6. 外部系统集成
+- **IoT平台**: 设备连接、数据采集
+- **支付系统**: 在线支付集成
+- **短信服务**: 验证码、通知推送
+- **地图服务**: 地理位置、路径规划
+
+## 技术特点
+
+### 微服务架构
+- 服务独立部署，技术栈自由选择
+- 服务间通过API网关通信
+- 支持水平扩展和高可用
+
+### 数据分离
+- 业务数据与时序数据分离
+- 缓存层提升性能
+- 文件存储独立
+
+### 云原生
+- 容器化部署
+- 自动化运维
+- 弹性伸缩
+
+### 移动优先
+- 离线数据同步
+- 实时通信支持
+- 移动端优化
+
+## 扩展性设计
+
+### 水平扩展
+- 无状态服务可无限扩展
+- 数据库读写分离
+- 缓存集群
+
+### 垂直扩展
+- 服务按功能拆分
+- 独立技术栈选择
+- 渐进式演进
+
+### 集成扩展
+- 标准化API接口
+- Webhook事件机制
+- 插件化架构

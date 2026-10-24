@@ -1,0 +1,131 @@
+# ─── 天链V3 监控栈 Docker Compose 配置 ───
+# 独立于主 docker-compose.yml，可按需启停
+
+version: "3.8"
+
+services:
+  # ============ Prometheus 监控采集 ============
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: tianlian-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - tianlian-network
+      - monitoring-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============ Alertmanager 告警管理 ============
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: tianlian-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.listen-address=:9093'
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-network
+
+  # ============ Grafana 可视化面板 ============
+  grafana:
+    image: grafana/grafana:10.4.3
+    container_name: tianlian-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD 未设置}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-http://localhost:3000}
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/tianlian-overview.json
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
+      - ./grafana/provisioning/dashboards/dashboard.json:/etc/grafana/provisioning/dashboards/tianlian-overview.json:ro
+      - ./grafana/provisioning/dashboards/dashboard-provider.yml:/etc/grafana/provisioning/dashboards/provider.yml:ro
+      - ./grafana/provisioning/dashboards/v2/tianlian-system-overview.json:/etc/grafana/provisioning/dashboards/tianlian-system-overview.json:ro
+      - ./grafana/provisioning/datasources/loki.yml:/etc/grafana/provisioning/datasources/loki.yml:ro
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============ Loki 日志聚合 ============
+  loki:
+    image: grafana/loki:2.9.6
+    container_name: tianlian-loki
+    restart: unless-stopped
+    user: root
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/data/loki
+    command:
+      - '-config.file=/etc/loki/loki-config.yml'
+    networks:
+      - monitoring-network
+
+  # ============ Promtail 日志采集 ============
+  promtail:
+    image: grafana/promtail:2.9.6
+    container_name: tianlian-promtail
+    restart: unless-stopped
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command:
+      - '-config.file=/etc/promtail/promtail-config.yml'
+    depends_on:
+      - loki
+    networks:
+      - monitoring-network
+
+# ============ 网络 ============
+networks:
+  tianlian-network:
+    external: true
+    name: tianlian-network
+  monitoring-network:
+    driver: bridge
+    name: tianlian-monitoring
+
+# ============ 卷 (持久化) ============
+volumes:
+  prometheus_data:
+    name: tianlian-prometheus-data
+  alertmanager_data:
+    name: tianlian-alertmanager-data
+  grafana_data:
+    name: tianlian-grafana-data
+  loki_data:
+    name: tianlian-loki-data

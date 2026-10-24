@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天链V3 - 充电桩智能运维平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .slide {
+            min-height: 100vh;
+            padding: 4rem 6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .slide-subtitle {
+            font-size: 1.75rem;
+            color: #cbd5e1;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f8fafc;
+        }
+        
+        .card-content {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        
+        .stat-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: #f8fafc;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+            position: relative;
+            color: #cbd5e1;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .architecture-diagram {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+        
+        .diagram-layer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        .layer-name {
+            font-weight: 600;
+            color: #f8fafc;
+            min-width: 150px;
+        }
+        
+        .layer-services {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .service-badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #3b82f6, #10b981);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -0.5rem;
+            top: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #3b82f6;
+            border: 3px solid #0f172a;
+        }
+        
+        .timeline-date {
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timeline-content {
+            color: #cbd5e1;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+            border-top: 1px solid rgba(100, 116, 139, 0.2);
+            margin-top: 4rem;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 2rem;
+            }
+            
+            .slide-title {
+                font-size: 2.5rem;
+            }
+            
+            .slide-subtitle {
+                font-size: 1.25rem;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .diagram-layer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .layer-services {
+                margin-top: 1rem;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 幻灯片 1: 封面 -->
+    <section class="slide">
+        <div class="logo">天链V3</div>
+        <h1 class="slide-title">充电桩智能运维平台</h1>
+        <p class="slide-subtitle">基于物联网、人工智能和大数据技术的下一代充电桩运维解决方案，实现设备健康度智能评估、故障预测和自动化运维。</p>
+        
+        <div class="content-grid">
+            <div class="card">
+                <div class="stat-number">99.5%</div>
+                <div class="stat-label">设备在线率</div>
+            </div>
+            <div class="card">
+                <div class="stat-number">72%↓</div>
+                <div class="stat-label">故障响应时间降低</div>
+            </div>
+            <div class="card">
+                <div class="stat-number">85%↑</div>
+                <div class="stat-label">运维效率提升</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 幻灯片 2: 项目概述 -->
+    <section class="slide">
+        <h2 class="section-title">项目概述</h2>
+        <p class="slide-subtitle">天链V3是专为充电桩运营商设计的智能运维平台，通过物联网数据采集、AI分析和自动化调度，实现充电桩的全生命周期管理。</p>
+        
+        <div class="content-grid">
+            <div class="card">
+                <h3 class="card-title">核心问题</h3>
+                <div class="card-content">
+                    <ul class="feature-list">
+                        <li>充电桩故障发现不及时</li>
+                        <li>运维响应效率低下</li>
+                        <li>设备健康状态不透明</li>
+                        <li>运维成本居高不下</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">解决方案</h3>
+                <div class="card-content">
+                    <ul class="feature-list">
+                        <li>实时设备监控与预警</li>
+                        <li>智能健康度评估引擎</li>
+                        <li>自动化工单派发系统</li>
+                        <li>移动端离线运维支持</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">技术优势</h3>
+                <div class="card-content">
+                    <ul class="feature-list">
+                        <li>微服务云原生架构</li>
+                        <li>5维度健康评估模型</li>
+                        <li>多因子智能调度算法</li>
+                        <li>离线数据同步技术</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 幻灯片 3: 技术架构 -->
+    <section class="slide">
+        <h2 class="section-title">技术架构</h2>
+        <p class="slide-subtitle">基于微服务架构的云原生平台，支持高并发、高可用和弹性伸缩。</p>
+        
+        <div class="architecture-diagram">
+            <div class="diagram-layer">
+                <div class="layer-name">用户层</div>
+                <div class="layer-services">
+                    <span class="service-badge">Web管理后台</span>
+                    <span class="service-badge">移动端App</span>
+                    <span class="service-badge">API接口</span>
+                </div>
+            </div>
+            
+            <div class="diagram-layer">
+                <div class="layer-name">接入层</div>
+                <div class="layer-services">
+                    <span class="service-badge">API网关</span>
+                    <span class="service-badge">WebSocket网关</span>
+                    <span class="service-badge">MQTT Broker</span>
+                </div>
+            </div>
+            
+            <div class="diagram-layer">
+                <div class="layer-name">应用服务层</div>
+                <div class="layer-services">
+                    <span class="service-badge">设备服务</span>
+                    <span class="service-badge">健康度服务</span>
+                    <span class="service-badge">派单服务</span>
+                    <span class="service-badge">工单服务</span>
+                </div>
+            </div>
+            
+            <div class="diagram-layer">
+                <div class="layer-name">数据层</div>
+                <div class="layer-services">
+                    <span class="service-badge">PostgreSQL</span>
+                    <span class="service-badge">TimescaleDB</span>
+                    <span class="service-badge">Redis</span>
+                    <span class="service-badge">MinIO</span>
+                </div>
+            </div>
+            
+            <div class="diagram-layer">
+                <div class="layer-name">基础设施</div>
+                <div class="layer-services">
+                    <span class="service-badge">Kubernetes</span>
+                    <span class="service-badge">Docker</span>
+                    <span class="service-badge">Prometheus</span>
+                    <span class="service-badge">Grafana</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <h3 class="card-title" style="margin-bottom: 1rem;">技术栈</h3>
+            <div>
+                <span class="tech-badge">React 18</span>
+                <span class="tech-badge">TypeScript</span>
+                <span class="tech-badge">Ant Design</span>
+                <span class="tech-badge">Python FastAPI</span>
+                <span class="tech-badge">PostgreSQL</span>
+                <span class="tech-badge">Redis</span>
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">Kubernetes</span>
+                <span class="tech-badge">MQTT</span>
+                <span class="tech-badge">WebSocket</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 幻灯片 4: 核心功能 -->
+    <section class="slide">
+        <h2 class="section-title">核心功能</h2>
+        
+        <div class="content-grid">
+            <div class="card">
+                <h3 class="card-title">设备健康度评估</h3>
+                <div class="card-content">
+                    <p>基于5维度评分模型：</p>
+                    <ul class="feature-list">
+                        <li>电气性能 (电压/电流稳定性)</li>
+                        <li>热稳定性 (温度监控)</li>
+                        <li>通信质量 (网络连接)</li>
+                        <li>电能质量 (功率因数)</li>
+                        <li>机械状态 (物理损坏)</li>
+                    </ul>
+                    <p>实时计算健康分数，预测设备寿命。</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">智能派单系统</h3>
+                <div class="card-content">
+                    <p>多因子加权算法：</p>
+                    <ul class="feature-list">
+                        <li>距离优先 (Haversine计算)</li>
+                        <li>技能匹配 (工程师专长)</li>
+                        <li>负载均衡 (当前任务量)</li>
+                        <li>历史绩效 (完成率/评分)</li>
+                    </ul>
+                    <p>自动分配最优工程师，提升响应效率。</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">移动端离线支持</h3>
+                <div class="card-content">
+                    <p>9种变更类型同步：</p>
+                    <ul class="feature-list">
+                        <li>工单创建/更新/完成</li>
+                        <li>设备状态变更</li>
+                        <li>现场照片上传</li>
+                        <li>签名确认</li>
+                        <li>位置信息</li>
+                    </ul>
+                    <p>网络恢复后自动同步，确保数据完整性。</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">数据可视化</h3>
+                <div class="card-content">
+                    <p>丰富的图表和仪表盘：</p>
+                    <ul class="feature-list">
+                        <li>实时设备状态监控</li>
+                        <li>健康度趋势分析</li>
+                        <li>工单统计报表</li>
+                        <li>运维效率分析</li>
+                        <li>收入统计图表</li>
+                    </ul>
+                    <p>基于ECharts的可视化组件，支持自定义配置。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 幻灯片 5: 开发进展 -->
+    <section class="slide">
+        <h2 class="section-title">开发进展</h2>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-date">2026年3月 - 第一阶段</div>
+                <div class="timeline-content">移动端离线模式完善，同步服务、工单页面、TypeScript编译完成。</div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">2026年4月 - 第二阶段</div>
+                <div class="timeline-content">生产环境部署准备，服务器部署脚本、数据库迁移、监控告警配置完成。</div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">2026年4月 - 第三阶段</div>
+                <div class="timeline-content">功能完善阶段，知识库系统、图表可视化、扫码报修功能开发中。</div>
+            </div>
+        </div>
+        
+        <div class="content-grid" style="margin-top: 3rem;">
+            <div class="card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">第一阶段完成</div>
+            </div>
+            <div class="card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">第二阶段完成</div>
+            </div>
+            <div class="card">
+                <div class="stat-number">30%</div>
+                <div class="stat-label">第三阶段进度</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 幻灯片 6: 下一步计划 -->
+    <section class="slide">
+        <h2 class="section-title">下一步计划</h2>
+        
+        <div class="content-grid">
+            <div class="card">
+                <h3 class="card-title">知识库系统</h3>
+                <div class="card-content">
+                    <p>构建充电桩故障知识库：</p>
+                    <ul class="feature-list">
+                        <li>常见故障解决方案</li>
+                        <li>维修手册电子化</li>
+                        <li>专家经验库</li>
+                        <li>智能故障诊断</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">图表可视化增强</h3>
+                <div class="card-content">
+                    <p>丰富的数据可视化：</p>
+                    <ul class="feature-list">
+                        <li>实时数据大屏</li>
+                        <li>预测性分析图表</li>
+                        <li>自定义报表生成</li>
+                        <li>移动端图表优化</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">扫码报修功能</h3>
+                <div class="card-content">
+                    <p>便捷的故障上报：</p>
+                    <ul class="feature-list">
+                        <li>设备二维码识别</li>
+                        <li>一键报修流程</li>
+                        <li>照片视频上传</li>
+                        <li>进度实时跟踪</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 幻灯片 7: 总结与展望 -->
+    <section class="slide">
+        <h2 class="section-title">总结与展望</h2>
+        
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <h3 class="card-title">项目价值</h3>
+            <div class="card-content">
+                <ul class="feature-list">
+                    <li><strong>提升运维效率</strong>: 通过智能化调度，减少人工干预</li>
+                    <li><strong>降低运营成本</strong>: 预防性维护减少故障损失</li>
+                    <li><strong>提高服务质量</strong>: 快速响应，提升用户满意度</li>
+                    <li><strong>数据驱动决策</strong>: 基于数据分析优化运营策略</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card" style="max-width: 800px; margin: 2rem auto;">
+            <h3 class="card-title">技术优势</h3>
+            <div class="card-content">
+                <ul class="feature-list">
+                    <li><strong>微服务架构</strong>: 高可用、易扩展</li>
+                    <li><strong>云原生部署</strong>: 弹性伸缩、自动化运维</li>
+                    <li><strong>移动优先设计</strong>: 离线支持、实时同步</li>
+                    <li><strong>AI赋能</strong>: 智能分析、预测维护</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem;">
+            <button class="cta-button" onclick="window.open('https://github.com/your-org/tianlian-v3', '_blank')">
+                查看项目源码
+            </button>
+            <button class="cta-button" onclick="window.open('/demo', '_blank')" style="margin-left: 1rem;">
+                体验演示版本
+            </button>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>© 2026 天链V3 - 充电桩智能运维平台 | 技术支持: 大圣AI助手</p>
+        <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">本演示文稿使用 frontend-slides 技能生成</p>
+    </footer>
+
+    <script>
+        // 简单的幻灯片导航
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        
+        function showSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= slides.length) index = slides.length - 1;
+            
+            currentSlide = index;
+            window.scrollTo({
+                top: slides[index].offsetTop,
+                behavior: 'smooth'
+            });
+        }
+        
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                showSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                showSlide(currentSlide - 1);
+            } else if (e.key === 'Home') {
+                showSlide(0);
+            } else if (e.key === 'End') {
+                showSlide(slides.length - 1);
+            }
+        });
+        
+        // 鼠标滚轮导航
+        let wheelTimeout;
+        document.addEventListener('wheel', (e) => {
+            clearTimeout(wheelTimeout);
+            wheelTimeout = setTimeout(() => {
+                if (e.deltaY > 0) {
+                    showSlide(currentSlide + 1);
+                } else {
+                    showSlide(currentSlide - 1);
+                }
+            }, 100);
+        }, { passive: true });
+        
+        // 初始显示第一张幻灯片
+        showSlide(0);
+    </script>
+</body>
+</html>

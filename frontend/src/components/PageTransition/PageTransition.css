@@ -1,0 +1,320 @@
+/* ============================================
+   页面过渡动画 + 按钮交互反馈
+   ============================================ */
+
+/* ─── 页面入场动画 ─── */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pageSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.page-transition {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+.page-fade {
+  animation-name: pageFadeIn;
+}
+
+.page-slide-up {
+  animation-name: pageSlideUp;
+}
+
+.page-slide-left {
+  animation-name: pageSlideLeft;
+}
+
+.page-scale {
+  animation-name: pageScaleIn;
+}
+
+/* ─── 列表交错入场 ─── */
+@keyframes staggerFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes staggerFadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes staggerScale {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.stagger-item {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+}
+
+.stagger-fade-up {
+  animation-name: staggerFadeUp;
+}
+
+.stagger-fade-left {
+  animation-name: staggerFadeLeft;
+}
+
+.stagger-scale {
+  animation-name: staggerScale;
+}
+
+/* ─── 按钮交互反馈 ─── */
+
+/* Hover 微升效果 */
+.btn-lift {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 90, 54, 0.25);
+}
+
+.btn-lift:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(255, 90, 54, 0.15);
+}
+
+/* Click 涟漪反馈 */
+@keyframes btnRipple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 90, 54, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 90, 54, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 90, 54, 0);
+  }
+}
+
+.btn-ripple:active {
+  animation: btnRipple 0.3s ease-out;
+}
+
+/* Pulse 脉冲提示 */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 90, 54, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 90, 54, 0);
+  }
+}
+
+.btn-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Hover 缩放效果 (卡片) */
+.card-hover-zoom {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover-zoom:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ─── 数据刷新指示器 ─── */
+@keyframes spinPulse {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.icon-refreshing {
+  animation: spinPulse 0.8s ease-in-out;
+}
+
+/* ─── 滚动触发渐显 ─── */
+@keyframes revealOnScroll {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-on-scroll {
+  animation: revealOnScroll 0.5s ease forwards;
+  animation-play-state: paused;
+  animation-delay: calc(var(--reveal-index, 0) * 80ms);
+}
+
+.reveal-on-scroll.visible {
+  animation-play-state: running;
+}
+
+/* ─── 暗色模式适配动画 ─── */
+[data-theme='dark'] .btn-lift:hover {
+  box-shadow: 0 4px 12px rgba(255, 122, 92, 0.35);
+}
+
+[data-theme='dark'] .btn-ripple:active {
+  animation-name: btnRippleDark;
+}
+
+@keyframes btnRippleDark {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 122, 92, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 122, 92, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 122, 92, 0);
+  }
+}
+
+/* ─── 加载骨架屏 Shimmer 效果 ─── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 25%,
+    var(--bg-card) 50%,
+    var(--bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ─── Phase5: 额外过渡动画 ─── */
+
+/* 从右侧滑入 (用于面板) */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 内容区域弹性展开 */
+@keyframes expandDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    max-height: 2000px;
+    transform: translateY(0);
+  }
+}
+
+.expand-down {
+  animation: expandDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  overflow: hidden;
+}
+
+/* 轻微呼吸效果 (用于活跃状态指示) */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.breathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* Glow pulse (发光脉冲) */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(255, 90, 54, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(255, 90, 54, 0.5);
+  }
+}
+
+.glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}

@@ -1,0 +1,253 @@
+# 天链V3 - 前端测试 CI 配置草案
+#
+# 包含:
+# - 单元测试 (Vitest)
+# - E2E 测试 (Playwright)
+# - 覆盖率报告
+# - 测试结果通知
+#
+# 注意: 这是草案,需要根据实际部署情况调整
+
+name: Frontend Tests
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-tests.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  # ============ 单元测试 ============
+  unit-tests:
+    name: Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests + coverage (with thresholds)
+        run: npm run test:coverage
+        # vitest.config.ts 内置阈值: lines 30%, functions 30%, statements 30%, branches 20%
+        # 低于阈值时自动失败
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: frontend/coverage/
+          retention-days: 7
+
+      # 可选: 上传到 Codecov
+      # - name: Upload to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     directory: frontend/coverage
+      #     fail_ci_if_error: true
+
+  # ============ E2E 测试 ============
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    services:
+      # 可选: 启动后端服务 (如果需要)
+      # backend:
+      #   image: tianlian-backend:latest
+      #   ports:
+      #     - 8000:8000
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run E2E tests
+        run: npm run test:e2e:ci
+        env:
+          CI: true
+          E2E_BASE_URL: http://localhost:5173
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/test-results/
+          retention-days: 7
+
+      - name: Upload test videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-videos
+          path: frontend/test-results/artifacts/
+          retention-days: 7
+
+  # ============ 类型检查 ============
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript check
+        run: npm run typecheck
+
+  # ============ Lint 检查 ============
+  lint:
+    name: ESLint Check
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  # ============ 测试结果汇总 ============
+  test-summary:
+    name: Test Summary
+    needs: [unit-tests, e2e-tests, typecheck, lint]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check all tests passed
+        run: |
+          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+            echo "::error::Unit tests failed"
+          fi
+          if [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+            echo "::error::E2E tests failed"
+          fi
+          if [[ "${{ needs.typecheck.result }}" != "success" ]]; then
+            echo "::error::TypeScript check failed"
+          fi
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "::error::Lint check failed"
+          fi
+
+          # 如果所有测试通过,输出成功信息
+          if [[ "${{ needs.unit-tests.result }}" == "success" && \
+                "${{ needs.e2e-tests.result }}" == "success" && \
+                "${{ needs.typecheck.result }}" == "success" && \
+                "${{ needs.lint.result }}" == "success" ]]; then
+            echo "::notice::All frontend tests passed!"
+          fi
+
+  # ============ PR 覆盖率评论 (可选) ============
+  coverage-comment:
+    name: Coverage Comment
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: frontend/coverage/
+
+      - name: Add coverage comment to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const coverage = JSON.parse(
+              fs.readFileSync('frontend/coverage/coverage-summary.json', 'utf8')
+            );
+
+            const body = `
+            ## 测试覆盖率报告
+
+            | 类型 | 覆盖率 | 状态 |
+            |------|--------|------|
+            | Lines | ${coverage.total.lines.pct}% | ${coverage.total.lines.pct >= 30 ? '✅' : '❌'} |
+            | Functions | ${coverage.total.functions.pct}% | ${coverage.total.functions.pct >= 30 ? '✅' : '❌'} |
+            | Branches | ${coverage.total.branches.pct}% | ${coverage.total.branches.pct >= 20 ? '✅' : '❌'} |
+            | Statements | ${coverage.total.statements.pct}% | ${coverage.total.statements.pct >= 30 ? '✅' : '❌'} |
+
+            [查看详细报告](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });

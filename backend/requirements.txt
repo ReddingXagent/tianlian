@@ -1,0 +1,50 @@
+fastapi==0.140.0
+uvicorn==0.51.0
+sqlalchemy==2.0.51
+# 卡52f731ac: 异步 SQLAlchemy 会话驱动 (含真实 await 的端点改用 AsyncSession)
+aiosqlite==0.22.1  # SQLite 异步驱动 (dev 默认)
+asyncpg==0.31.0  # Postgres 异步驱动 (DB_TYPE=postgres 时异步会话必需)
+pydantic==2.13.4
+pydantic-settings==2.14.2
+python-multipart==0.0.32
+alembic==1.18.5
+psycopg2-binary==2.9.12
+redis==8.0.1
+celery==5.6.3
+httpx==0.28.1
+python-dotenv==1.2.2
+bcrypt==5.0.0
+pyjwt==2.15.0
+# 加密库: Fernet密钥加密/IM-B支付验签/发票签名 (app 直接 import, 显式声明防传递漂移; 卡 8f9f0a66 PYSEC-2026-3552)
+cryptography==50.0.0
+urllib3==2.8.0  # 显式 pin 传递依赖防漂移（requests/httpx 上游），修复 PYSEC-2026-4175/4176/4177
+werkzeug==3.1.9  # 显式 pin 传递依赖防漂移（Flask/locust 上游），修复 CVE-2026-102598 safe_join 挂死 (卡 8d9a0658)
+email-validator==2.3.0
+requests==2.34.2
+sentry-sdk==2.66.1
+slowapi==0.1.10
+prometheus-client==0.26.0
+schedule==1.2.2
+# Phase3: TDengine RESTful 连接器 (可选, 未安装时自动降级)
+# taosrest>=1.3.0  # 需要 TDengine 服务端, 从 TDengine 官方源安装
+
+# ===== 运行时依赖（app 实际 import，早期 requirements 漏列，Phase37 补齐）=====
+pytz==2026.3.post1
+# Phase40-P6: 配置驱动设备接入 - YAML 设备模板解析
+pyyaml==6.0.3
+numpy==2.4.6
+pandas==3.0.5
+openpyxl==3.1.5
+qrcode==8.2
+scikit-learn==1.9.0
+# VPP LP 优化 (scipy 缺失时 lp_optimizer 静默回退启发式调度, 生产须显式声明)
+scipy==1.17.1
+joblib==1.5.3
+
+# ===== 测试依赖 =====
+pytest==9.1.1
+pytest-asyncio==1.4.0
+pytest-cov==7.1.0
+pytest-timeout==2.4.0
+pytest-xdist==3.8.0
+httpx-ws==0.9.0

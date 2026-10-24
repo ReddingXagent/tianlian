@@ -1,0 +1,29 @@
+[Unit]
+Description=Tianlian V3 Celery Worker
+After=network.target redis.service postgresql.service
+Requires=redis.service
+
+[Service]
+Type=simple
+User=tianlian
+Group=tianlian
+WorkingDirectory=/opt/tianlian-v3/backend
+Environment="CELERY_BROKER_URL=redis://localhost:6379/0"
+Environment="CELERY_RESULT_BACKEND=redis://localhost:6379/1"
+Environment="PYTHONPATH=/opt/tianlian-v3/backend"
+ExecStart=/opt/tianlian-v3/backend/venv/bin/celery -A app.core.celery_app worker \
+  --loglevel=info \
+  --queues=default,analytics,maintenance \
+  --concurrency=4 \
+  --max-tasks-per-child=100 \
+  --time-limit=600 \
+  --soft-time-limit=300
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tianlian-celery-worker
+
+[Install]
+WantedBy=multi-user.target

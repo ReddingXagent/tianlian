@@ -1,0 +1,686 @@
+/**
+ * 工单管理页面 - 增强版
+ * 功能: 统计卡片 + 搜索筛选 + 详情弹窗 + 转单弹窗 + 完成报告 + 催单
+ */
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+  Card, Table, Tag, Spin, Button, Modal, Form, Input, Select,
+  message, Space, Divider, Statistic, Row, Col, Timeline, Descriptions,
+  Badge, Popconfirm, Upload, Tooltip
+} from 'antd';
+import {
+  PlusOutlined, CheckCircleOutlined, SyncOutlined, CloseCircleOutlined,
+  SearchOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined,
+  UserOutlined, ThunderboltOutlined, RollbackOutlined, FileTextOutlined,
+  CheckSquareOutlined, ExclamationCircleOutlined, BellOutlined, BarChartOutlined
+} from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import api from '../../api';
+import type { WorkOrder } from '../../types';
+import TransferModal from './components/TransferModal';
+import CompleteReport from './components/CompleteReport';
+
+const { TextArea } = Input;
+
+interface WorkOrderLocal {
+  id: string;
+  fault_desc: string;
+  type: string;
+  level: string;
+  status: string;
+  station_id: number | null;
+  device_id: number | null;
+  assignee_id: number | null;
+  creator_id: number;
+  create_time: string;
+  accept_time: string | null;
+  finish_time: string | null;
+  solution: string | null;
+  fault_reason?: string;
+  parts_replaced?: string;
+}
+
+const WorkOrders: React.FC = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState<WorkOrderLocal[]>([]);
+  const [createModal, setCreateModal] = useState(false);
+  const [dispatchModal, setDispatchModal] = useState(false);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<WorkOrderLocal | null>(null);
+
+  // 新组件弹窗状态
+  const [transferVisible, setTransferVisible] = useState(false);
+  const [completeVisible, setCompleteVisible] = useState(false);
+  const [urgeLoading, setUrgeLoading] = useState<string | null>(null);
+
+  const [form] = Form.useForm();
+  const [rejectForm] = Form.useForm();
+
+  // 搜索筛选
+  const [searchText, setSearchText] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('');
+  const [filterLevel, setFilterLevel] = useState<string>('');
+
+  useEffect(() => {
+    fetchOrders();
+    let ws: WebSocket | null = null;
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/v1/workorders`;
+    try {
+      ws = new WebSocket(wsUrl);
+      ws.onmessage = () => { fetchOrders(); };
+      ws.onerror = () => {};
+    } catch {}
+    return () => { if (ws) ws.close(); };
+  }, []);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const { data } = await api.get('/workorders');
+      setOrders(data.items || []);
+    } catch (err: unknown) {
+      const error = err as any;
+      message.error('加载失败:' + (error?.response?.data?.detail || error?.message));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 统计数据
+  const stats = useMemo(() => ({
+    total: orders.length,
+    pending: orders.filter(o => o.status === 'pending').length,
+    accepted: orders.filter(o => o.status === 'accepted').length,
+    processing: orders.filter(o => o.status === 'processing').length,
+    completed: orders.filter(o => o.status === 'completed' || o.status === 'verified').length,
+    urgent: orders.filter(o => o.level === 'urgent' && o.status !== 'completed' && o.status !== 'verified').length,
+  }), [orders]);
+
+  // 筛选后的数据
+  const filteredOrders = useMemo(() => {
+    return orders.filter(o => {
+      if (filterStatus && o.status !== filterStatus) return false;
+      if (filterLevel && o.level !== filterLevel) return false;
+      if (searchText && !o.fault_desc.toLowerCase().includes(searchText.toLowerCase()) && !o.id.toLowerCase().includes(searchText.toLowerCase())) return false;
+      return true;
+    });
+  }, [orders, searchText, filterStatus, filterLevel]);
+
+  const handleCreate = async (values: { fault_desc: string; type?: string; level?: string; station_id?: number | null; device_id?: number | null }) => {
+    try {
+      await api.post('/workorders', {
+        fault_desc: values.fault_desc,
+        type: values.type || 'repair',
+        level: values.level || 'warning',
+        station_id: values.station_id || null,
+        device_id: values.device_id || null,
+      });
+      message.success('工单创建成功');
+      setCreateModal(false);
+      form.resetFields();
+      fetchOrders();
+    } catch (err: unknown) {
+      const error = err as any;
+      message.error('创建失败:' + (error?.response?.data?.detail || error?.message));
+    }
+  };
+
+  const handleDispatch = async () => {
+    if (!selectedOrder) return;
+    try {
+      await api.post(`/workorders/${selectedOrder.id}/dispatch`, { auto: true });
+      message.success('智能派单成功');
+      setDispatchModal(false);
+      setDetailVisible(false);
+      fetchOrders();
+    } catch (err: unknown) {
+      const error = err as any;
+      message.error('派单失败:' + (error?.response?.data?.detail || error?.message));
+    }
+  };
+
+  const handleAccept = async (order: WorkOrderLocal) => {
+    try {
+      await api.post(`/workorders/${order.id}/accept`);
+      message.success('已接单');
+      setDetailVisible(false);
+      fetchOrders();
+    } catch (err: unknown) { message.error('接单失败'); }
+  };
+
+  const handleStart = async (order: WorkOrderLocal) => {
+    try {
+      await api.post(`/workorders/${order.id}/start`);
+      message.success('已开始处理');
+      setDetailVisible(false);
+      fetchOrders();
+    } catch (err: unknown) { message.error('操作失败'); }
+  };
+
+  const handleVerify = async (order: WorkOrderLocal) => {
+    try {
+      await api.post(`/workorders/${order.id}/verify`);
+      message.success('验收通过');
+      setDetailVisible(false);
+      fetchOrders();
+    } catch (err: unknown) { message.error('操作失败'); }
+  };
+
+  const handleReject = async (values: { reason: string }) => {
+    if (!selectedOrder) return;
+    try {
+      await api.post(`/workorders/${selectedOrder.id}/reject`, null, {
+        params: { reason: values.reason },
+      });
+      message.success('已驳回');
+      setDetailVisible(false);
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (err: unknown) { message.error('操作失败'); }
+  };
+
+  const handleCancel = async (order: WorkOrderLocal) => {
+    try {
+      await api.post(`/workorders/${order.id}/reject`, { reason: '取消工单' });
+      message.success('工单已取消');
+      setDetailVisible(false);
+      fetchOrders();
+    } catch (err: unknown) { message.error('操作失败'); }
+  };
+
+  // 催单 - 直接调用API并弹toast
+  const handleUrge = async (order: WorkOrderLocal) => {
+    setUrgeLoading(order.id);
+    try {
+      await api.post(`/workorders/${order.id}/urge`, {
+        message: '请尽快处理此工单',
+      });
+      message.success({ content: `工单 ${order.id} 催单已发送，工程师将收到通知`, duration: 3 });
+      fetchOrders();
+    } catch (err: unknown) {
+      const error = err as any;
+      message.error('催单失败: ' + (error?.response?.data?.detail || error?.message));
+    } finally {
+      setUrgeLoading(null);
+    }
+  };
+
+  const handleViewDetail = (order: WorkOrderLocal) => {
+    setSelectedOrder(order);
+    setDetailVisible(true);
+  };
+
+  // 打开转单弹窗
+  const handleOpenTransfer = (order: WorkOrderLocal) => {
+    setSelectedOrder(order);
+    setDetailVisible(false);
+    setTransferVisible(true);
+  };
+
+  // 打开完成报告弹窗
+  const handleOpenComplete = (order: WorkOrderLocal) => {
+    setSelectedOrder(order);
+    setDetailVisible(false);
+    setCompleteVisible(true);
+  };
+
+  const levelColors: Record<string, string> = { low: 'blue', warning: 'orange', medium: 'orange', high: 'red', urgent: 'magenta' };
+  const statusColors: Record<string, string> = {
+    pending: 'orange', accepted: 'blue', processing: 'blue',
+    pending_verify: 'gold', completed: 'green', cancelled: 'default', verified: 'green'
+  };
+  const statusLabels: Record<string, string> = {
+    pending: '待派单', accepted: '已接单', processing: '处理中',
+    pending_verify: '待验收', completed: '已完成', cancelled: '已取消', verified: '已验收'
+  };
+  const statusIcons: Record<string, React.ReactNode> = {
+    pending: <ClockCircleOutlined />, accepted: <UserOutlined />,
+    processing: <ThunderboltOutlined />, completed: <CheckCircleOutlined />,
+    cancelled: <CloseCircleOutlined />, verified: <CheckSquareOutlined />
+  };
+  const typeLabels: Record<string, string> = {
+    repair: '维修', inspection: '巡检', installation: '安装', maintenance: '保养'
+  };
+
+  const columns = [
+    { title: '工单号', dataIndex: 'id', key: 'id', width: 170 },
+    {
+      title: '故障描述', dataIndex: 'fault_desc', key: 'fault_desc', ellipsis: true,
+      render: (v: string) => <span style={{ maxWidth: 300 }}>{v}</span>
+    },
+    {
+      title: '类型', dataIndex: 'type', key: 'type', width: 70,
+      render: (v: string) => typeLabels[v] || v
+    },
+    {
+      title: '级别', dataIndex: 'level', key: 'level', width: 80,
+      render: (v: string) => (
+        <Tag color={levelColors[v] || 'default'} icon={v === 'urgent' ? <ExclamationCircleOutlined /> : null}>
+          {v === 'urgent' ? '紧急' : v === 'high' ? '高' : v === 'warning' ? '一般' : v === 'low' ? '低' : v}
+        </Tag>
+      )
+    },
+    {
+      title: '状态', dataIndex: 'status', key: 'status', width: 100,
+      render: (v: string) => (
+        <Tag color={statusColors[v] || 'default'} icon={statusIcons[v] || null}>
+          {statusLabels[v] || v}
+        </Tag>
+      )
+    },
+    {
+      title: '创建时间', dataIndex: 'create_time', key: 'create_time', width: 150,
+      render: (v: string) => v ? v.substring(0, 16) : '-'
+    },
+    {
+      title: '操作', key: 'action', width: 280, fixed: 'right' as const,
+      render: (_: unknown, record: WorkOrderLocal) => (
+        <Space size="small">
+          <Button size="small" type="link" icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
+            详情
+          </Button>
+          {record.status === 'pending' && (
+            <Button size="small" type="link" icon={<SyncOutlined />}
+              onClick={() => { setSelectedOrder(record); setDispatchModal(true); }}>
+              派单
+            </Button>
+          )}
+          {record.status === 'accepted' && (
+            <Button size="small" type="link" icon={<ThunderboltOutlined />} onClick={() => handleStart(record)}>
+              开始
+            </Button>
+          )}
+          {(record.status === 'accepted' || record.status === 'processing') && (
+            <Button size="small" type="primary" ghost icon={<CheckCircleOutlined />}
+              onClick={() => handleOpenComplete(record)}>
+              完成
+            </Button>
+          )}
+          {record.status === 'pending_verify' && (
+            <>
+              <Button size="small" type="link" icon={<CheckCircleOutlined />}
+                onClick={() => handleVerify(record)}>验收</Button>
+              <Button size="small" type="link" danger icon={<CloseCircleOutlined />}
+                onClick={() => { setSelectedOrder(record); setDetailVisible(true); }}>驳回</Button>
+            </>
+          )}
+          {(record.status === 'pending' || record.status === 'accepted' || record.status === 'processing') && (
+            <Button size="small" type="link" icon={<RollbackOutlined />}
+              onClick={() => handleOpenTransfer(record)}>
+              转单
+            </Button>
+          )}
+          {(record.status === 'pending' || record.status === 'accepted' || record.status === 'processing') && (
+            <Tooltip title="发送催单通知">
+              <Button
+                size="small"
+                type="link"
+                danger
+                icon={<BellOutlined />}
+                loading={urgeLoading === record.id}
+                onClick={() => handleUrge(record)}
+              >
+                催单
+              </Button>
+            </Tooltip>
+          )}
+        </Space>
+      )
+    },
+  ];
+
+  return (
+    <div className="page-container">
+      {/* 统计卡片 */}
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={4}>
+          <Card size="small">
+            <Statistic title="总工单" value={stats.total} prefix={<FileTextOutlined />} />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card size="small">
+            <Statistic title="待派单" value={stats.pending} valueStyle={{ color: '#f5a623' }} prefix={<ClockCircleOutlined />} />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card size="small">
+            <Statistic title="已接单" value={stats.accepted} valueStyle={{ color: '#ff5a36' }} prefix={<UserOutlined />} />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card size="small">
+            <Statistic title="处理中" value={stats.processing} valueStyle={{ color: '#ff5a36' }} prefix={<ThunderboltOutlined />} />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card size="small">
+            <Statistic title="已完成" value={stats.completed} valueStyle={{ color: '#34a853' }} prefix={<CheckCircleOutlined />} />
+          </Card>
+        </Col>
+        <Col span={4}>
+          <Card size="small">
+            <Statistic title="紧急未结" value={stats.urgent} valueStyle={{ color: stats.urgent > 0 ? '#ea4335' : '#34a853' }} prefix={<ExclamationCircleOutlined />} />
+          </Card>
+        </Col>
+      </Row>
+
+      <Card
+        title="工单列表"
+        extra={
+          <Space>
+            <Button icon={<BarChartOutlined />} onClick={() => navigate('/workorder-stats')}>
+              工单统计
+            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModal(true)}>
+              创建工单
+            </Button>
+          </Space>
+        }
+      >
+        {/* 搜索筛选栏 */}
+        <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <Input.Search
+            placeholder="搜索工单号/故障描述..."
+            allowClear
+            style={{ width: 280 }}
+            prefix={<SearchOutlined />}
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+          />
+          <Select
+            placeholder="筛选状态"
+            allowClear
+            style={{ width: 130 }}
+            value={filterStatus || undefined}
+            onChange={v => setFilterStatus(v || '')}
+            options={Object.entries(statusLabels).map(([k, v]) => ({ label: v as string, value: k }))}
+          />
+          <Select
+            placeholder="筛选级别"
+            allowClear
+            style={{ width: 120 }}
+            value={filterLevel || undefined}
+            onChange={v => setFilterLevel(v || '')}
+            options={[
+              { label: '紧急', value: 'urgent' },
+              { label: '高', value: 'high' },
+              { label: '一般', value: 'warning' },
+              { label: '低', value: 'low' },
+            ]}
+          />
+          <span style={{ lineHeight: '32px', color: '#999' }}>
+            共 {filteredOrders.length} 条
+          </span>
+        </div>
+
+        {loading ? (
+          <div style={{ padding: 40, textAlign: 'center' }}><Spin size="large" /></div>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={filteredOrders}
+            rowKey="id"
+            pagination={{ pageSize: 10, showSizeChanger: true, showTotal: t => `共 ${t} 条` }}
+            size="small"
+            scroll={{ x: 1200 }}
+          />
+        )}
+      </Card>
+
+      {/* 创建工单弹窗 */}
+      <Modal
+        title="创建工单"
+        open={createModal}
+        onCancel={() => { setCreateModal(false); form.resetFields(); }}
+        footer={null}
+      >
+        <Form form={form} layout="vertical" onFinish={handleCreate}>
+          <Form.Item name="fault_desc" label="故障描述" rules={[{ required: true, message: '请输入故障描述' }]}>
+            <TextArea rows={3} placeholder="请描述故障情况" />
+          </Form.Item>
+          <Form.Item name="type" label="工单类型" initialValue="repair">
+            <Select options={[
+              { label: '维修', value: 'repair' },
+              { label: '巡检', value: 'inspection' },
+              { label: '安装', value: 'installation' },
+              { label: '保养', value: 'maintenance' },
+            ]} />
+          </Form.Item>
+          <Form.Item name="level" label="优先级" initialValue="warning">
+            <Select options={[
+              { label: '低', value: 'low' },
+              { label: '一般', value: 'warning' },
+              { label: '高', value: 'high' },
+              { label: '紧急', value: 'urgent' },
+            ]} />
+          </Form.Item>
+          <Form.Item name="station_id" label="站点ID">
+            <Input type="number" placeholder="可选" />
+          </Form.Item>
+          <Form.Item name="device_id" label="设备ID">
+            <Input type="number" placeholder="可选" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>创建</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 智能派单弹窗 */}
+      <Modal
+        title="智能派单"
+        open={dispatchModal}
+        onCancel={() => { setDispatchModal(false); setSelectedOrder(null); }}
+        footer={[
+          <Button key="cancel" onClick={() => setDispatchModal(false)}>取消</Button>,
+          <Button key="dispatch" type="primary" icon={<SyncOutlined />} onClick={handleDispatch}>
+            自动派单
+          </Button>,
+        ]}
+      >
+        <Descriptions bordered size="small" column={1}>
+          <Descriptions.Item label="工单号">{selectedOrder?.id}</Descriptions.Item>
+          <Descriptions.Item label="故障描述">{selectedOrder?.fault_desc}</Descriptions.Item>
+          <Descriptions.Item label="优先级">
+            <Tag color={levelColors[selectedOrder?.level || '']}>{selectedOrder?.level}</Tag>
+          </Descriptions.Item>
+        </Descriptions>
+        <Divider />
+        <p style={{ color: '#666' }}>
+          <ThunderboltOutlined /> 系统将根据工程师位置、技能、负载等因素自动分配最佳工程师。
+        </p>
+      </Modal>
+
+      {/* 工单详情弹窗 */}
+      <Modal
+        title="工单详情"
+        open={detailVisible}
+        onCancel={() => { setDetailVisible(false); setSelectedOrder(null); }}
+        width={700}
+        footer={null}
+      >
+        {selectedOrder && (
+          <div>
+            <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+              <Descriptions.Item label="工单号" span={2}>
+                <b>{selectedOrder.id}</b>
+              </Descriptions.Item>
+              <Descriptions.Item label="故障描述" span={2}>
+                {selectedOrder.fault_desc}
+              </Descriptions.Item>
+              <Descriptions.Item label="工单类型">
+                {typeLabels[selectedOrder.type] || selectedOrder.type}
+              </Descriptions.Item>
+              <Descriptions.Item label="优先级">
+                <Tag color={levelColors[selectedOrder.level]}>
+                  {selectedOrder.level === 'urgent' ? '🔴 紧急' : selectedOrder.level === 'high' ? '🟠 高' : selectedOrder.level === 'warning' ? '🟡 一般' : '🔵 低'}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="当前状态">
+                <Badge color={statusColors[selectedOrder.status]} text={statusLabels[selectedOrder.status]} />
+              </Descriptions.Item>
+              <Descriptions.Item label="创建时间">
+                {selectedOrder.create_time?.substring(0, 16)}
+              </Descriptions.Item>
+              <Descriptions.Item label="接单时间">
+                {selectedOrder.accept_time?.substring(0, 16) || '-'}
+              </Descriptions.Item>
+              <Descriptions.Item label="完成时间">
+                {selectedOrder.finish_time?.substring(0, 16) || '-'}
+              </Descriptions.Item>
+              {selectedOrder.station_id && (
+                <Descriptions.Item label="站点ID">{selectedOrder.station_id}</Descriptions.Item>
+              )}
+              {selectedOrder.device_id && (
+                <Descriptions.Item label="设备ID">{selectedOrder.device_id}</Descriptions.Item>
+              )}
+            </Descriptions>
+
+            {/* 操作时间线 */}
+            <Card title="操作记录" size="small" style={{ marginBottom: 16 }}>
+              <Timeline mode="left">
+                <Timeline.Item color="blue">
+                  <p><ClockCircleOutlined /> 创建工单</p>
+                  <p style={{ color: '#999', fontSize: 12 }}>{selectedOrder.create_time?.substring(0, 16)}</p>
+                  <p style={{ color: '#666' }}>{selectedOrder.fault_desc}</p>
+                </Timeline.Item>
+                {selectedOrder.accept_time && (
+                  <Timeline.Item color="green">
+                    <p><UserOutlined /> 接单</p>
+                    <p style={{ color: '#999', fontSize: 12 }}>{selectedOrder.accept_time.substring(0, 16)}</p>
+                  </Timeline.Item>
+                )}
+                {selectedOrder.status === 'processing' && (
+                  <Timeline.Item color="orange">
+                    <p><ThunderboltOutlined /> 开始处理</p>
+                  </Timeline.Item>
+                )}
+                {(selectedOrder.status === 'completed' || selectedOrder.status === 'verified') && selectedOrder.finish_time && (
+                  <Timeline.Item color="green">
+                    <p><CheckCircleOutlined /> 完成工单</p>
+                    <p style={{ color: '#999', fontSize: 12 }}>{selectedOrder.finish_time.substring(0, 16)}</p>
+                    {selectedOrder.solution && (
+                      <p style={{ color: '#666' }}>解决方案: {selectedOrder.solution}</p>
+                    )}
+                  </Timeline.Item>
+                )}
+                {selectedOrder.status === 'cancelled' && (
+                  <Timeline.Item color="red">
+                    <p><CloseCircleOutlined /> 取消工单</p>
+                  </Timeline.Item>
+                )}
+              </Timeline>
+            </Card>
+
+            {/* 操作按钮 */}
+            <Divider orientation="left" style={{ fontSize: 13 }}>操作</Divider>
+            <Space wrap>
+              {selectedOrder.status === 'pending' && (
+                <>
+                  <Button icon={<SyncOutlined />} onClick={() => { setDetailVisible(false); setDispatchModal(true); }}>
+                    智能派单
+                  </Button>
+                  <Popconfirm title="确认接单？" onConfirm={() => handleAccept(selectedOrder)}>
+                    <Button type="primary" ghost icon={<UserOutlined />}>接单</Button>
+                  </Popconfirm>
+                </>
+              )}
+              {selectedOrder.status === 'accepted' && (
+                <Button type="primary" icon={<ThunderboltOutlined />} onClick={() => handleStart(selectedOrder)}>
+                  开始处理
+                </Button>
+              )}
+              {(selectedOrder.status === 'accepted' || selectedOrder.status === 'processing') && (
+                <>
+                  <Button type="primary" icon={<CheckCircleOutlined />}
+                    onClick={() => { setDetailVisible(false); handleOpenComplete(selectedOrder); }}>
+                    完成工单
+                  </Button>
+                  <Popconfirm title="确认取消此工单？" onConfirm={() => handleCancel(selectedOrder)}>
+                    <Button danger icon={<CloseCircleOutlined />}>取消工单</Button>
+                  </Popconfirm>
+                </>
+              )}
+              {selectedOrder.status === 'pending_verify' && (
+                <>
+                  <Button type="primary" icon={<CheckCircleOutlined />} onClick={() => handleVerify(selectedOrder)}>
+                    验收通过
+                  </Button>
+                  <Button danger icon={<CloseCircleOutlined />}
+                    onClick={() => { rejectForm.setFieldsValue({ reason: '' }); }}>
+                    驳回
+                  </Button>
+                </>
+              )}
+              {(selectedOrder.status === 'pending' || selectedOrder.status === 'accepted' || selectedOrder.status === 'processing') && (
+                <>
+                  <Button icon={<RollbackOutlined />}
+                    onClick={() => { setDetailVisible(false); handleOpenTransfer(selectedOrder); }}>
+                    转单
+                  </Button>
+                  <Button
+                    danger
+                    icon={<BellOutlined />}
+                    loading={urgeLoading === selectedOrder.id}
+                    onClick={() => handleUrge(selectedOrder)}
+                  >
+                    催单
+                  </Button>
+                </>
+              )}
+            </Space>
+
+            {/* 驳回表单 */}
+            {selectedOrder.status === 'pending_verify' && (
+              <Form form={rejectForm} layout="vertical" onFinish={handleReject} style={{ marginTop: 16 }}>
+                <Form.Item name="reason" label="驳回原因" rules={[{ required: true, message: '请填写驳回原因' }]}>
+                  <TextArea rows={3} placeholder="请说明验收不通过的原因" />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" danger htmlType="submit" block>
+                    确认驳回
+                  </Button>
+                </Form.Item>
+              </Form>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* 转单弹窗 - 新组件 */}
+      {selectedOrder && (
+        <TransferModal
+          visible={transferVisible}
+          orderId={selectedOrder.id}
+          currentAssigneeId={selectedOrder.assignee_id}
+          onCancel={() => { setTransferVisible(false); }}
+          onSuccess={() => {
+            setTransferVisible(false);
+            setSelectedOrder(null);
+            fetchOrders();
+          }}
+        />
+      )}
+
+      {/* 完成报告弹窗 - 新组件 */}
+      {selectedOrder && (
+        <CompleteReport
+          visible={completeVisible}
+          orderId={selectedOrder.id}
+          onCancel={() => { setCompleteVisible(false); }}
+          onSuccess={() => {
+            setCompleteVisible(false);
+            setSelectedOrder(null);
+            fetchOrders();
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+export default WorkOrders;
+</｜DSML｜parameter>

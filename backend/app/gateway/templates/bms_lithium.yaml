@@ -1,0 +1,30 @@
+device_type: bms_lithium
+manufacturer: CATL
+model: BMS-LFP-280
+category: bms
+protocol: modbus_rtu
+connection:
+  port: /dev/ttyUSB0
+  baudrate: 9600
+  slave_id: 5
+registers:
+  - address: 40400
+    name: pack_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+  - address: 40401
+    name: pack_current
+    type: int16
+    scale: 0.1
+    unit: A
+  - address: 40402
+    name: soc
+    type: uint16
+    scale: 0.01
+    unit: "%"
+  - address: 40403
+    name: soh
+    type: uint16
+    scale: 0.01
+    unit: "%"

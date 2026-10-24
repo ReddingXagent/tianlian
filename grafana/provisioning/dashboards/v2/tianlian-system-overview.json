@@ -1,0 +1,152 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "tianlian-system-overview",
+    "title": "天链V3 系统总览",
+    "tags": ["tianlian", "system"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "type": "row",
+        "title": "服务状态",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "type": "stat",
+        "title": "后端服务",
+        "gridPos": {"h": 4, "w": 4, "x": 0, "y": 1},
+        "targets": [{"expr": "up{job=\"tianlian-backend\"}", "legendFormat": ""}],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {"steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+          }
+        }
+      },
+      {
+        "id": 3,
+        "type": "stat",
+        "title": "HTTP请求速率",
+        "gridPos": {"h": 4, "w": 4, "x": 4, "y": 1},
+        "targets": [{"expr": "rate(http_requests_total[5m])", "legendFormat": "rps"}]
+      },
+      {
+        "id": 4,
+        "type": "stat",
+        "title": "活跃告警",
+        "gridPos": {"h": 4, "w": 4, "x": 8, "y": 1},
+        "targets": [{"expr": "count(active_alarms)", "legendFormat": ""}],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "orange", "value": 10}, {"color": "red", "value": 50}]}
+          }
+        }
+      },
+      {
+        "id": 5,
+        "type": "stat",
+        "title": "在线设备",
+        "gridPos": {"h": 4, "w": 4, "x": 12, "y": 1},
+        "targets": [{"expr": "count(device_status == 1)", "legendFormat": ""}]
+      },
+      {
+        "id": 6,
+        "type": "stat",
+        "title": "API错误率(5m)",
+        "gridPos": {"h": 4, "w": 4, "x": 16, "y": 1},
+        "targets": [{"expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m]) * 100", "legendFormat": ""}],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {"mode": "thresholds"},
+            "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}, {"color": "red", "value": 5}]}
+          }
+        }
+      },
+      {
+        "id": 7,
+        "type": "stat",
+        "title": "API响应时间P95",
+        "gridPos": {"h": 4, "w": 4, "x": 20, "y": 1},
+        "targets": [{"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": ""}],
+        "fieldConfig": {"defaults": {"unit": "s"}}
+      },
+      {
+        "id": 8,
+        "type": "row",
+        "title": "性能指标",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5}
+      },
+      {
+        "id": 9,
+        "type": "timeseries",
+        "title": "HTTP请求速率 (5m滑动)",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {"expr": "sum(rate(http_requests_total[5m]))", "legendFormat": "总请求"},
+          {"expr": "sum(rate(http_requests_total{status=~\"2..\"}[5m]))", "legendFormat": "2xx"},
+          {"expr": "sum(rate(http_requests_total{status=~\"4..\"}[5m]))", "legendFormat": "4xx"},
+          {"expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))", "legendFormat": "5xx"}
+        ]
+      },
+      {
+        "id": 10,
+        "type": "timeseries",
+        "title": "API响应时间分布",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {"expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50"},
+          {"expr": "histogram_quantile(0.90, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p90"},
+          {"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95"},
+          {"expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99"}
+        ]
+      },
+      {
+        "id": 11,
+        "type": "row",
+        "title": "系统资源",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 14}
+      },
+      {
+        "id": 12,
+        "type": "gauge",
+        "title": "CPU使用率",
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 15},
+        "targets": [{"expr": "100 - (avg by(instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "legendFormat": ""}],
+        "fieldConfig": {"defaults": {"unit": "percent", "max": 100, "min": 0}}
+      },
+      {
+        "id": 13,
+        "type": "gauge",
+        "title": "内存使用率",
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 15},
+        "targets": [{"expr": "(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100", "legendFormat": ""}],
+        "fieldConfig": {"defaults": {"unit": "percent", "max": 100, "min": 0}}
+      },
+      {
+        "id": 14,
+        "type": "gauge",
+        "title": "磁盘使用率",
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 15},
+        "targets": [{"expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100)", "legendFormat": ""}],
+        "fieldConfig": {"defaults": {"unit": "percent", "max": 100, "min": 0}}
+      },
+      {
+        "id": 15,
+        "type": "gauge",
+        "title": "DB连接数",
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 15},
+        "targets": [{"expr": "pg_stat_database_numbackends", "legendFormat": ""}]
+      }
+    ],
+    "templating": {"list": []},
+    "annotations": {"list": []},
+    "editable": true
+  }
+}

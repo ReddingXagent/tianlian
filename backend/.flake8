@@ -1,0 +1,25 @@
+[flake8]
+max-line-length = 120
+max-complexity = 12
+extend-ignore =
+    # E203: whitespace before ':'
+    E203,
+    # W503: line break before binary operator
+    W503,
+    # F401: imported but unused (handled by IDE)
+    F401,
+    # F403: star imports
+    F403,
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    migrations,
+    node_modules,
+    *.egg-info,
+per-file-ignores =
+    # allow unused imports in __init__.py (re-export)
+    __init__.py: F401
+    # allow long lines in conftest
+    tests/conftest.py: E501
