@@ -120,12 +120,13 @@ describe('设备管理 — 渲染', () => {
     expect(screen.getByText('逆变器-02')).toBeInTheDocument();
   });
 
-  it('显示设备 SN', async () => {
+  it('列表不展示 SN（2026-10-09 设计：SN 仅在详情页展示）', async () => {
     await act(async () => {
       render(<BrowserRouter><DeviceListPage /></BrowserRouter>);
     });
-    expect(await screen.findByText('SN001')).toBeInTheDocument();
-    expect(screen.getByText('SN002')).toBeInTheDocument();
+    await screen.findByText('充电桩-01');
+    // SN 已从列表列移除, 只在详情抽屉里出现
+    expect(screen.queryByText('SN001')).not.toBeInTheDocument();
   });
 });
 

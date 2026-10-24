@@ -125,20 +125,17 @@ describe('定价管理主页', () => {
     expect(container).toBeTruthy();
   });
 
-  it('显示6个Tab标签', () => {
+  it('显示3个Tab标签', () => {
     render(<BrowserRouter><PricingPage /></BrowserRouter>);
-    expect(screen.getByText('时段定义')).toBeInTheDocument();
-    expect(screen.getByText('充电费')).toBeInTheDocument();
-    expect(screen.getByText('服务费')).toBeInTheDocument();
-    expect(screen.getByText('停车费')).toBeInTheDocument();
-    expect(screen.getByText('占桩费')).toBeInTheDocument();
-    expect(screen.getByText('预约费')).toBeInTheDocument();
+    expect(screen.getByText(/充电费/)).toBeInTheDocument();
+    expect(screen.getByText(/V2G放电价/)).toBeInTheDocument();
+    expect(screen.getByText(/平台费率/)).toBeInTheDocument();
   });
 
-  it('默认激活时段定义Tab', () => {
+  it('默认激活充电费Tab', () => {
     render(<BrowserRouter><PricingPage /></BrowserRouter>);
     const activeTab = document.querySelector('.ant-tabs-tab-active');
-    expect(activeTab?.textContent).toContain('时段定义');
+    expect(activeTab?.textContent).toContain('充电费');
   });
 
   it('点击Tab切换到充电费', () => {
@@ -148,36 +145,6 @@ describe('定价管理主页', () => {
     expect(activeTab?.textContent).toContain('充电费');
   });
 
-  it('点击Tab切换到服务费', () => {
-    render(<BrowserRouter><PricingPage /></BrowserRouter>);
-    clickTab('服务费');
-    const activeTab = document.querySelector('.ant-tabs-tab-active');
-    expect(activeTab?.textContent).toContain('服务费');
-  });
-
-  it('点击Tab切换到停车费', () => {
-    render(<BrowserRouter><PricingPage /></BrowserRouter>);
-    clickTab('停车费');
-    const activeTab = document.querySelector('.ant-tabs-tab-active');
-    expect(activeTab?.textContent).toContain('停车费');
-  });
-
-  it('点击Tab切换到占桩费', () => {
-    render(<BrowserRouter><PricingPage /></BrowserRouter>);
-    clickTab('占桩费');
-    const activeTab = document.querySelector('.ant-tabs-tab-active');
-    expect(activeTab?.textContent).toContain('占桩费');
-  });
-
-  it('点击Tab切换到预约费', () => {
-    render(<BrowserRouter><PricingPage /></BrowserRouter>);
-    clickTab('预约费');
-    const activeTab = document.querySelector('.ant-tabs-tab-active');
-    expect(activeTab?.textContent).toContain('预约费');
-  });
-});
-
-describe('时段定义管理', () => {
   it('渲染不崩溃', () => {
     const { container } = render(<BrowserRouter><TimeSlotDefinitions /></BrowserRouter>);
     expect(container).toBeTruthy();

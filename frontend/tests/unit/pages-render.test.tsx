@@ -26,6 +26,11 @@ vi.mock('../../src/api', () => ({
   alarmAPI: {
     stats: vi.fn().mockResolvedValue({ data: { active: 0 } }),
   },
+  // 卡 971f853e: 页面改用 fetchAllPages 循环拉全量, mock 必须提供该导出
+  fetchAllPages: vi.fn(async () => []),
+  deviceAPI: {
+    list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
+  },
 }));
 
 describe('页面渲染测试', () => {

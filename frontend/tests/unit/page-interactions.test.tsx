@@ -133,11 +133,22 @@ vi.mock('../../src/api', () => {
     get: vi.fn().mockResolvedValue({ data: {} }),
     update: vi.fn().mockResolvedValue({ data: {} }),
   },
+  fetchAllPages: vi.fn(async () => []),
+  deviceAPI: {
+    list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
+  },
   gatewayAPI: {
     list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
     create: vi.fn().mockResolvedValue({ data: {} }),
     update: vi.fn().mockResolvedValue({ data: {} }),
     delete: vi.fn().mockResolvedValue({ data: {} }),
+    // Gateways 页额外调用的方法（useGateways.ts 实际引用）
+    sn: vi.fn().mockResolvedValue({ data: { items: [] } }),
+    firmware: vi.fn().mockResolvedValue({ data: { items: [] } }),
+    upgradeTasks: vi.fn().mockResolvedValue({ data: { items: [] } }),
+    generateSn: vi.fn().mockResolvedValue({ data: { sn: 'TL-GW-TEST' } }),
+    uploadFirmware: vi.fn().mockResolvedValue({ data: {} }),
+    releaseFirmware: vi.fn().mockResolvedValue({ data: {} }),
   },
   terminalAPI: {
     list: vi.fn().mockResolvedValue({ data: { items: [], total: 0 } }),
