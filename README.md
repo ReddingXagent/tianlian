@@ -145,6 +145,7 @@ tianlian-cloud/
 
 ## 文档
 
+- **[功能板块总览](./docs/FEATURES.md)** — 全部 11 个业务域、70+ 页面、100+ API 模块索引
 - [系统架构](./ARCHITECTURE.md)
 - [部署指南](./DEPLOYMENT.md)
 - [用户手册](./USER_MANUAL.md)
