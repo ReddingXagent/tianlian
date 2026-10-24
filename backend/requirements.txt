@@ -48,3 +48,7 @@ pytest-cov==7.1.0
 pytest-timeout==2.4.0
 pytest-xdist==3.8.0
 httpx-ws==0.9.0
+
+# 开源版补全: 测试与 PDF 导出运行时依赖
+itsdangerous==2.2.0
+reportlab==5.1.0

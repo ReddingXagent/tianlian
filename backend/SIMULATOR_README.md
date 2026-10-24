@@ -447,7 +447,7 @@ model: NSS201
 category: rtu
 protocol: iec104
 connection:
-  host: 192.168.10.50
+  host: 192.168.1.50
   port: 2404
   common_address: 1
   originator_address: 10
@@ -513,7 +513,7 @@ from app.gateway.iec104 import IEC104Client, ASDUCodec
 
 # TLS 安全连接 (生产环境推荐)
 client = IEC104Client(
-    host="192.168.10.50",
+    host="192.168.1.50",
     port=2404,
     common_address=1,
     use_tls=True,

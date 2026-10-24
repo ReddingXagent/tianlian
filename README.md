@@ -7,7 +7,7 @@
 [![Frontend](https://img.shields.io/badge/frontend-React%2018-61dafb.svg)](https://react.dev/)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
-**在线演示**：https://tianlian.cloud （体验账户见下方「演示账户」）
+**在线演示**：http://8.134.106.166/ （体验账户见下方「演示账户」）
 
 ---
 
@@ -31,6 +31,23 @@ TianLian Cloud 是面向光储充行业的新一代智能运维平台，前后�
 | 可视化 | 数字孪生（three.js）/ 数据大屏（LargeScreen）/ 电子地图 |
 | 平台治理 | RBAC 权限 / 多租户（Tenants）/ 审计日志 / Webhooks / SSL 证书监控 |
 | AI 辅助 | 日志分析 / 维修建议 / 预防性维护（可插拔 LLM 接入） |
+
+## 设备模拟器（开箱即用）
+
+没有真实现场设备也能跑通全链路——仓库内置多协议设备模拟器，覆盖光储充主要设备类型：
+
+| 协议 | 模拟对象 |
+|------|----------|
+| Modbus-RTU | 储能逆变器 / PCS / 电表 |
+| MQTT | 直流充电桩（国标协议） |
+| REST | 光伏气象站等 HTTP 设备 |
+| OCPP 1.6J | 充电桩 |
+| DLT645 | 多功能电能表 |
+| IEC104 | 电力远动规约 RTU |
+
+另含**故障注入引擎**（7 类故障场景 + 随机模式）与**批量并发模拟**（100+ 设备同时在线），可直接复现告警、工单、自愈等完整业务流转。
+
+详见 [backend/SIMULATOR_README.md](./backend/SIMULATOR_README.md)
 
 ## 技术栈
 
