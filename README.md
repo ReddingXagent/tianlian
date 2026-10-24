@@ -39,7 +39,7 @@ npm run ios          # iOS
 
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
-npm test             # jest 单测（214 套 / 1597 用例全绿）
+npm test             # jest 单测（221 套 / 1673 用例全绿，CI --runInBand 口径）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo export --platform ios   # 产物构建验证
 ```
@@ -97,11 +97,11 @@ eas build --profile production       # 商店构建
 
 ```
 src/
-├── screens/        # 15 个页面
-├── components/     # 通用组件（StatusBadge/WorkOrderCard/EmptyState/LoadingSpinner）
+├── screens/        # 17 个页面
+├── components/     # 通用组件（StatusBadge/WorkOrderCard/EmptyState/LoadingSpinner/ErrorBoundary/OfflineBanner）
 ├── hooks/          # usePolling 等
 ├── navigation/     # AppNavigator（Auth/Main 双栈）
-├── services/       # api.ts（axios 封装）
+├── services/       # api.ts barrel + api-modules/（client + 13 领域模块，F1361 领域细分）
 ├── store/          # zustand stores
 └── types/          # 类型定义
 ```

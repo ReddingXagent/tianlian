@@ -32,6 +32,7 @@
 - engines门控强制(F218): package.json `engines.node>=20` 原仅为声明 — npm默认对EBADENGINE只警告不拦截, Node 18/16本地`npm ci/install`+构建无声通过(声明的门控=假门控, F206同族) → 新增 `.npmrc` 设 `engine-strict=true`, npm ci/install在低版本Node直接失败; CI两job的npm ci读项目.npmrc自动生效, 零调用点改动(F206单一源模式); 变异实测四档: ①正常engines exit 0 ②变异`>=99`+engine-strict exit 1(EBADENGINE精确报错) ③恢复后exit 0 ④对照移除.npmrc+变异engines exit 0无声放行(证明缺口真实); 全门复验: tsc 0err + lint 0err/0warn + jest 263绿
 
 ### Fixed
+- 文档对账修复(F456, 文档维度例行对账): 94fac3c 商户进件审核侧落地(卡a8ca56aa, +2屏+3模块+59测)未同步文档账目, README/api.ts 注释头三处账实脱节同源清偿 — ①README jest 计数 214套/1597用例→221套/1673用例(本轮 --runInBand 顺序实测全绿; 附注: npm test 裸并行跑存在 F399 已知 act() 间歇假红, 本轮实测并行 6 fail / 顺序 0 fail, 权威口径以 CI --runInBand 为准); ②README 目录结构 screens 15→17(MerchantAuditList/Detail 双屏); ③components 括注 4/6 补 ErrorBoundary/OfflineBanner(建仓 141142d 起存量欠账); ④services 行补 api-modules/ 领域模块层(client + 13 领域模块, F1361 领域细分形态, 存量欠账+94fac3c 加深); ⑤api.ts 注释头目录清单补 merchant-audit 三件套(audit 133行/mock 141行/source 83行, 尾部导出已在而注释头漏登)+存量行数括注全量刷新至实况; 本条即 94fac3c 的 CHANGELOG 补登记。验证: jest --runInBand 221套/1673测全绿 + tsc 0err + lint 0/0
 - bundle-size门控单平台静默漏测(F212): 原逻辑导出目录缺失即"跳过"返回0 — 只导出android没导ios时门控照样通过, ios bundle超限无声放行 → 改为缺目录返回2, 单平台缺失/双缺均FAIL(门控要求双平台齐验); 变异三档实测: 双平台齐在exit 0 / 单缺exit 1(新拦截) / 双缺exit 1
 - F206遗留清零: CI export job与Makefile export-android/export-ios仍为裸 `npx expo export` → 全部委托 `npm run build:android/build:ios -- --output-dir ...`(参数透传); 验证: YAML结构断言(新调用点在位/裸npx清零/timeout与artifact保留) + make -n委托确认 + 真实android导出实测2.19MB与基线一致
 
