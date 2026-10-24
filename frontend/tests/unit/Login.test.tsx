@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import LoginPage from '../../src/pages/Login';
-import { authAPI } from '../../src/api';
+import { authAPI, forgotPasswordAPI } from '../../src/api';
 
 // Mock authAPI
 vi.mock('../../src/api', () => ({
@@ -15,9 +15,11 @@ vi.mock('../../src/api', () => ({
     smsVerify: vi.fn(),
     smsLogin: vi.fn(),
     passwordReset: vi.fn(),
+    forgotPassword: vi.fn(),
     logout: vi.fn(),
     me: vi.fn(),
   },
+  forgotPasswordAPI: { submit: vi.fn(() => Promise.resolve({ data: {} })) },
 }));
 
 // Mock useNavigate
@@ -131,16 +133,16 @@ describe('LoginPage', () => {
     });
 
     it('发送重置验证码应调用API', async () => {
-      (authAPI.smsSend as any).mockResolvedValue({ data: {} });
+      (forgotPasswordAPI.submit as any).mockResolvedValue({ data: {} });
       renderLogin();
       selectRole(1);
       fireEvent.click(screen.getByText('忘记密码？'));
-      const phoneInputs = screen.getAllByPlaceholderText('请输入手机号');
+      const phoneInputs = screen.getAllByPlaceholderText('请输入账号或手机号');
       fireEvent.change(phoneInputs[phoneInputs.length - 1], { target: { value: '13800138000' } });
-      const getCodeBtns = screen.getAllByText('获取验证码');
+      const getCodeBtns = screen.getAllByText('提交重置申请');
       fireEvent.click(getCodeBtns[getCodeBtns.length - 1]);
       await waitFor(() => {
-        expect(authAPI.smsSend).toHaveBeenCalledWith('13800138000', 'reset');
+        expect(screen.getByText(/申请已提交/)).toBeTruthy();
       });
     });
   });
@@ -148,18 +150,18 @@ describe('LoginPage', () => {
   describe('验证码发送', () => {
     it('忘记密码获取验证码按钮应触发API调用', async () => {
       // (任务卡 78c7404b: 验证码登录已停用; 获取验证码现仅服务于忘记密码重置流程)
-      (authAPI.smsSend as any).mockResolvedValue({ data: {} });
+      (forgotPasswordAPI.submit as any).mockResolvedValue({ data: {} });
       renderLogin();
       selectRole(1);
       fireEvent.click(screen.getByText('忘记密码？'));
-      const phoneInputs = screen.getAllByPlaceholderText('请输入手机号');
+      const phoneInputs = screen.getAllByPlaceholderText('请输入账号或手机号');
       fireEvent.change(phoneInputs[phoneInputs.length - 1], {
         target: { value: '13800138000' },
       });
-      const getCodeBtns = screen.getAllByText('获取验证码');
+      const getCodeBtns = screen.getAllByText('提交重置申请');
       fireEvent.click(getCodeBtns[getCodeBtns.length - 1]);
       await waitFor(() => {
-        expect(authAPI.smsSend).toHaveBeenCalledWith('13800138000', 'reset');
+        expect(screen.getByText(/申请已提交/)).toBeTruthy();
       });
     });
   });

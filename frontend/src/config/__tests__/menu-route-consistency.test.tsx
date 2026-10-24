@@ -66,7 +66,7 @@ const APP_ROUTE_PATTERNS = [
   '/monitor', '/diagnosis', '/alarm-notices', '/api-keys', '/log-analysis',
   '/notification-rules', '/message-center', '/runbook-approval',
   '/ssl-certificates', '/webhooks', '/operate', '/operate/:tab', '/fleet',
-  '/map', '/discount-management', '/coupon-management', '/points-management',
+  '/map', '/data-ops', '/discount-management', '/coupon-management', '/points-management',
   '/user-type-management', '/interconnect', '/supervision',
   // ===== /platform 平台管理组 (admin) =====
   '/platform', '/platform/dashboard',
