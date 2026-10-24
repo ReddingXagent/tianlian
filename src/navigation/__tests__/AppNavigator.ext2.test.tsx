@@ -73,6 +73,8 @@ jest.mock('../../screens/ProfileScreen', () => () => <MS name="Profile" />);
 jest.mock('../../screens/DiagnosisScreen', () => () => <MS name="Diagnosis" />);
 jest.mock('../../screens/KnowledgeScreen', () => () => <MS name="Knowledge" />);
 jest.mock('../../screens/KnowledgeDetailScreen', () => () => <MS name="KnowDetail" />);
+jest.mock('../../screens/MerchantAuditListScreen', () => () => <MS name="MerchantAuditList" />);
+jest.mock('../../screens/MerchantAuditDetailScreen', () => () => <MS name="MerchantAuditDetail" />);
 
 import { AppNavigator } from '../AppNavigator';
 

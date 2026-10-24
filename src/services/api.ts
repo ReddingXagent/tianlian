@@ -114,3 +114,30 @@ export {
 export type {
   GatewayCreate,
 } from './api-modules/infrastructure';
+// merchant-audit (商户进件审核, 卡 a8ca56aa)
+export {
+  MERCHANT_STATUS_LABEL,
+  merchantStatusLabel,
+  mapMerchantApplication,
+  mapMerchantApplicationList,
+  merchantAuditApi,
+} from './api-modules/merchant-audit';
+export type { RawMerchantApplication } from './api-modules/merchant-audit';
+export {
+  merchantAuditMockApi,
+  MerchantAuditNotFoundError,
+  MerchantAuditInvalidTransitionError,
+  __mockStore as merchantAuditMockStore,
+} from './api-modules/merchant-audit-mock';
+export {
+  resolveMerchantAuditMode,
+  merchantAuditModeLabel,
+  createMerchantAuditClient,
+  realMerchantAuditAdapter,
+  MERCHANT_AUDIT_MODE,
+  merchantAudit,
+} from './api-modules/merchant-audit-source';
+export type {
+  MerchantAuditMode,
+  MerchantAuditClient,
+} from './api-modules/merchant-audit-source';

@@ -23,3 +23,4 @@ export * from './modules/infrastructure';
 export * from './modules/security';
 export * from './modules/ai';
 export * from './modules/health';
+export * from './modules/merchant-audit';

@@ -24,6 +24,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import DiagnosisScreen from '../screens/DiagnosisScreen';
 import KnowledgeScreen from '../screens/KnowledgeScreen';
 import KnowledgeDetailScreen from '../screens/KnowledgeDetailScreen';
+import MerchantAuditListScreen from '../screens/MerchantAuditListScreen';
+import MerchantAuditDetailScreen from '../screens/MerchantAuditDetailScreen';
 import { useTheme } from '../hooks/useTheme';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -248,6 +250,26 @@ function MainTabNavigatorWithDetail() {
         component={KnowledgeDetailScreen}
         options={{
           title: '文章详情',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
+      <RootStack.Screen
+        name="MerchantAuditList"
+        component={MerchantAuditListScreen}
+        options={{
+          title: '商户进件审核',
+          headerStyle: { backgroundColor: colors.primary },
+          headerTintColor: colors.onPrimary,
+          headerTitleStyle: { fontWeight: '600' },
+        }}
+      />
+      <RootStack.Screen
+        name="MerchantAuditDetail"
+        component={MerchantAuditDetailScreen}
+        options={{
+          title: '进件审核详情',
           headerStyle: { backgroundColor: colors.primary },
           headerTintColor: colors.onPrimary,
           headerTitleStyle: { fontWeight: '600' },

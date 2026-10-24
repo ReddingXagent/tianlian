@@ -29,6 +29,7 @@ const QUICK_ACTIONS = [
   { key: 'monitor', icon: '📊', label: '设备监控', route: 'Monitor' as const },
   { key: 'knowledge', icon: '📚', label: '知识库', route: 'Knowledge' as const },
   { key: 'diagnosis', icon: '🔍', label: '故障诊断', route: 'Diagnosis' as const },
+  { key: 'merchantAudit', icon: '🏦', label: '商户审核', route: 'MerchantAuditList' as const },
 ];
 
 const WorkbenchScreen: React.FC = () => {

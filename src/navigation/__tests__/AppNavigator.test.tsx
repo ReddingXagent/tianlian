@@ -51,6 +51,8 @@ jest.mock('../../screens/ProfileScreen', () => () => <MockScreen name="ProfileSc
 jest.mock('../../screens/DiagnosisScreen', () => () => <MockScreen name="DiagnosisScreen" />);
 jest.mock('../../screens/KnowledgeScreen', () => () => <MockScreen name="KnowledgeScreen" />);
 jest.mock('../../screens/KnowledgeDetailScreen', () => () => <MockScreen name="KnowledgeDetailScreen" />);
+jest.mock('../../screens/MerchantAuditListScreen', () => () => <MockScreen name="MerchantAuditListScreen" />);
+jest.mock('../../screens/MerchantAuditDetailScreen', () => () => <MockScreen name="MerchantAuditDetailScreen" />);
 
 import { AppNavigator } from '../AppNavigator';
 import { useAuthStore } from '../../store/authStore';

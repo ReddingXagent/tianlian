@@ -19,6 +19,8 @@ export type RootStackParamList = {
   Knowledge: undefined;
   KnowledgeDetail: { articleId: number };
   InspectionDetail: { taskId: number };
+  MerchantAuditList: undefined;
+  MerchantAuditDetail: { applicationId: number };
 };
 
 export type AuthStackParamList = {

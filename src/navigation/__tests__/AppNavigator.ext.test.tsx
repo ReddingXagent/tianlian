@@ -67,6 +67,8 @@ jest.mock('../../screens/ProfileScreen', () => makeScreen('Profile'));
 jest.mock('../../screens/DiagnosisScreen', () => makeScreen('Diag'));
 jest.mock('../../screens/KnowledgeScreen', () => makeScreen('Knowledge'));
 jest.mock('../../screens/KnowledgeDetailScreen', () => makeScreen('KnowDetail'));
+jest.mock('../../screens/MerchantAuditListScreen', () => makeScreen('MerchantAuditList'));
+jest.mock('../../screens/MerchantAuditDetailScreen', () => makeScreen('MerchantAuditDetail'));
 
 import { AppNavigator } from '../AppNavigator';
 

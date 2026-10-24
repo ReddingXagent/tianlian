@@ -76,6 +76,8 @@ jest.mock('../../screens/ProfileScreen', () => () => <Stub name="Profile" />);
 jest.mock('../../screens/DiagnosisScreen', () => () => <Stub name="Diag" />);
 jest.mock('../../screens/KnowledgeScreen', () => () => <Stub name="Knowledge" />);
 jest.mock('../../screens/KnowledgeDetailScreen', () => () => <Stub name="KnowDetail" />);
+jest.mock('../../screens/MerchantAuditListScreen', () => () => <Stub name="MerchantAuditList" />);
+jest.mock('../../screens/MerchantAuditDetailScreen', () => () => <Stub name="MerchantAuditDetail" />);
 
 import { AppNavigator } from '../AppNavigator';
 
