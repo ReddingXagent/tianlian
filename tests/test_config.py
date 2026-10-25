@@ -17,8 +17,8 @@ class TestGatewayConfig:
         assert config.log_level == "INFO"
 
         # Cloud defaults (updated to production address)
-        assert config.cloud.base_url == "http://8.134.106.166"
-        assert config.cloud.ws_url == "ws://8.134.106.166/ws/v1"
+        assert config.cloud.base_url == ""
+        assert config.cloud.ws_url == ""
         assert config.cloud.username == ""
         assert config.cloud.password == ""
         assert config.cloud.token == ""
@@ -68,7 +68,7 @@ class TestGatewayConfig:
 
         assert config1.gateway_id == "GW-001"
         assert config2.gateway_id == "GW-002"
-        assert config1.cloud.base_url == "http://8.134.106.166"
+        assert config1.cloud.base_url == ""
         assert config2.cloud.base_url == "http://custom.example.com/api"
 
     def test_config_from_env(self, monkeypatch):
@@ -106,7 +106,7 @@ class TestGatewayConfig:
         assert config.log_level == "DEBUG"
 
         # Non-overridden fields should keep defaults
-        assert config.cloud.ws_url == "ws://8.134.106.166/ws/v1"
+        assert config.cloud.ws_url == ""
         assert config.cloud.token == ""
         assert config.cloud.heartbeat_interval == 30
         assert config.mqtt.qos == 1
@@ -123,5 +123,5 @@ class TestGatewayConfig:
 
         # Unset fields should fall back to defaults
         assert config.gateway_name == "RaspberryPi-Gateway"
-        assert config.cloud.base_url == "http://8.134.106.166"
+        assert config.cloud.base_url == ""
         assert config.modbus.port == 502

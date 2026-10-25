@@ -247,7 +247,7 @@ if [ -f .env ]; then
 else
     cat > .env << 'ENVEOF'
 # 天链V3边缘网关环境变量(模板, 填好token再启动)
-CLOUD_BASE_URL=http://8.134.106.166
+CLOUD_BASE_URL=${CLOUD_BASE_URL:-http://your-server-ip}
 CLOUD_TOKEN=*** 云端签发长期token, user=edge_gateway_telemetry>
 GATEWAY_ID=GW-001
 GATEWAY_NAME=RaspberryPi-Gateway

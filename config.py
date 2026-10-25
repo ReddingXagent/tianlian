@@ -7,8 +7,8 @@ from dataclasses import dataclass, field
 @dataclass
 class CloudConfig:
     """Cloud API configuration"""
-    base_url: str = "http://8.134.106.166"  # 大圣统一入口; paths in cloud_client include /api/v1/
-    ws_url: str = "ws://8.134.106.166/ws/v1"
+    base_url: str = ""  # 云端接入地址，部署时通过环境变量 CLOUD_BASE_URL 覆盖
+    ws_url: str = ""  # 云端 WebSocket 地址，通过环境变量 CLOUD_WS_URL 覆盖
     username: str = ""
     password: str = ""
     token: str = ""
@@ -103,7 +103,7 @@ class GatewayConfig:
             gateway_id=os.getenv("GATEWAY_ID", "GW-001"),
             gateway_name=os.getenv("GATEWAY_NAME", "RaspberryPi-Gateway"),
             cloud=CloudConfig(
-                base_url=os.getenv("CLOUD_BASE_URL", "http://8.134.106.166"),
+                base_url=os.getenv("CLOUD_BASE_URL", ""),
                 username=os.getenv("CLOUD_USERNAME", ""),
                 password=os.getenv("CLOUD_PASSWORD", ""),
                 token=os.getenv("CLOUD_TOKEN", ""),

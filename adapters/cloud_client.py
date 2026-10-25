@@ -1,6 +1,6 @@
 """Cloud API Client — 边缘网关→云端对接 (V3 API对齐版)
 
-对接云端 8.134.106.166 天链V3系统：
+对接云端天链平台：
 - Pod注册/心跳 (pod/register, pod/heartbeat) — 无需认证
 - 遥测数据批量上报 (telemetry/batch-report) — Bearer token认证
 - 告警上报 (alarms) — Bearer token认证

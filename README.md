@@ -12,7 +12,7 @@
                     Cloud API (register/heartbeat/alarm/upload)
 ```
 
-- 云端入口默认 `http://8.134.106.166/api/v1`（大圣 tianlian-v3 统一入口）
+- 云端入口默认 `http://your-server-ip/api/v1`
 - 上云批量间隔 15s（T-1202），心跳 30s，均可配
 
 ## 快速开始
@@ -29,7 +29,7 @@ GATEWAY_ID=GW-002 python main.py  # 环境变量覆盖
 | 变量 | 默认 | 说明 |
 |------|------|------|
 | `GATEWAY_ID` / `GATEWAY_NAME` | `GW-001` / `RaspberryPi-Gateway` | 网关身份 |
-| `CLOUD_BASE_URL` | `http://8.134.106.166` | 云端入口 |
+| `CLOUD_BASE_URL` | `http://your-server-ip` | 云端入口（必填） |
 | `CLOUD_TOKEN` / `CLOUD_USERNAME` / `CLOUD_PASSWORD` | 空 | 云端认证 |
 | `CLOUD_REGISTER` / `CLOUD_DEREGISTER` | `true` | 启停时自动注册/注销 |
 | `MQTT_HOST` / `MQTT_PORT` | `localhost` / `1883` | MQTT broker |
