@@ -19,7 +19,7 @@ describe('deploy.js 部署门控', () => {
     expect(r.stdout).toContain('构建门控 PASS');
     expect(r.stdout).toContain('步骤2/4 appid校验');
     expect(r.stderr).toContain('占位符');
-    expect(r.stderr).toContain('丁哥');
+    expect(r.stderr).toContain('真实 appid');
   });
 
   it('正式模式同样被appid占位拦截, 不会触达上传', () => {

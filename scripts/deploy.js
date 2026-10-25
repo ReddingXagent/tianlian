@@ -7,7 +7,7 @@
  *   node scripts/deploy.js                         # 正式上传(需真appid + 密钥)
  *   node scripts/deploy.js --version=1.2.0 --robot=2 --desc="修复X"
  * 密钥: private-key/<appid>.key (小程序后台→开发设置→生成并下载代码上传密钥), 或 env MP_KEY_PATH
- * 退出码: 0=成功/就绪 1=门控失败或运行错误 2=appid占位(待丁哥) 3=缺上传密钥
+ * 退出码: 0=成功/就绪 1=门控失败或运行错误 2=appid占位 3=缺上传密钥
  */
 const fs = require('fs');
 const path = require('path');
@@ -65,7 +65,7 @@ async function main() {
   const appid = loadAppid();
   if (!appid || appid === PLACEHOLDER_APPID) {
     console.error('✗ appid 为占位符 wx0000000000000000, 无法上传');
-    console.error('  → 需丁哥在微信公众平台注册小程序并提供真 appid, 替换 project.config.json');
+    console.error('  → 需在微信公众平台注册小程序并提供真实 appid, 替换 project.config.json');
     process.exit(2);
   }
   console.log(`  appid: ${appid}`);

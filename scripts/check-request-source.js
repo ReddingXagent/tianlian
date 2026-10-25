@@ -20,7 +20,7 @@
  *   注释中的 URL 不计(文档性引用无害), 用字符级状态机剥离注释(保字符串内容)。
  *
  * HTTPS 方案级断言不在本轮: prod 现为 http://, 微信正式版强制 HTTPS(F89),
- * 升级依赖云端 https 域名就绪(大圣侧)——届时在本守卫加方案断言同 commit 收敛。
+ * 升级依赖云端 https 域名就绪(后端侧)——届时在本守卫加方案断言同 commit 收敛。
  *
  * 扫描范围: app.js + pages/ components/ services/ utils/ config/ 全部 .js
  * (排除 node_modules/scripts/coverage/dist/build/miniprogram_npm/__tests__;

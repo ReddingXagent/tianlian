@@ -2,7 +2,7 @@
 
 天链V3 充电平台的**微信原生小程序**用户端：扫码充电、站点查找、订单/支付、优惠券/积分/钱包。
 
-- 后端 API：天链V3 云端 `/api/v1`（云端由大圣维护，本仓只消费接口）
+- 后端 API：天链V3 云端 `/api/v1`（云端由后端服务提供，本仓只消费接口）
 - 形态：微信小程序原生（WXML/WXSS/JS），无框架依赖，微信开发者工具直接打开即用
 
 ## 快速开始
@@ -68,12 +68,12 @@ scripts/          check-mp-structure.js 结构门控 / deploy.js 部署门控(mi
 3. **密钥校验**：`private-key/<appid>.key`（小程序后台→开发设置→生成代码上传密钥，已 gitignore），或 `MP_KEY_PATH` 环境变量
 4. **上传**：`--check` 模式在第 3 步后止步；正式上传参数 `--version=` / `--robot=` / `--desc=`（默认取 package.json 版本 + git 分支@SHA）
 
-退出码：0=成功/就绪 · 1=门控失败/运行错误 · 2=appid 占位 · 3=缺密钥。当前 appid 为占位符，`deploy:check` 会停在第 2 步——真 appid 待丁哥提供后即可贯通。
+退出码：0=成功/就绪 · 1=门控失败/运行错误 · 2=appid 占位 · 3=缺密钥。当前 appid 为占位符，`deploy:check` 会停在第 2 步——替换为真实 appid 后即可贯通。
 
 ## 已知限制 / TODO
 
-- `project.config.json` appid 为占位符 `wx0000000000000000`，上架需真 appid（待丁哥）
+- `project.config.json` appid 为占位符 `wx0000000000000000`，上架前需替换为真实 appid
 - `MAP_KEY` 为占位符，腾讯地图 key 待配
-- cloud-mock 登录接口尚未对齐 OAuth2 form + 信封格式，本地登录全链路待通（云端配合走大圣）
+- cloud-mock 登录接口尚未对齐 OAuth2 form + 信封格式，本地登录全链路待通（需云端接口配合）
 - 头像昵称采集待 `<button open-type="chooseAvatar">` 组件方案（废弃 API 已清，UI 待排期）
 - api.js 分支覆盖 78.57%（实测 2026-08-05），错误路径待补强

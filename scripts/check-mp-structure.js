@@ -64,7 +64,7 @@ if (app) {
 // --- project.config.json ---
 const proj = readJson('project.config.json');
 if (proj && proj.appid === 'wx0000000000000000') {
-  warnings.push('appid为占位符 wx0000000000000000, 上架前需换真appid(待丁哥)');
+  warnings.push('appid为占位符 wx0000000000000000, 上架前需换真实 appid');
 }
 
 // --- 组件引用解析 ---
