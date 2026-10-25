@@ -8,7 +8,7 @@
  * 退出码:
  *   0 = 管线就绪(可执行 eas build / eas update)
  *   1 = 配置错误(app.json/eas.json 损坏或缺关键字段)
- *   2 = 等待外部依赖(Expo账号/EXPO_TOKEN/eas-cli, 待丁哥) — 设计内拦截
+ *   2 = 等待外部依赖(Expo账号/EXPO_TOKEN/eas-cli) — 设计内拦截
  * 阻塞项追踪: F25/F33(EAS Update通道+Expo账号) F43(部署管线空白)
  */
 const fs = require('fs');
@@ -74,7 +74,7 @@ console.log('▶ 步骤4/4 凭证校验...');
 if (process.env.EXPO_TOKEN) {
   ok('EXPO_TOKEN 已设置 (CI模式)');
 } else {
-  blocked('EXPO_TOKEN 未设置 — 待丁哥创建Expo账号后生成 access token (F25/F33)');
+  blocked('EXPO_TOKEN 未设置 — 需创建 Expo 账号后生成 access token (F25/F33)');
 }
 
 console.log('');
@@ -83,7 +83,7 @@ if (failures > 0) {
   process.exit(1);
 }
 if (blockers > 0) {
-  console.error(`⚠ 部署管线未就绪: ${blockers} 项外部依赖待就位(设计内拦截, 待丁哥)`);
+  console.error(`⚠ 部署管线未就绪: ${blockers} 项外部依赖待就位(设计内拦截)`);
   console.error('  就绪清单: Expo账号 → EXPO_TOKEN → eas build:configure → install expo-updates → 配updates.url/channel');
   process.exit(2);
 }
