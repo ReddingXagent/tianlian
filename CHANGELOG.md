@@ -1,6 +1,6 @@
 # Changelog — tianlian-edge-gateway
 
-格式参考 Keep a Changelog。终端侧网关，云端协议以大圣 tianlian-v3 为准。
+格式参考 Keep a Changelog。终端侧网关，云端协议以天链云端平台为准。
 
 ## [Unreleased]
 

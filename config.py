@@ -18,7 +18,7 @@ class CloudConfig:
     deregister_on_shutdown: bool = True  # deregister on graceful shutdown
     # F-gzip: 上行压缩 — payload >= 阈值时 gzip + Content-Encoding: gzip
     # 自适应降级: 服务端 4xx 拒绝压缩请求时本会话自动关闭压缩改明文
-    # (真云是否支持 gzip 请求体待大圣确认, 不支持时自适应兜底, 无需改配置)
+    # (真云是否支持 gzip 请求体待云端确认, 不支持时自适应兜底, 无需改配置)
     compress_enabled: bool = True
     compress_threshold: int = 1024  # bytes, 小 payload 压缩不划算
     pod_secret: str = ""  # 云端Pod注册密钥(空=不发送, 向后兼容)

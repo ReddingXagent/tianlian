@@ -75,5 +75,5 @@ GitHub Actions CI 对每次 push 把关: lint+compile+test+coverage ‖ **Docker
 ## 已知问题 / 备忘
 
 - Pi→NAS 无免密 fetch → deploy.sh 设计内降级；Pi 端代码可能落后（需人工 pull 或配免密）
-- CLOUD_TOKEN 由云端（大圣 tianlian-v3）签发，当前长期 token 存 Pi `.env`，勿提交入库
-- 云端 pod API 曾现 403 "Invalid pod secret" → 云端侧问题，找大圣排查
+- CLOUD_TOKEN 由云端平台签发，当前长期 token 存 Pi `.env`，勿提交入库
+- 云端 pod API 曾现 403 "Invalid pod secret" → 云端侧问题，联系云端维护方排查
