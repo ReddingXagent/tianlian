@@ -1,5 +1,5 @@
 // ESLint flat config — Expo 官方推荐 (eslint-config-expo/flat)
-// 2026-07-31 猴王自驱lint轮建立: 此前仓库零lint门控, tsc之外无静态检查
+// 2026-07-31 lint 门控建立: 此前仓库零lint门控, tsc之外无静态检查
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 

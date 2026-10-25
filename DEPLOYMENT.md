@@ -4,7 +4,7 @@
 
 | 项目 | 要求 | 状态 |
 |------|------|------|
-| Expo 账号 | 需组织/个人 Expo 账号 | ⏳ 待丁哥注册 (F25) |
+| Expo 账号 | 需组织/个人 Expo 账号 | ⏳ 需部署方自备 (F25) |
 | EAS CLI | `npm i -g eas-cli` | ⚠️ 本地未安装 |
 | Android Keystore | EAS 自动管理或自备 | EAS 自动 |
 | iOS Cert/Provisioning | EAS 自动管理或 Apple Developer 账号 | ⏳ 待 Apple Dev 账号 |
@@ -115,9 +115,9 @@ npm test
 | ID | 问题 | 影响 | 状态 |
 |----|------|------|------|
 | ~~F22~~ | ~~BASE_URL 硬编码生产 IP~~ | ~~已修复~~ | ✅ F130 已修复 (EXPO_PUBLIC_API_URL) |
-| F25 | 无 Expo 账号，EAS 通道全不可用 | 无法云端构建/分发 | ⏳ 待丁哥 |
+| F25 | 无 Expo 账号，EAS 通道全不可用 | 无法云端构建/分发 | ⏳ 需部署方自备 |
 | F89 | (user-mp) 生产 HTTP 非 HTTPS | 微信正式版强制 HTTPS | 📋 跨仓项 |
-| — | 无 iOS Apple Developer 账号 | 无法 iOS 商店发布 | ⏳ 待丁哥 |
+| — | 无 iOS Apple Developer 账号 | 无法 iOS 商店发布 | ⏳ 需自备账号 |
 
 ## 环境变量 (已实现 F130)
 
@@ -125,7 +125,7 @@ npm test
 
 ```bash
 # .env.example
-EXPO_PUBLIC_API_URL=http://8.134.106.166/api/v1
+EXPO_PUBLIC_API_URL=http://your-server-ip/api/v1
 
 # 本地开发指向边缘网关
 EXPO_PUBLIC_API_URL=http://192.168.31.10:8000/api/v1

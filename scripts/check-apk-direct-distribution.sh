@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # eas.json preview profile distribution:internal ↔ android.buildType:apk APK直装分发形态成对守卫 (F377, 构建守卫族第二十枚)
-# 丁哥 2026-08-05 决策 (F25/F33 清零): 内部分发走 APK 直装/二维码 (充电站运维场景不上架商店)。
+# 既定决策 (F25/F33 清零): 内部分发走 APK 直装/二维码 (充电站运维场景不上架商店)。
 # preview profile 是 APK 直装分发通道, 由同文件内双键共同编码:
 #   - distribution: "internal" → 内部分发形态 (非 store)
 #   - android.buildType: "apk" → 产物为 APK (可扫码直装; app-bundle/AAB 无法直装)

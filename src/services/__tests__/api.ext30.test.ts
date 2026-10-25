@@ -40,7 +40,7 @@ describe('gatewayApi.getList', () => {
             {
               id: 1,
               sn: 'MK-GW-001',
-              name: '猴王测试网关',
+              name: '测试网关A',
               model: 'v3',
               manufacturer: 'TL',
               station_id: 5,
@@ -139,7 +139,7 @@ describe('gatewayApi.getById', () => {
         data: {
           id: 1,
           sn: 'MK-GW-001',
-          name: '猴王测试网关',
+          name: '测试网关A',
           model: null,
           manufacturer: null,
           station_id: null,
@@ -161,7 +161,7 @@ describe('gatewayApi.getById', () => {
     const res = await gatewayApi.getById(1);
     expect(res.data.id).toBe(1);
     expect(res.data.sn).toBe('MK-GW-001');
-    expect(res.data.name).toBe('猴王测试网关');
+    expect(res.data.name).toBe('测试网关A');
     expect(res.data.healthScore).toBe(100.0);
   });
 
