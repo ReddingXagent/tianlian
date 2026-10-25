@@ -1,6 +1,12 @@
 // Jest setup for tianlian-user-app
 /* eslint-disable @typescript-eslint/no-require-imports -- jest.mock工厂与setup需CJS require, 有意为之 */
+import { configure } from '@testing-library/react-native';
 import { AppState } from 'react-native';
+
+// 观察项卡102e56c2兑现: user-app jest .ext 超时抖动(5/923, 复跑全绿) — RNTL默认
+// asyncUtilTimeout=1000ms在冷缓存/负载竞争下不够用(Charging/Scan/Coupon/Wallet/Vehicle .ext 7-15s超时)
+// 同族修复: F1217 ops-app已兑现, 详见 test/jest.setup.ts
+configure({ asyncUtilTimeout: 4000 });
 
 // AppState.addEventListener: jest 无原生事件发射器, 全局兜底空订阅;
 // 需要模拟前后台切换的测试用 jest.spyOn 覆盖即可
