@@ -58,7 +58,7 @@ eas update:configure
 eas update --branch production --message "v1.0.0"
 ```
 
-> 当前状态: 待丁哥提供 Expo 账号
+> 当前状态: 需部署方自备 Expo 账号
 
 ## EAS 原生构建 (待配置)
 
@@ -67,4 +67,4 @@ eas build --platform android --profile production
 eas build --platform ios --profile production
 ```
 
-> 当前状态: 待丁哥提供 EAS 账号和密钥
+> 当前状态: 需部署方自备 EAS 账号和密钥

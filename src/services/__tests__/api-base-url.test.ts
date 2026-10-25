@@ -33,6 +33,6 @@ describe('BASE_URL resolution branches', () => {
     (globalThis as MutableGlobal).__DEV__ = false;
     jest.resetModules();
     const freshApi = require('../api').default;
-    expect(freshApi.defaults.baseURL).toBe('http://8.134.106.166/api/v1');
+    expect(freshApi.defaults.baseURL).toBe('http://your-server-ip/api/v1');
   });
 });

@@ -66,7 +66,7 @@ npx expo export --platform ios       # 同上，iOS 平台
 
 - `eas.json`：三档 profile（development / preview / production）已就位 ✅
 - `.easignore`：云端构建排除开发/测试产物（59 测试文件/CI/文档）+ 凭据兜底，对齐 ops/user-app 惯例（F459）
-- ⚠️ EAS Update 通道未配（app.json 无 updates.url），OTA 需 Expo 账号（F25，等丁哥）
+- ⚠️ EAS Update 通道未配（app.json 无 updates.url），OTA 需自备 Expo 账号（F25）
 - `assets/`：icon / adaptive-icon / splash / favicon 品牌占位图
 
 ## 目录结构
