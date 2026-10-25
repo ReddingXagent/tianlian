@@ -26,6 +26,7 @@
 | 通知 | NotificationCenter | 通知中心 |
 | AI 助手 | AIChatPanel（组件） | ai.ts 服务 + function calling 框架 |
 | 我的 | Profile | 个人中心 |
+| 商户进件 | MerchantKYC | Profile「商户服务」入口；特约商户进件全流程（四态跟踪+驳回重提）；mock 先行三层通道，候云端契约（卡 a8ca56aa） |
 
 ## 快速开始
 
@@ -41,7 +42,7 @@ npm run ios          # iOS
 ```bash
 npx tsc --noEmit     # 类型检查 ✅
 npm run check:alias  # 路径别名双源漂移守卫（tsconfig.paths ↔ jest.moduleNameMapper，F238）
-npm run check:test-liveness  # 测试套件活性守卫（收集数下限33+路径域断言，拦 --passWithNoTests 零收集静默放行，F379）
+npm run check:test-liveness  # 测试套件活性守卫（收集数下限59+路径域断言，拦 --passWithNoTests 零收集静默放行，F379；下限随套件扩容上调 33→54→59）
 npm test             # jest 单测（646 用例全绿；CI --runInBand 口径防并行 act() 资源争抢假红，F457/F399 同族；testTimeout 15s 加固负载型 flaky，F322；加 --coverage 触发覆盖率门限）
 npm run lint         # eslint（0 err / 0 warn）
 npx expo-doctor      # 依赖健康检查（18/18 全过）
@@ -71,13 +72,13 @@ npx expo export --platform ios       # 同上，iOS 平台
 
 ```
 src/
-├── screens/        # 12 个页面 + MainTabNavigator
-├── components/     # AIChatPanel / ChargerTrendChart / ConfirmDialog / EmptyState / LoadingSpinner / StatusBadge
-├── hooks/          # usePolling（轮询）
-├── navigation/     # AppNavigator（Auth/Main 双栈）
-├── services/       # api.ts（axios 封装）/ ai.ts（AI function calling）
+├── screens/        # 13 个页面 + MainTabNavigator
+├── components/     # AIChatPanel / ChargerTrendChart / ConfirmDialog / EmptyState / ErrorBoundary / LoadingSpinner / NetworkStatus / StatusBadge
+├── hooks/          # 11 个 hooks（usePolling 轮询 / useTheme 主题 / useLogin 认证 / 7 领域数据 hooks / useMerchantApplication 商户进件）
+├── navigation/     # AppNavigator（Root 栈：AuthStack 登录栈 + MainTab 主栈 + MerchantKYC）
+├── services/       # client.ts（axios 实例）+ mappers + 14 领域模块（api.ts barrel 再导出，F1363 拆分）+ ai.ts（AI function calling）
 ├── store/          # zustand stores ×4
-├── utils/          # cache.ts（LRU 缓存）/ csvExport.ts
+├── utils/          # csvExport.ts（CSV 导出）/ merchant-kyc.ts（KYC 表单字段与校验）
 └── types/          # 类型定义
 ```
 
@@ -104,7 +105,7 @@ push/PR → master 自动触发。
 ## Roadmap / 已知缺口
 
 - **F30**: react-native-chart-kit 已停更且 New Arch 未测（doctor 已 exclude）→ 待迁移 gifted-charts / victory
-- **F31**: `api.ts` BASE_URL 硬编码生产 IP，缺 dev/mock 环境切换（同 ops-app F22）
+- **F31**: ✅ 已修复 — client.ts BASE_URL 环境化（EXPO_PUBLIC_API_URL 优先 + __DEV__ 本地/生产分流，F1363 拆分后），eas.json 三 profile + .env.example 模板齐备；KYC 另有 EXPO_PUBLIC_MERCHANT_KYC_MODE mock 开关
 - **F32**: ✅ 已修复 — ErrorBoundary + NetworkStatus（AppState 监听）已接入 App.tsx（`e4dc934`）
 - **F27/F75**: ✅ 已修复 — authStore/stationStore/workOrderStore 均达 100%，api.ts 提升至 91.4%
 - **F28**: ✅ eslint warn 全部清零（0 warn）

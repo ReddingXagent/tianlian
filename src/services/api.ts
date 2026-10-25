@@ -1,5 +1,5 @@
 // Barrel re-export for services — F1363 领域拆分
-// 原始 718 行单体 api.ts → 13 模块文件 + barrel
+// 原始 718 行单体 api.ts → 13 模块文件 + barrel（KYC 轮 433a55b 增 merchant 三件套后 17 模块文件：client + mappers + ai + 11 领域 API + merchant 契约/mock/source）
 
 export { default } from './client';
 export { tokenStorage } from './client';
