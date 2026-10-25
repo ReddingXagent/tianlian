@@ -11,11 +11,11 @@ const ENV_CONFIG = {
     MAP_KEY: 'YOUR_TENCENT_MAP_KEY'
   },
   staging: {
-    API_BASE_URL: 'http://8.134.106.166:8000/api/v1',
+    API_BASE_URL: 'http://your-server-ip:8000/api/v1',
     MAP_KEY: 'YOUR_TENCENT_MAP_KEY'
   },
   prod: {
-    API_BASE_URL: 'http://8.134.106.166/api/v1',
+    API_BASE_URL: 'http://your-server-ip/api/v1',
     MAP_KEY: 'YOUR_TENCENT_MAP_KEY'
   }
 };

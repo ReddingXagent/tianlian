@@ -18,7 +18,7 @@ describe('config.ext: production env branch', () => {
     const prodConfig = require('../index');
 
     expect(prodConfig.ENV).toBe('prod');
-    expect(prodConfig.API_BASE_URL).toBe('http://8.134.106.166/api/v1');
+    expect(prodConfig.API_BASE_URL).toBe('http://your-server-ip/api/v1');
 
     process.env.NODE_ENV = originalEnv;
     jest.resetModules();
@@ -67,7 +67,7 @@ describe('config.ext: production env branch', () => {
     process.env.NODE_ENV = 'production';
     jest.resetModules();
     const prodConfig = require('../index');
-    expect(prodConfig.API_BASE_URL).toBe('http://8.134.106.166/api/v1');
+    expect(prodConfig.API_BASE_URL).toBe('http://your-server-ip/api/v1');
     expect(prodConfig.MAP_KEY).toBeDefined();
 
     process.env.NODE_ENV = originalEnv;

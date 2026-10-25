@@ -1,7 +1,7 @@
 {
-  "name": "tianlian-v3-user-mp",
+  "name": "tianlian-user-mp",
   "version": "1.1.0",
-  "description": "天链V3用户小程序",
+  "description": "天链充电 - 用户端微信小程序",
   "scripts": {
     "check": "node scripts/check-mp-structure.js",
     "check:auth-keys": "node scripts/check-auth-keys.js",

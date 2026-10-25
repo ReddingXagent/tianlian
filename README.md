@@ -42,8 +42,8 @@ scripts/          check-mp-structure.js 结构门控 / deploy.js 部署门控(mi
 | 环境 | API_BASE_URL | 触发 |
 |------|--------------|------|
 | dev | `http://localhost:8000/api/v1` | 默认（`NODE_ENV !== production`） |
-| staging | `http://8.134.106.166:8000/api/v1` | 手动切 ENV |
-| prod | `http://8.134.106.166/api/v1` | `NODE_ENV=production` |
+| staging | `http://your-server-ip:8000/api/v1` | 手动切 ENV |
+| prod | `http://your-server-ip/api/v1` | `NODE_ENV=production` |
 
 登录走 OAuth2 form-urlencoded（`/auth/login`），响应信封 `{code, data:{token,user}}`；token 存 storage，401/code=401 触发 `TOKEN_EXPIRED` 清理。
 

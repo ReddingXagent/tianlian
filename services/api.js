@@ -1,6 +1,6 @@
 // services/api.js - barrel re-export (原598行单体→12模块+barrel)
 // 闭环战役B3: 充电/订单/优惠券/积分 全量对齐真后端 /business 经营域契约
-// 真云端冒烟实测(8.134.106.166): 登录走OAuth2 form-urlencoded, 全站snake_case+{code,message,data}信封
+// 云端联调记录: 登录走OAuth2 form-urlencoded, 全站snake_case+{code,message,data}信封
 
 const { request } = require('./modules/client');
 const {
