@@ -5,7 +5,7 @@
 
 **开源 · MIT License · 支持私有化部署**
 
-在线演示：http://8.134.134.106 · 主仓库示例：https://github.com/ReddingXagent/tianlian-cloud
+在线演示：http://8.134.106.166/ · 体验账户：`demo` / `demo12345`（只读） · 主仓库示例：https://github.com/ReddingXagent/tianlian-cloud
 
 ---
 
