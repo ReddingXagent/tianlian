@@ -1,0 +1,72 @@
+# Teladian 直流充电桩 (MQTT协议)
+# 符合国标 GB/T 27930-2015
+device_type: charger_teladian
+manufacturer: Teladian
+model: TLD-DC120
+category: charger
+protocol: mqtt
+connection:
+  host: 192.168.1.100
+  port: 1883
+  topic_report: tcu/TCU001/report
+  topic_control: tcu/TCU001/control
+  qos: 1
+  keepalive: 60
+  tls_enabled: false
+registers:
+  - name: output_voltage
+    type: float
+    unit: V
+    description: 输出电压
+  - name: output_current
+    type: float
+    unit: A
+    description: 输出电流
+  - name: output_power
+    type: float
+    unit: kW
+    description: 输出功率
+  - name: accumulated_energy
+    type: float
+    unit: kWh
+    description: 累计充电量
+  - name: soc
+    type: float
+    unit: "%"
+    description: 车辆SOC
+  - name: gun_temperature
+    type: float
+    unit: "°C"
+    description: 枪头温度
+  - name: module_temp_1
+    type: float
+    unit: "°C"
+    description: 功率模块1温度
+  - name: module_temp_2
+    type: float
+    unit: "°C"
+    description: 功率模块2温度
+  - name: bms_voltage_request
+    type: float
+    unit: V
+    description: BMS请求电压
+  - name: bms_current_request
+    type: float
+    unit: A
+    description: BMS请求电流
+  - name: insulation_resistance
+    type: float
+    unit: "kΩ"
+    description: 绝缘电阻
+  - name: connector_status
+    type: int
+    unit: ""
+    description: 连接器状态 (0=未连接, 1=已连接, 2=充电中, 3=已停止)
+  - name: fault_level
+    type: int
+    unit: ""
+    description: 故障等级 (0=正常, 1=警告, 2=故障, 3=严重故障)
+  - name: fault_code
+    type: int
+    unit: ""
+    description: 故障代码

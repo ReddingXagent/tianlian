@@ -1,0 +1,18 @@
+
+# runtime uploads
+
+# runtime-trained predictive maintenance models
+app/data/predictive_models/
+app/uploads/
+
+# coverage artifacts (pytest/coverage 验收产物)
+.coverage
+.coverage.*
+htmlcov/
+
+# backup files
+*.bak
+
+# local venvs
+.venv/
+.venv2/

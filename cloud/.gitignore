@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+build/
+
+# 环境配置（示例文件除外）
+.env
+.env.local
+.env.production
+!.env.example
+
+# 数据与日志
+*.db
+*.sqlite
+*.log
+logs/
+data/
+
+# IDE / 系统
+.idea/
+.vscode/
+.DS_Store

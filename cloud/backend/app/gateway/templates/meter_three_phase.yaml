@@ -1,0 +1,30 @@
+device_type: meter_three_phase
+manufacturer: Acrel
+model: ADL3000
+category: meter
+protocol: modbus_rtu
+connection:
+  port: /dev/ttyUSB0
+  baudrate: 9600
+  slave_id: 3
+registers:
+  - address: 40200
+    name: voltage_a
+    type: uint16
+    scale: 0.1
+    unit: V
+  - address: 40201
+    name: voltage_b
+    type: uint16
+    scale: 0.1
+    unit: V
+  - address: 40202
+    name: voltage_c
+    type: uint16
+    scale: 0.1
+    unit: V
+  - address: 40203
+    name: current_a
+    type: uint16
+    scale: 0.01
+    unit: A

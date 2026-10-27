@@ -1,0 +1,453 @@
+{
+  "nodes": [
+    {
+      "id": "project-title",
+      "type": "text",
+      "x": 100,
+      "y": 50,
+      "width": 600,
+      "height": 120,
+      "text": "# 天链V3 - 项目规划图\n## 充电桩智能运维平台\n### 2026年4月6日",
+      "color": "#3b82f6",
+      "fontSize": 24
+    },
+    {
+      "id": "phase-1",
+      "type": "group",
+      "x": 50,
+      "y": 200,
+      "width": 350,
+      "height": 400,
+      "label": "第一阶段: 移动端离线模式",
+      "color": "#10b981",
+      "background": "#ecfdf5"
+    },
+    {
+      "id": "phase-1-title",
+      "type": "text",
+      "x": 70,
+      "y": 220,
+      "width": 310,
+      "height": 40,
+      "text": "## ✅ 已完成",
+      "color": "#10b981",
+      "fontSize": 18
+    },
+    {
+      "id": "sync-service",
+      "type": "text",
+      "x": 80,
+      "y": 280,
+      "width": 290,
+      "height": 80,
+      "text": "### 同步服务\n- 9种变更类型\n- 自动重试机制\n- 冲突解决策略",
+      "color": "#059669",
+      "background": "#d1fae5"
+    },
+    {
+      "id": "workorder-page",
+      "type": "text",
+      "x": 80,
+      "y": 380,
+      "width": 290,
+      "height": 80,
+      "text": "### 工单页面\n- 完整离线操作\n- 现场照片上传\n- 签名确认",
+      "color": "#059669",
+      "background": "#d1fae5"
+    },
+    {
+      "id": "typescript",
+      "type": "text",
+      "x": 80,
+      "y": 480,
+      "width": 290,
+      "height": 60,
+      "text": "### TypeScript\n- 编译通过\n- 类型安全",
+      "color": "#059669",
+      "background": "#d1fae5"
+    },
+    {
+      "id": "phase-2",
+      "type": "group",
+      "x": 450,
+      "y": 200,
+      "width": 350,
+      "height": 400,
+      "label": "第二阶段: 生产环境部署",
+      "color": "#3b82f6",
+      "background": "#eff6ff"
+    },
+    {
+      "id": "phase-2-title",
+      "type": "text",
+      "x": 470,
+      "y": 220,
+      "width": 310,
+      "height": 40,
+      "text": "## ✅ 已完成",
+      "color": "#3b82f6",
+      "fontSize": 18
+    },
+    {
+      "id": "deploy-scripts",
+      "type": "text",
+      "x": 480,
+      "y": 280,
+      "width": 290,
+      "height": 80,
+      "text": "### 部署脚本\n- production.sh\n- server-setup.sh\n- 一键部署",
+      "color": "#2563eb",
+      "background": "#dbeafe"
+    },
+    {
+      "id": "database-migration",
+      "type": "text",
+      "x": 480,
+      "y": 380,
+      "width": 290,
+      "height": 80,
+      "text": "### 数据库迁移\n- 初始迁移脚本\n- 数据备份策略\n- 回滚方案",
+      "color": "#2563eb",
+      "background": "#dbeafe"
+    },
+    {
+      "id": "monitoring",
+      "type": "text",
+      "x": 480,
+      "y": 480,
+      "width": 290,
+      "height": 60,
+      "text": "### 监控告警\n- Prometheus配置\n- Grafana仪表盘\n- 告警规则",
+      "color": "#2563eb",
+      "background": "#dbeafe"
+    },
+    {
+      "id": "phase-3",
+      "type": "group",
+      "x": 850,
+      "y": 200,
+      "width": 350,
+      "height": 400,
+      "label": "第三阶段: 功能完善",
+      "color": "#f59e0b",
+      "background": "#fffbeb"
+    },
+    {
+      "id": "phase-3-title",
+      "type": "text",
+      "x": 870,
+      "y": 220,
+      "width": 310,
+      "height": 40,
+      "text": "## 🔄 进行中",
+      "color": "#f59e0b",
+      "fontSize": 18
+    },
+    {
+      "id": "knowledge-base",
+      "type": "text",
+      "x": 880,
+      "y": 280,
+      "width": 290,
+      "height": 100,
+      "text": "### 知识库系统\n- 故障诊断知识库\n- 维修手册电子化\n- 专家经验库\n- 智能推荐",
+      "color": "#d97706",
+      "background": "#fef3c7"
+    },
+    {
+      "id": "chart-visualization",
+      "type": "text",
+      "x": 880,
+      "y": 400,
+      "width": 290,
+      "height": 100,
+      "text": "### 图表可视化\n- 实时数据大屏\n- 预测性分析图表\n- 自定义报表\n- 移动端优化",
+      "color": "#d97706",
+      "background": "#fef3c7"
+    },
+    {
+      "id": "qr-repair",
+      "type": "text",
+      "x": 880,
+      "y": 520,
+      "width": 290,
+      "height": 60,
+      "text": "### 扫码报修\n- 设备二维码识别\n- 一键报修流程",
+      "color": "#d97706",
+      "background": "#fef3c7"
+    },
+    {
+      "id": "tech-architecture",
+      "type": "group",
+      "x": 50,
+      "y": 650,
+      "width": 1150,
+      "height": 300,
+      "label": "技术架构",
+      "color": "#8b5cf6",
+      "background": "#f5f3ff"
+    },
+    {
+      "id": "frontend-tech",
+      "type": "text",
+      "x": 70,
+      "y": 680,
+      "width": 250,
+      "height": 120,
+      "text": "### 前端技术栈\n- React 18 + TypeScript\n- Ant Design Pro\n- ECharts 可视化\n- PWA 离线支持",
+      "color": "#7c3aed",
+      "background": "#ede9fe"
+    },
+    {
+      "id": "backend-tech",
+      "type": "text",
+      "x": 340,
+      "y": 680,
+      "width": 250,
+      "height": 120,
+      "text": "### 后端技术栈\n- Python FastAPI\n- PostgreSQL + TimescaleDB\n- Redis 缓存\n- Celery 异步任务",
+      "color": "#7c3aed",
+      "background": "#ede9fe"
+    },
+    {
+      "id": "mobile-tech",
+      "type": "text",
+      "x": 610,
+      "y": 680,
+      "width": 250,
+      "height": 120,
+      "text": "### 移动端技术\n- React Native\n- 离线数据同步\n- 相机/扫码功能\n- 地理位置",
+      "color": "#7c3aed",
+      "background": "#ede9fe"
+    },
+    {
+      "id": "infra-tech",
+      "type": "text",
+      "x": 880,
+      "y": 680,
+      "width": 250,
+      "height": 120,
+      "text": "### 基础设施\n- Docker + Kubernetes\n- Nginx 网关\n- Prometheus 监控\n- ELK 日志",
+      "color": "#7c3aed",
+      "background": "#ede9fe"
+    },
+    {
+      "id": "ai-features",
+      "type": "group",
+      "x": 50,
+      "y": 980,
+      "width": 550,
+      "height": 250,
+      "label": "AI智能功能",
+      "color": "#ec4899",
+      "background": "#fdf2f8"
+    },
+    {
+      "id": "health-engine",
+      "type": "text",
+      "x": 70,
+      "y": 1010,
+      "width": 250,
+      "height": 100,
+      "text": "### 健康度评估引擎\n- 5维度评分模型\n- 动态权重计算\n- 趋势分析算法\n- 寿命预测",
+      "color": "#db2777",
+      "background": "#fce7f3"
+    },
+    {
+      "id": "dispatch-engine",
+      "type": "text",
+      "x": 340,
+      "y": 1010,
+      "width": 250,
+      "height": 100,
+      "text": "### 智能派单引擎\n- 多因子加权算法\n- Haversine距离计算\n- 技能匹配\n- 负载评估",
+      "color": "#db2777",
+      "background": "#fce7f3"
+    },
+    {
+      "id": "knowledge-ai",
+      "type": "text",
+      "x": 70,
+      "y": 1130,
+      "width": 520,
+      "height": 80,
+      "text": "### 知识库AI\n- NLP症状解析\n- 相似故障推荐\n- 智能诊断\n- 学习反馈",
+      "color": "#db2777",
+      "background": "#fce7f3"
+    },
+    {
+      "id": "business-value",
+      "type": "group",
+      "x": 650,
+      "y": 980,
+      "width": 550,
+      "height": 250,
+      "label": "业务价值",
+      "color": "#10b981",
+      "background": "#ecfdf5"
+    },
+    {
+      "id": "efficiency",
+      "type": "text",
+      "x": 670,
+      "y": 1010,
+      "width": 250,
+      "height": 100,
+      "text": "### 运维效率提升\n- 故障响应时间 ↓72%\n- 平均修复时间 ↓65%\n- 人工干预 ↓80%\n- 工单处理量 ↑85%",
+      "color": "#059669",
+      "background": "#d1fae5"
+    },
+    {
+      "id": "cost",
+      "type": "text",
+      "x": 940,
+      "y": 1010,
+      "width": 250,
+      "height": 100,
+      "text": "### 运营成本降低\n- 运维成本 ↓45%\n- 设备停机损失 ↓60%\n- 备件库存 ↓30%\n- 培训成本 ↓50%",
+      "color": "#059669",
+      "background": "#d1fae5"
+    },
+    {
+      "id": "quality",
+      "type": "text",
+      "x": 670,
+      "y": 1130,
+      "width": 520,
+      "height": 80,
+      "text": "### 服务质量提升\n- 设备在线率 99.5%\n- 用户满意度 4.8/5\n- 故障预防率 75%\n- 服务标准化 100%",
+      "color": "#059669",
+      "background": "#d1fae5"
+    },
+    {
+      "id": "next-steps",
+      "type": "group",
+      "x": 50,
+      "y": 1260,
+      "width": 1150,
+      "height": 200,
+      "label": "下一步计划",
+      "color": "#3b82f6",
+      "background": "#eff6ff"
+    },
+    {
+      "id": "short-term",
+      "type": "text",
+      "x": 70,
+      "y": 1290,
+      "width": 350,
+      "height": 150,
+      "text": "### 短期 (1-2周)\n1. 知识库系统开发\n2. 图表可视化增强\n3. 扫码报功功能\n4. 性能优化测试",
+      "color": "#2563eb",
+      "background": "#dbeafe"
+    },
+    {
+      "id": "mid-term",
+      "type": "text",
+      "x": 440,
+      "y": 1290,
+      "width": 350,
+      "height": 150,
+      "text": "### 中期 (3-4周)\n1. 生产环境部署\n2. 用户培训材料\n3. 监控系统完善\n4. 安全审计加固",
+      "color": "#2563eb",
+      "background": "#dbeafe"
+    },
+    {
+      "id": "long-term",
+      "type": "text",
+      "x": 810,
+      "y": 1290,
+      "width": 350,
+      "height": 150,
+      "text": "### 长期 (1-2月)\n1. 多租户支持\n2. API开放平台\n3. 生态合作伙伴\n4. 国际化版本",
+      "color": "#2563eb",
+      "background": "#dbeafe"
+    },
+    {
+      "id": "status-summary",
+      "type": "text",
+      "x": 100,
+      "y": 1500,
+      "width": 1050,
+      "height": 80,
+      "text": "## 📊 项目状态总结\n**整体进度**: 70% | **当前阶段**: 第三阶段功能完善 | **风险等级**: 低 | **资源需求**: 正常",
+      "color": "#3b82f6",
+      "fontSize": 20,
+      "background": "#eff6ff"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "fromNode": "phase-1",
+      "fromSide": "right",
+      "toNode": "phase-2",
+      "toSide": "left",
+      "color": "#10b981",
+      "label": "已完成"
+    },
+    {
+      "id": "edge-2",
+      "fromNode": "phase-2",
+      "fromSide": "right",
+      "toNode": "phase-3",
+      "toSide": "left",
+      "color": "#3b82f6",
+      "label": "已完成"
+    },
+    {
+      "id": "edge-3",
+      "fromNode": "phase-3",
+      "fromSide": "bottom",
+      "toNode": "tech-architecture",
+      "toSide": "top",
+      "color": "#f59e0b",
+      "label": "技术支撑"
+    },
+    {
+      "id": "edge-4",
+      "fromNode": "tech-architecture",
+      "fromSide": "bottom",
+      "toNode": "ai-features",
+      "toSide": "top",
+      "color": "#8b5cf6",
+      "label": "AI赋能"
+    },
+    {
+      "id": "edge-5",
+      "fromNode": "tech-architecture",
+      "fromSide": "bottom",
+      "toNode": "business-value",
+      "toSide": "top",
+      "color": "#8b5cf6",
+      "label": "价值转化"
+    },
+    {
+      "id": "edge-6",
+      "fromNode": "ai-features",
+      "fromSide": "bottom",
+      "toNode": "next-steps",
+      "toSide": "top",
+      "color": "#ec4899",
+      "label": "持续优化"
+    },
+    {
+      "id": "edge-7",
+      "fromNode": "business-value",
+      "fromSide": "bottom",
+      "toNode": "next-steps",
+      "toSide": "top",
+      "color": "#10b981",
+      "label": "价值延伸"
+    },
+    {
+      "id": "edge-8",
+      "fromNode": "next-steps",
+      "fromSide": "bottom",
+      "toNode": "status-summary",
+      "toSide": "top",
+      "color": "#3b82f6",
+      "label": "总结"
+    }
+  ]
+}

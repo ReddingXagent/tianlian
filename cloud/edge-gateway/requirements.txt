@@ -1,0 +1,29 @@
+# 天链 V3 边缘网关 - Python 依赖（全量精确锁定，卡 58f8ecf6 维度V）
+# 重叠依赖对齐 backend/requirements.lock 生产已验证版本；
+# 独有依赖锁 PyPI 实测当前稳定版（ocpp/pymodbus 无卡片预设的 1.2.0/3.8.7，
+# PyPI 实际最新可用为 2.0.0 / 3.8.6，已按实测锁定的为准）。
+# FastAPI + async
+fastapi==0.140.0
+uvicorn[standard]==0.51.0
+httpx==0.28.1
+
+# OCPP WebSocket
+websockets==15.0.1
+ocpp==2.0.0
+
+# Modbus TCP
+pymodbus==3.8.6
+
+# 数据存储
+aiosqlite==0.22.1
+sqlalchemy==2.0.51
+
+# 工具
+python-dotenv==1.2.2
+pydantic==2.13.4
+pydantic-settings==2.14.2
+pyyaml==6.0.3
+
+# 测试
+pytest==9.1.1
+pytest-asyncio==1.4.0

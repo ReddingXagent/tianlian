@@ -1,0 +1,172 @@
+# 华为 SUN2000-330KTL 智能组串式逆变器
+# 适用于大型地面电站
+device_type: inverter_huawei_sun2000
+manufacturer: Huawei
+model: SUN2000-330KTL-H1
+category: inverter
+protocol: modbus_rtu
+connection:
+  port: /dev/ttyUSB0
+  baudrate: 9600
+  slave_id: 2
+registers:
+  # 电网侧
+  - address: 32080
+    name: phase_a_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: A相电压
+  - address: 32081
+    name: phase_b_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: B相电压
+  - address: 32082
+    name: phase_c_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: C相电压
+  - address: 32083
+    name: phase_a_current
+    type: uint16
+    scale: 0.1
+    unit: A
+    description: A相电流
+  - address: 32084
+    name: phase_b_current
+    type: uint16
+    scale: 0.1
+    unit: A
+    description: B相电流
+  - address: 32085
+    name: phase_c_current
+    type: uint16
+    scale: 0.1
+    unit: A
+    description: C相电流
+  - address: 32088
+    name: active_power
+    type: int32
+    scale: 0.001
+    unit: kW
+    description: 有功功率
+  - address: 32090
+    name: reactive_power
+    type: int32
+    scale: 0.001
+    unit: kvar
+    description: 无功功率
+  - address: 32092
+    name: apparent_power
+    type: int32
+    scale: 0.001
+    unit: kVA
+    description: 视在功率
+  - address: 32094
+    name: power_factor
+    type: int16
+    scale: 0.001
+    unit: ""
+    description: 功率因数
+  - address: 32095
+    name: grid_frequency
+    type: uint16
+    scale: 0.01
+    unit: Hz
+    description: 电网频率
+  # 直流侧 (MPPT 1-6)
+  - address: 32100
+    name: mppt1_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: MPPT1电压
+  - address: 32101
+    name: mppt1_current
+    type: uint16
+    scale: 0.01
+    unit: A
+    description: MPPT1电流
+  - address: 32106
+    name: mppt2_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: MPPT2电压
+  - address: 32107
+    name: mppt2_current
+    type: uint16
+    scale: 0.01
+    unit: A
+    description: MPPT2电流
+  - address: 32112
+    name: mppt3_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: MPPT3电压
+  - address: 32113
+    name: mppt3_current
+    type: uint16
+    scale: 0.01
+    unit: A
+    description: MPPT3电流
+  # 逆变器状态
+  - address: 32150
+    name: daily_yield
+    type: uint32
+    scale: 0.1
+    unit: kWh
+    description: 日发电量
+  - address: 32152
+    name: total_yield
+    type: uint32
+    scale: 0.1
+    unit: kWh
+    description: 累计发电量
+  - address: 32154
+    name: total_runtime
+    type: uint32
+    scale: 1.0
+    unit: h
+    description: 累计运行时间
+  - address: 32160
+    name: device_status
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 设备运行状态
+  - address: 32161
+    name: cabinet_temp
+    type: int16
+    scale: 0.1
+    unit: "°C"
+    description: 机柜温度
+  # 故障信息
+  - address: 32200
+    name: fault_id_1
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 故障ID1
+  - address: 32201
+    name: fault_id_2
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 故障ID2
+  - address: 32210
+    name: alarm_id_1
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 告警ID1
+  - address: 32211
+    name: alarm_id_2
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 告警ID2

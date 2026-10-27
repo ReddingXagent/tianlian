@@ -1,0 +1,67 @@
+# 天链 V3 边缘网关 - 配置文件
+gateway:
+  sn: "TL-GW-001"                # 网关序列号（唯一标识）
+  name: "edge-gateway-01"        # 网关名称
+  model: "TL-GW-100"             # 网关型号
+  manufacturer: "天链科技"        # 制造商
+  station_id: 1                  # 关联站点ID
+  location: "充电站A"             # 安装位置
+
+# 云端 API 地址
+cloud:
+  api_base: "http://demo.example.com/api/v1"
+  api_key: ""                    # 云端 API Key（注册后获取）
+  register_endpoint: "/gateways/register"
+  heartbeat_endpoint: "/gateways/heartbeat"
+  telemetry_endpoint: "/telemetry/report"
+
+# 心跳配置
+heartbeat:
+  interval_seconds: 30           # 心跳间隔（秒）
+  timeout_seconds: 10            # 心跳超时（秒）
+
+# OCPP WebSocket 服务端
+ocpp:
+  enabled: true
+  host: "0.0.0.0"
+  port: 9000                    # OCPP WS 监听端口
+  max_connections: 100
+  heartbeat_interval: 300       # OCPP 心跳间隔（秒）
+
+# Modbus TCP 主站
+modbus:
+  enabled: true
+  poll_interval_seconds: 5      # 轮询间隔（秒）
+  timeout_seconds: 3            # 连接超时（秒）
+  retry_count: 3                # 重试次数
+  devices:                      # 设备列表
+    - name: "逆变器-1"
+      host: "192.168.1.100"
+      port: 502
+      unit_id: 1
+      device_id: 1              # 云端设备ID
+    - name: "电表-1"
+      host: "192.168.1.101"
+      port: 502
+      unit_id: 1
+      device_id: 2
+
+# 遥测上报
+telemetry:
+  report_interval_seconds: 10   # 上报间隔（秒）
+  batch_size: 100               # 批量上报大小
+  max_retries: 3                # 最大重试次数
+
+# 断网续传
+offline_buffer:
+  enabled: true
+  db_path: "data/offline_buffer.db"  # 本地缓存数据库
+  max_buffer_size_mb: 500            # 最大缓存大小（MB）
+  max_buffer_age_hours: 72           # 最大缓存时长（小时）
+  retry_interval_seconds: 30         # 重试间隔（秒）
+
+# 日志
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file: "data/gateway.log"

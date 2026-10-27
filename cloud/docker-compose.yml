@@ -1,0 +1,245 @@
+# ═══════════════════════════════════════════════════════════════
+#  天链V3 光储充运维系统 - Docker Compose 编排
+# ═══════════════════════════════════════════════════════════════
+# 用法:
+#   启动所有服务: docker compose --env-file docker/.env up -d
+#   仅启动数据库: docker compose up db -d
+#   查看日志:     docker compose logs -f
+#   停止:         docker compose down
+#   完全清理:     docker compose down -v
+# ═══════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+# ─── 共享网络 ───
+networks:
+  tianlian-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ─── 持久化卷 ───
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  uploads-data:
+    driver: local
+
+services:
+  # ============================================================
+  # PostgreSQL 数据库
+  # ============================================================
+  db:
+    image: postgres:16.4-alpine
+    container_name: tianlian-db
+    restart: unless-stopped
+    networks:
+      - tianlian-net
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: tianlian_v3
+      POSTGRES_USER: tianlian
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD 未设置}
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tianlian -d tianlian_v3"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # ============================================================
+  # Redis 缓存 & 任务队列
+  # ============================================================
+  redis:
+    image: redis:7.4-alpine
+    container_name: tianlian-redis
+    restart: unless-stopped
+    networks:
+      - tianlian-net
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 128M
+
+  # ============================================================
+  # Celery Broker 专用 Redis (队列/结果, 与 cache 实例隔离)
+  # 卡片 b9b1c588: 共用 cache 实例时 allkeys-lru 会逐出队列键 → 任务丢失;
+  # 独立实例 + noeviction, 队列满时宁可拒绝写入也不静默丢消息。
+  # 无持久化 (appendonly 关): 队列消息为瞬态, 实例重启由任务重投/幂等兜底。
+  # ============================================================
+  redis-broker:
+    image: redis:7.4-alpine
+    container_name: tianlian-redis-broker
+    restart: unless-stopped
+    networks:
+      - tianlian-net
+    command: redis-server --appendonly no --maxmemory 128mb --maxmemory-policy noeviction
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+        reservations:
+          memory: 64M
+
+  # ============================================================
+  # 后端 API 服务 (FastAPI)
+  # ============================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tianlian-backend
+    restart: unless-stopped
+    networks:
+      - tianlian-net
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      # 应用配置
+      APP_NAME: 天链光储充运维系统
+      APP_VERSION: 3.0.0
+      DEBUG: ${DEBUG:-false}
+      HOST: 0.0.0.0
+      PORT: 8000
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # 数据库
+      DB_TYPE: ${DB_TYPE:-postgres}
+      DATABASE_URL: postgresql://tianlian:${DB_PASSWORD:?DB_PASSWORD 未设置}@db:5432/tianlian_v3
+      DB_POOL_SIZE: 20
+      DB_MAX_OVERFLOW: 10
+      DB_POOL_RECYCLE: 3600
+      DB_POOL_PRE_PING: "true"
+      # JWT
+      SECRET_KEY: ${SECRET_KEY:-change-me-to-a-random-secret-key}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      # Redis
+      REDIS_URL: redis://redis:6379/0
+      # CORS
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3004,http://localhost:80,http://localhost}
+      # 上传
+      UPLOAD_DIR: /app/uploads
+      MAX_FILE_SIZE: 10485760
+    volumes:
+      - uploads-data:/app/uploads
+      - ./backend/app.db:/app/app.db    # 兼容 SQLite 开发
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # ============================================================
+  # 前端 SPA (Nginx)
+  # ============================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tianlian-frontend
+    restart: unless-stopped
+    networks:
+      - tianlian-net
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      BACKEND_URL: http://backend:8000
+    volumes:
+      - uploads-data:/usr/share/nginx/uploads:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # ============================================================
+  # Celery Worker (可选 - 异步任务处理)
+  # ============================================================
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tianlian-worker
+    restart: unless-stopped
+    networks:
+      - tianlian-net
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_started
+      redis-broker:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://tianlian:${DB_PASSWORD:?DB_PASSWORD 未设置}@db:5432/tianlian_v3
+      DB_POOL_SIZE: 20
+      DB_MAX_OVERFLOW: 10
+      DB_POOL_RECYCLE: 3600
+      DB_POOL_PRE_PING: "true"
+      # 卡片 b9b1c588: celery_app 只认专用变量, 不读 REDIS_URL;
+      # 须显式指向独立 broker 实例 (db0=broker, db1=result, 与 cache 实例物理隔离)
+      CELERY_BROKER_URL: redis://redis-broker:6379/0
+      CELERY_RESULT_BACKEND: redis://redis-broker:6379/1
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-change-me}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - uploads-data:/app/uploads
+    command: celery -A app.core.celery_app worker --loglevel=info --concurrency=4
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M

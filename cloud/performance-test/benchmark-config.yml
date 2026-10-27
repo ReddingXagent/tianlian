@@ -1,0 +1,46 @@
+# 性能压测基准配置
+benchmark:
+  # 基础配置
+  base_url: http://localhost:8000
+  duration: 300  # 压测持续时间（秒）
+  
+  # 用户配置
+  user_scenarios:
+    - name: "轻负载场景"
+      users: 50
+      spawn_rate: 10  # 每秒新增用户数
+      target_response_time: < 500ms
+    
+    - name: "中等负载场景"
+      users: 100
+      spawn_rate: 20
+      target_response_time: < 800ms
+    
+    - name: "高负载场景"
+      users: 200
+      spawn_rate: 40
+      target_response_time: < 1500ms
+  
+  # 监控指标
+  metrics:
+    - name: "响应时间"
+      thresholds:
+        p95: < 1000ms
+        p99: < 2000ms
+    
+    - name: "错误率"
+      thresholds:
+        http_5xx: < 1%
+        timeout: < 0.5%
+    
+    - name: "吞吐量"
+      thresholds:
+        rps: > 100
+        successful_requests: > 95%
+  
+  # 报告配置
+  report:
+    format: "html+json"
+    output_dir: "./reports"
+    include_charts: true
+    compare_with_baseline: false

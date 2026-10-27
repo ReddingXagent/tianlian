@@ -1,0 +1,166 @@
+# Sungrow SG250HX 组串式逆变器
+# 适用于大型地面电站，最大输入功率 250kW
+device_type: inverter_sungrow_sg250hx
+manufacturer: Sungrow
+model: SG250HX
+category: inverter
+protocol: modbus_rtu
+connection:
+  port: /dev/ttyUSB0
+  baudrate: 9600
+  slave_id: 1
+registers:
+  # 电网侧遥测
+  - address: 5000
+    name: grid_voltage_ab
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: AB线电压
+  - address: 5001
+    name: grid_voltage_bc
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: BC线电压
+  - address: 5002
+    name: grid_voltage_ca
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: CA线电压
+  - address: 5003
+    name: grid_current_a
+    type: uint16
+    scale: 0.1
+    unit: A
+    description: A相电流
+  - address: 5004
+    name: grid_current_b
+    type: uint16
+    scale: 0.1
+    unit: A
+    description: B相电流
+  - address: 5005
+    name: grid_current_c
+    type: uint16
+    scale: 0.1
+    unit: A
+    description: C相电流
+  - address: 5008
+    name: active_power
+    type: int32
+    scale: 0.001
+    unit: kW
+    description: 有功功率
+  - address: 5010
+    name: reactive_power
+    type: int32
+    scale: 0.001
+    unit: kvar
+    description: 无功功率
+  - address: 5014
+    name: power_factor
+    type: int16
+    scale: 0.001
+    unit: ""
+    description: 功率因数
+  - address: 5015
+    name: grid_frequency
+    type: uint16
+    scale: 0.01
+    unit: Hz
+    description: 电网频率
+  # 直流侧遥测
+  - address: 5020
+    name: pv1_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: PV1输入电压
+  - address: 5021
+    name: pv1_current
+    type: uint16
+    scale: 0.01
+    unit: A
+    description: PV1输入电流
+  - address: 5022
+    name: pv1_power
+    type: uint32
+    scale: 0.001
+    unit: kW
+    description: PV1输入功率
+  - address: 5025
+    name: pv2_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+    description: PV2输入电压
+  - address: 5026
+    name: pv2_current
+    type: uint16
+    scale: 0.01
+    unit: A
+    description: PV2输入电流
+  - address: 5027
+    name: pv2_power
+    type: uint32
+    scale: 0.001
+    unit: kW
+    description: PV2输入功率
+  # 逆变器状态
+  - address: 5100
+    name: daily_energy
+    type: uint32
+    scale: 0.1
+    unit: kWh
+    description: 日发电量
+  - address: 5102
+    name: total_energy
+    type: uint32
+    scale: 0.1
+    unit: kWh
+    description: 总发电量
+  - address: 5104
+    name: total_runtime
+    type: uint32
+    scale: 0.1
+    unit: h
+    description: 累计运行时间
+  - address: 5106
+    name: internal_temp
+    type: int16
+    scale: 0.1
+    unit: "°C"
+    description: 机内温度
+  - address: 5107
+    name: efficiency
+    type: uint16
+    scale: 0.01
+    unit: "%"
+    description: 逆变器效率
+  # 故障状态
+  - address: 5200
+    name: fault_code_1
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 故障码1
+  - address: 5201
+    name: fault_code_2
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 故障码2
+  - address: 5202
+    name: alarm_code_1
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 告警码1
+  - address: 5203
+    name: alarm_code_2
+    type: uint16
+    scale: 1.0
+    unit: ""
+    description: 告警码2

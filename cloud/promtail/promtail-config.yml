@@ -1,0 +1,58 @@
+# ─── 天链V3 Promtail 日志采集配置 ───
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /data/promtail/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # === Backend FastAPI 日志 ===
+  - job_name: tianlian-backend
+    static_configs:
+      - targets: []
+        labels:
+          job: tianlian-backend
+          service: backend
+          __path__: /var/log/tianlian/*.log
+
+  # === Nginx 访问日志 ===
+  - job_name: tianlian-nginx-access
+    static_configs:
+      - targets: []
+        labels:
+          job: tianlian-nginx
+          service: nginx
+          type: access
+          __path__: /var/log/nginx/access.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>\S+) \S+ \S+ \[(?P<time_local>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d{3}) (?P<body_bytes>\d+) "(?P<referer>[^"]*)" "(?P<user_agent>[^"]*)"'
+      - labels:
+          status:
+          method:
+
+  # === Nginx 错误日志 ===
+  - job_name: tianlian-nginx-error
+    static_configs:
+      - targets: []
+        labels:
+          job: tianlian-nginx
+          service: nginx
+          type: error
+          __path__: /var/log/nginx/error.log
+
+  # === 系统日志 ===
+  - job_name: system-journal
+    journal:
+      max_age: 12h
+      labels:
+        job: system-journal
+        service: system
+    relabel_configs:
+      - source_labels: ['__journal__hostname']
+        target_label: 'host'

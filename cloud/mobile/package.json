@@ -1,0 +1,47 @@
+{
+  "name": "tianlian-v3-mobile",
+  "version": "1.0.0",
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/netinfo": "12.0.1",
+    "@react-native-picker/picker": "2.11.4",
+    "@react-navigation/native": "^6.1.9",
+    "@react-navigation/native-stack": "^6.9.17",
+    "axios": "^1.20.0",
+    "expo": "~57.0.0",
+    "expo-build-properties": "~57.0.15",
+    "expo-constants": "~57.0.16",
+    "expo-splash-screen": "~57.0.8",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@types/react": "~19.2.10",
+    "babel-plugin-module-resolver": "^5.0.3",
+    "typescript": "~6.0.3"
+  },
+  "private": true,
+  "overrides": {
+    "shell-quote": "^1.8.6",
+    "form-data": "^4.0.6",
+    "nanoid": "^3.3.18",
+    "lodash": "^4.17.24",
+    "ws": "^8.20.1",
+    "js-yaml@3": "^3.15.1",
+    "js-yaml@4": "^4.3.1",
+    "brace-expansion@1": "^1.1.18",
+    "brace-expansion@2": "^2.1.4",
+    "uuid": "^11.1.1"
+  }
+}

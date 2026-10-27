@@ -1,0 +1,30 @@
+device_type: inverter_eahi_20k
+manufacturer: EAHI
+model: 20K-TL3
+category: inverter
+protocol: modbus_rtu
+connection:
+  port: /dev/ttyUSB0
+  baudrate: 9600
+  slave_id: 1
+registers:
+  - address: 40001
+    name: grid_voltage_a
+    type: uint16
+    scale: 0.1
+    unit: V
+  - address: 40002
+    name: grid_current_a
+    type: uint16
+    scale: 0.1
+    unit: A
+  - address: 40003
+    name: grid_power
+    type: uint16
+    scale: 0.01
+    unit: kW
+  - address: 40004
+    name: dc_voltage
+    type: uint16
+    scale: 0.1
+    unit: V

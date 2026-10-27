@@ -1,0 +1,14 @@
+# Grafana Dashboard Provider 配置
+apiVersion: 1
+
+providers:
+  - name: "TianLian"
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

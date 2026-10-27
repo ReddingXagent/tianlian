@@ -1,0 +1,182 @@
+# IEC60870-5-104 远动通信协议 RTU 配置
+# 调度中心与变电站/新能源场站之间的数据传输
+device_type: iec104_rtu
+manufacturer: NARI
+model: NSS201
+category: meter
+protocol: iec104
+connection:
+  host: 192.168.10.50
+  port: 2404
+  common_address: 1
+  originator_address: 10
+  # 超时参数
+  t0_timeout: 30
+  t1_timeout: 15
+  t2_timeout: 10
+  t3_timeout: 20
+  # 窗口参数
+  k_value: 12
+  w_value: 8
+  # TLS (可选)
+  tls_enabled: false
+  tls_ca_cert: ""
+# IEC104 ASDU类型说明:
+#   type_id=1:  M_SP_NA  - 单点遥信
+#   type_id=9:  M_ME_NA  - 归一化遥测 (归一化值 -1..+1)
+#   type_id=11: M_ME_NB  - 标度化遥测 (带比例因子的整数)
+#   type_id=13: M_ME_NC  - 短浮点遥测 (IEEE 754 float)
+#   type_id=15: M_IT_NA  - 累计量 (电能累计)
+#   type_id=45: C_SC_NA  - 单点遥控命令
+#   type_id=100: C_IC_NA - 总召唤命令
+# IOA (信息体地址) 说明:
+#   1xxx - 遥信 (YX)
+#   4xxx - 遥测 (YC)
+#   6xxx - 遥控 (YK)
+#   8xxx - 累计量
+data_points:
+  # === 遥信 (单点信息) ===
+  - ioa: 1001
+    name: breaker_cb101_status
+    type: single_point
+    description: 进线断路器CB101状态
+  - ioa: 1002
+    name: breaker_cb102_status
+    type: single_point
+    description: 出线断路器CB102状态
+  - ioa: 1003
+    name: disconnector_ds101_status
+    type: single_point
+    description: 隔离开关DS101状态
+  - ioa: 1004
+    name: ground_switch_es101_status
+    type: single_point
+    description: 接地开关ES101状态
+  - ioa: 1010
+    name: protection_relay_status
+    type: single_point
+    description: 保护装置动作信号
+  - ioa: 1011
+    name: fire_alarm_status
+    type: single_point
+    description: 火灾报警信号
+  - ioa: 1012
+    name: door_open_status
+    type: single_point
+    description: 柜门开启信号
+  - ioa: 1020
+    name: inverter_running
+    type: single_point
+    description: 逆变器运行信号
+  - ioa: 1021
+    name: grid_connected
+    type: single_point
+    description: 并网信号
+  # === 遥测 (归一化测量值) ===
+  - ioa: 4001
+    name: bus_voltage_a
+    type: normalized
+    unit: V
+    scale: 220.0
+    description: 母线A相电压
+  - ioa: 4002
+    name: bus_voltage_b
+    type: normalized
+    unit: V
+    scale: 220.0
+    description: 母线B相电压
+  - ioa: 4003
+    name: bus_voltage_c
+    type: normalized
+    unit: V
+    scale: 220.0
+    description: 母线C相电压
+  - ioa: 4004
+    name: bus_current_a
+    type: normalized
+    unit: A
+    scale: 1000.0
+    description: 母线A相电流
+  - ioa: 4005
+    name: bus_current_b
+    type: normalized
+    unit: A
+    scale: 1000.0
+    description: 母线B相电流
+  - ioa: 4006
+    name: bus_current_c
+    type: normalized
+    unit: A
+    scale: 1000.0
+    description: 母线C相电流
+  # === 遥测 (标度化测量值) ===
+  - ioa: 5001
+    name: active_power_total
+    type: scaled
+    unit: MW
+    scale: 100.0
+    description: 全站有功功率
+  - ioa: 5002
+    name: reactive_power_total
+    type: scaled
+    unit: Mvar
+    scale: 100.0
+    description: 全站无功功率
+  - ioa: 5003
+    name: grid_frequency
+    type: scaled
+    unit: Hz
+    scale: 50.0
+    description: 电网频率
+  - ioa: 5004
+    name: power_factor
+    type: scaled
+    unit: ""
+    scale: 1.0
+    description: 功率因数
+  # === 遥测 (短浮点数) ===
+  - ioa: 7001
+    name: ambient_temperature
+    type: float
+    unit: "°C"
+    description: 环境温度
+  - ioa: 7002
+    name: humidity
+    type: float
+    unit: "%"
+    description: 环境湿度
+  - ioa: 7003
+    name: wind_speed
+    type: float
+    unit: m/s
+    description: 风速
+  - ioa: 7004
+    name: irradiance
+    type: float
+    unit: W/m²
+    description: 辐照度
+  # === 累计量 ===
+  - ioa: 8001
+    name: energy_import
+    type: integrated
+    unit: MWh
+    description: 正向有功累计电量
+  - ioa: 8002
+    name: energy_export
+    type: integrated
+    unit: MWh
+    description: 反向有功累计电量
+  - ioa: 8003
+    name: pv_total_energy
+    type: integrated
+    unit: MWh
+    description: 光伏累计发电量
+  # === 遥控 ===
+  - ioa: 6001
+    name: cmd_breaker_cb101
+    type: command
+    description: 断路器CB101分合闸
+  - ioa: 6002
+    name: cmd_inverter_start_stop
+    type: command
+    description: 逆变器启停控制

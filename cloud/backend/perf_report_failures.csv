@@ -1,0 +1,14 @@
+Method,Name,Error,Occurrences
+GET,/api/v1/devices,"ConnectionRefusedError(61, 'Connection refused')",330
+GET,/api/v1/telemetry/device/{id}/latest,"ConnectionRefusedError(61, 'Connection refused')",140
+GET,/api/v1/stats/dashboard,"ConnectionRefusedError(61, 'Connection refused')",56
+GET,/api/v1/health,"ConnectionRefusedError(61, 'Connection refused')",57
+GET,/api/v1/workorders,"ConnectionRefusedError(61, 'Connection refused')",150
+GET,/api/v1/stats/overview,"ConnectionRefusedError(61, 'Connection refused')",491
+GET,/api/v1/teams,"ConnectionRefusedError(61, 'Connection refused')",54
+POST,/api/v1/workorders [POST],"ConnectionRefusedError(61, 'Connection refused')",35
+POST,/api/v1/auth/login,"ConnectionRefusedError(61, 'Connection refused')",100
+GET,/api/v1/stations,"ConnectionRefusedError(61, 'Connection refused')",405
+GET,/api/v1/users,"ConnectionRefusedError(61, 'Connection refused')",56
+GET,/api/v1/health/device-health,"ConnectionRefusedError(61, 'Connection refused')",20
+GET,/api/v1/alarms,"ConnectionRefusedError(61, 'Connection refused')",381

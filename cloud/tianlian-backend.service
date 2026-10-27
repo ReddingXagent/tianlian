@@ -1,0 +1,14 @@
+[Unit]
+Description=天链 V3 后端服务
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/tianlian-v3/backend
+ExecStart=/opt/tianlian-v3/backend/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

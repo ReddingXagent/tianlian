@@ -1,0 +1,131 @@
+# ─── 天链V3 Prometheus 告警规则 ───
+# 覆盖 API 可用性、业务指标、硬件状态
+
+groups:
+
+  # ============ 可用性与性能 ============
+  - name: tianlian-availability
+    interval: 30s
+    rules:
+
+      - alert: BackendDown
+        expr: up{job="tianlian-backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "天链V3 后端服务宕机"
+          description: "服务 {{ $labels.instance }} 已离线超过 30 秒"
+
+      - alert: HighErrorRate
+        expr: |
+          (sum(rate(tianlian_http_requests_total{status_code=~"5.."}[5m]))
+           /
+           sum(rate(tianlian_http_requests_total[5m]))) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "API 错误率过高"
+          description: "5xx 错误率 {{ $value | humanizePercentage }}，超过 5% 阈值"
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(tianlian_http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 3
+        for: 2m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "API P95 延迟过高"
+          description: "P95 延迟 {{ $value }}s，超过 3s 阈值"
+
+  # ============ 设备与业务 ============
+  - name: tianlian-business
+    interval: 1m
+    rules:
+
+      - alert: ActiveAlarmsHigh
+        expr: tianlian_active_alarms > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "活跃告警数量过高"
+          description: "当前活跃告警 {{ $value }}，超过 50 阈值"
+
+      - alert: ActiveAlarmsCritical
+        expr: tianlian_active_alarms > 100
+        for: 2m
+        labels:
+          severity: critical
+          component: business
+        annotations:
+          summary: "活跃告警数量严重过高"
+          description: "当前活跃告警 {{ $value }}，超过 100 阈值"
+
+      - alert: DeviceOfflineRate
+        expr: |
+          (1 - tianlian_devices_online / tianlian_devices_total) * 100 > 20
+        for: 5m
+        labels:
+          severity: critical
+          component: business
+        annotations:
+          summary: "设备离线率超过 20%"
+          description: "离线率 {{ $value | humanizePercentage }}"
+
+      - alert: WorkorderBacklog
+        expr: tianlian_workorders_pending > 30
+        for: 10m
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "待处理工单积压"
+          description: "待处理工单 {{ $value }}，超过 30 阈值"
+
+      - alert: GatewayOffline
+        expr: tianlian_gateways_online == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: gateway
+        annotations:
+          summary: "所有网关离线"
+          description: "在线网关数为 0，数据采集完全中断"
+
+  # ============ AI 诊断 ============
+  - name: tianlian-ai
+    interval: 5m
+    rules:
+
+      - alert: AITokenSpike
+        expr: rate(tianlian_ai_tokens_used_total[5m]) * 300 > 100000
+        for: 5m
+        labels:
+          severity: info
+          component: ai
+        annotations:
+          summary: "AI Token 消耗激增"
+          description: "近 5 分钟 Token 消耗 {{ $value }}，超过预期 100k/5min"
+
+  # ============ 数据库 ============
+  - name: tianlian-database
+    interval: 1m
+    rules:
+
+      - alert: DBConnectionExhaustion
+        expr: tianlian_db_connections_active / tianlian_db_connection_pool_size > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "数据库连接池接近耗尽"
+          description: "活跃连接 {{ $value | humanizePercentage }}，超过 85% 阈值"

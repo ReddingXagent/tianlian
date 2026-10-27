@@ -1,0 +1,101 @@
+# 万马/StarCharge 直流充电桩 (MQTT协议)
+# 补充配置 - DCL060已在charger_dc_60kw.yaml配置基础参数
+# 本文件提供完整的遥测点列表
+device_type: charger_starcharge_full
+manufacturer: StarCharge
+model: DCL060-Full
+category: charger
+protocol: mqtt
+connection:
+  host: 192.168.1.101
+  port: 1883
+  topic_report: tcu/TCU002/report
+  topic_control: tcu/TCU002/control
+  qos: 1
+  keepalive: 60
+  tls_enabled: false
+registers:
+  - name: output_voltage
+    type: float
+    unit: V
+    description: 输出电压
+  - name: output_current
+    type: float
+    unit: A
+    description: 输出电流
+  - name: output_power
+    type: float
+    unit: kW
+    description: 输出功率
+  - name: soc
+    type: float
+    unit: "%"
+    description: 车辆SOC
+  - name: soc_display
+    type: float
+    unit: "%"
+    description: SOC显示值
+  - name: remain_time
+    type: int
+    unit: min
+    description: 剩余充电时间
+  - name: charge_amount
+    type: float
+    unit: kWh
+    description: 本次充电量
+  - name: charge_cost
+    type: float
+    unit: "元"
+    description: 本次充电费用
+  - name: battery_voltage
+    type: float
+    unit: V
+    description: 电池组电压
+  - name: battery_current
+    type: float
+    unit: A
+    description: 电池组电流
+  - name: battery_max_temp
+    type: float
+    unit: "°C"
+    description: 电池最高温度
+  - name: battery_min_temp
+    type: float
+    unit: "°C"
+    description: 电池最低温度
+  - name: cabinet_temp
+    type: float
+    unit: "°C"
+    description: 机柜温度
+  - name: humidity
+    type: float
+    unit: "%"
+    description: 机柜湿度
+  - name: gun_lock_status
+    type: int
+    unit: ""
+    description: 枪锁状态
+  - name: emergency_stop
+    type: int
+    unit: ""
+    description: 急停状态
+  - name: insulation_status
+    type: int
+    unit: ""
+    description: 绝缘检测状态
+  - name: charger_status
+    type: int
+    unit: ""
+    description: 充电机状态 (0=离线,1=空闲,2=充电中,3=已充满,4=故障,5=维护)
+  - name: fault_code
+    type: int
+    unit: ""
+    description: 故障代码
+  - name: total_charge_count
+    type: int
+    unit: "次"
+    description: 累计充电次数
+  - name: total_charge_energy
+    type: float
+    unit: kWh
+    description: 累计充电量

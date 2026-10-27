@@ -1,0 +1,22 @@
+device_type: charger_dc_60kw
+manufacturer: StarCharge
+model: DCL060
+category: charger
+protocol: mqtt
+connection:
+  host: 192.168.1.100
+  port: 1883
+  topic: charger/status
+registers:
+  - name: output_voltage
+    type: float
+    unit: V
+  - name: output_current
+    type: float
+    unit: A
+  - name: output_power
+    type: float
+    unit: kW
+  - name: soc
+    type: float
+    unit: "%"

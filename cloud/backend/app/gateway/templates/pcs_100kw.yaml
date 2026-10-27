@@ -1,0 +1,30 @@
+device_type: pcs_100kw
+manufacturer: Sinexcel
+model: PCS100K
+category: pcs
+protocol: modbus_rtu
+connection:
+  port: /dev/ttyUSB0
+  baudrate: 9600
+  slave_id: 2
+registers:
+  - address: 40100
+    name: active_power
+    type: int16
+    scale: 0.1
+    unit: kW
+  - address: 40101
+    name: reactive_power
+    type: int16
+    scale: 0.1
+    unit: kvar
+  - address: 40102
+    name: battery_voltage
+    type: uint16
+    scale: 0.1
+    unit: V
+  - address: 40103
+    name: battery_current
+    type: int16
+    scale: 0.1
+    unit: A

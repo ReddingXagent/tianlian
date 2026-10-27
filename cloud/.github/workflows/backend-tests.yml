@@ -1,0 +1,151 @@
+# 天链V3 - 后端测试 CI 配置
+# 包含: pytest + coverage（50%通过线）
+
+name: Backend Tests
+
+on:
+  push:
+    branches: [main, master, develop, stable-v3.0]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    name: Pytest + Coverage
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    # 启动 PostgreSQL 服务供测试使用
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tianlian
+          POSTGRES_PASSWORD: ci-test-password
+          POSTGRES_DB: tianlian_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio pytest-xdist httpx
+
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          SECRET_KEY: ci-test-secret-key
+          REDIS_URL: redis://localhost:6379/0
+          DEBUG: "true"
+        # 并发与 OOM 控制由 backend/pytest.ini addopts 统一配置（-n 4 --dist=loadfile）。
+        # 此处不重复指定，避免与 addopts 冲突。去掉原 -x：跑全量看完整通过数。
+        run: |
+          pytest \
+            --cov=app \
+            --cov-report=term \
+            --cov-report=html \
+            --cov-report=json \
+            --cov-fail-under=50 \
+            -q \
+            --timeout=120
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: |
+            backend/htmlcov/
+            backend/coverage.json
+          retention-days: 7
+
+      - name: Upload coverage to Codecov (optional)
+        if: github.event_name == 'pull_request'
+        uses: codecov/codecov-action@v4
+        with:
+          directory: backend
+          files: coverage.json
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: 
+
+  typecheck:
+    name: Python Type / Lint
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install flake8 mypy
+
+      - name: Run flake8
+        run: flake8 app/ --count --max-line-length=120 --statistics || true
+
+      - name: Run mypy (type check - informational only)
+        run: mypy app/ --ignore-missing-imports || true
+
+  test-summary:
+    name: Backend Test Summary
+    needs: [test, typecheck]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check all tests passed
+        run: |
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "::warning::Backend unit tests failed or coverage below threshold"
+          fi
+          if [[ "${{ needs.typecheck.result }}" != "success" ]]; then
+            echo "::warning::Lint/type check completed with warnings"
+          fi
+          if [[ "${{ needs.test.result }}" == "success" ]]; then
+            echo "::notice::All backend tests passed!"
+          fi

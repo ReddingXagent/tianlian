@@ -1,0 +1,246 @@
+# TianLian Cloud — 光储充一体化智能运维平台
+
+> 覆盖光伏发电、储能管理、充电桩运维全链路的开源运维管理平台
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Backend](https://img.shields.io/badge/backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![Frontend](https://img.shields.io/badge/frontend-React%2018-61dafb.svg)](https://react.dev/)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+
+**在线演示**：http://8.134.106.166/ （体验账户见下方「演示账户」）
+
+---
+
+## 项目简介
+
+TianLian Cloud 是面向光储充行业的新一代智能运维平台，前后端分离架构，包含 Web 管理后台、FastAPI 后端、移动端三端。核心覆盖设备管理、多协议遥测采集、告警诊断、工单调度、运维自动化（Runbook / 自愈）、运营结算、车队管理、虚拟电厂（VPP）等业务。
+
+**核心能力**：实时监控 · 智能诊断 · 工单调度 · 告警闭环 · 数据分析 · 运营结算 · 虚拟电厂 · 数字孪生
+
+### 功能全景
+
+| 模块 | 说明 |
+|------|------|
+| 设备管理 | 站点 / 设备台账 / 设备协议库 / 网关管理 |
+| 遥测采集 | Modbus / MQTT / DLT645 / IEC104 多协议接入，WebSocket 实时推送 |
+| 智能诊断 | 故障诊断 / 智能诊断 / 预测性维护 / 自愈（Healing） |
+| 运维自动化 | Runbook 编排 / 审批流 / 巡检（InspectionOps）/ 值班（OnCall） |
+| 工单系统 | 工单调度 / 统计 / 远程控制（RemoteControl） |
+| 运营结算 | 订单 / 优惠券 / 积分 / 对账 / 折扣管理 |
+| 能源业务 | 能耗报表 / 能源分析 / VPP 虚拟电厂 / 车队（Fleet） |
+| 可视化 | 数字孪生（three.js）/ 数据大屏（LargeScreen）/ 电子地图 |
+| 平台治理 | RBAC 权限 / 多租户（Tenants）/ 审计日志 / Webhooks / SSL 证书监控 |
+| AI 辅助 | 日志分析 / 维修建议 / 预防性维护（可插拔 LLM 接入） |
+
+## 功能截图
+
+演示环境（`demo` / `demo12345`，只读）实拍，全部为原生界面：
+
+| 板块 | 说明 |
+|------|------|
+| [运维驾驶舱](docs/images/dashboard.png) | 在线设备、今日告警、工单进度、发电与充电量一屏总览 |
+| [站点管理](docs/images/stations.png) | 站点档案、容量、设备挂载与地理分布 |
+| [设备台账](docs/images/devices.png) | 全量设备档案：型号、SN、归属站点、运行状态 |
+| [实时遥测](docs/images/telemetry.png) | 设备实时点位、曲线与批量上报 |
+| [告警中心](docs/images/alarms.png) | 告警列表、级别、确认与关闭闭环 |
+| [工单管理](docs/images/workorders.png) | 创建、派发、接单、验收全流程 |
+| [数字孪生](docs/images/digital-twin.png) | 三维站点还原与交互 |
+| [能源报表](docs/images/energy-report.png) | 发电、储能、充电三类能量流报表 |
+| [运营工作台](docs/images/operate.png) | 订单、结算、优惠券、开票、互联互通 |
+| [数据大屏](docs/images/large-screen.png) | 全屏可视化，适合展厅与指挥中心 |
+
+<details>
+<summary><b>展开查看全部截图</b></summary>
+
+### 运维驾驶舱
+
+<img src="./docs/images/dashboard.png" width="760" alt="运维驾驶舱" />
+
+### 站点管理
+
+<img src="./docs/images/stations.png" width="760" alt="站点管理" />
+
+### 设备台账
+
+<img src="./docs/images/devices.png" width="760" alt="设备台账" />
+
+### 实时遥测
+
+<img src="./docs/images/telemetry.png" width="760" alt="实时遥测" />
+
+### 告警中心
+
+<img src="./docs/images/alarms.png" width="760" alt="告警中心" />
+
+### 工单管理
+
+<img src="./docs/images/workorders.png" width="760" alt="工单管理" />
+
+### 数字孪生
+
+<img src="./docs/images/digital-twin.png" width="760" alt="数字孪生" />
+
+### 能源报表
+
+<img src="./docs/images/energy-report.png" width="760" alt="能源报表" />
+
+### 运营工作台
+
+<img src="./docs/images/operate.png" width="760" alt="运营工作台" />
+
+### 数据大屏
+
+<img src="./docs/images/large-screen.png" width="760" alt="数据大屏" />
+
+</details>
+
+## 可作为独立运维系统使用
+
+天链 Cloud 的**运维管理部分可以独立部署、独立使用**，不需要依赖充电运营、车队结算、虚拟电厂等商业模块。
+
+这意味着：
+
+- **运维团队可以只拿这一套**——设备台账、多协议接入、实时遥测、告警闭环、工单调度、巡检、值班、Runbook 自愈、知识库，一个系统覆盖日常运维全流程
+- **不必为了运维去购买或搭建整套商业化运营平台**，也不要求接入任何第三方收费服务
+- **数据完全自有**——部署在自己的服务器上，设备数据不出内网（配合仓库内置的设备模拟器，没有现场设备也能先跑通全链路）
+- **按需扩展**——需要充电运营、车队管理、VPP 时再启用对应模块，同一个数据库、同一套权限体系，不用迁移
+
+典型场景：企业自建的光伏 / 储能 / 充电场站，交给内部运维团队管理，只需要一套能看设备、能报故障、能派单、能沉淀经验的系统——这就是完整答案。
+
+## 设备模拟器（开箱即用）
+
+没有真实现场设备也能跑通全链路——仓库内置多协议设备模拟器，覆盖光储充主要设备类型：
+
+| 协议 | 模拟对象 |
+|------|----------|
+| Modbus-RTU | 储能逆变器 / PCS / 电表 |
+| MQTT | 直流充电桩（国标协议） |
+| REST | 光伏气象站等 HTTP 设备 |
+| OCPP 1.6J | 充电桩 |
+| DLT645 | 多功能电能表 |
+| IEC104 | 电力远动规约 RTU |
+
+另含**故障注入引擎**（7 类故障场景 + 随机模式）与**批量并发模拟**（100+ 设备同时在线），可直接复现告警、工单、自愈等完整业务流转。
+
+详见 [backend/SIMULATOR_README.md](./backend/SIMULATOR_README.md)
+
+## 技术栈
+
+| 层级 | 技术 |
+|------|------|
+| Web 前端 | React 18 + Vite 5 + TypeScript，Ant Design 5 + ECharts + three.js |
+| 移动端 | React Native（Expo） |
+| 后端 | FastAPI + SQLAlchemy 2 + Pydantic v2，Python 3.10+，Celery 异步任务 |
+| 数据库 | SQLite（开发）/ PostgreSQL（生产），Alembic 迁移 |
+| 缓存/队列 | Redis（可选）：缓存 + Celery broker |
+| 设备接入 | 边缘网关 + 多协议解析器（Modbus / MQTT / DLT645 / IEC104） |
+| 实时推送 | WebSocket（`/ws/v1/`） |
+| 可观测 | Prometheus 指标（`/metrics`）+ Loki 日志 + Grafana 面板 |
+| 部署 | Docker Compose / Nginx，自动化部署脚本 |
+
+## 快速开始
+
+### 环境要求
+
+- Python 3.10+
+- Node.js 18+
+- Docker & Docker Compose（可选，推荐生产部署方式）
+
+### 1. 后端
+
+```bash
+cd backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# 初始化数据（含演示数据与演示账户）
+python seed_data.py
+
+# 启动开发服务
+uvicorn app.main:app --reload --port 8000
+```
+
+API 文档：`http://localhost:8000/docs`
+
+### 2. Web 前端
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+访问 `http://localhost:5173`
+
+### 3. Docker 一键部署
+
+```bash
+cp .env.example .env       # 按需修改配置
+docker compose up -d
+```
+
+## 演示账户
+
+公开演示环境提供只读体验账户，**该账户参数已锁定**（禁止修改密码、资料与删除），可浏览全部只读功能：
+
+| 项目 | 值 |
+|------|-----|
+| 用户名 | `demo` |
+| 密码 | `demo12345` |
+| 角色 | viewer（只读） |
+
+> 演示账户的保护逻辑见 `backend/app/api/v1/users.py` 中的 `ensure_not_demo()`；
+> 种子定义见 `backend/seed_data.py`。生产部署请删除该账户或修改 `DEMO_LOCKED_USERNAME`。
+
+## 项目结构
+
+```
+tianlian-cloud/
+├── backend/                 # FastAPI 后端（60+ API 模块）
+│   ├── app/
+│   │   ├── api/v1/          # REST API 路由
+│   │   ├── core/            # 配置 / 安全 / 缓存 / 限流
+│   │   ├── models/          # SQLAlchemy 数据模型
+│   │   ├── schemas/         # Pydantic 模型
+│   │   ├── services/        # 业务逻辑层
+│   │   ├── gateway/         # IoT 网关（modbus/mqtt/rest）
+│   │   ├── parsers/         # 协议解析器
+│   │   ├── ws/              # WebSocket 路由
+│   │   └── tasks/           # Celery 异步任务
+│   ├── alembic/             # 数据库迁移
+│   └── tests/               # 测试套件
+├── frontend/                # React Web 管理后台
+├── mobile/                  # React Native 移动端（Expo）
+├── edge-gateway/            # 边缘网关（独立进程）
+├── docs/                    # 架构与方案文档
+├── deploy/                  # 部署脚本与配置
+├── grafana/ loki/ alertmanager/  # 可观测栈配置
+└── docker-compose.yml       # 一键编排
+```
+
+## 文档
+
+- **[功能板块总览](./docs/FEATURES.md)** — 全部 11 个业务域、70+ 页面、100+ API 模块索引
+- [系统架构](./ARCHITECTURE.md)
+- [部署指南](./DEPLOYMENT.md)
+- [用户手册](./USER_MANUAL.md)
+- [接口规格](./SPEC.md)
+- [更新日志](./CHANGELOG.md)
+
+## 安全说明
+
+- 全局认证：JWT Bearer + 路由白名单，C 端 / 运营端双 token 体系（aud 隔离）
+- 防护机制：登录失败锁定、验证码防爆破、CSRF、安全响应头、请求限流、审计日志
+- 上线前请务必：修改默认账户密码、更换 JWT 密钥、配置 HTTPS、删除演示账户
+
+## 贡献
+
+欢迎 Issue 与 PR。提交前请运行测试套件：
+
+```bash
+cd backend && python -m pytest
+```
+
+## 许可证
+
+[MIT](./LICENSE)

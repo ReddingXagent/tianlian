@@ -1,0 +1,169 @@
+# DLT645-2007 多功能电能表 (威胜/正泰)
+# 国网/南网标准电表协议
+device_type: dlt645_meter
+manufacturer: Wasion
+model: DTSD341
+category: meter
+protocol: dlt645
+connection:
+  port: /dev/ttyUSB1
+  baudrate: 2400
+  data_bits: 8
+  parity: even
+  stop_bits: 1
+  meter_address: "000101000001"
+  timeout_ms: 5000
+  retry_count: 3
+# DLT645 数据标识 (DI) 编码说明:
+#   DI0-DI3 共4字节，格式: D3 D2 D1 D0
+#   D3: 功能码 (0x00=电能量, 0x02=变量, 0x04=参变量, 0x08=事件记录, 0x0A=负荷记录)
+#   D2: 标识 (具体含义见协议)
+#   D1-D0: 扩展标识
+data_points:
+  # === 正向有功电能 ===
+  - di_code: "00000000"
+    name: positive_active_energy_total
+    unit: kWh
+    scale: 0.01
+    description: 组合有功总电能
+  - di_code: "00010000"
+    name: positive_active_energy_t1
+    unit: kWh
+    scale: 0.01
+    description: 正向有功费率1(尖)
+  - di_code: "00020000"
+    name: positive_active_energy_t2
+    unit: kWh
+    scale: 0.01
+    description: 正向有功费率2(峰)
+  - di_code: "00030000"
+    name: positive_active_energy_t3
+    unit: kWh
+    scale: 0.01
+    description: 正向有功费率3(平)
+  - di_code: "00040000"
+    name: positive_active_energy_t4
+    unit: kWh
+    scale: 0.01
+    description: 正向有功费率4(谷)
+  # === 反向有功电能 ===
+  - di_code: "00050000"
+    name: reverse_active_energy_total
+    unit: kWh
+    scale: 0.01
+    description: 反向有功总电能
+  - di_code: "00060000"
+    name: reverse_active_energy_t1
+    unit: kWh
+    scale: 0.01
+    description: 反向有功费率1(尖)
+  - di_code: "00070000"
+    name: reverse_active_energy_t2
+    unit: kWh
+    scale: 0.01
+    description: 反向有功费率2(峰)
+  - di_code: "00080000"
+    name: reverse_active_energy_t3
+    unit: kWh
+    scale: 0.01
+    description: 反向有功费率3(平)
+  - di_code: "00090000"
+    name: reverse_active_energy_t4
+    unit: kWh
+    scale: 0.01
+    description: 反向有功费率4(谷)
+  # === 电压 ===
+  - di_code: "02010100"
+    name: voltage_a
+    unit: V
+    scale: 0.1
+    description: A相电压
+  - di_code: "02010200"
+    name: voltage_b
+    unit: V
+    scale: 0.1
+    description: B相电压
+  - di_code: "02010300"
+    name: voltage_c
+    unit: V
+    scale: 0.1
+    description: C相电压
+  # === 电流 ===
+  - di_code: "02020100"
+    name: current_a
+    unit: A
+    scale: 0.001
+    description: A相电流
+  - di_code: "02020200"
+    name: current_b
+    unit: A
+    scale: 0.001
+    description: B相电流
+  - di_code: "02020300"
+    name: current_c
+    unit: A
+    scale: 0.001
+    description: C相电流
+  # === 功率 ===
+  - di_code: "02030000"
+    name: active_power_total
+    unit: kW
+    scale: 0.0001
+    description: 总有功功率
+  - di_code: "02030100"
+    name: active_power_a
+    unit: kW
+    scale: 0.0001
+    description: A相有功功率
+  - di_code: "02030200"
+    name: active_power_b
+    unit: kW
+    scale: 0.0001
+    description: B相有功功率
+  - di_code: "02030300"
+    name: active_power_c
+    unit: kW
+    scale: 0.0001
+    description: C相有功功率
+  - di_code: "02040000"
+    name: reactive_power_total
+    unit: kvar
+    scale: 0.0001
+    description: 总无功功率
+  # === 功率因数 ===
+  - di_code: "02060000"
+    name: power_factor_total
+    unit: ""
+    scale: 0.001
+    description: 总功率因数
+  - di_code: "02060100"
+    name: power_factor_a
+    unit: ""
+    scale: 0.001
+    description: A相功率因数
+  - di_code: "02060200"
+    name: power_factor_b
+    unit: ""
+    scale: 0.001
+    description: B相功率因数
+  - di_code: "02060300"
+    name: power_factor_c
+    unit: ""
+    scale: 0.001
+    description: C相功率因数
+  # === 其他 ===
+  - di_code: "02800002"
+    name: grid_frequency
+    unit: Hz
+    scale: 0.01
+    description: 电网频率
+  - di_code: "04000501"
+    name: demand_active_power
+    unit: kW
+    scale: 0.0001
+    description: 当前有功需量
+  - di_code: "02070100"
+    name: phase_angle_a
+    unit: "°"
+    scale: 0.1
+    description: A相电压电流相位角

@@ -1,0 +1,60 @@
+# ─── 天链V3 Loki 日志聚合配置 ───
+# 单二进制模式 (all-in-one)
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+common:
+  path_prefix: /data/loki
+  storage:
+    filesystem:
+      chunks_directory: /data/loki/chunks
+      rules_directory: /data/loki/rules
+  replication_factor: 1
+  ring:
+    instance_addr: 0.0.0.0
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  boltdb:
+    directory: /data/loki/index
+
+limits_config:
+  ingestion_rate_mb: 10
+  ingestion_burst_size_mb: 20
+  max_entries_limit_per_query: 5000
+
+compactor:
+  working_directory: /data/loki/compactor
+  retention_enabled: true
+  retention_delete_delay: 2h
+
+table_manager:
+  retention_deletes_enabled: true
+  retention_period: 720h  # 30天
+
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /data/loki/rules
+  rule_path: /tmp/loki/rules
+  alertmanager_url: http://alertmanager:9093
+  enable_alertmanager_v2: true
+  ring:
+    kvstore:
+      store: inmemory

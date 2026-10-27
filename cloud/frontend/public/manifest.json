@@ -1,0 +1,27 @@
+{
+  "name": "天链光储充运维系统 V3",
+  "short_name": "天链V3",
+  "description": "天链V3 运维管理系统 - 移动端H5响应式离线缓存",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1918",
+  "theme_color": "#ff5a36",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
