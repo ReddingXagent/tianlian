@@ -1,0 +1,20 @@
+node_modules/
+.expo/
+dist/
+coverage/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+.DS_Store
+# Understand Anything skill artifacts
+.ua/
+
+# local env overrides (EXPO_PUBLIC_* dev URLs)
+.env
+.env.*
+!.env.example

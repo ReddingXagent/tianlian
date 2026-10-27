@@ -1,0 +1,50 @@
+import { renderHook, act } from '@testing-library/react-native';
+import { useChargingPolling } from '../useChargingPolling';
+import { chargingApi } from '../../services/api';
+
+// Mock useAppLifecycle
+jest.mock('../useAppLifecycle', () => ({
+  useAppLifecycle: () => ({
+    appState: 'active',
+    isForeground: true,
+    isConnected: true,
+  }),
+}));
+
+jest.mock('../../services/api', () => ({
+  chargingApi: {
+    getStatus: jest.fn(),
+    getActiveOrder: jest.fn(),
+  },
+}));
+
+describe('useChargingPolling.ext3 — L76 non-Error throw in fetchStatus', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  // L76: `if (err instanceof Error)` false branch — non-Error throw
+  it('sets fallback error message when fetchStatus throws non-Error', async () => {
+    (chargingApi.getStatus as jest.Mock).mockRejectedValue('network down');
+
+    const { result, unmount } = renderHook(() =>
+      useChargingPolling({ orderId: 1 }),
+    );
+
+    await act(async () => {
+      // Flush the microtask queue to let the rejected promise settle
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(result.current.error).toBe('获取充电状态失败');
+    expect(result.current.loading).toBe(false);
+
+    unmount();
+  });
+});
