@@ -1,0 +1,126 @@
+# 天链V3 边缘网关 — GitHub Actions CI
+# 触发: push(main) + PR
+# 阶段: lint → test(cov) ‖ docker镜像构建+import smoke
+# 运行时: Python 3.10 (匹配Pi生产环境)
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint + Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15   # F193模式: 挂死不吃满GitHub默认6h runner
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ruff lint
+        run: ruff check . --output-format=github
+
+      - name: Compile check
+        run: python -m compileall main.py config.py adapters/ api/ models/ storage/ -q
+
+      - name: Deploy names guard (F236)
+        run: bash scripts/check-deploy-names.sh
+
+      - name: Deploy endpoints guard (F243)
+        run: bash scripts/check-deploy-endpoints.sh
+
+      - name: API port guard (F249)
+        run: bash scripts/check-api-port.sh
+
+      - name: Env keys guard (F255)
+        run: bash scripts/check-env-keys.sh
+
+      - name: Log paths guard (F261)
+        run: bash scripts/check-log-paths.sh
+
+      - name: Data paths guard (F267)
+        run: bash scripts/check-data-paths.sh
+
+      - name: Entry file guard (F273)
+        run: bash scripts/check-entry-file.sh
+
+      - name: Health probes guard (F280)
+        run: bash scripts/check-health-probes.sh
+
+      - name: Python version guard (F287)
+        run: bash scripts/check-python-version.sh
+
+      - name: Template render guard (F295)
+        run: bash scripts/check-template-render.sh
+
+      - name: Backup restore guard (F301)
+        run: bash scripts/check-backup-restore.sh
+
+      - name: Pid file guard (F308)
+        run: bash scripts/check-pid-file.sh
+
+      - name: Start interpreter guard (F314)
+        run: bash scripts/check-start-interpreter.sh
+
+      - name: Env file guard (F326)
+        run: bash scripts/check-env-file.sh
+
+# F1232: coverage门禁同步CI — 与Makefile make coverage同参数(生产模块范围+fail-under=100)
+      - name: Pytest with coverage
+        run: |
+          pip install pytest-cov
+          pytest -q --timeout=120 --cov=main.py --cov=config.py --cov=db_migration.py --cov=adapters --cov=api --cov=models --cov=storage --cov-fail-under=100 --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 7
+
+  docker:
+    name: Docker image build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20   # F193模式: 冷缓存docker build留足余量
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 只构建不推送：验证 Dockerfile/依赖可成功成镜像（GHA缓存加速）
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: tianlian-edge-gateway:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 冒烟: 容器内无环境变量纯 import（main.py 有 __main__ 守卫，不启服务）
+      - name: Smoke test (import in container)
+        run: docker run --rm tianlian-edge-gateway:ci python3 -c "import main"

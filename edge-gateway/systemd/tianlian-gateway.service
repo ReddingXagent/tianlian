@@ -1,0 +1,27 @@
+[Unit]
+Description=TianLian V3 Edge Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# 路径为Pi默认值; make systemd-install 安装时sed渲染为当前仓库目录(F211)
+Type=simple
+User=tl
+WorkingDirectory=/home/tl/tianlian-edge-gateway-v3
+EnvironmentFile=/home/tl/tianlian-edge-gateway-v3/.env
+ExecStart=/usr/bin/python3 main.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# 安全加固
+NoNewPrivileges=true
+ProtectSystem=full
+# 注意: 禁止 ProtectHome=read-only! SQLite DB(data/gateway.db)在 /home 下,
+# 只读 /home 会导致 "attempt to write a readonly database" 全面写库失败
+ProtectHome=false
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

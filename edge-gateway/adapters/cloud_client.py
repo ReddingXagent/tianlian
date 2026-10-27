@@ -1,0 +1,485 @@
+"""Cloud API Client — 边缘网关→云端对接 (V3 API对齐版)
+
+对接云端天链平台：
+- Pod注册/心跳 (pod/register, pod/heartbeat) — 无需认证
+- 遥测数据批量上报 (telemetry/batch-report) — Bearer token认证
+- 告警上报 (alarms) — Bearer token认证
+- 失败重试（指数退避）
+- 断网时自动降级写入本地缓存
+
+API对齐日期: 2026-07-06 (对齐云端334端点真实OpenAPI schema)
+"""
+
+import asyncio
+import contextlib
+import gzip
+import json
+import logging
+from typing import TYPE_CHECKING, Optional
+
+import httpx
+
+from config import CloudConfig
+from models import TelemetryPoint
+
+if TYPE_CHECKING:
+    from storage.cache import TelemetryCache
+
+logger = logging.getLogger(__name__)
+
+
+def _to_int_id(device_id) -> int:
+    """将设备ID转为云端要求的整数ID"""
+    try:
+        return int(device_id)
+    except (ValueError, TypeError):
+        return 1  # 默认ID
+
+
+class CloudClient:
+    """云端API客户端 (V3对齐)
+
+    负责将网关(Pod)数据推送到云端服务器。
+    - 失败时自动重试（指数退避，最多3次）
+    - 重试耗尽后降级写入本地缓存（如有）
+    - 不影响网关主流程
+    """
+
+    MAX_RETRIES = 3
+    RETRY_BASE_DELAY = 0.5  # seconds, exponential backoff base
+
+    def __init__(self, config: CloudConfig, gateway_id: str,
+                 cache: Optional["TelemetryCache"] = None):
+        self.config = config
+        self.gateway_id = gateway_id  # 对应云端的 pod_id
+        self.region_id = getattr(config, 'region_id', 'default')
+        self.cache = cache
+        self._token: str | None = None
+        self._csrf_token: str = ""
+        self._registered = False
+        self._gzip_disabled = False  # F-gzip 自适应: 服务端拒绝压缩后本会话关闭
+        self._heartbeat_task: asyncio.Task | None = None
+        self._sync_task: asyncio.Task | None = None
+        self._client: httpx.AsyncClient | None = None
+
+    @property
+    def pod_id(self) -> str:
+        """兼容属性: pod_id = gateway_id"""
+        return self.gateway_id
+
+    async def start(self) -> None:
+        """启动云端连接"""
+        self._client = httpx.AsyncClient(
+            base_url=self.config.base_url,
+            timeout=httpx.Timeout(connect=5.0, read=10.0, write=5.0, pool=2.0),
+            limits=httpx.Limits(
+                max_connections=20,
+                max_keepalive_connections=10,
+                keepalive_expiry=30,
+            ),
+        )
+
+        # 获取 CSRF token（云端 Django 要求）
+        await self._fetch_csrf_token()
+
+        # 设置认证 token
+        if self.config.token:
+            self._token = self.config.token
+
+        if self.config.register_on_startup:
+            await self.register()
+
+        if self.config.heartbeat_interval > 0:
+            self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
+
+        # 启动缓存恢复同步循环
+        if self.cache:
+            self._sync_task = asyncio.create_task(self._cache_sync_loop())
+
+        logger.info("CloudClient started, base_url=%s, pod_id=%s",
+                     self.config.base_url, self.pod_id)
+
+    async def _fetch_csrf_token(self) -> None:
+        """从云端获取 CSRF token（Django CSRF 中间件要求）"""
+        try:
+            r = await self._client.get("/api/v1/health")
+            self._csrf_token = r.cookies.get("tianlian_csrf_token", "")
+            if self._csrf_token:
+                logger.debug("CSRF token acquired")
+        except Exception:
+            self._csrf_token = ""
+
+    async def stop(self) -> None:
+        """停止云端连接"""
+        if self._heartbeat_task:
+            self._heartbeat_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self._heartbeat_task
+
+        if hasattr(self, '_sync_task') and self._sync_task:
+            self._sync_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self._sync_task
+
+        if self.config.deregister_on_shutdown:
+            await self.deregister()
+
+        if self._client:
+            await self._client.aclose()
+
+        logger.info("CloudClient stopped")
+
+    # ============================================================
+    # Pod 注册/注销/心跳 (对齐 V3 pod/ 系列端点)
+    # ============================================================
+
+    async def register(self) -> bool:
+        """Pod注册 → POST /api/v1/pod/register (无需认证)"""
+        try:
+            # 云端单Pod模式：如果pod-01已存在，尝试心跳确认
+            r = await self._client.get("/api/v1/pod/list")
+            if r.status_code == 200:
+                data = r.json()
+                pods = data.get("pods", data.get("data", {}).get("pods", []))
+                for pod in pods:
+                    if pod.get("pod_id") == self.pod_id:
+                        self._registered = True
+                        logger.info("Cloud pod already registered: %s", self.pod_id)
+                        return True
+
+            # 尝试注册新Pod
+            reg_payload: dict = {
+                "pod_id": self.pod_id,
+                "region_id": self.region_id,
+                "endpoint": f"http://{self._get_local_ip()}:8080",
+                "version": "3.0.0",
+            }
+            # pod_secret 非空时加入 payload (向后兼容: 空值不影响现有行为)
+            if self.config.pod_secret:
+                reg_payload["pod_secret"] = self.config.pod_secret
+            r = await self._client.post("/api/v1/pod/register", json=reg_payload)
+            if r.status_code == 200:
+                self._registered = True
+                logger.info("Cloud pod registered: %s", self.pod_id)
+                return True
+            # 单Pod模式可能不支持注册，确认已有pod即可
+            if "单Pod模式" in r.text or "not supported" in r.text.lower():
+                logger.info("Cloud in single-pod mode, pod registration handled by cloud")
+                self._registered = True
+                return True
+            logger.warning("Cloud register failed: %d %s", r.status_code, r.text[:200])
+        except Exception as e:
+            logger.warning("Cloud register error: %s", e)
+        return False
+
+    def _get_local_ip(self) -> str:
+        """获取本机局域网IP"""
+        import socket
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return "192.168.31.10"
+
+    async def deregister(self) -> None:
+        """Pod注销 — 云端单Pod模式无需注销"""
+        if not self._registered:
+            return
+        self._registered = False
+        logger.info("Cloud pod unregistered: %s", self.pod_id)
+
+    # ============================================================
+    # 遥测推送 (对齐 V3 telemetry/batch-report 端点)
+    # ============================================================
+
+    async def push_telemetry_batch(self, points: list[TelemetryPoint]) -> bool:
+        """批量推送遥测数据到云端 → POST /api/v1/telemetry/batch"""
+        if not self._client or not points:
+            return False
+
+        records = [p.to_api_payload() for p in points]
+
+        payload = {
+            "records": records,
+            "pod_id": self.pod_id,
+            "region_id": self.region_id,
+        }
+
+        ok = await self._post_with_retry(
+            "/api/v1/telemetry/batch-report", payload, "telemetry_push"
+        )
+        if ok:
+            logger.debug("Cloud telemetry pushed: %d points", len(points))
+            return True
+
+        # 云推送失败，主动写入本地缓存
+        if self.cache:
+            self.cache.cache_telemetry_batch(points)
+            logger.info("Cloud telemetry push failed, %d points cached locally", len(points))
+        else:
+            logger.warning("Cloud telemetry push failed, no cache available")
+        return False
+
+    # ============================================================
+    # 告警推送 (对齐 V3 alarms 端点，逐条POST)
+    # ============================================================
+
+    async def push_alarm(self, device_id: str, alarm_type: str,
+                          severity: str, message: str) -> bool:
+        """推送单个告警 → POST /api/v1/alarms
+
+        云端V3字段: device_id(int), alarm_type, content, level
+        """
+        if not self._client:
+            return False
+
+        payload = {
+            "device_id": _to_int_id(device_id),
+            "alarm_type": alarm_type,
+            "content": message,
+            "level": severity,
+        }
+
+        ok = await self._post_with_retry(
+            "/api/v1/alarms", payload, "alarm_push"
+        )
+        if ok:
+            logger.info("Cloud alarm pushed: %s/%s", device_id, alarm_type)
+            return True
+
+        # 降级缓存
+        if self.cache:
+            self.cache.cache_alarm(device_id, {
+                "device_id": device_id,
+                "alarm_type": alarm_type,
+                "severity": severity,
+                "message": message,
+            })
+        return False
+
+    async def push_alarm_batch(self, alarms: list[dict]) -> bool:
+        """批量推送告警 → 逐条 POST /api/v1/alarms (云端无batch端点)
+
+        Returns:
+            True if ALL pushed, False if any failed
+        """
+        if not self._client or not alarms:
+            return False
+
+        all_ok = True
+        for a in alarms:
+            payload = {
+                "device_id": _to_int_id(a.get("device_id", "unknown")),
+                "alarm_type": a.get("alarm_type", "unknown"),
+                "content": a.get("message", ""),
+                "level": a.get("severity", "info"),
+            }
+            ok = await self._post_with_retry(
+                "/api/v1/alarms", payload, "alarm_batch_push"
+            )
+            if ok:
+                logger.debug("Cloud alarm pushed: %s/%s",
+                             a.get("device_id"), a.get("alarm_type"))
+            else:
+                all_ok = False
+                if self.cache:
+                    self.cache.cache_alarm(a.get("device_id", "unknown"), a)
+                logger.warning("Cloud alarm push failed, cached locally")
+
+        if not all_ok and not self.cache:
+            logger.warning("Cloud alarm batch push partially failed, no cache available")
+        return all_ok
+
+    # ============================================================
+    # 内部重试机制
+    # ============================================================
+
+    async def _post_with_retry(self, path: str, payload: dict,
+                                 op_name: str) -> bool:
+        """带指数退避重试的POST请求
+
+        F-gzip: payload 序列化后 >= config.compress_threshold 且开启压缩时，
+        发送 gzip 压缩 body + Content-Encoding: gzip；若服务端以 4xx 拒绝
+        压缩请求（如真云暂不支持 gzip 请求体），本会话永久关闭压缩并
+        立即明文重试一次（自适应降级，无需改配置）。
+        """
+        last_error = None
+        headers = {"Content-Type": "application/json"}
+        if self._token:
+            headers["Authorization"] = f"Bearer {self._token}"
+        if hasattr(self, "_csrf_token") and self._csrf_token:
+            headers["X-CSRF-Token"] = self._csrf_token
+            headers["Cookie"] = f"tianlian_csrf_token={self._csrf_token}"
+            headers["Referer"] = self.config.base_url + "/"
+
+        body = json.dumps(payload).encode("utf-8")
+        use_gzip = (
+            getattr(self.config, "compress_enabled", False)
+            and not self._gzip_disabled
+            and len(body) >= getattr(self.config, "compress_threshold", 1024)
+        )
+        if use_gzip:
+            headers["Content-Encoding"] = "gzip"
+            body = gzip.compress(body)
+
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                r = await self._client.post(path, content=body, headers=headers)
+                if r.status_code == 200:
+                    return True
+                # 4xx 不重试（客户端错误）；例外: gzip 被拒 → 关压缩立即明文重试
+                if 400 <= r.status_code < 500:
+                    if use_gzip:
+                        logger.warning("%s: gzip rejected (%d), disabling compression, retry plain",
+                                       op_name, r.status_code)
+                        self._gzip_disabled = True
+                        use_gzip = False
+                        headers.pop("Content-Encoding", None)
+                        body = json.dumps(payload).encode("utf-8")
+                        continue
+                    logger.warning("%s rejected: %d %s", op_name, r.status_code, r.text[:200])
+                    return False
+                # 5xx 可重试
+                last_error = f"HTTP {r.status_code}"
+            except (httpx.ConnectError, httpx.TimeoutException,
+                    httpx.RemoteProtocolError) as e:
+                last_error = str(e)
+            except Exception as e:
+                last_error = str(e)
+
+            # 指数退避（最后一次不等待）
+            if attempt < self.MAX_RETRIES - 1:
+                delay = self.RETRY_BASE_DELAY * (2 ** attempt)
+                logger.debug("%s retry %d/%d after %.1fs (%s)",
+                             op_name, attempt + 1, self.MAX_RETRIES, delay, last_error)
+                await asyncio.sleep(delay)
+
+        logger.warning("%s failed after %d retries: %s",
+                       op_name, self.MAX_RETRIES, last_error)
+        return False
+
+    # ============================================================
+    # 心跳循环
+    # ============================================================
+
+    async def _heartbeat_loop(self) -> None:
+        """心跳循环 → POST /api/v1/pod/heartbeat (无需认证)"""
+        while True:
+            await asyncio.sleep(self.config.heartbeat_interval)
+            try:
+                hb_payload: dict = {
+                    "pod_id": self.pod_id,
+                    "load": {
+                        "gateway_id": self.gateway_id,
+                        "region_id": self.region_id,
+                    },
+                }
+                # pod_secret 非空时加入 payload (向后兼容: 空值不影响现有行为)
+                if self.config.pod_secret:
+                    hb_payload["pod_secret"] = self.config.pod_secret
+                r = await self._client.post(
+                    "/api/v1/pod/heartbeat",
+                    json=hb_payload,
+                )
+                if r.status_code != 200:
+                    logger.warning("Cloud heartbeat failed: %d", r.status_code)
+                else:
+                    logger.debug("Cloud heartbeat OK: pod_id=%s", self.pod_id)
+            except Exception as e:
+                logger.debug("Cloud heartbeat error: %s", e)
+
+    # ============================================================
+    # 缓存恢复同步循环
+    # ============================================================
+
+    async def _cache_sync_loop(self) -> None:
+        """缓存恢复同步循环 — 网络恢复后自动上传积压数据"""
+        idle_interval = 60
+        active_interval = 5
+        batch_size = 100
+        consecutive_idle = 0
+
+        while True:
+            try:
+                alarm_synced = await self._sync_cached_alarms(batch_size)
+                if alarm_synced == 0:
+                    tel_synced = await self._sync_cached_telemetry(batch_size)
+                else:
+                    tel_synced = 0
+
+                total_synced = alarm_synced + tel_synced
+                if total_synced > 0:
+                    consecutive_idle = 0
+                    await asyncio.sleep(active_interval)
+                else:
+                    consecutive_idle += 1
+                    interval = min(idle_interval, active_interval * (2 ** consecutive_idle))
+                    await asyncio.sleep(interval)
+            except Exception as e:
+                logger.debug("Cache sync loop error: %s", e)
+                await asyncio.sleep(active_interval)
+
+    async def _sync_cached_telemetry(self, batch_size: int = 50) -> int:
+        """同步积压的遥测缓存数据到云端 → POST /api/v1/telemetry/batch"""
+        if not self.cache or not self._client:
+            return 0
+        unsynced = self.cache.get_cloud_unsynced(limit=batch_size)
+        if not unsynced:
+            return 0
+
+        ids = [item["id"] for item in unsynced]
+        records = [item["payload"] for item in unsynced]
+
+        payload = {
+            "records": records,
+            "pod_id": self.pod_id,
+            "region_id": self.region_id,
+        }
+
+        ok = await self._post_with_retry(
+            "/api/v1/telemetry/batch-report", payload, "cache_sync_telemetry"
+        )
+        if ok:
+            self.cache.mark_cloud_synced(ids)
+            logger.info("Cache sync: %d telemetry points synced", len(ids))
+            return len(ids)
+        else:
+            self.cache.increment_retry(ids)
+            return 0
+
+    async def _sync_cached_alarms(self, batch_size: int = 50) -> int:
+        """同步积压的告警缓存 → 逐条 POST /api/v1/alarms"""
+        if not self.cache or not self._client:
+            return 0
+        unsynced = self.cache.get_cloud_unsynced_alarms(limit=batch_size)
+        if not unsynced:
+            return 0
+
+        synced_count = 0
+        for item in unsynced:
+            a = item["payload"]
+            payload = {
+                "device_id": _to_int_id(a.get("device_id", "unknown")),
+                "alarm_type": a.get("alarm_type", "unknown"),
+                "content": a.get("message", ""),
+                "level": a.get("severity", "info"),
+            }
+            ok = await self._post_with_retry(
+                "/api/v1/alarms", payload, "cache_sync_alarms"
+            )
+            if ok:
+                synced_count += 1
+
+        if synced_count > 0:
+            synced_ids = [item["id"] for item in unsynced[:synced_count]]
+            self.cache.mark_alarms_cloud_synced(synced_ids)
+            logger.info("Cache sync: %d alarms synced", synced_count)
+
+        if synced_count < len(unsynced):
+            failed_ids = [item["id"] for item in unsynced[synced_count:]]
+            self.cache.increment_alarm_retry(failed_ids)
+
+        return synced_count

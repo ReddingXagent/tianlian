@@ -1,0 +1,32 @@
+# 天链边缘网关 — ruff lint 门控（2026-07-31 建立）
+# 基线: 首次扫描 283 errors；逐轮收窄，F841/UP035/UP042 已清零(07-31)
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+extend-exclude = [".venv-build", ".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E4", "E7", "E9",   # pycodestyle 核心
+    "F",                 # pyflakes
+    "I",                 # import 排序
+    "UP",                # pyupgrade（py310 基线）
+    "B",                 # flake8-bugbear
+    "PIE", "PLR1711",    # 杂项质量
+    "RUF",               # ruff 专属
+]
+ignore = [
+    "BLE001",   # 债务: 40处 blind-except，需逐步收窄异常类型
+    "E402",     # 债务: 27处 import不在顶部（main.py sys.path注入 + 测试文件patch后import，需人工确认）
+    "RUF001", "RUF002", "RUF003",  # 中文注释/文档的全角标点，非歧义误报
+    "UP017",   # datetime.UTC 是 Py3.11+, Pi 运行 Py3.10
+]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI 依赖注入模式: Depends()/Query() 作默认参数是惯用法
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "fastapi.Header"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # starlette deprecation 已移除，空配置
+]
