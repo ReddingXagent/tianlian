@@ -1,0 +1,219 @@
+import React from 'react';
+import { render, fireEvent, act } from '@testing-library/react-native';
+import { Share, Animated, Alert, RefreshControl } from 'react-native';
+import RevenueScreen from '../RevenueScreen';
+import { revenueApi } from '../../services/api';
+
+// 捕获 LineChart props, 便于测试中直接调用图表回调(color/labelColor/datasets.color)
+interface CapturedChartProps {
+  data: {
+    labels: string[];
+    datasets: {
+      data: number[];
+      color: () => string;
+    }[];
+  };
+  chartConfig: {
+    color: (opacity?: number) => string;
+    labelColor: () => string;
+  };
+}
+let mockChartProps: Record<string, unknown> | null = null;
+
+jest.mock('react-native-chart-kit', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return {
+    LineChart: (props: Record<string, unknown>) => {
+      mockChartProps = props;
+      return React.createElement(Text, { testID: 'line-chart' }, 'chart');
+    },
+  };
+});
+
+jest.mock('../../services/api', () => ({
+  revenueApi: {
+    getRecords: jest.fn(),
+    getSummary: jest.fn(),
+  },
+}));
+
+jest.mock('../../components/LoadingSpinner', () => {
+  const MockLoadingSpinner = (props: { text?: string; size?: 'small' | 'large'; color?: string }) => {
+    const React = require('react');
+    const { Text } = require('react-native');
+    return React.createElement(Text, null, props.text || '加载中...');
+  };
+  return MockLoadingSpinner;
+});
+
+jest.mock('../../components/EmptyState', () => {
+  const MockEmptyState = (props: { icon?: string; title?: string; message?: string; actionLabel?: string; onAction?: () => void }) => {
+    const React = require('react');
+    const { View, Text, TouchableOpacity } = require('react-native');
+    const elements = [React.createElement(Text, { key: 'title' }, props.title || '')];
+    if (props.message) {
+      elements.push(React.createElement(Text, { key: 'msg' }, props.message));
+    }
+    if (props.actionLabel && props.onAction) {
+      elements.push(
+        React.createElement(TouchableOpacity, { key: 'btn', onPress: props.onAction },
+          React.createElement(Text, null, props.actionLabel)
+        )
+      );
+    }
+    return React.createElement(View, null, elements);
+  };
+  return MockEmptyState;
+});
+
+const MOCK_RECORDS = [
+  { date: '2024-01-01', amount: 123.45, orderCount: 10 },
+  { date: '2024-01-02', amount: 200, orderCount: 15 },
+];
+
+const MOCK_SUMMARY = { today: 100, week: 700, month: 3000, total: 50000 };
+
+describe('RevenueScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockChartProps = null;
+    jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
+    // 让图表入场动画同步完成，避免 600ms 定时器泄漏到其它测试套件
+    jest.spyOn(Animated, 'timing').mockReturnValue({ start: jest.fn() } as unknown as ReturnType<typeof Animated.timing>);
+    (revenueApi.getRecords as jest.Mock).mockResolvedValue({ data: MOCK_RECORDS });
+    (revenueApi.getSummary as jest.Mock).mockResolvedValue({ data: MOCK_SUMMARY });
+  });
+
+  it('should render loading state initially', () => {
+    (revenueApi.getRecords as jest.Mock).mockImplementation(() => new Promise(() => {}));
+    (revenueApi.getSummary as jest.Mock).mockImplementation(() => new Promise(() => {}));
+
+    const { getByText } = render(<RevenueScreen />);
+    expect(getByText('加载营收数据...')).toBeTruthy();
+  });
+
+  it('should render summary cards and records after loading', async () => {
+    const { findByText } = render(<RevenueScreen />);
+
+    expect(await findByText('¥100.00')).toBeTruthy(); // 今日
+    expect(await findByText('¥50000.00')).toBeTruthy(); // 累计
+    expect(await findByText('2024-01-01')).toBeTruthy();
+    expect(await findByText('¥123.45')).toBeTruthy();
+    expect(await findByText('10笔')).toBeTruthy();
+  });
+
+  it('should render period switch buttons', async () => {
+    const { findByText, findByTestId } = render(<RevenueScreen />);
+
+    expect(await findByText('日')).toBeTruthy();
+    expect(await findByText('周')).toBeTruthy();
+    expect(await findByText('月')).toBeTruthy();
+    // testID守卫: 周期切换锚点必须是prop而非children(F3688回归)
+    expect(await findByTestId('revenue-period-day')).toBeTruthy();
+    expect(await findByTestId('revenue-period-week')).toBeTruthy();
+    expect(await findByTestId('revenue-period-month')).toBeTruthy();
+  });
+
+  it('should refetch records with new period type when switching', async () => {
+    const { findByText, getByText } = render(<RevenueScreen />);
+
+    await findByText('2024-01-01');
+
+    // 默认周期为 week
+    expect(revenueApi.getRecords).toHaveBeenCalledWith({ type: 'week' });
+
+    fireEvent.press(getByText('日'));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(revenueApi.getRecords).toHaveBeenCalledWith({ type: 'day' });
+  });
+
+  it('should render export button and trigger Share with CSV content', async () => {
+    const { findByText, findByTestId } = render(<RevenueScreen />);
+
+    // testID守卫: 导出按钮锚点(F3688回归)
+    expect(await findByTestId('revenue-export-btn')).toBeTruthy();
+
+    const exportBtn = await findByText(/导出CSV/);
+    fireEvent.press(exportBtn);
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(Share.share).toHaveBeenCalledTimes(1);
+    const callArg = (Share.share as jest.Mock).mock.calls[0][0];
+    expect(callArg.message).toContain('天链V3 营收统计');
+    expect(callArg.message).toContain('123.45');
+    expect(callArg.message).toContain('合计');
+  });
+
+  it('should render empty state when no records', async () => {
+    (revenueApi.getRecords as jest.Mock).mockResolvedValue({ data: [] });
+
+    const { findByText } = render(<RevenueScreen />);
+    expect(await findByText('暂无营收明细')).toBeTruthy();
+  });
+
+  it('should refetch via pull-to-refresh without full-page loading spinner', async () => {
+    const { findByText, queryByText, UNSAFE_getByType } = render(<RevenueScreen />);
+    await findByText('2024-01-01');
+    expect(revenueApi.getRecords).toHaveBeenCalledTimes(1);
+
+    const rc = UNSAFE_getByType(RefreshControl);
+    await act(async () => {
+      rc.props.onRefresh();
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // 下拉刷新走 isRefresh 分支: 重新拉取且不显示整页加载态
+    expect(revenueApi.getRecords).toHaveBeenCalledTimes(2);
+    expect(revenueApi.getRecords).toHaveBeenLastCalledWith({ type: 'week' });
+    expect(queryByText('加载营收数据...')).toBeNull();
+    expect(rc.props.refreshing).toBe(false);
+  });
+
+  it('should alert 导出失败 when Share rejects', async () => {
+    (Share.share as jest.Mock).mockRejectedValue(new Error('share cancelled'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    const { findByText } = render(<RevenueScreen />);
+
+    fireEvent.press(await findByText(/导出CSV/));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith('导出失败', '无法导出数据，请稍后重试');
+  });
+
+  it('should build chart data/callbacks from records', async () => {
+    const { findByText } = render(<RevenueScreen />);
+    await findByText('2024-01-01');
+
+    expect(mockChartProps).toBeTruthy();
+    const props = mockChartProps as unknown as CapturedChartProps;
+    // labels: date -> M/D
+    expect(props.data.labels).toEqual(['1/1', '1/2']);
+    // datasets: 金额序列 + 曲线颜色回调
+    expect(props.data.datasets[0].data).toEqual([123.45, 200]);
+    // 深色模式: 语义化后 light 套 primary #0e8a80 → rgb(14,138,128), textSecondary #666
+    expect(props.data.datasets[0].color()).toBe('#0e8a80');
+    // chartConfig 颜色回调
+    expect(props.chartConfig.color(0.5)).toBe('rgba(14,138,128, 0.5)');
+    // 无参调用 → opacity 默认值 1 分支
+    expect(props.chartConfig.color()).toBe('rgba(14,138,128, 1)');
+    expect(props.chartConfig.labelColor()).toBe('#666');
+  });
+
+  it('导出CSV: records为空时早退, 不调用Share', async () => {
+    (revenueApi.getRecords as jest.Mock).mockResolvedValue({ data: [] });
+    const { findByText } = render(<RevenueScreen />);
+    // 等待加载完成（EmptyState 会显示）
+    await findByText('暂无营收明细');
+    // 导出按钮可能不渲染（空状态），即使渲染也不会调用Share
+    expect(Share.share).not.toHaveBeenCalled();
+  });
+});

@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+*.jks
+*.keystore
+.env
+coverage/
+
+# Understand Anything skill artifacts
+.ua/

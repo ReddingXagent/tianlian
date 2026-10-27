@@ -1,0 +1,44 @@
+// ESLint flat config — Expo 官方推荐 (eslint-config-expo/flat)
+// 2026-07-31 lint 门控建立: 此前仓库零lint门控(F19), 模板源自 ops-app
+const { defineConfig } = require('eslint/config');
+const expoConfig = require('eslint-config-expo/flat');
+
+module.exports = defineConfig([
+  expoConfig,
+  {
+    // 生成物与构建配置不走lint
+    ignores: ['dist/**', 'web-build/**', '*.config.js'],
+  },
+  {
+    // 分诊降级: 各screen数据加载模式(effect内fetch→setState)是有意为之,
+    // 10处同构, 重构风险高 → 降warn跟踪(F28), 待screen测试补齐后逐处评估
+    rules: {
+      'react-hooks/set-state-in-effect': 'warn',
+    },
+  },
+  {
+    // 测试文件放开 jest 全局 + require (jest.mock 工厂模式)
+    files: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        jest: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
+    },
+    rules: {
+      // jest.mock 工厂函数内 require() 是 RN 测试标准模式
+      '@typescript-eslint/no-require-imports': 'off',
+      // axios mock通过默认导入访问.create是测试惯用法
+      'import/no-named-as-default-member': 'off',
+      // 测试中 mock 工厂参数可能不全部使用
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+]);

@@ -1,0 +1,84 @@
+import { create } from 'zustand';
+import { User } from '../types';
+import { authApi, tokenStorage } from '../services/api';
+
+interface AuthState {
+  token: string | null;
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
+  setUser: (user: User) => void;
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
+  token: null,
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+
+  login: async (username: string, password: string) => {
+    const response = await authApi.login({ username, password });
+    const { token, user } = response.data;
+    await tokenStorage.setToken(token);
+    set({
+      token,
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  },
+
+  logout: async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // 即使登出API失败也清除本地状态
+    }
+    await tokenStorage.removeToken();
+    set({
+      token: null,
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
+  },
+
+  checkAuth: async () => {
+    try {
+      const token = await tokenStorage.getToken();
+      if (!token) {
+        set({ token: null, user: null, isAuthenticated: false, isLoading: false });
+        return;
+      }
+      // 真云端无 /auth/profile 端点: 有 token 即视为已认证, profile 尽力获取
+      let user: User | null = get().user;
+      try {
+        const response = await authApi.getProfile();
+        if (response.data) user = response.data;
+      } catch {
+        // profile 不可用时保留缓存用户, 不清 token
+      }
+      set({
+        token,
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch {
+      await tokenStorage.removeToken();
+      set({
+        token: null,
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+    }
+  },
+
+  setUser: (user: User) => {
+    set({ user });
+  },
+}));

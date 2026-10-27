@@ -1,0 +1,16 @@
+# EAS Build ignore - 排除开发/测试文件以加速云端构建 (对齐 ops-app/user-app 惯例)
+# 凭据防御纵深 (对齐 ops F321 精神): .gitignore 已排除 .env/*.jks/*.keystore,
+# 此处兜底确保即使未来被误 track 也不进 EAS 云端构建上下文
+.env
+*.jks
+*.keystore
+__tests__/
+*.test.*
+*.mock.*
+coverage/
+.env.example
+.github/
+scripts/
+eslint.config.js
+DEPLOYMENT.md
+CHANGELOG.md
