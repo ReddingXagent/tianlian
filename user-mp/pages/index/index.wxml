@@ -1,0 +1,108 @@
+<!-- pages/index/index.wxml - 首页（附近站点） -->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-wrapper">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索充电站"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+        confirm-type="search"
+      />
+    </view>
+    <view class="filter-toggle" bindtap="onToggleFilter">
+      <text class="filter-icon">⚙️</text>
+      <text>筛选</text>
+    </view>
+  </view>
+
+  <!-- 筛选面板 -->
+  <view class="filter-panel" wx:if="{{showFilter}}">
+    <view class="filter-row">
+      <text class="filter-label">充电类型</text>
+      <view class="filter-options">
+        <view
+          wx:for="{{gunTypes}}"
+          wx:key="value"
+          class="filter-option {{filterGunType === item.value ? 'active' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="onSelectGunType"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+    <view class="filter-row">
+      <text class="filter-label">排序方式</text>
+      <view class="filter-options">
+        <view
+          wx:for="{{sortOptions}}"
+          wx:key="value"
+          class="filter-option {{filterSortBy === item.value ? 'active' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="onSelectSortBy"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+    <view class="filter-actions">
+      <button class="filter-reset-btn" bindtap="onResetFilter">重置</button>
+      <button class="filter-apply-btn" bindtap="onApplyFilter">确定</button>
+    </view>
+  </view>
+
+  <!-- 地图区域 -->
+  <view class="map-container">
+    <map
+      id="stationMap"
+      class="map"
+      latitude="{{latitude}}"
+      longitude="{{longitude}}"
+      scale="{{14}}"
+      markers="{{markers}}"
+      show-location="{{true}}"
+      bindmarkertap="onMarkerTap"
+    >
+    </map>
+    <!-- 定位按钮 -->
+    <view class="locate-btn" bindtap="onLocate">
+      <text>📍</text>
+    </view>
+  </view>
+
+  <!-- 站点列表 -->
+  <view class="station-list">
+    <view class="list-header">
+      <text class="list-title">附近充电站</text>
+      <text class="list-count" wx:if="{{stations.length}}">共{{stations.length}}个</text>
+    </view>
+
+    <!-- 加载中 -->
+    <loading visible="{{loading}}" text="搜索附近站点..." />
+
+    <!-- 站点卡片列表 -->
+    <block wx:if="{{!loading}}">
+      <station-card
+        wx:for="{{stations}}"
+        wx:key="id"
+        station="{{item}}"
+        bind:tap="onStationTap"
+        bind:favorite="onStationFavorite"
+        bind:unfavorite="onStationUnfavorite"
+      />
+
+      <!-- 空状态 -->
+      <empty
+        visible="{{!stations.length}}"
+        text="附近暂无充电站"
+        showAction="{{true}}"
+        actionText="重新搜索"
+        bind:action="onRefresh"
+      />
+    </block>
+  </view>
+</view>

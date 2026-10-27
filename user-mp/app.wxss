@@ -1,0 +1,318 @@
+/* app.wxss - 全局样式 */
+
+/* === 主题色变量 === */
+page {
+  --primary: #07C160;
+  --primary-dark: #06AD56;
+  --primary-light: #E8F8EF;
+  --danger: #FA5151;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --bg-color: #f5f5f5;
+  --bg-white: #ffffff;
+  --border-color: #e5e5e5;
+  --shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  /* F3602 深色模式语义扩容(对齐三仓调色板口径) */
+  --divider: #f0f0f5;
+  --text-faint: #cccccc;
+  --bg-input: #f5f5f5;
+  --bg-hover: #f9f9f9;
+  --info: #1890FF;
+  --warning: #FF9500;
+  --warning-bg: #FFF3E0;
+  --success-bg: #E8F8EF;
+  --orange: #FF6B00;
+  --on-primary: #ffffff;
+  --danger-bg: #FFEBEE;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+  box-sizing: border-box;
+}
+
+/* F3602 深色模式 — 跟随系统切变量值(页面级已全部 var() 归一, 此处唯一切换点) */
+@media (prefers-color-scheme: dark) {
+  page {
+    --primary: #07C160;          /* 品牌绿不翻转 */
+    --primary-dark: #06AD56;
+    --primary-light: #123527;
+    --danger: #FF7875;
+    --text-primary: #e0e0e0;
+    --text-secondary: #9e9e9e;
+    --text-muted: #666666;
+    --bg-color: #111111;
+    --bg-white: #1e1e1e;
+    --border-color: #333333;
+    --divider: #2a2a2a;
+    --text-faint: #555555;
+    --bg-input: #2a2a2a;
+    --bg-hover: #333333;
+    --info: #40A9FF;
+    --warning: #FFA940;
+    --warning-bg: #33291c;
+    --success-bg: #1c2b1c;
+    --orange: #FF8534;
+    --on-primary: #ffffff;
+    --danger-bg: #3a1a24;
+    --shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.4);
+  }
+}  /* F3602 dark-mode block close — 原缺失致 @media 吞没后续全部规则, WXSS 317:1 unexpected EOF */
+
+/* === 通用容器 === */
+.container {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.page-container {
+  padding: 20rpx;
+}
+
+/* === 卡片 === */
+.card {
+  background: var(--bg-white);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-body {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid var(--border-color);
+}
+
+/* === 按钮 === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  padding: 0 40rpx;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn-primary:active {
+  background: var(--primary-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2rpx solid var(--primary);
+}
+
+.btn-outline:active {
+  background: var(--primary-light);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--on-primary);
+}
+
+.btn-sm {
+  height: 56rpx;
+  padding: 0 24rpx;
+  font-size: 24rpx;
+  border-radius: 8rpx;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* === 表单 === */
+.form-group {
+  margin-bottom: 24rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 24rpx;
+  background: var(--bg-white);
+  border: 2rpx solid var(--border-color);
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+}
+
+/* === 间距工具 === */
+.mt-10 { margin-top: 10rpx; }
+.mt-20 { margin-top: 20rpx; }
+.mt-30 { margin-top: 30rpx; }
+.mb-10 { margin-bottom: 10rpx; }
+.mb-20 { margin-bottom: 20rpx; }
+.mb-30 { margin-bottom: 30rpx; }
+.p-20 { padding: 20rpx; }
+.p-30 { padding: 30rpx; }
+
+/* === Flex工具 === */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* === 文本 === */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-primary { color: var(--primary); }
+.text-danger { color: var(--danger); }
+.text-muted { color: var(--text-muted); }
+.text-sm { font-size: 24rpx; }
+.text-lg { font-size: 36rpx; }
+.text-xl { font-size: 44rpx; }
+.text-bold { font-weight: 600; }
+
+/* === 分割线 === */
+.divider {
+  height: 1rpx;
+  background: var(--border-color);
+  margin: 20rpx 0;
+}
+
+/* === 标签 === */
+.tag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: 6rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+
+.tag-success {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.tag-warning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.tag-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.tag-default {
+  background: var(--divider);
+  color: var(--text-muted);
+}
+
+/* === 空状态 === */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: var(--text-muted);
+}
+
+/* === 加载 === */
+.loading-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* === 安全区域 === */
+.safe-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}

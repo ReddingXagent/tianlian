@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "loading": "/components/loading/index",
+    "empty": "/components/empty/index"
+  },
+  "navigationBarTitleText": "积分中心",
+  "enablePullDownRefresh": true
+}

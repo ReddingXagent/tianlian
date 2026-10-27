@@ -1,0 +1,108 @@
+/* pages/scan/scan.wxss */
+.container {
+  min-height: 100vh;
+  background: var(--bg-color);
+  padding: 40rpx 32rpx;
+}
+
+/* 扫码区域 */
+.scan-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 0;
+}
+
+.scan-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 48rpx;
+}
+
+.scan-icon-placeholder {
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.6;
+}
+
+.scan-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12rpx;
+}
+
+.scan-desc {
+  font-size: 26rpx;
+  color: var(--text-muted);
+}
+
+.scan-area .btn {
+  width: 400rpx;
+}
+
+/* 分割线文字 */
+.divider-text {
+  display: flex;
+  align-items: center;
+  margin: 48rpx 0 32rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: var(--border-color);
+}
+
+.divider-label {
+  padding: 0 24rpx;
+  font-size: 24rpx;
+  color: var(--text-muted);
+}
+
+/* 手动输入 */
+.manual-input {
+  background: var(--bg-white);
+  border-radius: 16rpx;
+  padding: 32rpx;
+}
+
+/* 历史记录 */
+.history-section {
+  margin-top: 48rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  color: var(--text-muted);
+  margin-bottom: 20rpx;
+}
+
+.history-list {
+  background: var(--bg-white);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid var(--bg-color);
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-name {
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+
+.history-time {
+  font-size: 24rpx;
+  color: var(--text-muted);
+}

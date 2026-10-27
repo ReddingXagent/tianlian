@@ -1,0 +1,51 @@
+<!-- components/station-card/index.wxml - 站点卡片组件 -->
+<view class="station-card" bindtap="onTap" style="{{brandColor ? 'border-top: 4rpx solid ' + brandColor : ''}}">
+  <view class="card-header">
+    <view class="station-name">{{station.name}}</view>
+    <view class="station-distance" wx:if="{{station.distance !== undefined}}" style="{{brandColor ? 'color:' + brandColor + ';background:' + brandColorLight : ''}}">
+      {{distanceText}}
+    </view>
+  </view>
+
+  <!-- 品牌标识（仅自定义品牌时显示） -->
+  <view class="station-brand" wx:if="{{brandIsCustom && brandOperator}}" style="color: {{brandColor}}">
+    <text class="brand-icon">🏢</text>
+    <text class="brand-name">{{brandOperator}}</text>
+  </view>
+
+  <view class="station-address">
+    <text class="iconfont icon-location"></text>
+    <text>{{station.address}}</text>
+  </view>
+
+  <view class="station-info">
+    <view class="info-item">
+      <text class="info-label">充电桩</text>
+      <text class="info-value">
+        <text class="text-primary" style="{{brandColor ? 'color:' + brandColor : ''}}">{{station.available || 0}}</text>
+        <text> / {{station.total || 0}}</text>
+      </text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">价格</text>
+      <text class="info-value" style="{{brandColor ? 'color:' + brandColor : ''}}">{{station.price || '0.00'}} 元/度</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">类型</text>
+      <text class="info-value">{{station.chargerType || '快充'}}</text>
+    </view>
+  </view>
+
+  <view class="station-tags" wx:if="{{station.tags && station.tags.length}}">
+    <text class="tag tag-success" wx:for="{{station.tags}}" wx:key="*this">{{item}}</text>
+  </view>
+
+  <view class="station-actions">
+    <view class="action-btn fav-btn" wx:if="{{station.isFavorited}}" catchtap="onUnfav">
+      ❤️ 已收藏
+    </view>
+    <view class="action-btn fav-btn outline" wx:else catchtap="onFav">
+      🤍 收藏
+    </view>
+  </view>
+</view>

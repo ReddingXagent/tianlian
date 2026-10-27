@@ -1,0 +1,69 @@
+<!-- pages/points/points.wxml -->
+<view class="container">
+  <!-- 积分卡片 -->
+  <view class="points-card">
+    <view class="points-header">
+      <text class="points-label">我的积分</text>
+      <text class="rules-link" bindtap="onShowRules">积分规则 ›</text>
+    </view>
+    <view class="points-value">{{points}}</view>
+    <view class="points-sign">
+      <view class="sign-days">连续签到 {{signInDays}} 天</view>
+      <button
+        class="sign-btn {{signedIn ? 'signed' : ''}}"
+        bindtap="onSignIn"
+        disabled="{{signedIn}}"
+      >
+        {{signedIn ? '今日已签到' : '签到领积分'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 兑换专区 -->
+  <view class="section">
+    <view class="section-title">兑换专区</view>
+    <view class="reward-list">
+      <view
+        wx:for="{{rewards}}"
+        wx:key="id"
+        class="reward-item"
+        data-id="{{item.id}}"
+        data-name="{{item.name}}"
+        data-points="{{item.points}}"
+        bindtap="onRedeem"
+      >
+        <text class="reward-icon">{{item.icon}}</text>
+        <view class="reward-info">
+          <text class="reward-name">{{item.name}}</text>
+          <text class="reward-desc">{{item.desc}}</text>
+        </view>
+        <view class="reward-cost {{points >= item.points ? '' : 'insufficient'}}">
+          <text class="cost-value">{{item.points}}</text>
+          <text class="cost-label">积分</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 积分记录 -->
+  <view class="section">
+    <view class="section-title">积分记录</view>
+    <view class="history-list" wx:if="{{!historyLoading}}">
+      <block wx:if="{{history.length > 0}}">
+        <view wx:for="{{history}}" wx:key="id" class="history-item">
+          <view class="history-left">
+            <text class="history-desc">{{item.description || '积分变动'}}</text>
+            <text class="history-time">{{item.timeText}}</text>
+          </view>
+          <text class="history-amount {{item.isPositive ? 'positive' : 'negative'}}">
+            {{item.amountText}}
+          </text>
+        </view>
+      </block>
+      <block wx:else>
+        <empty text="暂无积分记录"></empty>
+      </block>
+    </view>
+    <loading wx:if="{{historyLoading}}"></loading>
+  </view>
+</view>

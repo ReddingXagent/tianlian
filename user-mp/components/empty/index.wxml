@@ -1,0 +1,8 @@
+<!-- components/empty/index.wxml -->
+<view class="empty-state" wx:if="{{visible}}">
+  <image class="empty-icon" src="{{icon || '/assets/images/empty.png'}}" mode="aspectFit" />
+  <text class="empty-text">{{text || '暂无数据'}}</text>
+  <view class="empty-action" wx:if="{{showAction}}">
+    <button class="btn btn-primary btn-sm" bindtap="onAction">{{actionText || '重试'}}</button>
+  </view>
+</view>

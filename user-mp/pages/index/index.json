@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "天链充电",
+  "usingComponents": {
+    "station-card": "/components/station-card/index",
+    "loading": "/components/loading/index",
+    "empty": "/components/empty/index"
+  }
+}

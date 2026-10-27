@@ -1,0 +1,60 @@
+<!-- pages/notifications/notifications.wxml -->
+<view class="container">
+  <!-- 顶部操作栏 -->
+  <view class="top-bar" wx:if="{{unreadCount > 0}}">
+    <text class="unread-tip">{{unreadCount}}条未读</text>
+    <text class="mark-all-btn" bindtap="onMarkAllRead">全部已读</text>
+  </view>
+
+  <!-- Tab筛选 -->
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="tab-item {{currentTab === item.value ? 'active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onTabChange"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 通知列表 -->
+  <view class="notify-list" wx:if="{{!loading}}">
+    <block wx:if="{{notifications.length > 0}}">
+      <view
+        wx:for="{{notifications}}"
+        wx:key="id"
+        class="notify-item {{item.isUnread ? 'unread' : ''}}"
+        data-id="{{item.id}}"
+        data-status="{{item.status}}"
+        bindtap="onNotificationTap"
+      >
+        <view class="notify-icon-wrap" style="background: {{item.typeCfg.color}}20;">
+          <text class="notify-icon">{{item.typeCfg.icon}}</text>
+        </view>
+        <view class="notify-content">
+          <view class="notify-top">
+            <text class="notify-title">{{item.typeCfg.text}}</text>
+            <text class="notify-time">{{item.timeText}}</text>
+          </view>
+          <text class="notify-desc">{{item.title || item.message || '暂无详情'}}</text>
+        </view>
+        <view wx:if="{{item.isUnread}}" class="unread-dot"></view>
+      </view>
+    </block>
+    <block wx:else>
+      <empty text="暂无通知"></empty>
+    </block>
+
+    <!-- 加载更多 -->
+    <view wx:if="{{loadingMore}}" class="load-more">
+      <text>加载中...</text>
+    </view>
+    <view wx:elif="{{!hasMore && notifications.length > 0}}" class="load-more">
+      <text>没有更多了</text>
+    </view>
+  </view>
+
+  <loading wx:if="{{loading}}"></loading>
+</view>

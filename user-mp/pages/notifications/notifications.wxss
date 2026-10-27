@@ -1,0 +1,114 @@
+/* pages/notifications/notifications.wxss */
+.container {
+  min-height: 100vh;
+  background: var(--bg-color);
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 32rpx;
+  background: var(--bg-white);
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.unread-tip { font-size: 26rpx; color: var(--danger); }
+.mark-all-btn { font-size: 26rpx; color: var(--primary); }
+
+.tabs {
+  display: flex;
+  background: var(--bg-white);
+  padding: 0 32rpx;
+  border-bottom: 1rpx solid var(--border-color);
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.tab-item.active {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background: var(--primary);
+  border-radius: 2rpx;
+}
+
+.notify-list {
+  padding: 0 32rpx;
+}
+
+.notify-item {
+  display: flex;
+  align-items: flex-start;
+  background: var(--bg-white);
+  padding: 24rpx;
+  margin-bottom: 2rpx;
+  position: relative;
+}
+
+.notify-item.unread {
+  background: var(--success-bg);
+}
+
+.notify-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.notify-icon { font-size: 36rpx; }
+
+.notify-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notify-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.notify-title { font-size: 28rpx; color: var(--text-primary); font-weight: 500; }
+.notify-time { font-size: 22rpx; color: var(--text-faint); }
+.notify-desc { font-size: 24rpx; color: var(--text-muted); line-height: 1.5; }
+
+.unread-dot {
+  width: 14rpx;
+  height: 14rpx;
+  background: var(--danger);
+  border-radius: 50%;
+  position: absolute;
+  right: 24rpx;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.load-more {
+  text-align: center;
+  padding: 24rpx;
+  font-size: 24rpx;
+  color: var(--text-faint);
+}

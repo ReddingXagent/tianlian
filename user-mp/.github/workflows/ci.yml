@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run check:auth-keys
+      - run: npm run check:asset-refs
+      - run: npm run check:css-vars
+      - run: npm run check:css-classes
+      - run: npm run check:dead-handlers
+      - run: npm run check:event-usage
+      - run: npm run check:native-attrs
+      - run: npm run check:json-keys
+      - run: npm run check:nav-targets
+      - run: npm run check:orphan-components
+      - run: npm run check:orphan-pages
+      - run: npm run check:permission-apis
+      - run: npm run check:prop-usage
+      - run: npm run check:request-source
+      - run: npm run check:setdata-payload
+      - run: npm run check:setdata-perf
+      - run: npm run check:storage-keys
+      - run: npm run check:wxml-handlers
+      - run: npm run check:wxs-isolation
+      - run: npm test -- --coverage --passWithNoTests
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  structure:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: node scripts/check-mp-structure.js
+
+  deploy-readiness:
+    needs: structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: node scripts/deploy.js --check
+        continue-on-error: true

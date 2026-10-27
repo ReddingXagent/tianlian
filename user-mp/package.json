@@ -1,0 +1,67 @@
+{
+  "name": "tianlian-user-mp",
+  "version": "1.1.0",
+  "description": "天链充电 - 用户端微信小程序",
+  "scripts": {
+    "check": "node scripts/check-mp-structure.js",
+    "check:auth-keys": "node scripts/check-auth-keys.js",
+    "check:asset-refs": "node scripts/check-asset-refs.js",
+    "check:css-vars": "node scripts/check-css-vars.js",
+    "check:css-classes": "node scripts/check-css-classes.js",
+    "check:dead-handlers": "node scripts/check-dead-handlers.js",
+    "check:event-usage": "node scripts/check-event-usage.js",
+    "check:native-attrs": "node scripts/check-native-attrs.js",
+    "check:json-keys": "node scripts/check-json-keys.js",
+    "check:nav-targets": "node scripts/check-nav-targets.js",
+    "check:orphan-components": "node scripts/check-orphan-components.js",
+    "check:orphan-pages": "node scripts/check-orphan-pages.js",
+    "check:permission-apis": "node scripts/check-permission-apis.js",
+    "check:prop-usage": "node scripts/check-prop-usage.js",
+    "check:request-source": "node scripts/check-request-source.js",
+    "check:setdata-payload": "node scripts/check-setdata-payload.js",
+    "check:setdata-perf": "node scripts/check-setdata-perf.js",
+    "check:storage-keys": "node scripts/check-storage-keys.js",
+    "check:wxml-handlers": "node scripts/check-wxml-handlers.js",
+    "check:wxs-isolation": "node scripts/check-wxs-isolation.js",
+    "deploy": "node scripts/deploy.js",
+    "deploy:check": "node scripts/deploy.js --check",
+    "lint": "eslint . --max-warnings 0",
+    "lint:ci": "node scripts/lint-ci.js",
+    "test": "jest --passWithNoTests",
+    "check:node": "bash scripts/check-node-version.sh",
+    "check:engine-strict": "bash scripts/check-engine-strict.sh"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "services/**/*.js",
+      "utils/**/*.js",
+      "config/**/*.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/__tests__/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 99,
+        "branches": 100,
+        "functions": 99,
+        "lines": 99
+      }
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "axios": "^1.20.0",
+    "eslint": "^10.11.0",
+    "jest": "^29.7.0",
+    "miniprogram-ci": "^2.1.45"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

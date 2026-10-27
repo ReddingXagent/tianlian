@@ -1,0 +1,92 @@
+<!-- pages/charging/charging.wxml - 充电中 -->
+<view class="container">
+  <!-- 充电状态头部 -->
+  <view class="charging-header">
+    <view class="status-indicator {{statusClass}}">
+      <view class="pulse-dot"></view>
+      <text class="status-text">{{statusText}}</text>
+    </view>
+  </view>
+
+  <!-- 核心数据 -->
+  <view class="charging-data">
+    <!-- 实时功率 -->
+    <view class="data-card power-card">
+      <text class="data-label">实时功率</text>
+      <view class="data-value">
+        <text class="data-number">{{power}}</text>
+        <text class="data-unit">kW</text>
+      </view>
+    </view>
+
+    <!-- 已充电量 -->
+    <view class="data-card energy-card">
+      <text class="data-label">已充电量</text>
+      <view class="data-value">
+        <text class="data-number">{{energy}}</text>
+        <text class="data-unit">kWh</text>
+      </view>
+    </view>
+
+    <!-- 当前费用 -->
+    <view class="data-card cost-card">
+      <text class="data-label">当前费用</text>
+      <view class="data-value">
+        <text class="data-number">{{cost}}</text>
+        <text class="data-unit">元</text>
+      </view>
+    </view>
+
+    <!-- 已充时长 -->
+    <view class="data-card time-card">
+      <text class="data-label">已充时长</text>
+      <view class="data-value">
+        <text class="data-number">{{duration}}</text>
+        <text class="data-unit">分钟</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 充电进度 -->
+  <view class="progress-section">
+    <view class="progress-header">
+      <text class="progress-label">充电进度</text>
+      <text class="progress-percent">{{soc}}%</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{soc}}%"></view>
+    </view>
+    <view class="progress-info">
+      <text>电压 {{voltage}}V</text>
+      <text>电流 {{current}}A</text>
+      <text>温度 {{temp}}°C</text>
+    </view>
+  </view>
+
+  <!-- 充电详情 -->
+  <view class="detail-section">
+    <view class="detail-item">
+      <text class="detail-label">充电桩编号</text>
+      <text class="detail-value">{{chargerId}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">订单编号</text>
+      <text class="detail-value">{{orderId}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">开始时间</text>
+      <text class="detail-value">{{startTime}}</text>
+    </view>
+    <view class="detail-item">
+      <text class="detail-label">单价</text>
+      <text class="detail-value">{{price}} 元/度</text>
+    </view>
+  </view>
+
+  <!-- 停止充电按钮 -->
+  <view class="action-section safe-bottom">
+    <button class="btn btn-danger btn-block" bindtap="onStopCharging">
+      停止充电
+    </button>
+  </view>
+</view>

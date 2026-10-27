@@ -1,0 +1,8 @@
+node_modules/
+miniprogram_npm/
+coverage/
+.env
+private-key/
+
+# Understand Anything skill artifacts
+.ua/

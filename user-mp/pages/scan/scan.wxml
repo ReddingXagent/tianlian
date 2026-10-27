@@ -1,0 +1,58 @@
+<!-- pages/scan/scan.wxml - 扫码充电 -->
+<view class="container">
+  <!-- 扫码区域 -->
+  <view class="scan-area">
+    <view class="scan-frame">
+      <view class="scan-icon-placeholder">📷</view>
+      <text class="scan-title">扫描充电桩二维码</text>
+      <text class="scan-desc">将二维码放入框内，即可自动扫描</text>
+    </view>
+
+    <button class="btn btn-primary btn-block" bindtap="onScanCode">
+      📷 扫码充电
+    </button>
+  </view>
+
+  <!-- 手动输入 -->
+  <view class="manual-section">
+    <view class="divider-text">
+      <text class="divider-line"></text>
+      <text class="divider-label">或手动输入设备编号</text>
+      <text class="divider-line"></text>
+    </view>
+
+    <view class="manual-input">
+      <input
+        class="form-input"
+        placeholder="请输入充电桩编号"
+        value="{{chargerId}}"
+        bindinput="onInputChange"
+        maxlength="32"
+      />
+      <button
+        class="btn btn-primary btn-block mt-20"
+        disabled="{{!chargerId}}"
+        bindtap="onManualStart"
+      >
+        开始充电
+      </button>
+    </view>
+  </view>
+
+  <!-- 最近扫码记录 -->
+  <view class="history-section" wx:if="{{history.length}}">
+    <view class="section-title">最近使用</view>
+    <view class="history-list">
+      <view
+        class="history-item"
+        wx:for="{{history}}"
+        wx:key="id"
+        bindtap="onHistoryTap"
+        data-id="{{item.id}}"
+      >
+        <text class="history-name">{{item.name || item.id}}</text>
+        <text class="history-time">{{item.time}}</text>
+      </view>
+    </view>
+  </view>
+</view>

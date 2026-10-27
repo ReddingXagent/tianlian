@@ -1,0 +1,148 @@
+/* pages/order-detail/order-detail.wxss */
+.container {
+  min-height: 100vh;
+  background: var(--bg-color);
+  padding-bottom: 40rpx;
+}
+
+/* 状态区域 */
+.status-section {
+  padding: 48rpx 32rpx;
+  text-align: center;
+  background: var(--bg-white);
+  margin-bottom: 20rpx;
+}
+
+.status-section.charging {
+  background: linear-gradient(135deg, var(--primary-light), var(--bg-white));
+}
+
+.status-section.finished {
+  background: linear-gradient(135deg, var(--divider), var(--bg-white));
+}
+
+.status-section.pending {
+  background: linear-gradient(135deg, var(--warning-bg), var(--bg-white));
+}
+
+.status-icon {
+  font-size: 72rpx;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.status-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.status-desc {
+  font-size: 26rpx;
+  color: var(--text-muted);
+}
+
+/* 充电数据 */
+.data-section {
+  margin: 0 24rpx 20rpx;
+  background: var(--bg-white);
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24rpx;
+}
+
+.data-item {
+  text-align: center;
+}
+
+.data-label {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.data-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.data-value.price {
+  color: var(--danger);
+}
+
+/* 信息区域 */
+.info-section {
+  margin: 0 24rpx 20rpx;
+  background: var(--bg-white);
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid var(--divider);
+}
+
+.info-list {
+  /*  */
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14rpx 0;
+}
+
+.info-item.total {
+  padding-top: 20rpx;
+  margin-top: 12rpx;
+  border-top: 1rpx solid var(--divider);
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: var(--text-muted);
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: var(--text-primary);
+  max-width: 60%;
+  text-align: right;
+  word-break: break-all;
+}
+
+.info-value.price {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 30rpx;
+}
+
+.info-value.discount {
+  color: var(--primary);
+}
+
+/* 操作区 */
+.action-section {
+  padding: 24rpx;
+}
+
+.action-section .btn {
+  height: 88rpx;
+  font-size: 32rpx;
+  border-radius: 16rpx;
+}

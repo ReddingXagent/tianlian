@@ -1,0 +1,79 @@
+<!-- pages/coupons/coupons.wxml -->
+<view class="container">
+  <!-- Tab切换 -->
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="value"
+      class="tab-item {{currentTab === item.value ? 'active' : ''}}"
+      data-value="{{item.value}}"
+      bindtap="onTabChange"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 领取入口 -->
+  <view class="claim-entry" bindtap="onToggleClaim">
+    <text class="claim-icon">🎫</text>
+    <text class="claim-text">兑换优惠券</text>
+    <text class="claim-arrow">›</text>
+  </view>
+
+  <!-- 兑换输入框 -->
+  <view class="claim-input-area" wx:if="{{showClaimInput}}">
+    <input
+      class="code-input"
+      placeholder="请输入兑换码"
+      value="{{couponCode}}"
+      bindinput="onCodeInput"
+      maxlength="20"
+    />
+    <button
+      class="claim-btn {{claiming ? 'disabled' : ''}}"
+      size="mini"
+      bindtap="onClaim"
+      disabled="{{claiming}}"
+    >
+      {{claiming ? '领取中' : '兑换'}}
+    </button>
+  </view>
+
+  <!-- 优惠券列表 -->
+  <view class="coupon-list" wx:if="{{!loading}}">
+    <block wx:if="{{coupons.length > 0}}">
+      <view
+        wx:for="{{coupons}}"
+        wx:key="id"
+        class="coupon-card {{item.statusCfg.class}}"
+      >
+        <view class="coupon-left">
+          <text class="coupon-amount">{{item.amountText}}</text>
+          <text class="coupon-type">{{item.typeText}}</text>
+        </view>
+        <view class="coupon-right">
+          <text class="coupon-name">{{item.name || '优惠券'}}</text>
+          <text class="coupon-min">{{item.minAmountText}}</text>
+          <text class="coupon-expire">{{item.expireText}}</text>
+          <view
+            wx:if="{{item.status === 'unused'}}"
+            class="coupon-use-btn"
+            data-id="{{item.id}}"
+            bindtap="onUseCoupon"
+          >
+            立即使用
+          </view>
+          <view wx:else class="coupon-status-tag" style="color: {{item.statusCfg.color}}">
+            {{item.statusCfg.text}}
+          </view>
+        </view>
+      </view>
+    </block>
+    <block wx:else>
+      <empty text="暂无优惠券"></empty>
+    </block>
+  </view>
+
+  <!-- 加载中 -->
+  <loading wx:if="{{loading}}"></loading>
+</view>

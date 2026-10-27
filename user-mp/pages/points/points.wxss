@@ -1,0 +1,120 @@
+/* pages/points/points.wxss */
+.container {
+  min-height: 100vh;
+  background: var(--bg-color);
+}
+
+.points-card {
+  margin: 24rpx 32rpx;
+  padding: 40rpx;
+  background: linear-gradient(135deg, var(--warning), var(--orange));
+  border-radius: 20rpx;
+  color: var(--on-primary);
+}
+
+.points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.points-label { font-size: 28rpx; opacity: 0.9; }
+.rules-link { font-size: 24rpx; opacity: 0.7; }
+
+.points-value {
+  font-size: 80rpx;
+  font-weight: bold;
+  text-align: center;
+  margin: 24rpx 0;
+  line-height: 1.2;
+}
+
+.points-sign {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sign-days { font-size: 24rpx; opacity: 0.8; }
+
+.sign-btn {
+  background: rgba(255,255,255,0.25);
+  color: var(--on-primary);
+  font-size: 24rpx;
+  border: 1rpx solid rgba(255,255,255,0.5);
+  border-radius: 32rpx;
+  padding: 8rpx 28rpx;
+  line-height: 1.4;
+}
+
+.sign-btn.signed {
+  background: rgba(255,255,255,0.1);
+  opacity: 0.6;
+}
+
+.section {
+  margin: 0 32rpx 24rpx;
+  background: var(--bg-white);
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: var(--text-primary);
+  padding: 24rpx;
+  border-bottom: 1rpx solid var(--divider);
+}
+
+.reward-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid var(--bg-color);
+}
+
+.reward-item:last-child { border-bottom: none; }
+
+.reward-icon { font-size: 48rpx; margin-right: 20rpx; }
+
+.reward-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.reward-name { font-size: 28rpx; color: var(--text-primary); }
+.reward-desc { font-size: 22rpx; color: var(--text-muted); margin-top: 4rpx; }
+
+.reward-cost {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  background: var(--warning-bg);
+  border-radius: 12rpx;
+}
+
+.reward-cost.insufficient { background: var(--bg-input); opacity: 0.6; }
+
+.cost-value { font-size: 32rpx; font-weight: bold; color: var(--orange); }
+.cost-label { font-size: 20rpx; color: var(--text-muted); }
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid var(--bg-color);
+}
+
+.history-item:last-child { border-bottom: none; }
+
+.history-left { display: flex; flex-direction: column; }
+.history-desc { font-size: 28rpx; color: var(--text-primary); }
+.history-time { font-size: 22rpx; color: var(--text-faint); margin-top: 4rpx; }
+
+.history-amount { font-size: 32rpx; font-weight: 500; }
+.history-amount.positive { color: var(--primary); }
+.history-amount.negative { color: var(--text-muted); }
