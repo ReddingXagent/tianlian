@@ -30,12 +30,12 @@
 
 | 仓库 | 角色 | 技术栈 | 说明 |
 |---|---|---|---|
-| [tianlian-cloud](https://github.com/ReddingXagent/tianlian-cloud) | 云端平台 | FastAPI · React 18 · PostgreSQL | 109 个 API 模块，运维/运营/车队/平台/能源五大板块 |
-| [tianlian-edge-gateway](https://github.com/ReddingXagent/tianlian-edge-gateway) | 边缘网关 | Python · OCPP · Modbus · MQTT | 部署在场站现场，断网本地缓存，恢复自动补传 |
-| [tianlian-station-app](https://github.com/ReddingXagent/tianlian-station-app) | 站长 APP | React Native (Expo) | 站点总览、报修、工单验收、遥测查看 |
-| [tianlian-ops-app](https://github.com/ReddingXagent/tianlian-ops-app) | 运维工程师 APP | React Native (Expo) | 工单处理、设备监控、告警响应、AI 诊断 |
-| [tianlian-user-app](https://github.com/ReddingXagent/tianlian-user-app) | 用户 APP | React Native (Expo) | 扫码充电、订单管理、钱包、优惠券 |
-| [tianlian-user-mp](https://github.com/ReddingXagent/tianlian-user-mp) | 用户微信小程序 | 原生小程序 | 扫码充电、订单、优惠券、积分 |
+| [tianlian-cloud](./cloud) | 云端平台 | FastAPI · React 18 · PostgreSQL | 109 个 API 模块，运维/运营/车队/平台/能源五大板块 |
+| [tianlian-edge-gateway](./edge-gateway) | 边缘网关 | Python · OCPP · Modbus · MQTT | 部署在场站现场，断网本地缓存，恢复自动补传 |
+| [tianlian-station-app](./station-app) | 站长 APP | React Native (Expo) | 站点总览、报修、工单验收、遥测查看 |
+| [tianlian-ops-app](./ops-app) | 运维工程师 APP | React Native (Expo) | 工单处理、设备监控、告警响应、AI 诊断 |
+| [tianlian-user-app](./user-app) | 用户 APP | React Native (Expo) | 扫码充电、订单管理、钱包、优惠券 |
+| [tianlian-user-mp](./user-mp) | 用户微信小程序 | 原生小程序 | 扫码充电、订单、优惠券、积分 |
 
 ## 核心能力
 
