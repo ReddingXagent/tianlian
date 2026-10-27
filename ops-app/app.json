@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "天链运维",
+    "slug": "tianlian-ops",
+    "version": "1.0.0",
+    "platforms": [
+      "android",
+      "ios",
+      "web"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "tianlian-ops",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a73e8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tianlian.operator",
+      "buildNumber": "1"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a73e8"
+      },
+      "package": "com.tianlian.operator",
+      "versionCode": 1
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "enabled": false
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-asset"
+    ]
+  }
+}

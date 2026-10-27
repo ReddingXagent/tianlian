@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@tianlian/shared-types": [
+        "../tianlian-shared/shared-types/src"
+      ],
+      "@tianlian/shared-types/*": [
+        "../tianlian-shared/shared-types/src/*"
+      ],
+      "@tianlian/shared-ui": [
+        "../tianlian-shared/shared-ui/src"
+      ],
+      "@tianlian/shared-ui/*": [
+        "../tianlian-shared/shared-ui/src/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/**/__tests__/**"
+  ],
+  "extends": "expo/tsconfig.base"
+}

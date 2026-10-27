@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # 版本双源漂移守卫(F224): package.json.version 与 app.json.expo.version 必须一致, 发布 bundle 以 app.json 为准
+      - run: npm run check:version
+      # 路径别名双源漂移守卫(F231): tsconfig.paths 与 jest.moduleNameMapper 必须一致, 防 tsc/jest 解析分叉
+      - run: npm run check:alias
+      # node版本双源漂移守卫(F237): engines.node 与 CI setup-node node-version 必须兼容, 防本地门限与CI运行版本分叉
+      - run: npm run check:node
+      # 守卫接线三源一致性守卫(F250): check:* 守卫的 package.json声明 ↔ Makefile check链 ↔ CI步骤 三源必须一致, 防新增守卫漏接线=假门控
+      - run: npm run check:guard-wiring
+      # 环境变量双源漂移守卫(F256): 运行时代码读取键 ↔ .env.example模板键 双向对账 + fallback值==模板值, 防漏配静默吃默认值/死键误导
+      - run: npm run check:env-defaults
+      # 未使用依赖守卫(F262): 生产依赖必须满足 代码import/app.json plugins配置插件/运行时隐式原生桥白名单 三形态之一, 防死依赖增大构建面与audit攻击面
+      - run: npm run check:unused-deps
+      # CI门控链↔ci-local双源漂移守卫: ci.yml run门控集合 ↔ Makefile ci-local递归展开 必须一致, 防本地CI模拟与真实CI分叉(本地全绿≠CI绿)
+      - run: npm run check:ci-parity
+      # engines.node执行力双源漂移守卫: .npmrc engine-strict=true ↔ package.json engines.node 必须成对, 防引擎门控静默失效(npm默认EBADENGINE仅warning)
+      - run: npm run check:engine-strict
+      # appVersionSource双源成对守卫(F288): eas.json appVersionSource=local ↔ app.json versionCode/buildNumber 必须成对, 防EAS本地版本管理无锚点静默撞车
+      - run: npm run check:app-version-source
+      - run: npm run check:expo-plugins
+      # OTA更新通道双源成对守卫(F302): app.json updates.url ↔ eas.json projectId 必须成对, 防半接线静默OTA失效(设备端永不收到更新)
+      - run: npm run check:updates-channel
+      # 品牌色双源漂移守卫(F309): app.json splash.backgroundColor ↔ adaptiveIcon.backgroundColor, 同文件内同语义双源(F224族)
+      - run: npm run check:brand-color
+      # versionCode↔buildNumber数值配对守卫(F315): app.json android.versionCode ↔ ios.buildNumber 同语义双源值级配对(F224族), 防双平台构建序号分叉
+      - run: npm run check:build-number-parity
+      # .gitignore↔.easignore敏感排除超集守卫(F321): 凭据类模式(.env/*.jks/*.keystore)双侧对账, 防云端构建上传凭据
+      - run: npm run check:easignore-secrets
+      # assets磁盘↔引用源反向对账守卫(F327): 死资产检测, app.json资产字段+代码require 双引用源
+      - run: npm run check:unused-assets
+      # assets体积上限守卫(F334): 单文件≤512KB/总≤2048KB, APK直装分发无商店体积审查兜底, 防资产膨胀静默进包
+      - run: npm run check:asset-size
+      # eas.json构建期env↔.env.example模板对账守卫(F342): EXPO_PUBLIC_*键登记+值级对账, 防云端/本地构建内联env静默分叉
+      - run: npm run check:eas-env
+      # 跨平台身份一致性守卫(F354): android.package↔ios.bundleIdentifier, 防双平台身份分叉致推送/OAuth/深度链接静默失效
+      - run: npm run check:app-identity
+      # APK直装分发形态成对守卫(F377): preview distribution:internal↔android.buildType:apk, F25/F33决策门禁, 防AAB产物致二维码直装静默失效
+      - run: npm run check:apk-direct-distribution
+      # 调用点单一源(F206): typecheck/test/doctor 均委托 package.json scripts, 防 CI 与本地参数漂移
+      - run: npm run typecheck
+      - run: npm run lint
+      # --runInBand: 顺序执行防并行 act() 资源争抢假红 (F399, 2026-09-22 本地复现: 并行 1/1614 fail, 顺序全绿)
+      - run: npm test -- --runInBand --coverage --ci --reporters=default
+      - run: npm run doctor
+
+  export:
+    runs-on: ubuntu-latest
+    needs: check
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # 调用点单一源(F212/F206): export 同样委托 package.json scripts(build:android/build:ios), 参数透传
+      - run: npm run build:android -- --output-dir /tmp/export
+      - run: npm run build:ios -- --output-dir /tmp/export-ios
+      - run: ./scripts/bundle-size.sh /tmp/export /tmp/export-ios
+      # 产物留档: bundle-size回归/导出异常时可下载hbc与资产排查 (always: 门控失败也要能取证)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: expo-export-bundles
+          path: |
+            /tmp/export
+            /tmp/export-ios
+          retention-days: 7
